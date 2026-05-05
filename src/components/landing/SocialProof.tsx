@@ -16,18 +16,18 @@ export default function SocialProof() {
           transition={{ duration: 0.6, ease }}
           className="border-t border-white/15 pt-14"
         >
-          <p className="text-white/50 text-xs font-medium tracking-widest uppercase mb-10">
+          <p className="text-white/50 text-xs font-medium tracking-widest uppercase mb-10 text-center sm:text-left">
             In Their Own Words
           </p>
 
           <blockquote
-            className="text-white text-2xl sm:text-3xl leading-relaxed mb-8"
+            className="text-white text-2xl sm:text-3xl leading-relaxed mb-8 text-center sm:text-left"
             style={{ ...lora, fontWeight: 400 }}
           >
             &ldquo;We had a legal issue come up and had no idea where to start. LWYRD helped us figure out what we actually needed and connected us with the right firm. It made a genuinely stressful process much more manageable.&rdquo;
           </blockquote>
 
-          <p className="text-white/50 text-sm">Small business owner</p>
+          <p className="text-white/50 text-sm text-center sm:text-left">Small business owner</p>
         </motion.div>
       </div>
     </section>

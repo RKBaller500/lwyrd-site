@@ -33,7 +33,7 @@ export default function TrustStats() {
           className="border-t border-[#ddd7cc] pt-14 mb-14"
         >
           <h2
-            className="text-[#002452] text-3xl sm:text-4xl"
+            className="text-[#002452] text-3xl sm:text-4xl text-center sm:text-left"
             style={{ ...lora, fontWeight: 500 }}
           >
             Trust through Social Proof
@@ -48,7 +48,7 @@ export default function TrustStats() {
           viewport={{ once: true, margin: "-40px" }}
         >
           {stats.map((stat) => (
-            <motion.div key={stat.value} variants={item}>
+            <motion.div key={stat.value} variants={item} className="text-center sm:text-left">
               <p
                 className="text-[#002452] text-5xl sm:text-6xl mb-3"
                 style={{ ...lora, fontWeight: 500 }}

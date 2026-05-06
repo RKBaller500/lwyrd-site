@@ -9,6 +9,7 @@ import { mapDbFirmToFirm } from "@/lib/supabase/mappers";
 import { DbFirm } from "@/lib/supabase/types";
 import { matchFirmsV2 } from "@/lib/matching";
 import { saveIntakeSubmissionV2 } from "@/lib/actions/intake";
+import { firms as localFirms } from "@/data/firms";
 import {
   V2Track,
   V2Question,
@@ -545,18 +546,20 @@ export default function IntakeWizard() {
     if (!track || !category) return;
     setIsSubmitting(true);
 
-    const supabase = createClient();
-    const { data, error } = await supabase
-      .from("firms")
-      .select("*, attorneys(*), firm_assessment_items(*)");
-
-    if (error || !data) {
-      console.error("Failed to fetch firms:", error?.message);
-      setIsSubmitting(false);
-      return;
+    // Try to fetch firms from Supabase; fall back to local data if unavailable or empty.
+    let allFirms = localFirms;
+    try {
+      const supabase = createClient();
+      const { data, error } = await supabase
+        .from("firms")
+        .select("*, attorneys(*), firm_assessment_items(*)");
+      if (!error && data && data.length > 0) {
+        allFirms = (data as DbFirm[]).map(mapDbFirmToFirm);
+      }
+    } catch {
+      // Supabase unavailable — proceed with local firms
     }
 
-    const allFirms = (data as DbFirm[]).map(mapDbFirmToFirm);
     const results = matchFirmsV2(track, category, answers, allFirms);
 
     sessionStorage.setItem("lwyrd_results", JSON.stringify(results));

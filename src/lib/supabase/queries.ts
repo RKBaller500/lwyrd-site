@@ -2,6 +2,7 @@ import { createClient } from "./server";
 import { mapDbFirmToFirm } from "./mappers";
 import { Firm, LegalCategory, IntakeQuestion, AssessmentCriterion } from "@/types";
 import { DbFirm } from "./types";
+import { firms as localFirms, getFirmById as getLocalFirmById, getFirmsByPracticeArea as getLocalFirmsByPracticeArea } from "@/data/firms";
 
 const FIRM_SELECT = `
   *,
@@ -17,38 +18,54 @@ const FIRM_SELECT = `
 `;
 
 export async function getAllFirms(): Promise<Firm[]> {
-  const supabase = await createClient();
-  const { data, error } = await supabase
-    .from("firms")
-    .select(FIRM_SELECT)
-    .order("overall_score", { ascending: false });
+  try {
+    const supabase = await createClient();
+    const { data, error } = await supabase
+      .from("firms")
+      .select(FIRM_SELECT)
+      .order("overall_score", { ascending: false });
 
-  if (error) throw new Error(error.message);
-  return (data as DbFirm[]).map(mapDbFirmToFirm);
+    if (!error && data && data.length > 0) {
+      return (data as DbFirm[]).map(mapDbFirmToFirm);
+    }
+  } catch {
+    // Supabase unavailable
+  }
+  return [...localFirms].sort((a, b) => b.overallScore - a.overallScore);
 }
 
 export async function getFirmById(id: string): Promise<Firm | null> {
-  const supabase = await createClient();
-  const { data, error } = await supabase
-    .from("firms")
-    .select(FIRM_SELECT)
-    .eq("id", id)
-    .single();
+  try {
+    const supabase = await createClient();
+    const { data, error } = await supabase
+      .from("firms")
+      .select(FIRM_SELECT)
+      .eq("id", id)
+      .single();
 
-  if (error || !data) return null;
-  return mapDbFirmToFirm(data as DbFirm);
+    if (!error && data) return mapDbFirmToFirm(data as DbFirm);
+  } catch {
+    // Supabase unavailable
+  }
+  return getLocalFirmById(id) ?? null;
 }
 
 export async function getFirmsByPracticeArea(slug: string): Promise<Firm[]> {
-  const supabase = await createClient();
-  const { data, error } = await supabase
-    .from("firms")
-    .select(FIRM_SELECT)
-    .contains("practice_areas", [slug])
-    .order("overall_score", { ascending: false });
+  try {
+    const supabase = await createClient();
+    const { data, error } = await supabase
+      .from("firms")
+      .select(FIRM_SELECT)
+      .contains("practice_areas", [slug])
+      .order("overall_score", { ascending: false });
 
-  if (error) throw new Error(error.message);
-  return (data as DbFirm[]).map(mapDbFirmToFirm);
+    if (!error && data && data.length > 0) {
+      return (data as DbFirm[]).map(mapDbFirmToFirm);
+    }
+  } catch {
+    // Supabase unavailable
+  }
+  return getLocalFirmsByPracticeArea(slug);
 }
 
 export async function getAllCategories(): Promise<LegalCategory[]> {

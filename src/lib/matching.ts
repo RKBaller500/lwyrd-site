@@ -1,7 +1,7 @@
 import { Firm, IntakeAnswers, MatchResult } from "@/types";
 import { CATEGORY_SLUG_MAP } from "@/data/intakeV2";
 
-// Maps intake answer strings to internal keys
+// Maps intake answer strings to internal industry keys
 const INDUSTRY_MAP: Record<string, string> = {
   "Technology / Software": "tech",
   "Financial Services / FinTech": "fintech",
@@ -48,41 +48,42 @@ function scoreStageCriterion(answers: IntakeAnswers, firm: Firm): { score: numbe
   const rawStage = answers["company-stage"] as string;
   const stage = STAGE_MAP[rawStage];
   if (!stage || stage === "individual") {
-    // No stage preference — no penalty
     return { score: 1.0 };
   }
   if (firm.companyStages.length === 0) {
-    // Firm serves all stages
-    return { score: 0.8, reason: "Serves a broad range of company stages" };
+    // Firm serves all stages (personal law firms, broad-scope firms)
+    return { score: 0.8 };
   }
   if (firm.companyStages.includes(stage)) {
     return { score: 1.0, reason: `Specializes in ${rawStage.split("/")[0].trim()} companies` };
   }
   const adjacent = STAGE_ADJACENCY[stage] ?? [];
   if (adjacent.some((s) => firm.companyStages.includes(s))) {
-    return { score: 0.6 };
+    return { score: 0.65 };
   }
-  return { score: 0.1 };
+  return { score: 0.15 };
 }
 
 function scoreBudgetCriterion(answers: IntakeAnswers, firm: Firm): { score: number; reason?: string } {
   const budget = answers["budget-monthly"] as number ?? 0;
-  if (budget === 0) return { score: 0.7 }; // no budget stated — neutral
-  if (firm.billingModel === "flat-fee" && firm.budgetRange.min === 0) {
-    // Personal injury contingency etc.
+  if (budget === 0) return { score: 0.7 };
+
+  // Contingency (personal injury) — no upfront cost
+  if (firm.billingModel === "flat-fee" && firm.budgetRange.min === 0 && firm.budgetRange.max === 0) {
     return { score: 1.0, reason: "Works on contingency — no upfront cost" };
   }
+
   if (budget >= firm.budgetRange.min && budget <= firm.budgetRange.max) {
     return { score: 1.0, reason: `Within your $${(budget / 1000).toFixed(0)}k/month budget` };
   }
   if (budget < firm.budgetRange.min) {
     const gap = firm.budgetRange.min - budget;
     const ratio = gap / firm.budgetRange.min;
-    if (ratio < 0.2) return { score: 0.75 }; // close enough
-    if (ratio < 0.5) return { score: 0.5 };
-    return { score: 0.2 };
+    if (ratio < 0.2) return { score: 0.75 };
+    if (ratio < 0.5) return { score: 0.45 };
+    return { score: 0.15 };
   }
-  // budget > max — client has more budget than firm's typical ceiling; fine
+  // budget > max — client has more than this firm's ceiling; still a fine match
   return { score: 0.9 };
 }
 
@@ -90,12 +91,19 @@ function scoreIndustryCriterion(answers: IntakeAnswers, firm: Firm): { score: nu
   const raw = answers["industry"] as string;
   const industry = INDUSTRY_MAP[raw];
   if (!industry) return { score: 0.7 };
-  if (firm.industries.length === 0) return { score: 0.8 };
+  if (firm.industries.length === 0) return { score: 0.75 };
   if (firm.industries.includes(industry)) {
     return { score: 1.0, reason: `Experienced in ${raw.split(" /")[0]}` };
   }
-  if (firm.industries.includes("finance") && industry === "fintech") return { score: 0.8 };
-  if (firm.industries.includes("tech") && ["saas", "fintech", "media"].includes(industry)) return { score: 0.7 };
+  // Near-matches
+  if (industry === "fintech" && (firm.industries.includes("finance") || firm.industries.includes("tech"))) {
+    return { score: 0.8 };
+  }
+  if (industry === "healthcare" && firm.industries.includes("biotech")) return { score: 0.85 };
+  if (industry === "biotech" && firm.industries.includes("healthcare")) return { score: 0.85 };
+  if (industry === "saas" && firm.industries.includes("tech")) return { score: 0.75 };
+  if (["saas", "fintech", "media"].includes(industry) && firm.industries.includes("tech")) return { score: 0.7 };
+  if (industry === "real-estate" && firm.industries.includes("finance")) return { score: 0.6 };
   return { score: 0.3 };
 }
 
@@ -113,7 +121,6 @@ function scoreTimelineCriterion(answers: IntakeAnswers, firm: Firm): { score: nu
     if (responseLevel >= 1) return { score: 1.0 };
     return { score: 0.7 };
   }
-  // No urgency — all firms fine
   return { score: 1.0 };
 }
 
@@ -124,7 +131,7 @@ function scoreSeniorityPreference(answers: IntakeAnswers, firm: Firm): { score: 
   if (pref.includes("Senior partner only")) {
     if (firm.size === "large") return { score: 1.0, reason: "Large firm with dedicated senior partners" };
     if (firm.size === "mid-size") return { score: 0.8 };
-    return { score: 0.5, reason: "Boutique — direct senior attorney access likely but team is smaller" };
+    return { score: 0.55, reason: "Boutique — direct senior attorney access likely" };
   }
   if (pref.includes("mix is fine") || pref.includes("Mix is fine")) {
     return { score: 1.0 };
@@ -132,7 +139,7 @@ function scoreSeniorityPreference(answers: IntakeAnswers, firm: Firm): { score: 
   if (pref.includes("Cost-efficiency")) {
     if (firm.size === "boutique") return { score: 1.0, reason: "Boutique firm — competitive rates" };
     if (firm.size === "mid-size") return { score: 0.75 };
-    return { score: 0.5 };
+    return { score: 0.4 };
   }
   return { score: 0.8 };
 }
@@ -141,31 +148,44 @@ function scoreLocationCriterion(answers: IntakeAnswers, firm: Firm): { score: nu
   const pref = answers["location-preference"] as string;
   if (!pref || pref.includes("No preference")) return { score: 1.0 };
 
-  const stateMap: Record<string, string> = {
-    "California": "CA",
-    "New York": "NY",
-    "Texas": "TX",
-    "Florida": "FL",
-    "Illinois": "IL",
-    "Colorado": "CO",
-    "Arizona": "AZ",
-    "Massachusetts": "MA",
-  };
-
-  for (const [stateName, abbr] of Object.entries(stateMap)) {
-    if (pref.includes(stateName)) {
-      if (firm.location.includes(abbr) || firm.location.includes(stateName)) {
-        return { score: 1.0, reason: `Licensed and based in ${stateName}` };
-      }
-      // Check team bar admissions
-      const hasState = firm.team.some((a) =>
-        a.barAdmissions.some((b) => b.includes(stateName) || b.includes(abbr))
-      );
-      if (hasState) return { score: 0.9, reason: `Attorney licensed in ${stateName}` };
-      return { score: 0.2 };
-    }
+  // All firms in the LWYRD database have NYC offices and are licensed in New York.
+  // New York / NY match: always full credit.
+  if (pref.includes("New York") || pref === "NY") {
+    return { score: 1.0, reason: "Licensed and operating in New York" };
   }
-  return { score: 0.9 };
+
+  // Delaware: many NYC startup firms handle DE incorporations regardless of physical location
+  if (pref.includes("Delaware") || pref === "DE") {
+    const startupPractices = ["corporate-formation", "fundraising", "corporate-governance", "mergers-acquisitions"];
+    if (firm.practiceAreas.some((p) => startupPractices.includes(p))) {
+      return { score: 0.85, reason: "Routinely handles Delaware incorporations and corporate filings" };
+    }
+    return { score: 0.6 };
+  }
+
+  // New Jersey / Connecticut: close to NYC, many NYC firms serve these markets
+  if (pref.includes("New Jersey") || pref === "NJ" || pref.includes("Connecticut") || pref === "CT") {
+    return { score: 0.75 };
+  }
+
+  // Other US states: these are NYC-based firms; state-specific matters (family law, real estate,
+  // personal injury, criminal) typically require local counsel. Score low for hard mismatch.
+  const personalLawPractices = ["family-law", "personal-injury", "estate-planning", "immigration"];
+  const hasPersonalLaw = firm.practiceAreas.some((p) => personalLawPractices.includes(p));
+  if (hasPersonalLaw && firm.practiceAreas.length <= 2) {
+    // Primarily personal law firm — unlikely to serve other states
+    return { score: 0.15 };
+  }
+
+  // Startup/corporate law firms can often handle federal and multi-state matters
+  const corporatePractices = ["corporate-formation", "intellectual-property", "fundraising",
+    "contract-law", "regulatory-compliance", "corporate-governance", "mergers-acquisitions"];
+  const isCorporate = firm.practiceAreas.some((p) => corporatePractices.includes(p));
+  if (isCorporate) {
+    return { score: 0.55, reason: "NYC-based firm; can advise on federal and multi-state matters" };
+  }
+
+  return { score: 0.3 };
 }
 
 function scoreLanguageCriterion(answers: IntakeAnswers, firm: Firm): { score: number; reason?: string } {
@@ -180,12 +200,10 @@ function scoreLanguageCriterion(answers: IntakeAnswers, firm: Firm): { score: nu
     return { score: 1.0, reason: `Supports ${matched.join(", ")}` };
   }
   if (matched.length > 0) return { score: 0.6 };
-  return { score: 0.3 };
+  return { score: 0.5 }; // Slight penalty but not catastrophic — can still work in English
 }
 
 function scoreQualityBaseline(firm: Firm): { score: number; reason?: string } {
-  // Use LWYRD Assessment pass rate as the quality signal.
-  // Falls back to overallScore if no assessment data yet.
   if (firm.assessment.length > 0) {
     const passed = firm.assessment.filter((a) => a.passed).length;
     const rate = passed / firm.assessment.length;
@@ -220,26 +238,38 @@ export function matchFirms(
     const languageResult = scoreLanguageCriterion(answers, firm);
     const qualityResult = scoreQualityBaseline(firm);
 
+    // Hard disqualification: if location score is very low (user explicitly needs a different state
+    // and this is a personal law firm), disqualify completely
+    if (locationResult.score < 0.2) {
+      return {
+        firm,
+        score: 0,
+        reasons: [],
+        matchedCriteria: [],
+        missedCriteria: ["location", "practice-area"],
+        _skip: true,
+      };
+    }
+
     const weightedScore =
-      stageResult.score * 20 +
+      stageResult.score * 18 +
       budgetResult.score * 20 +
       industryResult.score * 15 +
       timelineResult.score * 10 +
       seniorityResult.score * 10 +
-      locationResult.score * 10 +
+      locationResult.score * 12 +
       languageResult.score * 5 +
       qualityResult.score * 10;
 
     const finalScore = Math.round(Math.min(100, weightedScore));
 
-    // Collect positive reasons from top criteria
     const reasonCandidates = [
-      { result: stageResult, weight: 20 },
+      { result: stageResult, weight: 18 },
       { result: budgetResult, weight: 20 },
       { result: industryResult, weight: 15 },
       { result: timelineResult, weight: 10 },
       { result: seniorityResult, weight: 10 },
-      { result: locationResult, weight: 10 },
+      { result: locationResult, weight: 12 },
       { result: qualityResult, weight: 10 },
       { result: languageResult, weight: 5 },
     ];
@@ -250,7 +280,6 @@ export function matchFirms(
       .slice(0, 3)
       .map((r) => r.result.reason!);
 
-    // Matched vs missed criteria
     const matchedCriteria: string[] = [];
     const missedCriteria: string[] = [];
 
@@ -278,13 +307,15 @@ export function matchFirms(
     };
   });
 
-  // Step 3: Sort descending by score
-  scored.sort((a, b) => b.score - a.score);
+  // Remove hard-disqualified firms and sort descending by score
+  const valid = scored
+    .filter((r) => !("_skip" in r && r._skip))
+    .sort((a, b) => b.score - a.score);
 
-  // Step 4: Mark best match
-  const results: MatchResult[] = scored.map((r, i) => ({
+  // Mark best match
+  const results: MatchResult[] = valid.map((r, i) => ({
     ...r,
-    isBestMatch: i === 0 && r.score >= 70,
+    isBestMatch: i === 0 && r.score >= 65,
   }));
 
   return results;
@@ -294,7 +325,6 @@ export function matchFirms(
 function mapV2AnswersForMatching(
   v2Answers: Record<string, string | string[] | number>
 ): IntakeAnswers {
-  const track = v2Answers.q1 as string;
   const result: IntakeAnswers = {};
 
   // Company stage (startup only)
@@ -308,11 +338,11 @@ function mapV2AnswersForMatching(
   };
   if (v2Answers.s1) {
     result["company-stage"] = stageEnumMap[v2Answers.s1 as string] ?? "";
-  } else if (track === "individual") {
+  } else {
     result["company-stage"] = "Individual / Personal matter";
   }
 
-  // Industry (startup: s2, small business: b3 approximated)
+  // Industry
   const startupIndustryMap: Record<string, string> = {
     tech_saas: "Technology / Software",
     ai_ml: "Technology / Software",
@@ -340,7 +370,7 @@ function mapV2AnswersForMatching(
   if (v2Answers.s2) result["industry"] = startupIndustryMap[v2Answers.s2 as string] ?? "";
   else if (v2Answers.b3) result["industry"] = sbIndustryMap[v2Answers.b3 as string] ?? "";
 
-  // Budget — convert enum to approximate midpoint
+  // Budget
   const budgetMidMap: Record<string, number> = {
     under_2500: 1250,
     "2500_10k": 5000,
@@ -363,7 +393,7 @@ function mapV2AnswersForMatching(
       : budgetMidMap[budgetRaw as string] ?? 0;
   }
 
-  // Timeline / urgency
+  // Timeline
   const timelineMap: Record<string, string> = {
     this_week: "As soon as possible / This week",
     within_2_weeks: "Within 1–2 weeks",
@@ -384,20 +414,25 @@ function mapV2AnswersForMatching(
   const firmTypeAnswer = (v2Answers.sf1 ?? v2Answers.if1 ?? v2Answers.bf1) as string | undefined;
   if (firmTypeAnswer) result["seniority-preference"] = firmTypeMap[firmTypeAnswer] ?? "";
 
-  // State requirement
-  const stateMap: Record<string, string> = {
+  // State requirement — maps state abbreviation to full name for location scoring
+  const stateNameMap: Record<string, string> = {
     none: "No preference — I can work with any qualified firm remotely",
-    CA: "California",
     NY: "New York",
+    CA: "California",
     TX: "Texas",
     FL: "Florida",
     IL: "Illinois",
     DE: "Delaware",
+    NJ: "New Jersey",
+    CT: "Connecticut",
+    MA: "Massachusetts",
+    CO: "Colorado",
+    AZ: "Arizona",
     other: "No preference — I can work with any qualified firm remotely",
     multi_state: "No preference — I can work with any qualified firm remotely",
   };
   const stateAnswer = (v2Answers.sf7 ?? v2Answers.if5 ?? v2Answers.bf7) as string | undefined;
-  if (stateAnswer) result["location-preference"] = stateMap[stateAnswer] ?? "";
+  if (stateAnswer) result["location-preference"] = stateNameMap[stateAnswer] ?? stateAnswer;
 
   // Languages
   const langLabelMap: Record<string, string> = {
@@ -424,7 +459,7 @@ export function matchFirmsV2(
   allFirms: Firm[]
 ): MatchResult[] {
   const categorySlug =
-    CATEGORY_SLUG_MAP[track]?.[category] ?? "startup-law";
+    CATEGORY_SLUG_MAP[track]?.[category] ?? "corporate-formation";
   const mappedAnswers = mapV2AnswersForMatching(v2Answers);
   return matchFirms(categorySlug, mappedAnswers, allFirms);
 }

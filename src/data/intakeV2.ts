@@ -1435,18 +1435,18 @@ export function getQuestionSequence(
   return questions;
 }
 
-// Maps (track, category) to the closest legacy practice area slug for firm matching
+// Maps (track, category) to the practice area slug used in firms.ts
 export const CATEGORY_SLUG_MAP: Record<string, Record<string, string>> = {
   startup: {
     formation: 'corporate-formation',
     ip: 'intellectual-property',
-    fundraising: 'startup-law',
+    fundraising: 'fundraising',
     employment: 'employment-law',
     contracts: 'contract-law',
-    regulatory: 'startup-law',
-    governance: 'corporate-formation',
-    ma: 'fund-formation',
-    dispute: 'startup-law',
+    regulatory: 'regulatory-compliance',
+    governance: 'corporate-governance',
+    ma: 'mergers-acquisitions',
+    dispute: 'dispute-resolution',
   },
   individual: {
     family: 'family-law',
@@ -1469,7 +1469,7 @@ export const CATEGORY_SLUG_MAP: Record<string, Record<string, string>> = {
     real_estate: 'real-estate',
     regulatory: 'regulatory-compliance',
     tax: 'tax-law',
-    ma: 'fund-formation',
-    data_privacy: 'startup-law',
+    ma: 'mergers-acquisitions',
+    data_privacy: 'regulatory-compliance',
   },
 };

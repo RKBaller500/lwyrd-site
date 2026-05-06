@@ -148,13 +148,13 @@ function scoreLocationCriterion(answers: IntakeAnswers, firm: Firm): { score: nu
   const pref = answers["location-preference"] as string;
   if (!pref || pref.includes("No preference")) return { score: 1.0 };
 
-  // All firms in the LWYRD database have NYC offices and are licensed in New York.
-  // New York / NY match: always full credit.
+  // Every firm in the LWYRD database has a NYC office and is licensed in New York,
+  // regardless of where their headquarters is located.
   if (pref.includes("New York") || pref === "NY") {
     return { score: 1.0, reason: "Licensed and operating in New York" };
   }
 
-  // Delaware: many NYC startup firms handle DE incorporations regardless of physical location
+  // Delaware: startup/corporate firms routinely handle DE incorporations regardless of HQ state.
   if (pref.includes("Delaware") || pref === "DE") {
     const startupPractices = ["corporate-formation", "fundraising", "corporate-governance", "mergers-acquisitions"];
     if (firm.practiceAreas.some((p) => startupPractices.includes(p))) {
@@ -163,29 +163,40 @@ function scoreLocationCriterion(answers: IntakeAnswers, firm: Firm): { score: nu
     return { score: 0.6 };
   }
 
-  // New Jersey / Connecticut: close to NYC, many NYC firms serve these markets
+  // New Jersey / Connecticut: adjacent to NYC, many NYC firms serve these markets.
   if (pref.includes("New Jersey") || pref === "NJ" || pref.includes("Connecticut") || pref === "CT") {
     return { score: 0.75 };
   }
 
-  // Other US states: these are NYC-based firms; state-specific matters (family law, real estate,
-  // personal injury, criminal) typically require local counsel. Score low for hard mismatch.
-  const personalLawPractices = ["family-law", "personal-injury", "estate-planning", "immigration"];
-  const hasPersonalLaw = firm.practiceAreas.some((p) => personalLawPractices.includes(p));
-  if (hasPersonalLaw && firm.practiceAreas.length <= 2) {
-    // Primarily personal law firm — unlikely to serve other states
+  // For other states: check if the firm's actual HQ state matches.
+  const stateAbbrs: Record<string, string> = {
+    "California": "CA", "Texas": "TX", "Florida": "FL", "Illinois": "IL",
+    "Massachusetts": "MA", "Colorado": "CO", "Arizona": "AZ", "Georgia": "GA",
+    "Washington": "WA", "Pennsylvania": "PA", "Virginia": "VA", "Nevada": "NV",
+  };
+  for (const [stateName, abbr] of Object.entries(stateAbbrs)) {
+    if (pref.includes(stateName)) {
+      if (firm.location.includes(abbr) || firm.location.includes(stateName)) {
+        return { score: 1.0, reason: `Headquartered in ${stateName}` };
+      }
+      break;
+    }
+  }
+
+  // Personal-law firms (family, injury, estate) are state-specific — poor match outside NY/HQ state.
+  const personalLawPractices = ["family-law", "personal-injury", "estate-planning"];
+  if (firm.practiceAreas.every((p) => personalLawPractices.includes(p))) {
     return { score: 0.15 };
   }
 
-  // Startup/corporate law firms can often handle federal and multi-state matters
+  // Corporate/startup firms can advise on federal and multi-state matters from their NYC office.
   const corporatePractices = ["corporate-formation", "intellectual-property", "fundraising",
-    "contract-law", "regulatory-compliance", "corporate-governance", "mergers-acquisitions"];
-  const isCorporate = firm.practiceAreas.some((p) => corporatePractices.includes(p));
-  if (isCorporate) {
+    "contract-law", "regulatory-compliance", "corporate-governance", "mergers-acquisitions", "dispute-resolution"];
+  if (firm.practiceAreas.some((p) => corporatePractices.includes(p))) {
     return { score: 0.55, reason: "NYC-based firm; can advise on federal and multi-state matters" };
   }
 
-  return { score: 0.3 };
+  return { score: 0.35 };
 }
 
 function scoreLanguageCriterion(answers: IntakeAnswers, firm: Firm): { score: number; reason?: string } {

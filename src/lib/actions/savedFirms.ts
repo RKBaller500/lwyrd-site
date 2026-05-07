@@ -21,6 +21,7 @@ export async function saveFirm(firmId: string): Promise<{ error?: string }> {
   }
 
   revalidatePath("/account");
+  revalidatePath("/dashboard");
   return {};
 }
 
@@ -41,6 +42,7 @@ export async function unsaveFirm(firmId: string): Promise<{ error?: string }> {
   if (error) return { error: error.message };
 
   revalidatePath("/account");
+  revalidatePath("/dashboard");
   return {};
 }
 

@@ -2,30 +2,14 @@
 
 import { useState, useTransition } from "react";
 import { motion } from "framer-motion";
-import Link from "next/link";
-import { MapPin, Shield, ArrowRight, User, Bookmark, Lock, LogOut } from "lucide-react";
-import SaveFirmButton from "@/components/firms/SaveFirmButton";
-import { updateProfile } from "@/lib/actions/profile";
+import { useRouter } from "next/navigation";
+import { User, Lock, LogOut, AlertTriangle, Trash2 } from "lucide-react";
+import { updateProfile, deleteAccount } from "@/lib/actions/profile";
 import { createClient } from "@/lib/supabase/client";
 import { useAuth } from "@/context/AuthContext";
 
 const ease = [0.25, 0.46, 0.45, 0.94] as const;
 const lora = { fontFamily: '"Lora", Georgia, serif' } as const;
-
-interface FirmSummary {
-  id: string;
-  name: string;
-  tagline: string;
-  location: string;
-  size: string;
-  overall_score: number;
-  verified: boolean;
-}
-
-interface SavedFirmEntry {
-  savedAt: string;
-  firm: FirmSummary;
-}
 
 interface AccountContentProps {
   profile: {
@@ -35,14 +19,7 @@ interface AccountContentProps {
     createdAt: string;
     accessLevel: "none" | "subscription" | "org";
   };
-  savedFirms: SavedFirmEntry[];
 }
-
-const sizeLabels: Record<string, string> = {
-  boutique: "Boutique",
-  "mid-size": "Mid-size",
-  large: "Large",
-};
 
 const accessLevelLabels: Record<string, string> = {
   none: "Free",
@@ -70,8 +47,9 @@ function formatMemberSince(isoDate: string): string {
 const inputClass =
   "w-full px-4 py-3 rounded-2xl border border-[#ddd7cc] bg-white text-slate-700 placeholder-slate-400 focus:outline-none focus:border-[#002452] transition-colors text-sm";
 
-export default function AccountContent({ profile, savedFirms }: AccountContentProps) {
+export default function AccountContent({ profile }: AccountContentProps) {
   const { logout } = useAuth();
+  const router = useRouter();
 
   // Profile form
   const [name, setName] = useState(profile.name);
@@ -81,6 +59,12 @@ export default function AccountContent({ profile, savedFirms }: AccountContentPr
   // Password reset
   const [resetMessage, setResetMessage] = useState<{ type: "success" | "error"; text: string } | null>(null);
   const [isResetPending, setIsResetPending] = useState(false);
+
+  // Delete account
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [deleteConfirmText, setDeleteConfirmText] = useState("");
+  const [deleteMessage, setDeleteMessage] = useState<{ type: "success" | "error"; text: string } | null>(null);
+  const [isDeletePending, startDeleteTransition] = useTransition();
 
   const handleProfileSave = (e: React.FormEvent) => {
     e.preventDefault();
@@ -110,6 +94,21 @@ export default function AccountContent({ profile, savedFirms }: AccountContentPr
     );
   };
 
+  const handleDeleteAccount = () => {
+    setDeleteMessage(null);
+    startDeleteTransition(async () => {
+      const result = await deleteAccount();
+      if (result.error) {
+        setDeleteMessage({ type: "error", text: result.error });
+        return;
+      }
+      // Clear local session then redirect to home
+      const supabase = createClient();
+      await supabase.auth.signOut().catch(() => {});
+      router.push("/");
+    });
+  };
+
   return (
     <motion.div className="space-y-12" variants={container} initial="hidden" animate="visible">
       {/* Page header */}
@@ -118,89 +117,11 @@ export default function AccountContent({ profile, savedFirms }: AccountContentPr
           My Account
         </h1>
         <p className="text-slate-500 text-sm mt-2">
-          Manage your saved firms and profile settings.
+          Manage your profile settings and account security.
         </p>
       </motion.div>
 
-      {/* ── Section 1: Saved Firms ─────────────────────────────── */}
-      <motion.section variants={item}>
-        <div className="flex items-center gap-2 mb-5">
-          <Bookmark size={18} className="text-[#002452]" strokeWidth={1.5} />
-          <h2 className="text-2xl text-[#002452]" style={{ ...lora, fontWeight: 500 }}>
-            Saved Firms
-          </h2>
-          {savedFirms.length > 0 && (
-            <span className="ml-1 text-xs bg-[#002452]/10 text-[#002452] px-2 py-0.5 rounded-full">
-              {savedFirms.length}
-            </span>
-          )}
-        </div>
-
-        {savedFirms.length === 0 ? (
-          <div className="bg-[#fbfaf6] border border-[#ddd7cc] rounded-3xl p-10 text-center">
-            <Bookmark size={28} className="text-slate-300 mx-auto mb-3" strokeWidth={1.5} />
-            <p className="text-slate-500 text-sm mb-4">You haven&apos;t saved any firms yet.</p>
-            <Link
-              href="/intake"
-              className="inline-flex items-center gap-2 text-sm text-[#002452] font-medium hover:underline"
-            >
-              Get matched
-              <ArrowRight size={13} />
-            </Link>
-          </div>
-        ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
-            {savedFirms.map(({ firm }) => (
-              <div
-                key={firm.id}
-                className="bg-[#fbfaf6] border border-[#ddd7cc] rounded-3xl p-6 flex flex-col gap-4"
-              >
-                <div className="flex items-start justify-between gap-3">
-                  <div className="flex-1 min-w-0">
-                    {firm.verified && (
-                      <div className="inline-flex items-center gap-1 text-[#002452] text-xs font-medium mb-2">
-                        <Shield size={11} />
-                        LWYRD Verified
-                      </div>
-                    )}
-                    <h3 className="text-[#002452] text-xl leading-snug" style={{ ...lora, fontWeight: 500 }}>
-                      {firm.name}
-                    </h3>
-                    <p className="text-slate-500 text-sm mt-1 line-clamp-2">{firm.tagline}</p>
-                  </div>
-                  <div className="text-right shrink-0">
-                    <div className="text-3xl text-[#002452]" style={lora}>
-                      {firm.overall_score}
-                    </div>
-                    <div className="text-xs text-slate-400">score</div>
-                  </div>
-                </div>
-
-                <div className="flex flex-wrap gap-2 text-xs text-slate-500">
-                  <span className="flex items-center gap-1">
-                    <MapPin size={11} />
-                    {firm.location}
-                  </span>
-                  <span>{sizeLabels[firm.size] ?? firm.size} firm</span>
-                </div>
-
-                <div className="flex gap-2 mt-auto">
-                  <SaveFirmButton firmId={firm.id} initialSaved={true} compact />
-                  <Link
-                    href={`/firms/${firm.id}`}
-                    className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-2xl bg-[#002452] text-white text-sm font-medium hover:opacity-90 transition-opacity"
-                  >
-                    View Profile
-                    <ArrowRight size={13} />
-                  </Link>
-                </div>
-              </div>
-            ))}
-          </div>
-        )}
-      </motion.section>
-
-      {/* ── Section 2: Profile Settings ───────────────────────── */}
+      {/* ── Profile Settings ───────────────────────────────── */}
       <motion.section variants={item}>
         <div className="flex items-center gap-2 mb-5">
           <User size={18} className="text-[#002452]" strokeWidth={1.5} />
@@ -234,7 +155,6 @@ export default function AccountContent({ profile, savedFirms }: AccountContentPr
               <p className="text-xs text-slate-400 mt-1">Email cannot be changed here.</p>
             </div>
 
-            {/* Account info */}
             <div className="grid grid-cols-2 gap-4 pt-1">
               <div>
                 <p className="text-xs text-slate-400 font-medium mb-1">Member since</p>
@@ -265,7 +185,7 @@ export default function AccountContent({ profile, savedFirms }: AccountContentPr
         </div>
       </motion.section>
 
-      {/* ── Section 3: Security ───────────────────────────────── */}
+      {/* ── Security ───────────────────────────────── */}
       <motion.section variants={item}>
         <div className="flex items-center gap-2 mb-5">
           <Lock size={18} className="text-[#002452]" strokeWidth={1.5} />
@@ -299,7 +219,7 @@ export default function AccountContent({ profile, savedFirms }: AccountContentPr
       </motion.section>
 
       {/* ── Sign out ──────────────────────────────────────────── */}
-      <motion.div variants={item} className="pb-4">
+      <motion.div variants={item}>
         <button
           onClick={() => logout()}
           className="inline-flex items-center gap-2 text-sm text-slate-400 hover:text-red-500 transition-colors"
@@ -308,6 +228,84 @@ export default function AccountContent({ profile, savedFirms }: AccountContentPr
           Sign out
         </button>
       </motion.div>
+
+      {/* ── Danger Zone ───────────────────────────────────────── */}
+      <motion.section variants={item}>
+        <div className="flex items-center gap-2 mb-5">
+          <AlertTriangle size={18} className="text-red-500" strokeWidth={1.5} />
+          <h2 className="text-2xl text-red-600" style={{ ...lora, fontWeight: 500 }}>
+            Danger Zone
+          </h2>
+        </div>
+
+        <div className="border border-red-200 rounded-3xl p-8 max-w-md bg-red-50/40">
+          {!showDeleteConfirm ? (
+            <div>
+              <p className="text-sm text-slate-700 font-medium mb-1">Delete Account</p>
+              <p className="text-xs text-slate-500 mb-5 leading-relaxed">
+                Permanently delete your account and all associated data — including your intake history,
+                saved firms, and profile information. This action cannot be undone.
+              </p>
+              <button
+                onClick={() => setShowDeleteConfirm(true)}
+                className="inline-flex items-center gap-2 px-5 py-2.5 rounded-2xl border border-red-400 text-red-600 text-sm font-medium hover:bg-red-600 hover:text-white transition-colors"
+              >
+                <Trash2 size={14} strokeWidth={1.5} />
+                Delete Account
+              </button>
+            </div>
+          ) : (
+            <div className="space-y-4">
+              <div className="p-4 rounded-2xl bg-red-100/60 border border-red-200">
+                <p className="text-sm text-red-800 font-medium mb-1">This cannot be undone</p>
+                <p className="text-xs text-red-700 leading-relaxed">
+                  All of your data will be permanently removed: intake submissions, saved firms,
+                  match history, and your account credentials. There is no recovery option.
+                </p>
+              </div>
+
+              <div>
+                <label className="block text-xs text-slate-500 font-medium mb-1.5">
+                  Type <span className="font-bold text-red-600">DELETE</span> to confirm
+                </label>
+                <input
+                  type="text"
+                  value={deleteConfirmText}
+                  onChange={(e) => setDeleteConfirmText(e.target.value)}
+                  placeholder="DELETE"
+                  className="w-full px-4 py-3 rounded-2xl border border-red-300 bg-white text-slate-700 placeholder-slate-300 focus:outline-none focus:border-red-500 transition-colors text-sm"
+                  autoComplete="off"
+                />
+              </div>
+
+              {deleteMessage?.type === "error" && (
+                <p className="text-sm text-red-500">{deleteMessage.text}</p>
+              )}
+
+              <div className="flex gap-3">
+                <button
+                  onClick={() => {
+                    setShowDeleteConfirm(false);
+                    setDeleteConfirmText("");
+                    setDeleteMessage(null);
+                  }}
+                  disabled={isDeletePending}
+                  className="flex-1 py-2.5 rounded-2xl border border-[#ddd7cc] text-slate-600 text-sm font-medium hover:bg-slate-50 transition-colors disabled:opacity-50"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={handleDeleteAccount}
+                  disabled={deleteConfirmText !== "DELETE" || isDeletePending}
+                  className="flex-1 py-2.5 rounded-2xl bg-red-600 text-white text-sm font-medium hover:bg-red-700 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+                >
+                  {isDeletePending ? "Deleting..." : "Permanently Delete"}
+                </button>
+              </div>
+            </div>
+          )}
+        </div>
+      </motion.section>
     </motion.div>
   );
 }

@@ -41,9 +41,7 @@ export default function HeroSection() {
           className="text-4xl sm:text-5xl lg:text-6xl xl:text-7xl text-[#002452] leading-tight mb-8"
           style={{ ...lora, fontWeight: 500 }}
         >
-          Making Specialized Legal
-          <br />
-          Services Accessible
+          Demystifying Specialized Legal Services
         </motion.h1>
 
         <motion.p

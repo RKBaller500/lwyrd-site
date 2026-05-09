@@ -11,15 +11,15 @@ const tracks = [
   {
     icon: Rocket,
     label: "Startups",
-    tagline: "From first entity to first term sheet",
+    tagline: "Built for every stage of the founding journey.",
     description:
       "Early-stage companies face a specific kind of legal complexity, formation, IP, fundraising, employment, contracts, that generalist firms often underestimate and large firms often overcharge for. LWYRD connects founders with specialists who have done this before, at your stage, in your industry.",
     examples: ["Entity formation", "Fundraising & SAFEs", "IP assignment", "Equity & cap tables"],
   },
   {
     icon: Briefcase,
-    label: "Small Businesses",
-    tagline: "Real legal help for the business you actually run",
+    label: "SMBs",
+    tagline: "Attorneys that understand the complexity you face every day.",
     description:
       "Running a business means navigating contracts, compliance, employment, disputes, and more, often without a dedicated legal team. LWYRD matches small business owners with experienced attorneys who understand what's actually at stake.",
     examples: ["Contracts & vendors", "Employment compliance", "Business disputes", "Regulatory matters"],
@@ -27,7 +27,7 @@ const tracks = [
   {
     icon: User,
     label: "Individuals",
-    tagline: "Because your situation deserves a specialist, not a search result",
+    tagline: "A specialist for your situation.",
     description:
       "Whether it's a divorce, an immigration matter, a wrongful termination, or a home purchase gone sideways, personal legal situations require someone who has handled yours before. LWYRD helps individuals find that person without the guesswork.",
     examples: ["Family & divorce", "Immigration", "Employment disputes", "Personal injury"],

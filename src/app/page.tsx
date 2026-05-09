@@ -5,7 +5,6 @@ import TrustStats from "@/components/landing/TrustStats";
 import CategoryPreview from "@/components/landing/CategoryPreview";
 import HowItWorks from "@/components/landing/HowItWorks";
 import LwyrdStandard from "@/components/landing/LwyrdStandard";
-import SocialProof from "@/components/landing/SocialProof";
 import FinalCta from "@/components/landing/FinalCta";
 
 export default function HomePage() {
@@ -18,7 +17,6 @@ export default function HomePage() {
         <CategoryPreview />
         <HowItWorks />
         <LwyrdStandard />
-        <SocialProof />
         <FinalCta />
       </main>
       <Footer />

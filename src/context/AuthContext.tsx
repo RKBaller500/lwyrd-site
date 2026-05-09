@@ -22,6 +22,7 @@ interface AuthContextValue {
   login: (email: string, password: string) => Promise<void>;
   signup: (name: string, email: string, password: string, role?: "client" | "firm") => Promise<void>;
   logout: () => Promise<void>;
+  forgotPassword: (email: string) => Promise<void>;
   openModal: (mode?: "login" | "signup", redirectTo?: string) => void;
   closeModal: () => void;
 }
@@ -154,6 +155,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     router.push("/");
   }, [supabase, router]);
 
+  const forgotPassword = useCallback(
+    async (email: string) => {
+      const redirectTo = `${window.location.origin}/auth/callback?next=/auth/reset-password`;
+      const { error } = await supabase.auth.resetPasswordForEmail(email, { redirectTo });
+      if (error) throw error;
+    },
+    [supabase]
+  );
+
   const openModal = useCallback((mode: "login" | "signup" = "login", redirectTo?: string) => {
     setModalMode(mode);
     setIsModalOpen(true);
@@ -173,6 +183,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         login,
         signup,
         logout,
+        forgotPassword,
         openModal,
         closeModal,
       }}

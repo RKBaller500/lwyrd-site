@@ -62,7 +62,7 @@ export default function HowItWorks() {
               className="text-white text-3xl sm:text-4xl leading-tight"
               style={{ ...lora, fontWeight: 500 }}
             >
-              Three steps. No cold calls. No guesswork.
+              From intake to matched counsel in three steps.
             </h2>
           </motion.div>
 

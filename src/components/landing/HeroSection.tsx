@@ -52,7 +52,7 @@ export default function HeroSection() {
           transition={{ duration: 0.7, ease, delay: 0.15 }}
           className="text-slate-500 text-lg sm:text-xl leading-relaxed max-w-2xl mx-auto mb-10"
         >
-          LWYRD helps startups, small businesses, and individuals get access to specialized legal help through our curated network of vetted law firms and guided tools that help you understand your legal needs before hiring.
+          LWYRD helps startups, SMBs, and individuals get access to specialized legal help through our curated network of vetted law firms and guided tools that help you understand your legal needs before hiring.
         </motion.p>
 
         <motion.div

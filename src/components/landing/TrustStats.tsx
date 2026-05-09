@@ -6,8 +6,8 @@ const ease = [0.25, 0.46, 0.45, 0.94] as const;
 const lora = { fontFamily: '"Lora", Georgia, serif' } as const;
 
 const stats = [
-  { value: "$10M+", label: "in fees connected to law firms" },
-  { value: "$60M+", label: "in tax credits and settlements unlocked" },
+  { value: "$10M+", label: "in fees for partner firms" },
+  { value: "$60M+", label: "in tax credits and settlements for SMBs" },
   { value: "200+", label: "clients matched" },
 ];
 

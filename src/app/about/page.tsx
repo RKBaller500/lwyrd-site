@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import { motion } from "framer-motion";
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
@@ -47,9 +48,9 @@ const stats = [
 ];
 
 const team = [
-  { name: "Jai Malhotra", role: "Co-Founder" },
-  { name: "Aidan Berkeley", role: "Co-Founder" },
-  { name: "Rahul Kochar", role: "Co-Founder" },
+  { name: "Jai Malhotra", role: "Co-Founder", image: "/Profile Pics/Jai_Profile.jpeg" },
+  { name: "Aidan Berkeley", role: "Co-Founder", image: "/Profile Pics/Aidan_Profile.png" },
+  { name: "Rahul Kochar", role: "Co-Founder", image: "/Profile Pics/Rahul_Profile.png" },
 ];
 
 export default function AboutPage() {
@@ -290,13 +291,14 @@ export default function AboutPage() {
                   variants={item}
                   className="bg-[#fbfaf6] border border-[#ddd7cc] rounded-3xl p-8 text-center"
                 >
-                  <div className="w-16 h-16 rounded-full bg-[#002452]/10 border border-[#ddd7cc] flex items-center justify-center mx-auto mb-5">
-                    <span
-                      className="text-[#002452] text-2xl"
-                      style={lora}
-                    >
-                      {member.name[0]}
-                    </span>
+                  <div className="w-20 h-20 rounded-full overflow-hidden border border-[#ddd7cc] mx-auto mb-5">
+                    <Image
+                      src={member.image}
+                      alt={member.name}
+                      width={80}
+                      height={80}
+                      className="w-full h-full object-cover"
+                    />
                   </div>
                   <p
                     className="text-[#002452] text-lg mb-1"

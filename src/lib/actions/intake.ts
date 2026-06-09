@@ -2,6 +2,10 @@
 
 import { createClient } from "@/lib/supabase/server";
 import type { IntakeAnswers, MatchResult } from "@/types";
+import { matchFirmsV2 } from "@/lib/matching";
+import { mapDbFirmToFirm } from "@/lib/supabase/mappers";
+import type { DbFirm } from "@/lib/supabase/types";
+import { firms as localFirms } from "@/data/firms";
 
 // Legacy action — kept for backward compatibility
 export async function saveIntakeSubmission(
@@ -199,4 +203,120 @@ function extractSubQuestionJson(
     if (val !== undefined) result[id] = typeof val === "number" ? String(val) : val;
   });
   return result;
+}
+
+// Runs matching server-side and returns only the results the caller is entitled to.
+// Free users receive the top result only; paying users receive all results.
+// This prevents full match data from ever reaching the client for unpaid sessions.
+export async function runMatchingV2(
+  track: string,
+  category: string,
+  categoryLabel: string,
+  answers: IntakeAnswers
+): Promise<{ results: MatchResult[]; lockedCount: number; error?: string }> {
+  if (typeof track !== "string" || !track || typeof category !== "string" || !category) {
+    return { results: [], lockedCount: 0, error: "Invalid input" };
+  }
+
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return { results: [], lockedCount: 0, error: "Not authenticated" };
+
+  // Fetch firms server-side; fall back to local data if unavailable
+  let allFirms = localFirms;
+  try {
+    const { data, error } = await supabase
+      .from("firms")
+      .select("*, attorneys(*), firm_assessment_items(*)");
+    if (!error && data && data.length > 0) {
+      allFirms = (data as DbFirm[]).map(mapDbFirmToFirm);
+    }
+  } catch {
+    // proceed with local firms
+  }
+
+  const allResults = matchFirmsV2(track, category, answers, allFirms);
+
+  // Check access level to determine how many results to return
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("access_level")
+    .eq("id", user.id)
+    .single();
+  const hasAccess =
+    profile?.access_level === "subscription" || profile?.access_level === "org";
+
+  const results = hasAccess ? allResults : allResults.slice(0, 1);
+  const lockedCount = hasAccess ? 0 : Math.max(0, allResults.length - 1);
+
+  // Save submission with full results for analytics (fire-and-forget)
+  void saveIntakeSubmissionV2(track, category, categoryLabel, answers, allResults);
+
+  return { results, lockedCount };
+}
+
+// Re-runs matching for a past submission server-side, enforcing the same
+// access-level truncation as runMatchingV2.
+export async function runMatchingForSubmission(submissionId: string): Promise<{
+  results: MatchResult[];
+  lockedCount: number;
+  categorySlug: string;
+  categoryName: string;
+  intakeDate: string;
+  error?: string;
+}> {
+  const empty = { results: [] as MatchResult[], lockedCount: 0, categorySlug: "", categoryName: "", intakeDate: "" };
+
+  if (!submissionId || typeof submissionId !== "string") {
+    return { ...empty, error: "Invalid submission ID" };
+  }
+
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return { ...empty, error: "Not authenticated" };
+
+  // Ownership enforced server-side — users can only load their own submissions
+  const { data: submission, error: subError } = await supabase
+    .from("intake_submissions")
+    .select("track, category_slug, category_label, answers, created_at")
+    .eq("id", submissionId)
+    .eq("user_id", user.id)
+    .single();
+
+  if (subError || !submission) return { ...empty, error: "Not found" };
+
+  let allFirms = localFirms;
+  try {
+    const { data, error } = await supabase
+      .from("firms")
+      .select("*, attorneys(*), firm_assessment_items(*)");
+    if (!error && data && data.length > 0) {
+      allFirms = (data as DbFirm[]).map(mapDbFirmToFirm);
+    }
+  } catch {
+    // proceed with local firms
+  }
+
+  const answers = submission.answers as IntakeAnswers;
+  const allResults = matchFirmsV2(submission.track, submission.category_slug, answers, allFirms);
+
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("access_level")
+    .eq("id", user.id)
+    .single();
+  const hasAccess =
+    profile?.access_level === "subscription" || profile?.access_level === "org";
+
+  return {
+    results: hasAccess ? allResults : allResults.slice(0, 1),
+    lockedCount: hasAccess ? 0 : Math.max(0, allResults.length - 1),
+    categorySlug: submission.category_slug,
+    categoryName: submission.category_label ?? submission.category_slug,
+    intakeDate: submission.created_at,
+  };
 }

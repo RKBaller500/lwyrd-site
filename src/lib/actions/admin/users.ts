@@ -2,6 +2,7 @@
 
 import { verifyAdmin, createAdminClient } from "@/lib/supabase/admin";
 import { revalidatePath } from "next/cache";
+import { logAdminAction } from "./audit";
 
 export interface AdminUserRow {
   id: string;
@@ -70,8 +71,12 @@ export async function setAdminStatus(
   userId: string,
   isAdmin: boolean
 ): Promise<{ error?: string }> {
+  if (!userId || userId.trim().length === 0) return { error: "userId is required" };
+  if (typeof isAdmin !== "boolean") return { error: "isAdmin must be a boolean" };
+
+  let actor;
   try {
-    await verifyAdmin();
+    actor = await verifyAdmin();
   } catch (e) {
     return { error: (e as Error).message };
   }
@@ -84,16 +89,25 @@ export async function setAdminStatus(
 
   if (error) return { error: error.message };
 
+  void logAdminAction({ actorId: actor.id, action: "set_admin_status", targetType: "user", targetId: userId, after: { is_admin: isAdmin } });
+
   revalidatePath("/admin/users");
   return {};
 }
+
+const VALID_ACCESS_LEVELS = ["none", "subscription", "org"] as const;
 
 export async function setAccessLevel(
   userId: string,
   level: "none" | "subscription" | "org"
 ): Promise<{ error?: string }> {
+  if (!userId || userId.trim().length === 0) return { error: "userId is required" };
+  if (!(VALID_ACCESS_LEVELS as readonly string[]).includes(level))
+    return { error: `level must be one of: ${VALID_ACCESS_LEVELS.join(", ")}` };
+
+  let actor;
   try {
-    await verifyAdmin();
+    actor = await verifyAdmin();
   } catch (e) {
     return { error: (e as Error).message };
   }
@@ -106,13 +120,18 @@ export async function setAccessLevel(
 
   if (error) return { error: error.message };
 
+  void logAdminAction({ actorId: actor.id, action: "set_access_level", targetType: "user", targetId: userId, after: { access_level: level } });
+
   revalidatePath("/admin/users");
   return {};
 }
 
 export async function deleteUser(userId: string): Promise<{ error?: string }> {
+  if (!userId || userId.trim().length === 0) return { error: "userId is required" };
+
+  let actor;
   try {
-    await verifyAdmin();
+    actor = await verifyAdmin();
   } catch (e) {
     return { error: (e as Error).message };
   }
@@ -120,6 +139,8 @@ export async function deleteUser(userId: string): Promise<{ error?: string }> {
   const db = createAdminClient();
   const { error } = await db.auth.admin.deleteUser(userId);
   if (error) return { error: error.message };
+
+  void logAdminAction({ actorId: actor.id, action: "delete_user", targetType: "user", targetId: userId });
 
   revalidatePath("/admin/users");
   return {};

@@ -86,8 +86,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       );
       setUser(authUser);
       posthog.identify(authUser.id, {
-        email: authUser.email,
-        name: authUser.name,
         is_admin: authUser.isAdmin,
         access_level: authUser.accessLevel,
       });
@@ -114,19 +112,28 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const login = useCallback(
     async (email: string, password: string) => {
       setIsLoading(true);
-      const { error } = await supabase.auth.signInWithPassword({
-        email,
-        password,
+      const res = await fetch("/api/auth/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "same-origin",
+        body: JSON.stringify({ email, password }),
       });
       setIsLoading(false);
-      if (error) throw error;
+      if (!res.ok) {
+        const body = await res.json().catch(() => ({}));
+        throw new Error(body.error ?? "Login failed");
+      }
+      // Session cookies are now set by the server. Re-fetch the user so
+      // the client-side Supabase instance picks up the new session.
+      const { data: { user: u } } = await supabase.auth.getUser();
+      await hydrateUser(u);
       setIsModalOpen(false);
       if (pendingRedirect) {
         router.push(pendingRedirect);
         setPendingRedirect(null);
       }
     },
-    [supabase, pendingRedirect, router]
+    [supabase, hydrateUser, pendingRedirect, router]
   );
 
   const signup = useCallback(

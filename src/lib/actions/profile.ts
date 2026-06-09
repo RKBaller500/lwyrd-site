@@ -5,6 +5,10 @@ import { createAdminClient } from "@/lib/supabase/admin";
 import { revalidatePath } from "next/cache";
 
 export async function updateProfile(name: string): Promise<{ error?: string }> {
+  const trimmed = typeof name === "string" ? name.trim() : "";
+  if (trimmed.length === 0 || trimmed.length > 128)
+    return { error: "Name must be between 1 and 128 characters" };
+
   const supabase = await createClient();
   const {
     data: { user },
@@ -14,7 +18,7 @@ export async function updateProfile(name: string): Promise<{ error?: string }> {
 
   const { error } = await supabase
     .from("profiles")
-    .update({ name: name.trim(), updated_at: new Date().toISOString() })
+    .update({ name: trimmed, updated_at: new Date().toISOString() })
     .eq("id", user.id);
 
   if (error) return { error: error.message };

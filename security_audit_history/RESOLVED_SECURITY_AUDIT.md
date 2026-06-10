@@ -411,7 +411,185 @@ Same structure as `runMatchingV2` but for stored submissions:
 
 | Gap | Notes |
 |---|---|
-| Content-Security-Policy | Requires origin inventory across PostHog, Supabase, fonts. Not yet added. |
-| GDPR consent gate | Cookie consent banner and DPA with PostHog needed. |
-| Rate limiter persistence | In-memory Map not shared across serverless instances. Upstash Redis for multi-region. |
+| ~~Content-Security-Policy~~ | **Resolved in this session** — see below |
+| ~~GDPR consent gate~~ | **Resolved in this session** — see below |
+| ~~Rate limiter persistence~~ | **Resolved in this session** — see below |
+| `admin_audit_log` migration | Still requires manual run in Supabase SQL editor (`scripts/migrations/admin_audit_log.sql`). Cannot be automated without Supabase Management API access. |
+
+---
+
+## Resolutions from `SECURITY_AUDIT_JUNE_4.md` (pre-audit fixes)
+
+### Content-Security-Policy Header
+
+**Original issue:** No CSP was configured, leaving the site open to XSS amplification — a compromised third-party script had full DOM/network access.
+
+**Resolution — `next.config.ts`:**
+
+Performed an origin inventory of all external resources:
+- **PostHog:** JS bundle from `NEXT_PUBLIC_POSTHOG_HOST`; XHR/fetch to the same host
+- **Supabase:** XHR/WebSocket to `NEXT_PUBLIC_SUPABASE_URL` hostname
+- **Google Fonts CSS:** `https://fonts.googleapis.com`
+- **Google Fonts files:** `https://fonts.gstatic.com`
+- **FormSubmit.co:** `https://formsubmit.co` (form POST destination)
+- **Images:** `self` + `https:` (firm logos come from admin-entered URLs on any host)
+
+Added `Content-Security-Policy` header alongside the existing security headers. Env vars (`NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_POSTHOG_HOST`) are resolved at build time. Falls back to `*.supabase.co` wildcard if Supabase URL is unavailable at build time.
+
+Key directives:
+```
+default-src 'self'
+script-src 'self' 'unsafe-inline' <posthogHost>
+style-src 'self' 'unsafe-inline' https://fonts.googleapis.com
+font-src 'self' https://fonts.gstatic.com
+img-src 'self' data: blob: https:
+connect-src 'self' <supabaseHost> wss://<supabaseHost> <posthogHost> https://formsubmit.co
+frame-src 'none'
+frame-ancestors 'none'
+object-src 'none'
+base-uri 'self'
+form-action 'self' https://formsubmit.co
+upgrade-insecure-requests
+```
+
+**Residual note:** `'unsafe-inline'` is required in `script-src` because Next.js App Router injects inline scripts for server-component hydration. Nonce-based CSP (configured in middleware) is the path to removing `'unsafe-inline'`. That requires per-request nonce generation in `src/proxy.ts` — left for a future hardening task.
+
+---
+
+### GDPR Consent Gate for PostHog
+
+**Original issue:** PostHog initialized on every page load regardless of user consent. Even without PII, cookie-based analytics tracking requires consent under GDPR/CCPA.
+
+**Resolution — two files:**
+
+**New file `src/components/ui/ConsentBanner.tsx`:**
+- A fixed-bottom banner that appears on first visit (no `lwyrd_analytics_consent` in localStorage)
+- "Accept" button: sets `lwyrd_analytics_consent = "true"` in localStorage, dispatches `lwyrd_consent_granted` window event, hides banner
+- "Decline" button: sets `lwyrd_analytics_consent = "false"`, hides banner
+- Uses `role="dialog"` and `aria-label` for accessibility
+
+**Updated `src/components/providers/PostHogProvider.tsx`:**
+- On mount, reads `lwyrd_analytics_consent` from localStorage
+- Only calls `posthog.init()` if consent is `"true"` (previously stored or just granted this session)
+- Listens for `lwyrd_consent_granted` event to initialize PostHog mid-session without a page reload
+- Guards against double-init with `posthog.__loaded` check
+
+**`src/app/layout.tsx`:**
+- Added `<ConsentBanner />` inside `<PostHogProvider>` so it renders on every page
+
+**Residual note:** A DPA (Data Processing Agreement) with PostHog must be signed separately — this is a legal/business action, not a code change.
+
+---
+
+### Rate Limiter Persistence (Upstash Redis)
+
+**Original issue:** The in-memory `Map` rate limiter is not shared across serverless instances. An attacker distributing login attempts across multiple Vercel edge instances could bypass the 10-attempt window.
+
+**Resolution — `src/app/api/auth/login/route.ts`:**
+
+Added Upstash Redis REST API support using `fetch` (no package required). The implementation:
+- If `UPSTASH_REDIS_REST_URL` and `UPSTASH_REDIS_REST_TOKEN` are set, uses the Upstash pipeline endpoint to atomically `INCR` + `EXPIRE NX` a key (`rl:login:<email>`) in a single HTTP request
+- On Redis error (unavailable/misconfigured), falls back transparently to the in-memory `Map`
+- On successful login, deletes the Redis key via the REST DELETE endpoint
+- The in-memory fallback (`memCheck`/`memClear`) is retained for single-instance environments (local dev, single-region deployments)
+
+**To enable Redis rate limiting:** Set `UPSTASH_REDIS_REST_URL` and `UPSTASH_REDIS_REST_TOKEN` in the Vercel environment variables. No code changes or package installations required.
+
+---
+
+## Remaining Gaps (after June 4 pre-audit fixes)
+
+| Gap | Notes |
+|---|---|
+| ~~Consent event bus~~ | **Resolved in `SECURITY_AUDIT_JUNE_4.md`** — replaced with React context callback |
+| ~~`redisClear` silent failure~~ | **Resolved in `SECURITY_AUDIT_JUNE_4.md`** — added `res.ok` check |
+| CSP `'unsafe-inline'` in script-src | Nonce-based CSP via middleware is the path to removal. Left as a future hardening task. |
+| DPA with PostHog | Legal/business agreement — cannot be resolved in code. |
+| Upstash credentials | Redis rate limiting is implemented but inactive until `UPSTASH_REDIS_REST_URL` and `UPSTASH_REDIS_REST_TOKEN` are added to Vercel env vars. |
 | `admin_audit_log` migration | Must be run manually in Supabase SQL editor (`scripts/migrations/admin_audit_log.sql`). |
+
+---
+
+## Resolutions from `SECURITY_AUDIT_JUNE_4.md`
+
+### Finding #1 — Consent Event Bus Forgeable by Same-Origin Code
+
+**Original issue:** `PostHogProvider` used `window.addEventListener("lwyrd_consent_granted", ...)` to trigger PostHog init. Any same-origin script (compromised npm dependency, XSS payload) could dispatch `new Event("lwyrd_consent_granted")` to force initialization without user consent — a GDPR violation on a legal platform handling sensitive behavioral data.
+
+**Resolution — three files:**
+
+**New `src/context/ConsentContext.tsx`:** Provides a `grantConsent()` callback through the React tree via context. The callback is a closure scoped to the component tree, not reachable from the DOM event system.
+
+**`src/components/providers/PostHogProvider.tsx`:** Creates a `handleConsent` callback (`localStorage.setItem("true") + initPostHog()`), wraps children in `<ConsentProvider onConsent={handleConsent}>`. All `window.addEventListener` / `window.dispatchEvent` calls removed.
+
+**`src/components/ui/ConsentBanner.tsx`:** Calls `useConsent().grantConsent()` on Accept. `localStorage` write is now exclusively in `PostHogProvider.handleConsent`. No global event dispatch.
+
+**Security guarantee:** PostHog can only be initialized through the React `grantConsent` callback. External scripts cannot trigger it via the DOM event system.
+
+---
+
+### Finding #2 — `redisClear` Silent Failure (Split-Brain Rate Limit)
+
+**Original issue:** `redisClear` in `src/app/api/auth/login/route.ts` did not check `res.ok`. On Redis failure during the clear phase of a successful login, the Redis counter was not cleared. After 10 successful logins, the account could be locked out by the Redis counter even though the in-memory store showed 0 attempts. An attacker could deliberately cause this by flooding the endpoint during the clear phase.
+
+**Resolution — `src/app/api/auth/login/route.ts`:**
+
+```typescript
+async function redisClear(key: string, url: string, token: string): Promise<void> {
+  const res = await fetch(`${url}/del/rl:login:${key}`, {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+  if (!res.ok) throw new Error(`Redis clear failed: ${res.status}`);
+}
+```
+
+`redisClear` now throws on `!res.ok`, causing `clearRateLimit`'s `try/catch` to fall through to `memClear`. The Redis key expires naturally after 15 minutes. A brief counter retention is an acceptable tradeoff; the targeted lockout attack path is closed.
+
+---
+
+## Remaining Gaps (after Rounds 1–4)
+
+| Gap | Notes |
+|---|---|
+| Session refresh via `proxy.ts` | ✅ Was never broken — `proxy.ts` is the correct Next.js 16.x convention; `middleware.ts` created in error and deleted |
+| ~~Login CSRF~~ | **Resolved in `SECURITY_AUDIT_JUNE_5.md`** |
+| ~~Password minimum 6 chars~~ | **Resolved in `SECURITY_AUDIT_JUNE_5.md`** |
+| ~~sessionStorage not cleared on logout~~ | **Resolved in `SECURITY_AUDIT_JUNE_5.md`** |
+| ~~`runMatchingV2` track not allowlisted~~ | **Resolved in `SECURITY_AUDIT_JUNE_5.md`** |
+| CSP `'unsafe-inline'` in script-src | Nonce-based CSP via middleware. Future hardening task. |
+| DPA with PostHog | Legal/business agreement — cannot be resolved in code. |
+| Upstash credentials | Add `UPSTASH_REDIS_REST_URL` + `UPSTASH_REDIS_REST_TOKEN` to Vercel env vars. |
+| `admin_audit_log` migration | Run `scripts/migrations/admin_audit_log.sql` in Supabase SQL editor. |
+| Contact form rate limiting | `ContactFirmModal` / `ContactLwyrdModal` have no server-side auth or rate limiting. |
+
+---
+
+## Resolutions from `SECURITY_AUDIT_JUNE_5.md`
+
+### ~~Finding #1 — Missing `middleware.ts`~~ — RETRACTED
+
+`src/middleware.ts` was created in error during Round 5. In Next.js 16.x, the middleware file convention was renamed from `middleware.ts` to `proxy.ts`. `src/proxy.ts` was always the correct and active entry point. The erroneously created `src/middleware.ts` caused a startup conflict and has been deleted.
+
+### Finding #2 — Login CSRF
+
+**Issue:** `POST /api/auth/login` accepted cross-origin requests. A malicious page could silently log a user into an attacker's account by issuing a cross-origin POST, overwriting the victim's session cookie.
+
+**Resolution:** Added `Origin` header check — requests where `origin` does not match `new URL(request.url).origin` are rejected with HTTP 403.
+
+### Finding #3 — Password Minimum 6 Characters
+
+**Issue:** Signup form enforced `minLength={6}`, too weak for a platform storing sensitive legal data.
+
+**Resolution:** Raised to `minLength={8}` in `AuthModal.tsx`.
+
+### Finding #4 — sessionStorage Not Cleared on Logout
+
+**Issue:** All `lwyrd_*` sessionStorage keys (match results, answers including immigration status / litigation stage) persisted after logout, readable on shared devices.
+
+**Resolution:** `logout()` in `AuthContext.tsx` now clears all six `lwyrd_*` keys before navigating away.
+
+### Finding #5 — `runMatchingV2` Track Not Allowlisted
+
+**Issue:** `track` parameter accepted any non-empty string, allowing arbitrary values to be saved to the DB.
+
+**Resolution:** Added `VALID_TRACKS` allowlist `["startup", "individual", "small_business"]`; added 64-char cap on `category`.

@@ -214,7 +214,14 @@ export async function runMatchingV2(
   categoryLabel: string,
   answers: IntakeAnswers
 ): Promise<{ results: MatchResult[]; lockedCount: number; error?: string }> {
-  if (typeof track !== "string" || !track || typeof category !== "string" || !category) {
+  const VALID_TRACKS = ["startup", "individual", "small_business"] as const;
+  if (
+    typeof track !== "string" ||
+    !(VALID_TRACKS as readonly string[]).includes(track) ||
+    typeof category !== "string" ||
+    !category ||
+    category.length > 64
+  ) {
     return { results: [], lockedCount: 0, error: "Invalid input" };
   }
 

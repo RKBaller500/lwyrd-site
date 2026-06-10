@@ -2,8 +2,22 @@
 
 import posthog from "posthog-js";
 import { PostHogProvider as PHProvider, usePostHog } from "posthog-js/react";
-import { useEffect, Suspense } from "react";
+import { useEffect, useCallback, Suspense } from "react";
 import { usePathname, useSearchParams } from "next/navigation";
+import { ConsentProvider } from "@/context/ConsentContext";
+
+const CONSENT_KEY = "lwyrd_analytics_consent";
+
+function initPostHog() {
+  if (process.env.NEXT_PUBLIC_POSTHOG_ENABLED !== "true") return;
+  if (posthog.__loaded) return;
+  posthog.init(process.env.NEXT_PUBLIC_POSTHOG_KEY!, {
+    api_host: process.env.NEXT_PUBLIC_POSTHOG_HOST,
+    capture_pageview: false,
+    capture_pageleave: true,
+    person_profiles: "identified_only",
+  });
+}
 
 function PostHogPageView() {
   const pathname = usePathname();
@@ -27,21 +41,26 @@ export default function PostHogProvider({
   children: React.ReactNode;
 }) {
   useEffect(() => {
-    if (process.env.NEXT_PUBLIC_POSTHOG_ENABLED !== "true") return;
-    posthog.init(process.env.NEXT_PUBLIC_POSTHOG_KEY!, {
-      api_host: process.env.NEXT_PUBLIC_POSTHOG_HOST,
-      capture_pageview: false, // manual — prevents double-firing in App Router
-      capture_pageleave: true,
-      person_profiles: "identified_only",
-    });
+    // Initialize on mount if consent was previously granted
+    if (localStorage.getItem(CONSENT_KEY) === "true") {
+      initPostHog();
+    }
+  }, []);
+
+  // Called by ConsentBanner via context — no global event bus
+  const handleConsent = useCallback(() => {
+    localStorage.setItem(CONSENT_KEY, "true");
+    initPostHog();
   }, []);
 
   return (
     <PHProvider client={posthog}>
-      <Suspense fallback={null}>
-        <PostHogPageView />
-      </Suspense>
-      {children}
+      <ConsentProvider onConsent={handleConsent}>
+        <Suspense fallback={null}>
+          <PostHogPageView />
+        </Suspense>
+        {children}
+      </ConsentProvider>
     </PHProvider>
   );
 }

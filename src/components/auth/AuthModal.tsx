@@ -217,7 +217,7 @@ export default function AuthModal() {
             className={inputClass}
             autoComplete={activeTab === "login" ? "current-password" : "new-password"}
             required
-            minLength={6}
+            minLength={8}
           />
           {activeTab === "login" && (
             <button
@@ -229,7 +229,7 @@ export default function AuthModal() {
             </button>
           )}
           {activeTab === "signup" && (
-            <p className="text-xs text-slate-400 mt-1.5 ml-1">Must be at least 6 characters.</p>
+            <p className="text-xs text-slate-400 mt-1.5 ml-1">Must be at least 8 characters.</p>
           )}
         </div>
 

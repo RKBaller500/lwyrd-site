@@ -159,6 +159,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     await supabase.auth.signOut();
     posthog.reset();
     setUser(null);
+    // Clear session-scoped legal data so it doesn't persist on shared devices
+    ["lwyrd_results", "lwyrd_locked_count", "lwyrd_category", "lwyrd_category_name",
+     "lwyrd_match_scores", "lwyrd_answers_v2"].forEach((k) => sessionStorage.removeItem(k));
     router.push("/");
   }, [supabase, router]);
 

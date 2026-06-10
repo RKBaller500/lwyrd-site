@@ -256,5 +256,8 @@ encryption. No PII is logged server-side.
 | 2 | Password minimum 6 chars | `src/components/auth/AuthModal.tsx` | ✅ Fixed |
 | 3 | sessionStorage not cleared on logout | `src/context/AuthContext.tsx` | ✅ Fixed |
 | 4 | `runMatchingV2` track not allowlisted | `src/lib/actions/intake.ts` | ✅ Fixed |
-| 5 | CSP `'unsafe-inline'` | `src/proxy.ts` (future) | ⏳ Deferred |
+
+| 5 | CSP `'unsafe-inline'` | `src/proxy.ts` (future) | ⏳ Deferred | 
+Deferred to future sprint because nonce-based CSP requires application-wide testing to avoid breaking analytics, third-party scripts, or framework-generated scripts.
+
 | 6 | Contact form rate limiting | `ContactFirmModal` + API | ⏳ Deferred |

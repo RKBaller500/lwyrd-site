@@ -74,13 +74,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       // Enrich with profile data in background
       const { data: profile } = await supabase
         .from("profiles")
-        .select("is_admin, access_level")
+        .select("is_admin, role, access_level")
         .eq("id", supabaseUser.id)
         .single();
 
       const authUser = toAuthUser(
         supabaseUser,
-        profile?.is_admin ?? false,
+        profile?.role === "admin" || (profile?.is_admin ?? false),
         (profile?.access_level as "none" | "subscription" | "org") ?? "none",
         "client"
       );

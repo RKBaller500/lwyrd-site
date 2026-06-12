@@ -23,7 +23,7 @@ LWYRD is a legal services matchmaking platform. Users complete a guided intake q
 | Forms | FormSubmit.co (contact forms only) |
 
 No separate backend — all reads go through the browser Supabase client; authenticated writes go through server actions using the service-role client.
-
+https://docs.google.com/spreadsheets/d/17cAMdMyIn_LEIz4kE_X_zqMrR32zd2if/edit?gid=206185866#gid=206185866
 ---
 
 ## Commands

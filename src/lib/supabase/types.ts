@@ -5,20 +5,26 @@ export interface DbFirm {
   tagline: string;
   location: string;
   founded: number | null;
+  founded_year?: number | null;
   size: "boutique" | "mid-size" | "large";
   practice_areas: string[];
   industries: string[];
   company_stages: string[];
   budget_min: number;
   budget_max: number;
+  typical_budget_min?: number | null;
+  typical_budget_max?: number | null;
   billing_model: "hourly" | "retainer" | "flat-fee" | "hybrid";
+  primary_billing_model?: "hourly" | "retainer" | "flat-fee" | "hybrid" | null;
   hourly_rate: number | null;
   response_time: "same-day" | "24h" | "48h" | "72h";
   languages: string[];
   description: string;
+  bio?: string | null;
   strengths: string[];
   overall_score: number;
   verified: boolean;
+  is_verified?: boolean | null;
   created_at: string;
   // Joined relations
   attorneys?: DbAttorney[];
@@ -79,13 +85,15 @@ export interface DbIntakeSubmission {
   legal_category?: string;
   category_label?: string;
   answers: Record<string, string | string[] | number>;
-  top_matches: Array<{ firmId: string; firmName: string; score: number }>;
+  top_matches?: Array<{ firmId: string; firmName: string; score: number }>;
+  practice_area_slug?: string;
   created_at: string;
 }
 
 export interface DbStartupSubmission {
   id: string;
   general_submission_id: string | null;
+  intake_submission_id: string | null;
   user_id: string;
   created_at: string;
   track: string;
@@ -113,6 +121,7 @@ export interface DbStartupSubmission {
 export interface DbIndividualSubmission {
   id: string;
   general_submission_id: string | null;
+  intake_submission_id: string | null;
   user_id: string;
   created_at: string;
   track: string;
@@ -136,6 +145,7 @@ export interface DbIndividualSubmission {
 export interface DbSmallBusinessSubmission {
   id: string;
   general_submission_id: string | null;
+  intake_submission_id: string | null;
   user_id: string;
   created_at: string;
   track: string;

@@ -7,10 +7,16 @@ export const metadata = { title: "Firms — Admin" };
 
 export default async function AdminFirmsPage() {
   const db = createAdminClient();
-  const { data: firms } = await db
+  const { data: rawFirms } = await db
     .from("firms")
-    .select("id, name, location, size, overall_score, verified, practice_areas")
+    .select("id, name, location, size, overall_score, verified, is_verified, practice_areas")
     .order("name");
+
+  // Normalize to new column names; keep verified field the component expects
+  const firms = (rawFirms ?? []).map((f) => ({
+    ...f,
+    verified: (f.is_verified ?? f.verified) as boolean,
+  }));
 
   return (
     <div>
@@ -33,7 +39,7 @@ export default async function AdminFirmsPage() {
         </Link>
       </div>
 
-      <FirmsTable firms={firms ?? []} />
+      <FirmsTable firms={firms} />
     </div>
   );
 }

@@ -55,8 +55,8 @@ export async function getFirmsByPracticeArea(slug: string): Promise<Firm[]> {
     const supabase = await createClient();
     const { data, error } = await supabase
       .from("firms")
-      .select(FIRM_SELECT)
-      .contains("practice_areas", [slug])
+      .select(`${FIRM_SELECT}, firm_practice_areas!inner(practice_area_slug)`)
+      .eq("firm_practice_areas.practice_area_slug", slug)
       .order("overall_score", { ascending: false });
 
     if (!error && data && data.length > 0) {
@@ -96,6 +96,7 @@ export async function getQuestionsForCategory(slug: string): Promise<IntakeQuest
   const { data, error } = await supabase
     .from("intake_questions")
     .select("*")
+    .eq("active", true)
     .in("category_slug", ["global", slug])
     .order("display_order");
 

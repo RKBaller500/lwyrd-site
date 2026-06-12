@@ -49,17 +49,23 @@ export default async function SubmissionDetailPage({
 
   if (!sub) notFound();
 
+  const { data: matchRows } = await db
+    .from("matches")
+    .select("match_score, match_rank, firm_id, is_best_match, firms(name)")
+    .eq("intake_submission_id", id)
+    .order("match_rank");
+
   const { data: profile } = await db
     .from("profiles")
-    .select("name")
+    .select("full_name")
     .eq("id", sub.user_id)
-    .single<{ name: string }>();
+    .single<{ full_name: string }>();
 
   const {
     data: { user: authUser },
   } = await db.auth.admin.getUserById(sub.user_id);
 
-  const userName = profile?.name ?? "Unknown";
+  const userName = profile?.full_name ?? "Unknown";
   const userEmail = authUser?.email ?? "";
 
   const isV2 = !!sub.track;
@@ -142,7 +148,7 @@ export default async function SubmissionDetailPage({
       </div>
 
       {/* Top Matches */}
-      {sub.top_matches?.length > 0 && (
+      {matchRows && matchRows.length > 0 && (
         <div className="bg-[#fbfaf6] border border-[#ddd7cc] rounded-3xl p-6">
           <h2
             className="text-[#002452] text-xl mb-5"
@@ -151,18 +157,24 @@ export default async function SubmissionDetailPage({
             Top Matches
           </h2>
           <div className="space-y-2">
-            {sub.top_matches.map((m, i) => (
-              <div
-                key={m.firmId}
-                className="flex items-center justify-between bg-white border border-[#ddd7cc] rounded-2xl px-5 py-3"
-              >
-                <div className="flex items-center gap-3">
-                  <span className="text-xs text-slate-400 w-5">{i + 1}.</span>
-                  <span className="text-slate-700 text-sm font-medium">{m.firmName}</span>
+            {matchRows.map((m) => {
+              const firmName = (m.firms as unknown as { name: string } | null)?.name ?? "—";
+              return (
+                <div
+                  key={m.firm_id}
+                  className="flex items-center justify-between bg-white border border-[#ddd7cc] rounded-2xl px-5 py-3"
+                >
+                  <div className="flex items-center gap-3">
+                    <span className="text-xs text-slate-400 w-5">{m.match_rank}.</span>
+                    <span className="text-slate-700 text-sm font-medium">{firmName}</span>
+                    {m.is_best_match && (
+                      <span className="text-xs text-[#002452] font-medium">Best Match</span>
+                    )}
+                  </div>
+                  <span className="text-[#002452] text-sm font-medium">{m.match_score} match</span>
                 </div>
-                <span className="text-[#002452] text-sm font-medium">{m.score} match</span>
-              </div>
-            ))}
+              );
+            })}
           </div>
         </div>
       )}

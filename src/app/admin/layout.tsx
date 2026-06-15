@@ -17,11 +17,11 @@ export default async function AdminLayout({
 
   const { data: profile } = await supabase
     .from("profiles")
-    .select("is_admin")
+    .select("is_admin, role")
     .eq("id", user.id)
     .single();
 
-  if (!profile?.is_admin) redirect("/");
+  if (profile?.role !== "admin" && !profile?.is_admin) redirect("/");
 
   return (
     <div className="flex flex-col min-h-screen bg-[#f5f4f0]">

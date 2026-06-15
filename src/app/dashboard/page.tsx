@@ -43,7 +43,7 @@ interface IntakeRecord {
   category_label?: string;
   created_at: string;
   track?: string;
-  top_matches?: { firmId: string; firmName: string; score: number }[];
+  matches?: { match_rank: number }[];
 }
 
 interface SavedFirmRecord {
@@ -349,9 +349,9 @@ function MatchesTab({
                   </div>
                 </div>
                 <div className="flex items-center gap-3 shrink-0">
-                  {intake.top_matches && intake.top_matches.length > 0 && (
+                  {intake.matches && intake.matches.length > 0 && (
                     <span className="hidden sm:inline text-xs text-slate-400">
-                      {intake.top_matches.length} matches
+                      {intake.matches.length} matches
                     </span>
                   )}
                   <Link
@@ -573,7 +573,7 @@ function DashboardContent() {
       const [intakesRes, savedRes] = await Promise.all([
         supabase
           .from("intake_submissions")
-          .select("id, category_slug, category_label, created_at, track, top_matches")
+          .select("id, category_slug, category_label, created_at, track, matches(match_rank)")
           .eq("user_id", user!.id)
           .order("created_at", { ascending: false }),
         supabase

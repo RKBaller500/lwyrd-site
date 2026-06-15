@@ -74,20 +74,18 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       // Enrich with profile data in background
       const { data: profile } = await supabase
         .from("profiles")
-        .select("is_admin, access_level")
+        .select("is_admin, role, access_level")
         .eq("id", supabaseUser.id)
         .single();
 
       const authUser = toAuthUser(
         supabaseUser,
-        profile?.is_admin ?? false,
+        profile?.role === "admin" || (profile?.is_admin ?? false),
         (profile?.access_level as "none" | "subscription" | "org") ?? "none",
         "client"
       );
       setUser(authUser);
       posthog.identify(authUser.id, {
-        email: authUser.email,
-        name: authUser.name,
         is_admin: authUser.isAdmin,
         access_level: authUser.accessLevel,
       });
@@ -114,19 +112,28 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const login = useCallback(
     async (email: string, password: string) => {
       setIsLoading(true);
-      const { error } = await supabase.auth.signInWithPassword({
-        email,
-        password,
+      const res = await fetch("/api/auth/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "same-origin",
+        body: JSON.stringify({ email, password }),
       });
       setIsLoading(false);
-      if (error) throw error;
+      if (!res.ok) {
+        const body = await res.json().catch(() => ({}));
+        throw new Error(body.error ?? "Login failed");
+      }
+      // Session cookies are now set by the server. Re-fetch the user so
+      // the client-side Supabase instance picks up the new session.
+      const { data: { user: u } } = await supabase.auth.getUser();
+      await hydrateUser(u);
       setIsModalOpen(false);
       if (pendingRedirect) {
         router.push(pendingRedirect);
         setPendingRedirect(null);
       }
     },
-    [supabase, pendingRedirect, router]
+    [supabase, hydrateUser, pendingRedirect, router]
   );
 
   const signup = useCallback(
@@ -152,6 +159,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     await supabase.auth.signOut();
     posthog.reset();
     setUser(null);
+    // Clear session-scoped legal data so it doesn't persist on shared devices
+    ["lwyrd_results", "lwyrd_locked_count", "lwyrd_category", "lwyrd_category_name",
+     "lwyrd_match_scores", "lwyrd_answers_v2"].forEach((k) => sessionStorage.removeItem(k));
     router.push("/");
   }, [supabase, router]);
 

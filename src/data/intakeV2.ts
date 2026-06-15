@@ -1435,7 +1435,8 @@ export function getQuestionSequence(
   return questions;
 }
 
-// Maps (track, category) to the practice area slug used in firms.ts
+// LEGACY: This map is now mirrored in the database as public.legal_category_practice_area_map
+// The database table is the source of truth. This can be removed once all reads go through the DB.
 export const CATEGORY_SLUG_MAP: Record<string, Record<string, string>> = {
   startup: {
     formation: 'corporate-formation',

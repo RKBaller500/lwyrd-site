@@ -11,10 +11,7 @@ export async function submitForm(payload: FormPayload): Promise<void> {
       "Content-Type": "application/json",
       Accept: "application/json",
     },
-    body: JSON.stringify({
-      ...payload,
-      _captcha: "false",
-    }),
+    body: JSON.stringify(payload),
   });
 
   if (!res.ok) {

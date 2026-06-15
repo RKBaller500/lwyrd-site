@@ -3,6 +3,7 @@ import "./globals.css";
 import { AuthProvider } from "@/context/AuthContext";
 import AuthModal from "@/components/auth/AuthModal";
 import PostHogProvider from "@/components/providers/PostHogProvider";
+import ConsentBanner from "@/components/ui/ConsentBanner";
 
 export const metadata: Metadata = {
   title: "LWYRD | Find the Right Legal Partner",
@@ -23,6 +24,7 @@ export default function RootLayout({
             <AuthModal />
             {children}
           </AuthProvider>
+          <ConsentBanner />
         </PostHogProvider>
       </body>
     </html>

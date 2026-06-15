@@ -44,6 +44,8 @@ function ResultsContent() {
       setCategoryName(name);
       const scoreMap = Object.fromEntries(parsed.map((r) => [r.firm.id, r.score]));
       sessionStorage.setItem("lwyrd_match_scores", JSON.stringify(scoreMap));
+      // Clear sensitive intake answers — scores are all the firm detail page needs
+      sessionStorage.removeItem("lwyrd_answers_v2");
     } catch {
       router.push("/intake/start");
     }
@@ -120,11 +122,7 @@ function ResultsContent() {
           >
             {results.map((result, i) => (
               <motion.div key={result.firm.id} variants={item}>
-                <MatchCard
-                  result={result}
-                  rank={i + 1}
-                  blurred={false}
-                />
+                <MatchCard result={result} rank={i + 1} />
               </motion.div>
             ))}
           </motion.div>

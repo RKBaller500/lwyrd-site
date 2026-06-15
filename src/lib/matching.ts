@@ -593,9 +593,10 @@ export function matchFirmsV2(
   track: string,
   category: string,
   v2Answers: Record<string, string | string[] | number>,
-  allFirms: Firm[]
+  allFirms: Firm[],
+  practiceAreaSlug?: string
 ): MatchResult[] {
-  const categorySlug = CATEGORY_SLUG_MAP[track]?.[category] ?? "corporate-formation";
+  const categorySlug = practiceAreaSlug ?? CATEGORY_SLUG_MAP[track]?.[category] ?? "corporate-formation";
   const mappedAnswers = mapV2AnswersForMatching(v2Answers);
   return matchFirms(categorySlug, mappedAnswers, allFirms);
 }

@@ -8,17 +8,17 @@ export function mapDbFirmToFirm(row: DbFirm): Firm {
     logoUrl: row.logo_url ?? undefined,
     tagline: row.tagline,
     location: row.location,
-    founded: row.founded ?? 0,
+    founded: row.founded_year ?? row.founded ?? 0,
     size: row.size,
     practiceAreas: row.practice_areas,
     industries: row.industries,
     companyStages: row.company_stages,
-    budgetRange: { min: row.budget_min, max: row.budget_max },
-    billingModel: row.billing_model,
+    budgetRange: { min: row.typical_budget_min ?? row.budget_min, max: row.typical_budget_max ?? row.budget_max },
+    billingModel: row.primary_billing_model ?? row.billing_model,
     hourlyRate: row.hourly_rate ?? undefined,
     responseTime: row.response_time,
     languages: row.languages,
-    description: row.description,
+    description: row.bio ?? row.description,
     strengths: row.strengths,
     team: (row.attorneys ?? [])
       .sort((a, b) => a.display_order - b.display_order)
@@ -37,6 +37,6 @@ export function mapDbFirmToFirm(row: DbFirm): Firm {
         note: a.note ?? undefined,
       })),
     overallScore: row.overall_score,
-    verified: row.verified,
+    verified: row.is_verified ?? row.verified,
   };
 }

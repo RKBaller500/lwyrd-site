@@ -8,25 +8,8 @@ import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
 import AuthGuard from "@/components/auth/AuthGuard";
 import MatchCard from "@/components/results/MatchCard";
-import { useAuth } from "@/context/AuthContext";
-import { createClient } from "@/lib/supabase/client";
-import { matchFirmsV2 } from "@/lib/matching";
-import { mapDbFirmToFirm } from "@/lib/supabase/mappers";
+import { runMatchingForSubmission } from "@/lib/actions/intake";
 import { MatchResult } from "@/types";
-import type { DbFirm } from "@/lib/supabase/types";
-
-const FIRM_SELECT = `
-  *,
-  attorneys ( * ),
-  firm_assessment_items (
-    id,
-    criterion_id,
-    passed,
-    note,
-    display_order,
-    assessment_criteria ( id, label, description, display_order )
-  )
-`;
 
 const ease = [0.25, 0.46, 0.45, 0.94] as const;
 const lora = { fontFamily: '"Lora", Georgia, serif' } as const;
@@ -42,7 +25,6 @@ const cardItem = {
 };
 
 function PastResultsContent() {
-  const { user } = useAuth();
   const router = useRouter();
   const params = useParams();
   const submissionId = params.id as string;
@@ -54,62 +36,28 @@ function PastResultsContent() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    if (!user || !submissionId) return;
+    if (!submissionId) return;
 
-    const supabase = createClient();
-
-    async function load() {
-      // Fetch submission — user_id equality is the ownership/security gate
-      const { data: submission, error: subError } = await supabase
-        .from("intake_submissions")
-        .select("track, category_slug, category_label, answers, created_at")
-        .eq("id", submissionId)
-        .eq("user_id", user!.id)
-        .single();
-
-      if (subError || !submission) {
+    runMatchingForSubmission(submissionId).then(({ results: r, categorySlug: slug, categoryName: name, intakeDate: date, error }) => {
+      if (error || !r) {
         router.push("/dashboard");
         return;
       }
-
-      // Fetch current firm data from DB
-      const { data: firmData, error: firmError } = await supabase
-        .from("firms")
-        .select(FIRM_SELECT)
-        .order("overall_score", { ascending: false });
-
-      if (firmError || !firmData || firmData.length === 0) {
-        router.push("/dashboard");
-        return;
-      }
-
-      const allFirms = (firmData as DbFirm[]).map(mapDbFirmToFirm);
-
-      // Re-run matching with the stored answers
-      const answers = submission.answers as Record<string, string | string[] | number>;
-      const matchResults = matchFirmsV2(
-        submission.track,
-        submission.category_slug,
-        answers,
-        allFirms
-      );
 
       // Populate sessionStorage so /firms/[id] pages show the correct match score
-      sessionStorage.setItem("lwyrd_results", JSON.stringify(matchResults));
-      sessionStorage.setItem("lwyrd_category", submission.category_slug);
-      sessionStorage.setItem("lwyrd_category_name", submission.category_label ?? submission.category_slug);
-      const scoreMap = Object.fromEntries(matchResults.map((r) => [r.firm.id, r.score]));
+      sessionStorage.setItem("lwyrd_results", JSON.stringify(r));
+      sessionStorage.setItem("lwyrd_category", slug);
+      sessionStorage.setItem("lwyrd_category_name", name);
+      const scoreMap = Object.fromEntries(r.map((res) => [res.firm.id, res.score]));
       sessionStorage.setItem("lwyrd_match_scores", JSON.stringify(scoreMap));
 
-      setResults(matchResults);
-      setCategorySlug(submission.category_slug);
-      setCategoryName(submission.category_label ?? submission.category_slug);
-      setIntakeDate(submission.created_at);
+      setResults(r);
+      setCategorySlug(slug);
+      setCategoryName(name);
+      setIntakeDate(date);
       setLoading(false);
-    }
-
-    load().catch(() => router.push("/dashboard"));
-  }, [user, submissionId, router]);
+    }).catch(() => router.push("/dashboard"));
+  }, [submissionId, router]);
 
   // Loading skeleton
   if (loading) {
@@ -130,6 +78,8 @@ function PastResultsContent() {
   }
 
   if (!results) return null;
+
+  const total = results.length;
 
   return (
     <div className="flex flex-col min-h-screen bg-[#f5f4f0]">
@@ -161,8 +111,8 @@ function PastResultsContent() {
             Your Matches
           </h1>
           <p className="text-slate-500 text-base">
-            {results.length > 0
-              ? `${results.length} ${results.length === 1 ? "firm" : "firms"} matched${categoryName ? ` for ${categoryName}` : ""}`
+            {total > 0
+              ? `${total} ${total === 1 ? "firm" : "firms"} matched${categoryName ? ` for ${categoryName}` : ""}`
               : "No firms matched your criteria."}
             {intakeDate && (
               <span className="text-slate-400">
@@ -177,7 +127,7 @@ function PastResultsContent() {
           </p>
         </motion.div>
 
-        {results.length === 0 ? (
+        {total === 0 ? (
           <motion.div
             initial={{ opacity: 0, y: 14 }}
             animate={{ opacity: 1, y: 0 }}
@@ -209,13 +159,13 @@ function PastResultsContent() {
           >
             {results.map((result, i) => (
               <motion.div key={result.firm.id} variants={cardItem}>
-                <MatchCard result={result} rank={i + 1} blurred={false} />
+                <MatchCard result={result} rank={i + 1} />
               </motion.div>
             ))}
           </motion.div>
         )}
 
-        {results.length > 0 && categorySlug && (
+        {total > 0 && categorySlug && (
           <div className="mt-10 text-center">
             <p className="text-slate-400 text-sm">
               Looking for something different?{" "}

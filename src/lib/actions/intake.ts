@@ -2,6 +2,11 @@
 
 import { createClient } from "@/lib/supabase/server";
 import type { IntakeAnswers, MatchResult } from "@/types";
+import { matchFirmsV2 } from "@/lib/matching";
+import { mapDbFirmToFirm } from "@/lib/supabase/mappers";
+import type { DbFirm } from "@/lib/supabase/types";
+import { firms as localFirms } from "@/data/firms";
+import { CATEGORY_SLUG_MAP } from "@/data/intakeV2";
 
 // Legacy action — kept for backward compatibility
 export async function saveIntakeSubmission(
@@ -29,13 +34,14 @@ export async function saveIntakeSubmission(
   });
 }
 
-// V2 action — writes to general table + track-specific table
+// V2 action — writes to general table + track-specific table + matches table
 export async function saveIntakeSubmissionV2(
   track: string,
   category: string,
   categoryLabel: string,
   v2Answers: Record<string, string | string[] | number>,
-  matchResults: MatchResult[]
+  matchResults: MatchResult[],
+  practiceAreaSlug: string
 ): Promise<void> {
   const supabase = await createClient();
   const {
@@ -55,6 +61,7 @@ export async function saveIntakeSubmissionV2(
     .insert({
       user_id: user.id,
       category_slug: `${track}/${category}`,
+      practice_area_slug: practiceAreaSlug,
       track,
       legal_category: category,
       category_label: categoryLabel,
@@ -76,6 +83,7 @@ export async function saveIntakeSubmissionV2(
     const langRaw = (v2Answers.sf8 as string[] | undefined) ?? null;
     await supabase.from("startup_submissions").insert({
       general_submission_id: generalId,
+      intake_submission_id: generalId,
       user_id: user.id,
       track: "startup",
       legal_category: category,
@@ -104,6 +112,7 @@ export async function saveIntakeSubmissionV2(
     const langRaw = (v2Answers.if6 as string[] | undefined) ?? null;
     await supabase.from("individual_submissions").insert({
       general_submission_id: generalId,
+      intake_submission_id: generalId,
       user_id: user.id,
       track: "individual",
       legal_category: category,
@@ -126,6 +135,7 @@ export async function saveIntakeSubmissionV2(
     const langRaw = (v2Answers.bf8 as string[] | undefined) ?? null;
     await supabase.from("small_business_submissions").insert({
       general_submission_id: generalId,
+      intake_submission_id: generalId,
       user_id: user.id,
       track: "small_business",
       legal_category: category,
@@ -145,6 +155,28 @@ export async function saveIntakeSubmissionV2(
       language_requirement: langRaw,
       sub_question_json: extractSubQuestionJson(track, category, v2Answers),
     });
+  }
+
+  // Write match results to the matches table
+  if (generalId && matchResults.length > 0) {
+    const matchRows = matchResults.map((result, index) => {
+      const rank = index + 1;
+      return {
+        intake_submission_id: generalId,
+        firm_id: result.firm.id,
+        user_id: user.id,
+        practice_area_slug: practiceAreaSlug,
+        match_score: result.score,
+        match_rank: rank,
+        matched_criteria: result.matchedCriteria,
+        missed_criteria: result.missedCriteria,
+        is_best_match: rank === 1 && result.score >= 60,
+        // legacy columns — keep writing until told otherwise
+        score: result.score,
+        rank,
+      };
+    });
+    await supabase.from("matches").insert(matchRows);
   }
 }
 
@@ -199,4 +231,154 @@ function extractSubQuestionJson(
     if (val !== undefined) result[id] = typeof val === "number" ? String(val) : val;
   });
   return result;
+}
+
+// Runs matching server-side and returns only the results the caller is entitled to.
+// Free users receive the top result only; paying users receive all results.
+// This prevents full match data from ever reaching the client for unpaid sessions.
+export async function runMatchingV2(
+  track: string,
+  category: string,
+  categoryLabel: string,
+  answers: IntakeAnswers
+): Promise<{ results: MatchResult[]; lockedCount: number; error?: string }> {
+  const VALID_TRACKS = ["startup", "individual", "small_business"] as const;
+  if (
+    typeof track !== "string" ||
+    !(VALID_TRACKS as readonly string[]).includes(track) ||
+    typeof category !== "string" ||
+    !category ||
+    category.length > 64
+  ) {
+    return { results: [], lockedCount: 0, error: "Invalid input" };
+  }
+
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return { results: [], lockedCount: 0, error: "Not authenticated" };
+
+  // Resolve practice area slug from DB; fall back to CATEGORY_SLUG_MAP if unavailable
+  let practiceAreaSlug = CATEGORY_SLUG_MAP[track]?.[category] ?? "corporate-formation";
+  try {
+    const { data: mapRow } = await supabase
+      .from("legal_category_practice_area_map")
+      .select("practice_area_slug")
+      .eq("track", track)
+      .eq("category_key", category)
+      .single();
+    if (mapRow?.practice_area_slug) {
+      practiceAreaSlug = mapRow.practice_area_slug as string;
+    }
+  } catch {
+    // proceed with CATEGORY_SLUG_MAP fallback
+  }
+
+  // Fetch firms server-side; fall back to local data if unavailable
+  let allFirms = localFirms;
+  try {
+    const { data, error } = await supabase
+      .from("firms")
+      .select("*, attorneys(*), firm_assessment_items(*)");
+    if (!error && data && data.length > 0) {
+      allFirms = (data as DbFirm[]).map(mapDbFirmToFirm);
+    }
+  } catch {
+    // proceed with local firms
+  }
+
+  // Filter to firms that serve this practice area via the normalized join table
+  try {
+    const { data: fpaRows } = await supabase
+      .from("firm_practice_areas")
+      .select("firm_id")
+      .eq("practice_area_slug", practiceAreaSlug);
+    if (fpaRows && fpaRows.length > 0) {
+      const eligibleIds = new Set(fpaRows.map((r: { firm_id: string }) => r.firm_id));
+      allFirms = allFirms.filter((f) => eligibleIds.has(f.id));
+    }
+  } catch {
+    // matchFirms will fall back to practiceAreas array filter
+  }
+
+  const allResults = matchFirmsV2(track, category, answers, allFirms, practiceAreaSlug);
+
+  // Save submission with full results for analytics (fire-and-forget)
+  void saveIntakeSubmissionV2(track, category, categoryLabel, answers, allResults, practiceAreaSlug);
+
+  return { results: allResults, lockedCount: 0 };
+}
+
+// Re-runs matching for a past submission server-side, enforcing the same
+// access-level truncation as runMatchingV2.
+export async function runMatchingForSubmission(submissionId: string): Promise<{
+  results: MatchResult[];
+  lockedCount: number;
+  categorySlug: string;
+  categoryName: string;
+  intakeDate: string;
+  error?: string;
+}> {
+  const empty = { results: [] as MatchResult[], lockedCount: 0, categorySlug: "", categoryName: "", intakeDate: "" };
+
+  if (!submissionId || typeof submissionId !== "string") {
+    return { ...empty, error: "Invalid submission ID" };
+  }
+
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return { ...empty, error: "Not authenticated" };
+
+  // Ownership enforced server-side — users can only load their own submissions
+  const { data: submission, error: subError } = await supabase
+    .from("intake_submissions")
+    .select("track, category_slug, practice_area_slug, category_label, answers, created_at")
+    .eq("id", submissionId)
+    .eq("user_id", user.id)
+    .single();
+
+  if (subError || !submission) return { ...empty, error: "Not found" };
+
+  // Use practice_area_slug from submission; fall back to category_slug for legacy rows
+  const practiceAreaSlug = (submission.practice_area_slug ?? submission.category_slug) as string;
+
+  let allFirms = localFirms;
+  try {
+    const { data, error } = await supabase
+      .from("firms")
+      .select("*, attorneys(*), firm_assessment_items(*)");
+    if (!error && data && data.length > 0) {
+      allFirms = (data as DbFirm[]).map(mapDbFirmToFirm);
+    }
+  } catch {
+    // proceed with local firms
+  }
+
+  // Filter to firms that serve this practice area via the normalized join table
+  try {
+    const { data: fpaRows } = await supabase
+      .from("firm_practice_areas")
+      .select("firm_id")
+      .eq("practice_area_slug", practiceAreaSlug);
+    if (fpaRows && fpaRows.length > 0) {
+      const eligibleIds = new Set(fpaRows.map((r: { firm_id: string }) => r.firm_id));
+      allFirms = allFirms.filter((f) => eligibleIds.has(f.id));
+    }
+  } catch {
+    // matchFirms will fall back to practiceAreas array filter
+  }
+
+  const answers = submission.answers as IntakeAnswers;
+  const allResults = matchFirmsV2(submission.track, submission.category_slug, answers, allFirms, practiceAreaSlug);
+
+  return {
+    results: allResults,
+    lockedCount: 0,
+    categorySlug: submission.category_slug,
+    categoryName: submission.category_label ?? submission.category_slug,
+    intakeDate: submission.created_at,
+  };
 }

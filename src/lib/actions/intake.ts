@@ -304,22 +304,10 @@ export async function runMatchingV2(
 
   const allResults = matchFirmsV2(track, category, answers, allFirms, practiceAreaSlug);
 
-  // Check access level to determine how many results to return
-  const { data: profile } = await supabase
-    .from("profiles")
-    .select("access_level")
-    .eq("id", user.id)
-    .single();
-  const hasAccess =
-    profile?.access_level === "subscription" || profile?.access_level === "org";
-
-  const results = hasAccess ? allResults : allResults.slice(0, 1);
-  const lockedCount = hasAccess ? 0 : Math.max(0, allResults.length - 1);
-
   // Save submission with full results for analytics (fire-and-forget)
   void saveIntakeSubmissionV2(track, category, categoryLabel, answers, allResults, practiceAreaSlug);
 
-  return { results, lockedCount };
+  return { results: allResults, lockedCount: 0 };
 }
 
 // Re-runs matching for a past submission server-side, enforcing the same
@@ -386,17 +374,9 @@ export async function runMatchingForSubmission(submissionId: string): Promise<{
   const answers = submission.answers as IntakeAnswers;
   const allResults = matchFirmsV2(submission.track, submission.category_slug, answers, allFirms, practiceAreaSlug);
 
-  const { data: profile } = await supabase
-    .from("profiles")
-    .select("access_level")
-    .eq("id", user.id)
-    .single();
-  const hasAccess =
-    profile?.access_level === "subscription" || profile?.access_level === "org";
-
   return {
-    results: hasAccess ? allResults : allResults.slice(0, 1),
-    lockedCount: hasAccess ? 0 : Math.max(0, allResults.length - 1),
+    results: allResults,
+    lockedCount: 0,
     categorySlug: submission.category_slug,
     categoryName: submission.category_label ?? submission.category_slug,
     intakeDate: submission.created_at,

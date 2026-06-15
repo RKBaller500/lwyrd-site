@@ -4,51 +4,12 @@ import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import { useRouter, useParams } from "next/navigation";
 import Link from "next/link";
-import { Lock, ArrowRight } from "lucide-react";
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
 import AuthGuard from "@/components/auth/AuthGuard";
 import MatchCard from "@/components/results/MatchCard";
 import { runMatchingForSubmission } from "@/lib/actions/intake";
 import { MatchResult } from "@/types";
-
-function LockedCard({ rank }: { rank: number }) {
-  return (
-    <div className="rounded-3xl shadow-sm border border-[#ddd7cc] border-l-4 border-l-[#ddd7cc] overflow-hidden bg-[#fbfaf6]">
-      <div className="p-8">
-        <div className="flex items-start justify-between gap-4 mb-5">
-          <div className="flex-1 min-w-0">
-            <span className="text-xs text-slate-400 block mb-3">#{rank}</span>
-            <div className="h-6 w-48 bg-[#ddd7cc] rounded-lg animate-pulse mb-2" />
-            <div className="h-4 w-64 bg-[#ddd7cc]/50 rounded animate-pulse" />
-          </div>
-          <div className="text-right shrink-0">
-            <div className="h-10 w-12 bg-[#ddd7cc] rounded-lg animate-pulse mb-1" />
-            <div className="h-3 w-16 bg-[#ddd7cc]/50 rounded animate-pulse" />
-          </div>
-        </div>
-        <div className="space-y-2 mb-5">
-          <div className="h-3 w-full bg-[#ddd7cc]/50 rounded animate-pulse" />
-          <div className="h-3 w-5/6 bg-[#ddd7cc]/50 rounded animate-pulse" />
-          <div className="h-3 w-4/6 bg-[#ddd7cc]/50 rounded animate-pulse" />
-        </div>
-      </div>
-      <div className="border-t border-[#ddd7cc] bg-white/60 px-8 py-4 flex items-center justify-between gap-4">
-        <div className="flex items-center gap-2 text-slate-500 text-sm">
-          <Lock size={14} className="text-slate-400 shrink-0" />
-          Full profile and contact details are locked
-        </div>
-        <Link
-          href="/access"
-          className="flex items-center gap-2 px-5 py-2.5 rounded-2xl bg-[#002452] text-white text-sm font-medium hover:opacity-90 transition-opacity shrink-0"
-        >
-          Get Access
-          <ArrowRight size={14} />
-        </Link>
-      </div>
-    </div>
-  );
-}
 
 const ease = [0.25, 0.46, 0.45, 0.94] as const;
 const lora = { fontFamily: '"Lora", Georgia, serif' } as const;
@@ -69,7 +30,6 @@ function PastResultsContent() {
   const submissionId = params.id as string;
 
   const [results, setResults] = useState<MatchResult[] | null>(null);
-  const [lockedCount, setLockedCount] = useState(0);
   const [categoryName, setCategoryName] = useState("");
   const [categorySlug, setCategorySlug] = useState("");
   const [intakeDate, setIntakeDate] = useState("");
@@ -78,7 +38,7 @@ function PastResultsContent() {
   useEffect(() => {
     if (!submissionId) return;
 
-    runMatchingForSubmission(submissionId).then(({ results: r, lockedCount: lc, categorySlug: slug, categoryName: name, intakeDate: date, error }) => {
+    runMatchingForSubmission(submissionId).then(({ results: r, categorySlug: slug, categoryName: name, intakeDate: date, error }) => {
       if (error || !r) {
         router.push("/dashboard");
         return;
@@ -92,7 +52,6 @@ function PastResultsContent() {
       sessionStorage.setItem("lwyrd_match_scores", JSON.stringify(scoreMap));
 
       setResults(r);
-      setLockedCount(lc);
       setCategorySlug(slug);
       setCategoryName(name);
       setIntakeDate(date);
@@ -120,7 +79,7 @@ function PastResultsContent() {
 
   if (!results) return null;
 
-  const total = results.length + lockedCount;
+  const total = results.length;
 
   return (
     <div className="flex flex-col min-h-screen bg-[#f5f4f0]">
@@ -201,11 +160,6 @@ function PastResultsContent() {
             {results.map((result, i) => (
               <motion.div key={result.firm.id} variants={cardItem}>
                 <MatchCard result={result} rank={i + 1} />
-              </motion.div>
-            ))}
-            {Array.from({ length: lockedCount }, (_, i) => (
-              <motion.div key={`locked-${i}`} variants={cardItem}>
-                <LockedCard rank={results.length + i + 1} />
               </motion.div>
             ))}
           </motion.div>

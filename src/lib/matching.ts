@@ -165,15 +165,27 @@ function isHardDisqualified(
   return { disqualified: false };
 }
 
+// Practice areas where industry vertical is not a meaningful matching signal.
+// Personal law matters are not sector-specific — a user's industry has no bearing
+// on a family law or estate planning firm's ability to serve them.
+const INDUSTRY_IRRELEVANT_PRACTICES = new Set([
+  "family-law", "estate-planning", "personal-injury", "criminal-defense",
+  "bankruptcy", "consumer-protection", "immigration", "real-estate",
+]);
+
 // ── Scoring criteria ──────────────────────────────────────────────────────────
-// Total: 100 points
+// Normalised score: totalPts / maxPts × 100
+// Signals marked * are excluded (pts=0, max=0) when the user expressed no preference,
+// so they only affect ranking when they actually differentiate between firms.
 //   Budget fit:           24 pts  — Can the user actually afford this firm?
-//   Quality (LWYRD):      22 pts  — How strong is the firm overall?
 //   Industry fit:         18 pts  — Does the firm specialize in the user's sector?
-//   Stage fit:            14 pts  — Right experience for this company stage?
+//   Stage fit:            14 pts  — Right experience for this company stage? (* excluded for non-startup)
 //   Firm size preference: 12 pts  — Matches what the user asked for?
 //   Location / state:      6 pts  — Remaining soft location signal (after hard filter)
-//   Timeline / urgency:    4 pts  — Can they respond fast enough?
+//   Billing model:         6 pts  — Matches how the user wants to pay? (* excluded if no preference)
+//   Quality (LWYRD):      10 pts  — Squared ratio for top-end amplification
+//   Language:              5 pts  — Can the firm serve in the user's language? (* excluded if English-only)
+//   Timeline / urgency:    4 pts  — Can they respond fast enough? (* excluded if no urgency)
 // ─────────────────────────────────────────────────────────────────────────────
 
 function scoreBudget(answers: IntakeAnswers, firm: Firm): { pts: number; max: number; reason?: string } {
@@ -197,18 +209,18 @@ function scoreBudget(answers: IntakeAnswers, firm: Firm): { pts: number; max: nu
 
   if (budget > max) {
     // Client has more budget than ceiling — still a fine match, slight discount
-    return { pts: Math.round(MAX * 0.88), max: MAX };
+    return { pts: Math.round(MAX * 0.80), max: MAX };
   }
 
   // budget < min (but above the hard-filter threshold of 28%)
   const ratio = budget / min; // 0.28 – 0.99
-  if (ratio >= 0.80) return { pts: Math.round(MAX * 0.75), max: MAX };
-  if (ratio >= 0.55) return { pts: Math.round(MAX * 0.50), max: MAX };
-  return { pts: Math.round(MAX * 0.30), max: MAX }; // close to hard-filter threshold
+  if (ratio >= 0.80) return { pts: Math.round(MAX * 0.50), max: MAX };
+  if (ratio >= 0.55) return { pts: Math.round(MAX * 0.25), max: MAX };
+  return { pts: Math.round(MAX * 0.10), max: MAX }; // close to hard-filter threshold
 }
 
 function scoreQuality(firm: Firm): { pts: number; max: number; reason?: string } {
-  const MAX = 22;
+  const MAX = 10;
   // Use LWYRD assessment pass rate if available; otherwise the LWYRD score (0–100).
   let qualityRatio: number;
   let reason: string | undefined;
@@ -224,22 +236,28 @@ function scoreQuality(firm: Firm): { pts: number; max: number; reason?: string }
     else if (firm.overallScore >= 75) reason = `LWYRD score ${firm.overallScore}`;
   }
 
-  return { pts: Math.round(MAX * qualityRatio), max: MAX, reason };
+  // Square the ratio to amplify separation between top-rated and average firms
+  return { pts: Math.round(MAX * Math.pow(qualityRatio, 2)), max: MAX, reason };
 }
 
-function scoreIndustry(answers: IntakeAnswers, firm: Firm): { pts: number; max: number; reason?: string } {
+function scoreIndustry(categorySlug: string, answers: IntakeAnswers, firm: Firm): { pts: number; max: number; reason?: string } {
   const MAX = 18;
+
+  // Industry is not a meaningful signal for personal law — avoid penalising all results
+  if (INDUSTRY_IRRELEVANT_PRACTICES.has(categorySlug)) {
+    return { pts: MAX, max: MAX };
+  }
+
   const raw = answers["industry"] as string | undefined;
   const industry = raw ? INDUSTRY_MAP[raw] : undefined;
 
-  // Personal law firms rarely have industry data — neutral score
   if (firm.industries.length === 0) {
-    return { pts: Math.round(MAX * 0.72), max: MAX };
+    return { pts: Math.round(MAX * 0.50), max: MAX };
   }
 
   if (!industry) {
-    // User didn't specify an industry (individual/personal track usually)
-    return { pts: Math.round(MAX * 0.72), max: MAX };
+    // User didn't specify an industry — modest neutral, don't reward firms with no industry data equally
+    return { pts: Math.round(MAX * 0.55), max: MAX };
   }
 
   if (firm.industries.includes(industry)) {
@@ -273,9 +291,9 @@ function scoreStage(answers: IntakeAnswers, firm: Firm): { pts: number; max: num
   const rawStage = answers["company-stage"] as string;
   const stage = STAGE_MAP[rawStage];
 
-  // Individual/personal track — stage not applicable, full points
+  // Individual/personal track — stage not applicable, exclude from denominator
   if (!stage || stage === "individual") {
-    return { pts: MAX, max: MAX };
+    return { pts: 0, max: 0 };
   }
 
   // Firm serves all stages (empty array = broad scope)
@@ -361,9 +379,9 @@ function scoreLocation(
     }
   }
 
-  // Federal/multi-state practice — NYC firm can advise but not ideal for another state
+  // Federal practice — NYC firm can serve any US client regardless of state
   if (FEDERAL_PRACTICES.has(categorySlug)) {
-    return { pts: Math.round(MAX * 0.67), max: MAX, reason: "Can advise on federal matters from NYC" };
+    return { pts: MAX, max: MAX };
   }
 
   // Semi-state-specific (employment-law): partial credit
@@ -390,8 +408,40 @@ function scoreTimeline(answers: IntakeAnswers, firm: Firm): { pts: number; max: 
     if (responseLevel >= 1) return { pts: MAX, max: MAX };
     return { pts: Math.round(MAX * 0.75), max: MAX };
   }
-  // Low or no urgency — all firms are fine
-  return { pts: MAX, max: MAX };
+  // No urgency expressed — signal doesn't differentiate, exclude from denominator
+  return { pts: 0, max: 0 };
+}
+
+function scoreBillingModel(answers: IntakeAnswers, firm: Firm): { pts: number; max: number; reason?: string } {
+  const MAX = 6;
+  const pref = answers["billing-preference"] as string | undefined;
+
+  if (!pref) return { pts: 0, max: 0 };
+
+  if (pref === "Hourly"   && firm.billingModel === "hourly")                                      return { pts: MAX, max: MAX, reason: "Offers hourly billing" };
+  if (pref === "Retainer" && (firm.billingModel === "retainer" || firm.billingModel === "hybrid")) return { pts: MAX, max: MAX, reason: "Offers monthly retainer arrangements" };
+  if (pref === "Flat-fee" && firm.billingModel === "flat-fee")                                    return { pts: MAX, max: MAX, reason: "Offers flat-fee / fixed-cost arrangements" };
+  if (pref === "Hourly"   && firm.billingModel === "hybrid")                                      return { pts: Math.round(MAX * 0.67), max: MAX };
+
+  return { pts: Math.round(MAX * 0.33), max: MAX };
+}
+
+function scoreLanguage(answers: IntakeAnswers, firm: Firm): { pts: number; max: number; reason?: string } {
+  const MAX = 5;
+  const langs = answers["languages"] as string[] | undefined;
+
+  if (!langs || langs.length === 0) return { pts: 0, max: 0 };
+  const nonEnglish = langs.filter((l) => l !== "No — English only is fine");
+  // No non-English needed — signal doesn't differentiate, exclude from denominator
+  if (nonEnglish.length === 0) return { pts: 0, max: 0 };
+
+  const firmLangs = firm.languages.map((l) => l.toLowerCase());
+  const hasMatch = nonEnglish.some((lang) =>
+    firmLangs.some((fl) => fl.includes(lang.toLowerCase()))
+  );
+
+  if (hasMatch) return { pts: MAX, max: MAX, reason: `Attorneys fluent in ${nonEnglish.join(", ")}` };
+  return { pts: 0, max: MAX };
 }
 
 // ── Main matching function ────────────────────────────────────────────────────
@@ -419,11 +469,13 @@ export function matchFirms(
   const scored = pool.map((firm) => {
     const budgetResult    = scoreBudget(answers, firm);
     const qualityResult   = scoreQuality(firm);
-    const industryResult  = scoreIndustry(answers, firm);
+    const industryResult  = scoreIndustry(categorySlug, answers, firm);
     const stageResult     = scoreStage(answers, firm);
     const sizeResult      = scoreFirmSize(answers, firm);
     const locationResult  = scoreLocation(categorySlug, answers, firm);
     const timelineResult  = scoreTimeline(answers, firm);
+    const billingResult   = scoreBillingModel(answers, firm);
+    const languageResult  = scoreLanguage(answers, firm);
 
     const totalPts =
       budgetResult.pts +
@@ -432,7 +484,9 @@ export function matchFirms(
       stageResult.pts +
       sizeResult.pts +
       locationResult.pts +
-      timelineResult.pts;
+      timelineResult.pts +
+      billingResult.pts +
+      languageResult.pts;
 
     const maxPts =
       budgetResult.max +
@@ -441,7 +495,9 @@ export function matchFirms(
       stageResult.max +
       sizeResult.max +
       locationResult.max +
-      timelineResult.max;
+      timelineResult.max +
+      billingResult.max +
+      languageResult.max;
 
     const finalScore = Math.round((totalPts / maxPts) * 100);
 
@@ -454,6 +510,8 @@ export function matchFirms(
       sizeResult,
       locationResult,
       timelineResult,
+      billingResult,
+      languageResult,
     ]
       .filter((r) => r.reason && r.pts >= r.max * 0.8)
       .map((r) => r.reason!)
@@ -463,8 +521,12 @@ export function matchFirms(
     const matchedCriteria: string[] = [];
     const missedCriteria: string[] = [];
 
-    if (stageResult.pts >= stageResult.max * 0.7) matchedCriteria.push("company-stage");
-    else if (stageResult.pts < stageResult.max * 0.4) missedCriteria.push("company-stage");
+    const rawStageForCriteria = answers["company-stage"] as string | undefined;
+    const stageForCriteria = rawStageForCriteria ? STAGE_MAP[rawStageForCriteria] : undefined;
+    if (stageForCriteria && stageForCriteria !== "individual") {
+      if (stageResult.pts >= stageResult.max * 0.7) matchedCriteria.push("company-stage");
+      else if (stageResult.pts < stageResult.max * 0.4) missedCriteria.push("company-stage");
+    }
 
     if (budgetResult.pts >= budgetResult.max * 0.7) matchedCriteria.push("budget");
     else missedCriteria.push("budget");
@@ -556,7 +618,7 @@ function mapV2AnswersForMatching(
   // Firm size preference
   const firmTypeMap: Record<string, string> = {
     large: "Senior partner only — I want the most experienced attorney",
-    boutique: "Mix is fine — senior attorneys plus associates for routine work",
+    boutique: "Cost-efficiency — I want the most economical option",
     solo: "Cost-efficiency — I want the most economical option",
     no_preference: "No preference",
   };
@@ -585,6 +647,13 @@ function mapV2AnswersForMatching(
   if (langAnswer?.length) {
     result["languages"] = langAnswer.map((l) => langLabelMap[l] ?? l);
   }
+
+  // Billing model preference
+  const billingPrefMap: Record<string, string> = {
+    hourly: "Hourly", retainer: "Retainer", flat_fee: "Flat-fee", no_preference: "",
+  };
+  const billingAnswer = (v2Answers.sf2 ?? v2Answers.if2 ?? v2Answers.bf2) as string | undefined;
+  if (billingAnswer) result["billing-preference"] = billingPrefMap[billingAnswer] ?? "";
 
   return result;
 }

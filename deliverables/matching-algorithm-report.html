@@ -1,0 +1,934 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>LWYRD Matching Algorithm — Technical Report</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Lora:wght@400;500;600&family=Inter:wght@400;500;600&display=swap');
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --navy: #002452;
+    --bg: #f5f4f0;
+    --surface: #fbfaf6;
+    --border: #ddd7cc;
+    --text: #1a1a2e;
+    --muted: #64748b;
+    --accent: #002452;
+  }
+
+  html { font-size: 10.5pt; }
+
+  body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    color: var(--text);
+    background: white;
+    line-height: 1.65;
+    padding: 0;
+    margin: 0;
+  }
+
+  /* ── Cover page ── */
+  .cover {
+    background: var(--navy);
+    color: white;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    padding: 64px 72px;
+    page-break-after: always;
+  }
+
+  .cover-label {
+    font-size: 9pt;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: rgba(255,255,255,0.5);
+    margin-bottom: 24px;
+  }
+
+  .cover h1 {
+    font-family: 'Lora', Georgia, serif;
+    font-size: 38pt;
+    font-weight: 500;
+    line-height: 1.18;
+    color: white;
+    margin-bottom: 28px;
+    max-width: 560px;
+  }
+
+  .cover-meta {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    color: rgba(255,255,255,0.6);
+    font-size: 9.5pt;
+  }
+
+  .cover-meta strong { color: rgba(255,255,255,0.9); }
+
+  .cover-divider {
+    width: 48px;
+    height: 2px;
+    background: rgba(255,255,255,0.25);
+    margin: 32px 0;
+  }
+
+  /* ── Page layout ── */
+  .page {
+    max-width: 680px;
+    margin: 0 auto;
+    padding: 72px 64px;
+  }
+
+  @media print {
+    .page { padding: 48px 56px; }
+  }
+
+  /* ── Section headers ── */
+  .section-tag {
+    font-size: 8pt;
+    font-weight: 600;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 8px;
+  }
+
+  h1.section-title {
+    font-family: 'Lora', Georgia, serif;
+    font-size: 22pt;
+    font-weight: 500;
+    color: var(--navy);
+    line-height: 1.25;
+    margin-bottom: 32px;
+    padding-bottom: 20px;
+    border-bottom: 1.5px solid var(--border);
+  }
+
+  h2 {
+    font-family: 'Lora', Georgia, serif;
+    font-size: 14pt;
+    font-weight: 500;
+    color: var(--navy);
+    margin: 40px 0 14px;
+    line-height: 1.3;
+  }
+
+  h3 {
+    font-size: 10pt;
+    font-weight: 600;
+    color: var(--navy);
+    margin: 28px 0 10px;
+    letter-spacing: 0.01em;
+  }
+
+  p {
+    margin-bottom: 14px;
+    color: #2d3748;
+    font-size: 10pt;
+  }
+
+  /* ── Tables ── */
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 20px 0 28px;
+    font-size: 9.5pt;
+  }
+
+  thead th {
+    background: var(--navy);
+    color: white;
+    padding: 9px 14px;
+    text-align: left;
+    font-size: 8.5pt;
+    font-weight: 600;
+    letter-spacing: 0.05em;
+  }
+
+  thead th:first-child { border-radius: 6px 0 0 0; }
+  thead th:last-child  { border-radius: 0 6px 0 0; }
+
+  tbody tr:nth-child(even) { background: #f8f7f3; }
+  tbody tr:hover { background: #f0eeea; }
+
+  tbody td {
+    padding: 9px 14px;
+    border-bottom: 1px solid var(--border);
+    vertical-align: top;
+    line-height: 1.5;
+    color: #374151;
+  }
+
+  tbody td:first-child { font-weight: 500; color: var(--navy); }
+
+  /* ── Score pill ── */
+  .pill {
+    display: inline-block;
+    background: var(--navy);
+    color: white;
+    border-radius: 20px;
+    padding: 2px 10px;
+    font-size: 8pt;
+    font-weight: 600;
+  }
+
+  .pill-muted {
+    background: var(--border);
+    color: var(--navy);
+  }
+
+  /* ── Callout boxes ── */
+  .callout {
+    border-left: 3px solid var(--navy);
+    background: #f0f4ff;
+    padding: 14px 18px;
+    margin: 20px 0;
+    border-radius: 0 8px 8px 0;
+    font-size: 9.5pt;
+    color: #2d3748;
+  }
+
+  .callout.warning {
+    border-left-color: #d97706;
+    background: #fffbeb;
+  }
+
+  .callout.danger {
+    border-left-color: #dc2626;
+    background: #fef2f2;
+  }
+
+  .callout-label {
+    font-weight: 700;
+    font-size: 8.5pt;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    margin-bottom: 6px;
+    color: var(--navy);
+  }
+
+  .callout.warning .callout-label { color: #92400e; }
+  .callout.danger  .callout-label { color: #991b1b; }
+
+  /* ── Code blocks ── */
+  pre {
+    background: #1e293b;
+    color: #e2e8f0;
+    padding: 16px 18px;
+    border-radius: 8px;
+    font-family: 'Menlo', 'Fira Code', 'Cascadia Code', monospace;
+    font-size: 8pt;
+    line-height: 1.6;
+    margin: 16px 0 24px;
+    overflow-x: auto;
+    white-space: pre;
+  }
+
+  code {
+    font-family: 'Menlo', 'Fira Code', 'Cascadia Code', monospace;
+    font-size: 8.5pt;
+    background: #eef0f4;
+    color: #002452;
+    padding: 1px 5px;
+    border-radius: 3px;
+  }
+
+  pre code {
+    background: none;
+    color: inherit;
+    padding: 0;
+    font-size: inherit;
+  }
+
+  /* ── Lists ── */
+  ul, ol {
+    margin: 10px 0 16px 22px;
+    font-size: 10pt;
+    color: #2d3748;
+  }
+
+  li { margin-bottom: 6px; line-height: 1.55; }
+  li strong { color: var(--navy); }
+
+  /* ── Weakness list ── */
+  .weakness-item {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-left: 3px solid #d97706;
+    border-radius: 0 10px 10px 0;
+    padding: 14px 18px;
+    margin-bottom: 14px;
+  }
+
+  .weakness-title {
+    font-weight: 600;
+    font-size: 9.5pt;
+    color: var(--navy);
+    margin-bottom: 6px;
+  }
+
+  .weakness-body {
+    font-size: 9.5pt;
+    color: #374151;
+    line-height: 1.55;
+  }
+
+  /* ── Proposal cards ── */
+  .proposal {
+    border: 1.5px solid var(--border);
+    border-radius: 12px;
+    padding: 24px 26px;
+    margin: 20px 0 28px;
+    break-inside: avoid;
+  }
+
+  .proposal-header {
+    display: flex;
+    align-items: flex-start;
+    gap: 14px;
+    margin-bottom: 14px;
+  }
+
+  .proposal-number {
+    flex-shrink: 0;
+    width: 30px;
+    height: 30px;
+    background: var(--navy);
+    color: white;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 11pt;
+    font-weight: 700;
+    font-family: 'Lora', serif;
+    margin-top: 2px;
+  }
+
+  .proposal-title {
+    font-family: 'Lora', Georgia, serif;
+    font-size: 12.5pt;
+    font-weight: 500;
+    color: var(--navy);
+    line-height: 1.3;
+  }
+
+  .proposal-meta {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 14px;
+    flex-wrap: wrap;
+  }
+
+  .badge {
+    font-size: 8pt;
+    font-weight: 600;
+    padding: 3px 10px;
+    border-radius: 20px;
+    border: 1px solid var(--border);
+    color: var(--muted);
+    letter-spacing: 0.03em;
+  }
+
+  .badge.impact-high  { background: #dcfce7; border-color: #86efac; color: #166534; }
+  .badge.impact-med   { background: #fef9c3; border-color: #fde047; color: #854d0e; }
+  .badge.effort-low   { background: #eff6ff; border-color: #93c5fd; color: #1e40af; }
+  .badge.effort-med   { background: #f5f3ff; border-color: #c4b5fd; color: #5b21b6; }
+
+  .proposal-body { font-size: 9.5pt; color: #374151; line-height: 1.6; }
+  .proposal-body p { margin-bottom: 10px; font-size: 9.5pt; }
+
+  /* ── Score bar ── */
+  .score-bar-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 7px;
+    font-size: 9pt;
+  }
+
+  .score-bar-label { width: 160px; color: var(--navy); font-weight: 500; flex-shrink: 0; }
+  .score-bar-track { flex: 1; background: var(--border); border-radius: 4px; height: 7px; overflow: hidden; }
+  .score-bar-fill  { height: 100%; background: var(--navy); border-radius: 4px; }
+  .score-bar-pts   { width: 46px; text-align: right; color: var(--muted); font-size: 8.5pt; flex-shrink: 0; }
+
+  /* ── Page breaks ── */
+  .page-break { page-break-before: always; }
+
+  /* ── Footer ── */
+  .doc-footer {
+    margin-top: 64px;
+    padding-top: 20px;
+    border-top: 1px solid var(--border);
+    font-size: 8.5pt;
+    color: var(--muted);
+    display: flex;
+    justify-content: space-between;
+  }
+
+  /* ── Divider ── */
+  hr {
+    border: none;
+    border-top: 1px solid var(--border);
+    margin: 32px 0;
+  }
+
+  .toc-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    padding: 7px 0;
+    border-bottom: 1px dotted var(--border);
+    font-size: 9.5pt;
+  }
+
+  .toc-item a { color: var(--navy); text-decoration: none; font-weight: 500; }
+  .toc-item .pg { color: var(--muted); font-size: 8.5pt; }
+</style>
+</head>
+<body>
+
+<!-- ════════════════════════════════════════════════════════════════
+     COVER PAGE
+═══════════════════════════════════════════════════════════════════ -->
+<div class="cover">
+  <div>
+    <div class="cover-label">LWYRD · Intern Technical Group</div>
+    <h1>Matching Algorithm<br>Technical Report</h1>
+    <div class="cover-divider"></div>
+    <div class="cover-meta">
+      <div><strong>Document scope</strong> — Current logic, weakness assessment, three improvement proposals</div>
+      <div><strong>Primary file</strong> — <code style="background:rgba(255,255,255,0.12);color:rgba(255,255,255,0.9);padding:2px 6px;border-radius:3px;font-size:8.5pt;">src/lib/matching.ts</code> &nbsp;(618 lines)</div>
+      <div><strong>Date</strong> — June 2026</div>
+      <div><strong>Status</strong> — Proposals only — no code changes implemented</div>
+    </div>
+  </div>
+</div>
+
+
+<!-- ════════════════════════════════════════════════════════════════
+     TABLE OF CONTENTS
+═══════════════════════════════════════════════════════════════════ -->
+<div class="page">
+  <div class="section-tag">Contents</div>
+  <h1 class="section-title">Table of Contents</h1>
+
+  <div class="toc-item"><a href="#s1">1 &nbsp; Current Matching Logic</a><span class="pg">3</span></div>
+  <div class="toc-item"><a href="#s1a">&nbsp;&nbsp;&nbsp; 1.1 &nbsp; Algorithm overview</a><span class="pg">3</span></div>
+  <div class="toc-item"><a href="#s1b">&nbsp;&nbsp;&nbsp; 1.2 &nbsp; Hard filters</a><span class="pg">3</span></div>
+  <div class="toc-item"><a href="#s1c">&nbsp;&nbsp;&nbsp; 1.3 &nbsp; Scoring signals &amp; weights</a><span class="pg">4</span></div>
+  <div class="toc-item"><a href="#s1d">&nbsp;&nbsp;&nbsp; 1.4 &nbsp; Ranking &amp; output</a><span class="pg">5</span></div>
+  <div class="toc-item"><a href="#s1e">&nbsp;&nbsp;&nbsp; 1.5 &nbsp; Signals collected but not scored</a><span class="pg">6</span></div>
+  <div class="toc-item"><a href="#s2">2 &nbsp; Weakness Assessment</a><span class="pg">6</span></div>
+  <div class="toc-item"><a href="#s3">3 &nbsp; Research Summary</a><span class="pg">8</span></div>
+  <div class="toc-item"><a href="#s4">4 &nbsp; Three Improvement Proposals</a><span class="pg">9</span></div>
+  <div class="toc-item"><a href="#s4a">&nbsp;&nbsp;&nbsp; Proposal 1 &nbsp; Score language preference</a><span class="pg">9</span></div>
+  <div class="toc-item"><a href="#s4b">&nbsp;&nbsp;&nbsp; Proposal 2 &nbsp; Fix individual-track industry bias</a><span class="pg">10</span></div>
+  <div class="toc-item"><a href="#s4c">&nbsp;&nbsp;&nbsp; Proposal 3 &nbsp; Score billing model preference</a><span class="pg">11</span></div>
+</div>
+
+
+<!-- ════════════════════════════════════════════════════════════════
+     SECTION 1 — CURRENT MATCHING LOGIC
+═══════════════════════════════════════════════════════════════════ -->
+<div class="page page-break" id="s1">
+  <div class="section-tag">Section 1</div>
+  <h1 class="section-title">Current Matching Logic</h1>
+
+  <h2 id="s1a">1.1 Algorithm Overview</h2>
+
+  <p>
+    The matching engine lives entirely in <code>src/lib/matching.ts</code>. It is a pure in-memory function — no database calls, no ML, no feedback loop. It runs synchronously on every intake submission and on every re-load of a past submission.
+  </p>
+  <p>
+    The public entry point for V2 intakes is <code>matchFirmsV2()</code>, which maps the raw V2 answer keys into the legacy <code>IntakeAnswers</code> shape via <code>mapV2AnswersForMatching()</code>, then calls the core <code>matchFirms()</code> function. The core function executes five steps:
+  </p>
+
+  <ol>
+    <li><strong>Practice area filter (hard)</strong> — drop every firm whose <code>practiceAreas</code> array does not contain the intake's category slug. If zero firms survive, return an empty result immediately.</li>
+    <li><strong>Disqualification filters (hard)</strong> — run three further checks. Firms that fail any check are removed entirely.</li>
+    <li><strong>Scoring</strong> — run seven independent scoring functions against each surviving firm. Sum the points, normalise to 0–100.</li>
+    <li><strong>Ranking</strong> — sort all results descending by score.</li>
+    <li><strong>Best match flag</strong> — mark rank-1 as <code>isBestMatch = true</code> if its score is ≥ 60.</li>
+  </ol>
+
+  <div class="callout">
+    <div class="callout-label">Fallback behaviour</div>
+    If all firms are removed by the hard filters, the engine falls back to the full practice-area pool and scores them anyway, so users always see results. Scores in this case will be low and should be treated as approximate.
+  </div>
+
+  <hr />
+
+  <h2 id="s1b">1.2 Hard Filters</h2>
+  <p>These run before any scoring. A firm that fails is excluded entirely — it will not appear in results at any score.</p>
+
+  <table>
+    <thead>
+      <tr>
+        <th style="width:22%">Filter</th>
+        <th style="width:35%">Condition that disqualifies</th>
+        <th>Notes</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>Location &amp; state law</td>
+        <td>User's state ≠ New York AND the practice area is state-governed AND the firm's HQ is not in the user's state</td>
+        <td>All firms in the database are NY-licensed. State-governed practices (family law, PI, real estate, criminal, bankruptcy, consumer protection, estate planning) require a licence in the user's jurisdiction. Firms whose HQ address matches the user's state are kept.</td>
+      </tr>
+      <tr>
+        <td>Budget extreme mismatch</td>
+        <td><code>user_budget &lt; firm_min × 0.28</code></td>
+        <td>If the user's stated monthly budget is below 28% of the firm's minimum engagement, the firm is excluded. The 28% threshold is arbitrary — not empirically calibrated. Contingency firms (flat-fee with min = 0) are always kept.</td>
+      </tr>
+      <tr>
+        <td>Stage extreme mismatch</td>
+        <td>User is pre-seed/seed and firm has no early-stage coverage; or user is growth/enterprise and firm has no late-stage coverage</td>
+        <td>Startup track only. The filter checks whether any of the firm's <code>companyStages</code> values are early, adjacent-to-early, late, or adjacent-to-late. Individual/personal track is never affected by this filter.</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <hr />
+
+  <h2 id="s1c">1.3 Scoring Signals &amp; Weights</h2>
+
+  <p>Seven independent functions each return <code>{ pts, max, reason? }</code>. The final score is computed as:</p>
+
+  <pre>finalScore = Math.round((Σ pts) / (Σ max) × 100)</pre>
+
+  <p>
+    Because the score is a ratio of actual to possible points, adding or removing a signal automatically adjusts the denominator — no manual re-normalisation is needed.
+  </p>
+
+  <p><strong>Weight distribution (current totals: 100 pts)</strong></p>
+
+  <div class="score-bar-row"><span class="score-bar-label">Budget fit</span><span class="score-bar-track"><span class="score-bar-fill" style="width:24%"></span></span><span class="score-bar-pts">24 pts</span></div>
+  <div class="score-bar-row"><span class="score-bar-label">Quality / LWYRD score</span><span class="score-bar-track"><span class="score-bar-fill" style="width:22%"></span></span><span class="score-bar-pts">22 pts</span></div>
+  <div class="score-bar-row"><span class="score-bar-label">Industry fit</span><span class="score-bar-track"><span class="score-bar-fill" style="width:18%"></span></span><span class="score-bar-pts">18 pts</span></div>
+  <div class="score-bar-row"><span class="score-bar-label">Stage fit</span><span class="score-bar-track"><span class="score-bar-fill" style="width:14%"></span></span><span class="score-bar-pts">14 pts</span></div>
+  <div class="score-bar-row"><span class="score-bar-label">Firm size preference</span><span class="score-bar-track"><span class="score-bar-fill" style="width:12%"></span></span><span class="score-bar-pts">12 pts</span></div>
+  <div class="score-bar-row"><span class="score-bar-label">Location (soft)</span><span class="score-bar-track"><span class="score-bar-fill" style="width:6%"></span></span><span class="score-bar-pts">6 pts</span></div>
+  <div class="score-bar-row"><span class="score-bar-label">Timeline / urgency</span><span class="score-bar-track"><span class="score-bar-fill" style="width:4%"></span></span><span class="score-bar-pts">4 pts</span></div>
+
+  <br/>
+
+  <table>
+    <thead>
+      <tr>
+        <th style="width:18%">Signal</th>
+        <th style="width:8%">Max pts</th>
+        <th>Scoring logic</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>Budget fit</td>
+        <td><span class="pill">24</span></td>
+        <td>
+          Contingency (flat-fee, min = 0): full 24. No budget stated: 65% (15.6 pts neutral). Budget within firm range: full 24. Budget above firm max: 88% (22 pts). Budget below min but above hard-filter threshold (28–100% of min): tiered — ≥80%→75%, ≥55%→50%, else 30%.
+        </td>
+      </tr>
+      <tr>
+        <td>Quality / LWYRD score</td>
+        <td><span class="pill">22</span></td>
+        <td>
+          Uses firm's LWYRD assessment data. If assessment items exist: <code>passed / total</code>. If no items: <code>overallScore / 100</code>. A firm passing all 13 criteria scores 22 pts; passing 12/13 scores ≈20.3 pts. In practice, the spread across firms is very narrow (most pass 12–13), so this signal barely differentiates.
+        </td>
+      </tr>
+      <tr>
+        <td>Industry fit</td>
+        <td><span class="pill">18</span></td>
+        <td>
+          Maps user's industry answer via <code>INDUSTRY_MAP</code> to a slug, then checks if the firm's <code>industries</code> array contains it. Exact match: 18 pts. Near-match adjacencies (fintech↔finance/tech, healthcare↔biotech, etc.): 67–83%. No match: 22%. Neither side has data: 72% neutral. Weight is uniform across all practice areas, including personal law where industry is irrelevant.
+        </td>
+      </tr>
+      <tr>
+        <td>Stage fit</td>
+        <td><span class="pill">14</span></td>
+        <td>
+          Individual track always gets 14 pts (full — stage not applicable). Firm with empty <code>companyStages</code> array: 75%. Exact stage match: 14 pts. Adjacent stage (seed↔series-A, etc.): 60%. Non-adjacent: 25% (but extreme mismatches are already caught by the hard filter).
+        </td>
+      </tr>
+      <tr>
+        <td>Firm size preference</td>
+        <td><span class="pill">12</span></td>
+        <td>
+          Maps <code>seniority-preference</code> answer. No preference: 83%. "Senior partner only" prefers large firms (12 pts large, 9 mid, 6 boutique). "Mix is fine" prefers mid-size (12 pts mid, ≈11 any other). "Cost-efficiency" prefers boutique (12 pts boutique, 8 mid, 4 large).
+        </td>
+      </tr>
+      <tr>
+        <td>Location (soft)</td>
+        <td><span class="pill">6</span></td>
+        <td>
+          Applied after the hard location filter. NY preference or no preference: 6 pts. Immigration (federal): 6 pts. Delaware + federal practice: 5.5 pts. Federal practice, other state: 4 pts. Employment law, non-NY state: 3 pts. Remaining state-specific + no HQ match: 1 pt (should already be excluded by hard filter).
+        </td>
+      </tr>
+      <tr>
+        <td>Timeline / urgency</td>
+        <td><span class="pill">4</span></td>
+        <td>
+          Maps user urgency to a level (0–3) and firm response time to a level (0–3). High urgency (this week) + fast firm (24h): 4 pts; + 48h firm: 2 pts; + 72h firm: 1 pt. Medium urgency (1–2 weeks) + 24h firm: 4 pts; + 72h: 3 pts. Low urgency: all firms get full 4 pts.
+        </td>
+      </tr>
+    </tbody>
+  </table>
+
+  <hr />
+
+  <h2 id="s1d">1.4 Ranking &amp; Output</h2>
+
+  <p>After scoring, results are sorted descending by <code>finalScore</code>. There is no tie-breaking rule — equal-scored firms preserve the order in which the database returned them, which is effectively arbitrary.</p>
+
+  <p>Each result object carries:</p>
+  <ul>
+    <li><strong>score</strong> — integer 0–100</li>
+    <li><strong>reasons</strong> — up to 3 strings from scoring functions that both scored ≥ 80% of their maximum AND had a non-null reason string</li>
+    <li><strong>matchedCriteria</strong> / <strong>missedCriteria</strong> — arrays of criterion names for analytics; written to the <code>matches</code> table on submission</li>
+    <li><strong>isBestMatch</strong> — <code>true</code> for rank 1 only if <code>score ≥ 60</code></li>
+  </ul>
+
+  <div class="callout warning">
+    <div class="callout-label">Incomplete criteria tracking</div>
+    The <code>matchedCriteria</code> / <code>missedCriteria</code> arrays are only populated for five of the seven signals (budget, stage, industry, location, timeline). Quality and firm-size scores are never written to either array. The analytics data stored in the database is therefore systematically incomplete.
+  </div>
+
+  <hr />
+
+  <h2 id="s1e">1.5 Signals Collected But Not Scored</h2>
+
+  <p>The V2 intake collects more signals than the algorithm scores. The following reach <code>mapV2AnswersForMatching()</code> but have no corresponding scoring function:</p>
+
+  <table>
+    <thead>
+      <tr>
+        <th>Intake field</th>
+        <th>Answer keys</th>
+        <th>Status</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>Language preference</td>
+        <td><code>sf8</code>, <code>if6</code>, <code>bf8</code></td>
+        <td>Mapped to <code>result["languages"]</code> correctly. No <code>scoreLanguage()</code> function exists. Value is silently dropped before scoring.</td>
+      </tr>
+      <tr>
+        <td>Billing model preference</td>
+        <td><code>sf2</code>, <code>if2</code>, <code>bf2</code></td>
+        <td>Not even mapped — dropped from the answers object entirely before it reaches <code>matchFirms()</code>.</td>
+      </tr>
+      <tr>
+        <td>Engagement type</td>
+        <td><code>sf4</code>, <code>bf4</code></td>
+        <td>Not mapped, not scored.</td>
+      </tr>
+      <tr>
+        <td>Prior counsel experience</td>
+        <td><code>sf6</code>, <code>if2</code>, <code>bf6</code></td>
+        <td>Collected and written to the track-specific DB table. Not used in matching.</td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+
+<!-- ════════════════════════════════════════════════════════════════
+     SECTION 2 — WEAKNESS ASSESSMENT
+═══════════════════════════════════════════════════════════════════ -->
+<div class="page page-break" id="s2">
+  <div class="section-tag">Section 2</div>
+  <h1 class="section-title">Weakness Assessment</h1>
+
+  <p>The following weaknesses are listed in descending order of severity — from outright bugs to structural design gaps.</p>
+
+  <div class="weakness-item">
+    <div class="weakness-title">W1 — Language preference is collected but has zero effect on matching</div>
+    <div class="weakness-body">
+      Every track asks whether the user needs a non-English-speaking attorney (<code>sf8 / if6 / bf8</code>). The answer is mapped into <code>result["languages"]</code> in <code>mapV2AnswersForMatching()</code>. There is no <code>scoreLanguage()</code> function. The value sits in the answers object and is never read. A user who explicitly requests a Spanish-speaking attorney is ranked identically to a user with no language preference. This is a data collection commitment the algorithm fails to honour.
+    </div>
+  </div>
+
+  <div class="weakness-item">
+    <div class="weakness-title">W2 — Billing model preference is collected but has zero effect on matching</div>
+    <div class="weakness-body">
+      All three tracks ask whether the user prefers hourly billing, a monthly retainer, or a flat-fee arrangement (<code>sf2 / if2 / bf2</code>). Unlike language preference, this answer is not even mapped — it is dropped before <code>matchFirms()</code> receives the answers object. A client who requires a flat-fee arrangement for budget predictability will be matched to hourly-only firms with the same score as to flat-fee firms. The <code>Firm</code> object already has a <code>billingModel</code> field (<code>"hourly" | "retainer" | "flat-fee" | "hybrid"</code>) so the data needed to score this signal exists on both sides.
+    </div>
+  </div>
+
+  <div class="weakness-item">
+    <div class="weakness-title">W3 — Individual-track users are systematically underscored by ~5 points</div>
+    <div class="weakness-body">
+      <code>scoreIndustry()</code> returns 72% of its 18-point maximum (≈13 pts) when the user has not provided an industry answer. Individual/personal-track users never provide an industry answer — family law, estate planning, and personal injury are not industry-specific. This means all individual-track matches are penalised by 18 × 0.28 ≈ <strong>5 points</strong> uniformly, for no reason. Rankings within individual-track results are unaffected (since the penalty is symmetric), but absolute scores are artificially suppressed, making the "best match" threshold of 60 harder to reach, and all displayed scores misleadingly low.
+    </div>
+  </div>
+
+  <div class="weakness-item">
+    <div class="weakness-title">W4 — Quality score barely differentiates between firms</div>
+    <div class="weakness-body">
+      The 22-point quality signal is based on LWYRD assessment pass rate. In the current database, the majority of firms pass 12 or 13 of 13 criteria. The spread in quality points across the firm pool is roughly 2–3 points total. A signal with that little variance provides almost no ranking signal — it lifts all firms nearly uniformly. Quality scores that don't vary can't help the user. This will improve as more firms are onboarded with varying assessment outcomes, but it is a present limitation.
+    </div>
+  </div>
+
+  <div class="weakness-item">
+    <div class="weakness-title">W5 — Industry weight is inappropriate for personal law practice areas</div>
+    <div class="weakness-body">
+      The 18-point industry weight was designed for the startup and small-business tracks, where a firm's sector expertise genuinely matters (a healthcare startup needs healthcare-experienced counsel differently from a retail startup). For personal law — family law, estate planning, personal injury, criminal defence, bankruptcy — the user's industry is entirely irrelevant. The algorithm applies the same 18-point weight regardless of practice area. Since personal law firms and users both lack industry data, this resolves to a uniform 72% neutral (13/18 pts) for all personal law matches, adding noise without signal.
+    </div>
+  </div>
+
+  <div class="weakness-item">
+    <div class="weakness-title">W6 — Budget hard filter threshold is an arbitrary constant</div>
+    <div class="weakness-body">
+      The threshold <code>budget &lt; firm_min × 0.28</code> was written once and never revisited. There is no evidence this is the right cut-off. A user with $4,000/month against a firm with a $15,000 minimum (27%) is disqualified; a user with $4,200 (28%) passes — yet both are equally unable to engage that firm. The threshold should be calibrated against outcomes, but no outcome data currently exists.
+    </div>
+  </div>
+
+  <div class="weakness-item">
+    <div class="weakness-title">W7 — No sub-matter-type differentiation within practice areas</div>
+    <div class="weakness-body">
+      The algorithm treats an entire practice area as a single signal. Within "dispute-resolution" there is commercial litigation, employment arbitration, IP disputes, and consumer claims — and a firm specialising in securities arbitration scores identically to one focused on general commercial litigation. The V2 intake collects sub-matter answers (the <code>sub_question_json</code> fields), but none of those answers reach the matching function.
+    </div>
+  </div>
+
+  <div class="weakness-item">
+    <div class="weakness-title">W8 — No outcome feedback loop</div>
+    <div class="weakness-body">
+      Match scores, ranks, and criteria are written to the <code>matches</code> table on every submission. However, there is no mechanism to record whether a user actually contacted a firm, signed an engagement, or expressed satisfaction. Without this, there is no way to validate whether the weights are correct, no way to learn that a particular signal is over- or under-weighted, and no basis for any future ML approach. The schema supports a future <code>match_events</code> table but no such table exists.
+    </div>
+  </div>
+</div>
+
+
+<!-- ════════════════════════════════════════════════════════════════
+     SECTION 3 — RESEARCH SUMMARY
+═══════════════════════════════════════════════════════════════════ -->
+<div class="page page-break" id="s3">
+  <div class="section-tag">Section 3</div>
+  <h1 class="section-title">Research Summary</h1>
+  <p><em>What would making the algorithm meaningfully stronger actually require, technically?</em></p>
+
+  <h2>Fixing Known Signal Gaps</h2>
+  <p>
+    The three highest-value improvements require no new data and no schema changes. They correct existing bugs: scoring signals that are already collected and mapped but silently ignored (language preference, billing model preference), and a systematic scoring error that penalises entire user segments (individual-track industry bias). These are purely code changes in <code>matching.ts</code>, each under 25 lines. They represent the highest return per line of code of any available improvement.
+  </p>
+
+  <h2>Sub-Matter Type Matching</h2>
+  <p>
+    The most impactful missing signal is sub-matter type — the specific legal question within a practice area. The V2 intake already collects sub-question answers (stored in <code>sub_question_json</code> per submission), but firms have no corresponding structured data about their sub-matter expertise. To use this signal, two things are needed:
+  </p>
+  <ul>
+    <li>A <code>firm_sub_matter_expertise</code> join table (firm_id, practice_area_slug, sub_matter_type) in the database</li>
+    <li>Admin UI to tag each firm's sub-matter capabilities during onboarding</li>
+    <li>A <code>scoreSubMatter()</code> function in matching.ts (~30 lines)</li>
+  </ul>
+  <p>
+    This is the only signal improvement that requires a DB schema change. It is the right next milestone after the three code-only fixes.
+  </p>
+
+  <h2>Outcome Feedback &amp; Weight Calibration</h2>
+  <p>
+    The current weights (24 pts budget, 22 pts quality, etc.) were set by engineering judgement with no empirical validation. To calibrate them against real outcomes, you need a contact event — recorded when a user reaches out to a matched firm. This requires one of:
+  </p>
+  <ul>
+    <li>A tracked outbound link on the firm profile page (log the click with match_id)</li>
+    <li>A CRM integration (Airtable, HubSpot) where confirmed engagements are written back</li>
+    <li>A post-match satisfaction survey with a match_id association</li>
+  </ul>
+  <p>
+    The <code>matches</code> table already has the schema to receive this data — a <code>match_events</code> join table is the only addition needed. Accumulate 6–12 months of contact events, then re-analyse which intake signals actually predict contact.
+  </p>
+
+  <h2>Is Machine Learning Appropriate Now?</h2>
+  <p>
+    No. Training a ranking model requires thousands of labelled positive/negative outcomes (actual engagements), not thousands of submissions. At current data volume, there are likely hundreds of submissions and zero labelled engagement outcomes. A gradient-boosted ranker (LightGBM, XGBoost) or a Learning-to-Rank approach (RankNet, LambdaMART) is the correct eventual architecture for a task of this shape — but these models require ground truth labels to train against.
+  </p>
+
+  <div class="callout">
+    <div class="callout-label">Recommended sequence</div>
+    Fix the three signal bugs (no DB changes, ~60 lines total) → add sub-matter type matching (one DB migration, ~100 lines) → instrument contact events (one <code>match_events</code> table + tracking) → after 6–12 months of contact data, evaluate whether weight tuning or ML is warranted.
+  </div>
+
+  <h2>Thin Firm Pools</h2>
+  <p>
+    For niche practice areas and non-NY geographic preferences, the hard filters can reduce the matching pool to two or three firms. At that point, relative scoring becomes meaningless — the user sees near-identical results regardless of their answers. The correct mitigations are: (a) grow the firm database, particularly outside New York; and (b) consider softening the hard-filter thresholds to widen pools, accepting slightly less precision in exchange for showing more differentiated results.
+  </p>
+</div>
+
+
+<!-- ════════════════════════════════════════════════════════════════
+     SECTION 4 — THREE IMPROVEMENT PROPOSALS
+═══════════════════════════════════════════════════════════════════ -->
+<div class="page page-break" id="s4">
+  <div class="section-tag">Section 4</div>
+  <h1 class="section-title">Three Improvement Proposals</h1>
+
+  <p>Each proposal is a concrete code change, scoped to <code>src/lib/matching.ts</code> only. None require database migrations, schema changes, or UI changes. Each can be implemented and reverted independently.</p>
+
+  <!-- ── PROPOSAL 1 ── -->
+  <div class="proposal" id="s4a">
+    <div class="proposal-header">
+      <div class="proposal-number">1</div>
+      <div class="proposal-title">Score language preference — fix a collected signal that is currently ignored</div>
+    </div>
+    <div class="proposal-meta">
+      <span class="badge impact-high">High impact</span>
+      <span class="badge effort-low">Low effort — ~18 lines</span>
+      <span class="badge">No schema change</span>
+      <span class="badge">Addresses W1</span>
+    </div>
+    <div class="proposal-body">
+      <h3>Problem</h3>
+      <p>
+        <code>mapV2AnswersForMatching()</code> correctly maps language preference answers into <code>result["languages"]</code>, but no scoring function reads this key. A user who explicitly requests a Spanish-speaking attorney receives results ranked identically to a user who has no language preference. The Firm object already has a <code>languages: string[]</code> field populated during onboarding — the firm-side data exists, the user-side data exists, and nothing connects them.
+      </p>
+
+      <h3>Proposed change</h3>
+      <p>Add a <code>scoreLanguage()</code> function with a 5-point weight, and call it from the scoring block in <code>matchFirms()</code>. Because the score is computed as <code>(totalPts / maxPts) × 100</code>, adding a new signal with <code>max = 5</code> automatically adjusts the denominator — no other weights need to change.</p>
+
+<pre>function scoreLanguage(answers: IntakeAnswers, firm: Firm): { pts: number; max: number; reason?: string } {
+  const MAX = 5;
+  const langs = answers["languages"] as string[] | undefined;
+
+  // No preference, or English-only — no disadvantage for any firm
+  if (!langs || langs.length === 0) return { pts: MAX, max: MAX };
+  const nonEnglish = langs.filter((l) => l !== "No — English only is fine");
+  if (nonEnglish.length === 0) return { pts: MAX, max: MAX };
+
+  const firmLangs = firm.languages.map((l) => l.toLowerCase());
+  const hasMatch = nonEnglish.some((lang) =>
+    firmLangs.some((fl) => fl.includes(lang.toLowerCase()))
+  );
+
+  if (hasMatch) {
+    return { pts: MAX, max: MAX, reason: `Attorneys fluent in ${nonEnglish.join(", ")}` };
+  }
+  return { pts: 0, max: MAX };
+}</pre>
+
+      <h3>Expected impact</h3>
+      <p>
+        For users who state English-only or provide no answer (~80–85% of intake volume), scores are unchanged. For users who request a non-English language (~15–20%), multilingual firms will rank higher than English-only firms by approximately 3–5 normalised score points. False equivalences between multilingual and English-only firms are eliminated. The "Attorneys fluent in Spanish" reason will appear on matching MatchCard badges for eligible firms.
+      </p>
+    </div>
+  </div>
+
+  <!-- ── PROPOSAL 2 ── -->
+  <div class="proposal" id="s4b">
+    <div class="proposal-header">
+      <div class="proposal-number">2</div>
+      <div class="proposal-title">Fix individual-track industry bias — a systematic scoring error</div>
+    </div>
+    <div class="proposal-meta">
+      <span class="badge impact-high">High impact</span>
+      <span class="badge effort-low">Low effort — ~5 lines</span>
+      <span class="badge">No schema change</span>
+      <span class="badge">Addresses W3, W5</span>
+    </div>
+    <div class="proposal-body">
+      <h3>Problem</h3>
+      <p>
+        <code>scoreIndustry()</code> returns 72% of 18 pts (≈13 pts) as a "neutral" score when either the user or the firm has no industry data. For individual/personal-track intakes — family law, estate planning, personal injury, criminal defence, bankruptcy — industry vertical is entirely irrelevant to the legal matter. Yet all these users and all these firms score 13/18 instead of 18/18 on industry, introducing a symmetric 5-point deficit across every individual-track result. Rankings within individual-track results are unaffected (the penalty is applied to all equally), but absolute scores are wrong by ~5 points.
+      </p>
+
+      <h3>Proposed change</h3>
+      <p>
+        Pass <code>categorySlug</code> into <code>scoreIndustry()</code> and return full points immediately for practice areas where industry is not a relevant signal. Define a constant set of such practices:
+      </p>
+
+<pre>const INDUSTRY_IRRELEVANT_PRACTICES = new Set([
+  "family-law", "estate-planning", "personal-injury",
+  "criminal-defense", "bankruptcy", "consumer-protection",
+  "immigration", "real-estate",
+]);
+
+function scoreIndustry(
+  categorySlug: string,   // ← new first parameter
+  answers: IntakeAnswers,
+  firm: Firm
+): { pts: number; max: number; reason?: string } {
+  const MAX = 18;
+
+  // Industry vertical is not a meaningful signal for personal law
+  if (INDUSTRY_IRRELEVANT_PRACTICES.has(categorySlug)) {
+    return { pts: MAX, max: MAX };
+  }
+
+  // ... rest of function unchanged
+}</pre>
+
+      <p>The call site in <code>matchFirms()</code> becomes:</p>
+      <pre>const industryResult = scoreIndustry(categorySlug, answers, firm);</pre>
+
+      <h3>Expected impact</h3>
+      <p>
+        All individual-track and personal-law match scores increase by approximately 4–5 points. The "best match" threshold (score ≥ 60) becomes reachable for matches that are genuinely strong but were previously suppressed below 60 due to the neutral-industry penalty. Rankings within practice areas are unaffected since the change is uniform. This is a correctness fix, not a tuning decision.
+      </p>
+    </div>
+  </div>
+
+  <!-- ── PROPOSAL 3 ── -->
+  <div class="proposal" id="s4c">
+    <div class="proposal-header">
+      <div class="proposal-number">3</div>
+      <div class="proposal-title">Score billing model preference — fix a second collected signal that is fully ignored</div>
+    </div>
+    <div class="proposal-meta">
+      <span class="badge impact-med">Medium impact</span>
+      <span class="badge effort-low">Low effort — ~22 lines</span>
+      <span class="badge">No schema change</span>
+      <span class="badge">Addresses W2</span>
+    </div>
+    <div class="proposal-body">
+      <h3>Problem</h3>
+      <p>
+        All three intake tracks ask users whether they prefer hourly billing, a monthly retainer, or a flat-fee arrangement (<code>sf2 / if2 / bf2</code>). Unlike language preference, this answer is not even passed through <code>mapV2AnswersForMatching()</code> — it is discarded before the answers object reaches <code>matchFirms()</code>. The <code>Firm</code> type already has a <code>billingModel</code> field (<code>"hourly" | "retainer" | "flat-fee" | "hybrid"</code>), so matching data exists on both sides and nothing uses it.
+      </p>
+
+      <h3>Proposed change</h3>
+      <p>Step 1 — map the billing answer in <code>mapV2AnswersForMatching()</code>:</p>
+
+<pre>const billingPrefMap: Record&lt;string, string&gt; = {
+  hourly: "Hourly", retainer: "Retainer",
+  flat_fee: "Flat-fee", no_preference: "",
+};
+const billingAnswer = (v2Answers.sf2 ?? v2Answers.if2 ?? v2Answers.bf2) as string | undefined;
+if (billingAnswer) result["billing-preference"] = billingPrefMap[billingAnswer] ?? "";</pre>
+
+      <p>Step 2 — add a <code>scoreBillingModel()</code> function with a 6-point weight:</p>
+
+<pre>function scoreBillingModel(answers: IntakeAnswers, firm: Firm): { pts: number; max: number; reason?: string } {
+  const MAX = 6;
+  const pref = answers["billing-preference"] as string | undefined;
+
+  if (!pref) return { pts: Math.round(MAX * 0.83), max: MAX }; // no preference — slight neutral discount
+
+  if (pref === "Hourly"   && firm.billingModel === "hourly")    return { pts: MAX, max: MAX, reason: "Offers hourly billing" };
+  if (pref === "Retainer" && (firm.billingModel === "retainer" || firm.billingModel === "hybrid"))
+                                                                 return { pts: MAX, max: MAX, reason: "Offers monthly retainer arrangements" };
+  if (pref === "Flat-fee" && firm.billingModel === "flat-fee")  return { pts: MAX, max: MAX, reason: "Offers flat-fee / fixed-cost arrangements" };
+  if (pref === "Hourly"   && firm.billingModel === "hybrid")    return { pts: Math.round(MAX * 0.67), max: MAX };
+
+  return { pts: Math.round(MAX * 0.33), max: MAX }; // preference expressed, firm doesn't match
+}</pre>
+
+      <h3>Expected impact</h3>
+      <p>
+        Users with a strong billing preference — particularly flat-fee seekers, who prioritise cost predictability — will see firms that match their billing model ranked higher. The mismatch penalty (0.33× of 6 pts ≈ 2-pt reduction) is intentionally light, since billing model is a preference rather than a hard requirement. Users who select "no preference" see minimal change (the 83% neutral keeps them near-equivalent to current scores). The billing model reason ("Offers hourly billing") surfaces as a MatchCard badge for matching firms.
+      </p>
+    </div>
+  </div>
+
+  <div class="doc-footer">
+    <span>LWYRD · Matching Algorithm Technical Report · June 2026</span>
+    <span>Proposals only — no code changes implemented</span>
+  </div>
+</div>
+
+</body>
+</html>

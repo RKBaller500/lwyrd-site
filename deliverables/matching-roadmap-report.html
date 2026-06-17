@@ -1,0 +1,722 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<title>LWYRD Matching Algorithm — Improvement Roadmap</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Lora:wght@400;500;600&family=Inter:wght@400;500;600&display=swap');
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --navy: #002452;
+    --bg: #f5f4f0;
+    --surface: #fbfaf6;
+    --border: #ddd7cc;
+    --text: #1a1a2e;
+    --muted: #64748b;
+  }
+
+  html { font-size: 10.5pt; }
+
+  body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    color: var(--text);
+    background: white;
+    line-height: 1.65;
+  }
+
+  /* ── Cover ── */
+  .cover {
+    background: var(--navy);
+    color: white;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    padding: 64px 72px;
+    page-break-after: always;
+  }
+  .cover-label { font-size: 9pt; letter-spacing: 0.18em; text-transform: uppercase; color: rgba(255,255,255,0.5); margin-bottom: 24px; }
+  .cover h1 { font-family: 'Lora', Georgia, serif; font-size: 36pt; font-weight: 500; line-height: 1.2; color: white; margin-bottom: 28px; max-width: 560px; }
+  .cover-sub { font-size: 12pt; color: rgba(255,255,255,0.65); margin-bottom: 32px; max-width: 480px; line-height: 1.6; }
+  .cover-divider { width: 48px; height: 2px; background: rgba(255,255,255,0.25); margin: 32px 0; }
+  .cover-meta { display: flex; flex-direction: column; gap: 6px; color: rgba(255,255,255,0.6); font-size: 9.5pt; }
+  .cover-meta strong { color: rgba(255,255,255,0.9); }
+
+  /* ── Page layout ── */
+  .page { max-width: 680px; margin: 0 auto; padding: 72px 64px; }
+
+  /* ── Typography ── */
+  .section-tag { font-size: 8pt; font-weight: 600; letter-spacing: 0.2em; text-transform: uppercase; color: var(--muted); margin-bottom: 8px; }
+
+  h1.section-title {
+    font-family: 'Lora', Georgia, serif; font-size: 22pt; font-weight: 500;
+    color: var(--navy); line-height: 1.25; margin-bottom: 32px;
+    padding-bottom: 20px; border-bottom: 1.5px solid var(--border);
+  }
+
+  h2 { font-family: 'Lora', Georgia, serif; font-size: 14pt; font-weight: 500; color: var(--navy); margin: 40px 0 14px; line-height: 1.3; }
+  h3 { font-size: 10pt; font-weight: 600; color: var(--navy); margin: 26px 0 10px; }
+
+  p { margin-bottom: 14px; color: #2d3748; font-size: 10pt; }
+
+  ul, ol { margin: 10px 0 16px 22px; font-size: 10pt; color: #2d3748; }
+  li { margin-bottom: 7px; line-height: 1.55; }
+  li strong { color: var(--navy); }
+
+  hr { border: none; border-top: 1px solid var(--border); margin: 32px 0; }
+
+  code {
+    font-family: 'Menlo', 'Fira Code', monospace; font-size: 8.5pt;
+    background: #eef0f4; color: #002452; padding: 1px 5px; border-radius: 3px;
+  }
+
+  pre {
+    background: #1e293b; color: #e2e8f0; padding: 16px 18px; border-radius: 8px;
+    font-family: 'Menlo', 'Fira Code', monospace; font-size: 8pt; line-height: 1.6;
+    margin: 14px 0 22px; overflow-x: auto; white-space: pre;
+  }
+  pre code { background: none; color: inherit; padding: 0; font-size: inherit; }
+
+  /* ── Callouts ── */
+  .callout { border-left: 3px solid var(--navy); background: #f0f4ff; padding: 14px 18px; margin: 20px 0; border-radius: 0 8px 8px 0; font-size: 9.5pt; color: #2d3748; }
+  .callout.warning { border-left-color: #d97706; background: #fffbeb; }
+  .callout.green   { border-left-color: #16a34a; background: #f0fdf4; }
+  .callout-label   { font-weight: 700; font-size: 8.5pt; text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 6px; color: var(--navy); }
+  .callout.warning .callout-label { color: #92400e; }
+  .callout.green   .callout-label { color: #14532d; }
+
+  /* ── Priority cards ── */
+  .priority-card {
+    border: 1.5px solid var(--border); border-radius: 12px; padding: 22px 24px;
+    margin: 18px 0 26px; break-inside: avoid;
+  }
+
+  .priority-header { display: flex; align-items: flex-start; gap: 14px; margin-bottom: 12px; }
+
+  .priority-number {
+    flex-shrink: 0; width: 28px; height: 28px; background: var(--navy); color: white;
+    border-radius: 50%; display: flex; align-items: center; justify-content: center;
+    font-size: 10.5pt; font-weight: 700; font-family: 'Lora', serif; margin-top: 2px;
+  }
+
+  .priority-title { font-family: 'Lora', Georgia, serif; font-size: 12pt; font-weight: 500; color: var(--navy); line-height: 1.3; }
+
+  .priority-meta { display: flex; gap: 8px; margin-bottom: 12px; flex-wrap: wrap; }
+
+  .badge { font-size: 8pt; font-weight: 600; padding: 3px 10px; border-radius: 20px; border: 1px solid var(--border); color: var(--muted); }
+  .badge.p1  { background: #fef2f2; border-color: #fca5a5; color: #991b1b; }
+  .badge.p2  { background: #fff7ed; border-color: #fdba74; color: #9a3412; }
+  .badge.p3  { background: #fefce8; border-color: #fde047; color: #854d0e; }
+  .badge.later { background: #f0f9ff; border-color: #7dd3fc; color: #0c4a6e; }
+  .badge.code-change { background: #f5f3ff; border-color: #c4b5fd; color: #5b21b6; }
+  .badge.schema { background: #fff0f0; border-color: #fca5a5; color: #7f1d1d; }
+  .badge.no-change { background: #f0fdf4; border-color: #86efac; color: #14532d; }
+
+  .priority-body p { font-size: 9.5pt; color: #374151; margin-bottom: 10px; }
+  .priority-body ul { font-size: 9.5pt; color: #374151; }
+  .priority-body li { margin-bottom: 5px; }
+
+  /* ── Table ── */
+  table { width: 100%; border-collapse: collapse; margin: 18px 0 26px; font-size: 9.5pt; }
+  thead th { background: var(--navy); color: white; padding: 9px 14px; text-align: left; font-size: 8.5pt; font-weight: 600; letter-spacing: 0.05em; }
+  thead th:first-child { border-radius: 6px 0 0 0; }
+  thead th:last-child  { border-radius: 0 6px 0 0; }
+  tbody tr:nth-child(even) { background: #f8f7f3; }
+  tbody td { padding: 9px 14px; border-bottom: 1px solid var(--border); vertical-align: top; line-height: 1.5; color: #374151; }
+  tbody td:first-child { font-weight: 500; color: var(--navy); }
+
+  /* ── Phase timeline ── */
+  .phase-row {
+    display: flex; align-items: flex-start; gap: 16px; margin-bottom: 20px; padding-bottom: 20px;
+    border-bottom: 1px solid var(--border);
+  }
+  .phase-row:last-child { border-bottom: none; margin-bottom: 0; padding-bottom: 0; }
+
+  .phase-dot {
+    flex-shrink: 0; width: 10px; height: 10px; border-radius: 50%; background: var(--navy);
+    margin-top: 6px;
+  }
+  .phase-dot.future { background: var(--border); border: 2px solid var(--navy); }
+
+  .phase-label { font-weight: 600; font-size: 9.5pt; color: var(--navy); margin-bottom: 4px; }
+  .phase-items { font-size: 9.5pt; color: #374151; line-height: 1.55; }
+
+  /* ── Page breaks ── */
+  .page-break { page-break-before: always; }
+
+  /* ── Footer ── */
+  .doc-footer { margin-top: 64px; padding-top: 20px; border-top: 1px solid var(--border); font-size: 8.5pt; color: var(--muted); display: flex; justify-content: space-between; }
+
+  /* ── TOC ── */
+  .toc-item { display: flex; justify-content: space-between; align-items: baseline; padding: 7px 0; border-bottom: 1px dotted var(--border); font-size: 9.5pt; }
+  .toc-item a { color: var(--navy); text-decoration: none; font-weight: 500; }
+  .toc-item .pg { color: var(--muted); font-size: 8.5pt; }
+</style>
+</head>
+<body>
+
+<!-- ═══ COVER ═══ -->
+<div class="cover">
+  <div>
+    <div class="cover-label">LWYRD · Matching Algorithm · Supplementary Report</div>
+    <h1>How to Make the<br>Algorithm Meaningfully<br>Stronger</h1>
+    <div class="cover-sub">
+      A forward-looking roadmap covering new signals, data infrastructure,
+      firm-side data gaps, weight calibration, and the path to ML — beyond
+      the three specific bug fixes already implemented.
+    </div>
+    <div class="cover-divider"></div>
+    <div class="cover-meta">
+      <div><strong>Companion to</strong> — Matching Algorithm Technical Report (June 2026)</div>
+      <div><strong>Scope</strong> — Broader improvements: what to add, what to build, what to defer</div>
+      <div><strong>Date</strong> — June 2026</div>
+    </div>
+  </div>
+</div>
+
+
+<!-- ═══ TOC ═══ -->
+<div class="page">
+  <div class="section-tag">Contents</div>
+  <h1 class="section-title">Table of Contents</h1>
+
+  <div class="toc-item"><a href="#framing">The core problem with the algorithm today</a><span class="pg">3</span></div>
+  <div class="toc-item"><a href="#p1">Priority 1 &nbsp;·&nbsp; Build an outcome feedback loop</a><span class="pg">3</span></div>
+  <div class="toc-item"><a href="#p2">Priority 2 &nbsp;·&nbsp; Add sub-matter type matching</a><span class="pg">4</span></div>
+  <div class="toc-item"><a href="#p3">Priority 3 &nbsp;·&nbsp; Score the signals already collected but ignored</a><span class="pg">5</span></div>
+  <div class="toc-item"><a href="#p4">Priority 4 &nbsp;·&nbsp; Deepen firm-side data</a><span class="pg">6</span></div>
+  <div class="toc-item"><a href="#p5">Priority 5 &nbsp;·&nbsp; Calibrate weights against outcomes</a><span class="pg">7</span></div>
+  <div class="toc-item"><a href="#p6">Priority 6 &nbsp;·&nbsp; Fix score reliability at thin pool sizes</a><span class="pg">8</span></div>
+  <div class="toc-item"><a href="#p7">Priority 7 &nbsp;·&nbsp; The ML path — when and how</a><span class="pg">9</span></div>
+  <div class="toc-item"><a href="#avoid">What not to do</a><span class="pg">10</span></div>
+  <div class="toc-item"><a href="#roadmap">Suggested sequencing</a><span class="pg">10</span></div>
+</div>
+
+
+<!-- ═══ FRAMING ═══ -->
+<div class="page page-break" id="framing">
+  <div class="section-tag">Context</div>
+  <h1 class="section-title">The Core Problem With the Algorithm Today</h1>
+
+  <p>
+    The matching algorithm is currently a <strong>calibrated heuristic</strong> — a set of hand-tuned rules that encode what the team believes a good match looks like. That is a reasonable starting point. The problem is that it has no mechanism to learn whether those beliefs are correct, and several of the signals it uses are either wrong (the three bugs now fixed) or too coarse to discriminate meaningfully between firms.
+  </p>
+  <p>
+    The result is a system where two firms with very different capabilities for a specific user can receive nearly identical scores, and where a genuinely strong match might score 71 while a weak one scores 68 — differences that are within the noise margin of the current weights.
+  </p>
+
+  <p>Making the algorithm meaningfully stronger requires work at three levels:</p>
+
+  <ul>
+    <li><strong>Signal depth</strong> — adding signals that the algorithm doesn't yet see, on both the user side and the firm side</li>
+    <li><strong>Outcome feedback</strong> — building the infrastructure to measure whether matches are actually working</li>
+    <li><strong>Weight accuracy</strong> — using outcome data to replace engineering guesses with evidence-based weights</li>
+  </ul>
+
+  <div class="callout">
+    <div class="callout-label">What the three bug fixes accomplished</div>
+    The fixes already implemented correct two cases where collected signals were silently discarded (language, billing model) and one systematic scoring error (individual-track industry bias). They make the algorithm <em>correct</em> about what it currently measures. The items in this report make it measure <em>more</em>, and eventually measure <em>better</em>.
+  </div>
+</div>
+
+
+<!-- ═══ PRIORITY 1 ═══ -->
+<div class="page page-break" id="p1">
+  <div class="section-tag">Priority 1 — Most Critical</div>
+  <h1 class="section-title">Build an Outcome Feedback Loop</h1>
+
+  <p>
+    This is the most important single investment, and it should happen before anything else. Without it, every other improvement is unvalidatable. You can tune weights, add signals, and run experiments — but you cannot know if any of it made the matches better, because "better" has no definition without outcome data.
+  </p>
+
+  <h2>What "outcome" means in this context</h2>
+
+  <p>There are three tiers of outcome signal, in order of ease to collect and strength of signal:</p>
+
+  <table>
+    <thead><tr><th>Event</th><th>How to capture</th><th>Signal strength</th></tr></thead>
+    <tbody>
+      <tr>
+        <td>Contact click</td>
+        <td>Log a <code>match_event</code> when the user clicks "View Profile" or a contact link from a match card</td>
+        <td>Weak — interest, not engagement</td>
+      </tr>
+      <tr>
+        <td>Firm contacted</td>
+        <td>Track outbound contact link clicks (email, phone, website) on the firm profile page with a <code>match_id</code> parameter</td>
+        <td>Medium — strong intent signal</td>
+      </tr>
+      <tr>
+        <td>Engagement confirmed</td>
+        <td>Post-match email after 2 weeks: "Did you hire a firm?" — or CRM integration if firms report back</td>
+        <td>Strong — ground truth</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <h2>What to build</h2>
+
+  <p>One new database table and one server action are all that's needed to start collecting contact events:</p>
+
+<pre>-- New table
+create table match_events (
+  id           uuid primary key default gen_random_uuid(),
+  match_id     uuid references matches(id) on delete cascade,
+  user_id      uuid references auth.users(id),
+  event_type   text not null,   -- 'view_profile' | 'contact_click' | 'engaged'
+  occurred_at  timestamptz default now()
+);
+
+-- RLS: users can insert their own events, admins can read all
+alter table match_events enable row level security;</pre>
+
+  <p>
+    Log a <code>view_profile</code> event whenever a user navigates from a match card to <code>/firms/[id]</code> with a match context. Log a <code>contact_click</code> event from the firm profile page when the user clicks the contact button. The <code>match_id</code> is already stored in sessionStorage (<code>lwyrd_match_scores</code>) and can be passed as a query param or resolved server-side from the user's most recent submission.
+  </p>
+
+  <div class="callout green">
+    <div class="callout-label">Why this comes first</div>
+    Every other priority in this document — weight calibration, ML, A/B testing — requires outcome labels to validate. Start collecting now. Even six months of contact-click data is enough to validate whether the current weight ordering (budget &gt; quality &gt; industry &gt; stage &gt;…) is actually correct.
+  </div>
+</div>
+
+
+<!-- ═══ PRIORITY 2 ═══ -->
+<div class="page page-break" id="p2">
+  <div class="section-tag">Priority 2 — Highest Signal Value</div>
+  <h1 class="section-title">Add Sub-Matter Type Matching</h1>
+
+  <p>
+    The algorithm currently treats an entire practice area as one undifferentiated pool. "Dispute resolution" includes commercial litigation, employment arbitration, securities disputes, IP infringement, and consumer claims. A firm specialising in securities arbitration and a firm specialising in employment class actions are indistinguishable to the algorithm. This is the largest source of ranking noise currently present.
+  </p>
+
+  <h2>What the V2 intake already collects</h2>
+
+  <p>
+    The V2 intake wizard already asks sub-matter questions — stored as <code>sub_question_json</code> per submission. For example, a dispute-resolution intake might capture whether the matter is commercial, employment-related, or IP-related. This data is being stored but never read by the matching function.
+  </p>
+
+  <h2>What's missing on the firm side</h2>
+
+  <p>
+    Firms have no structured sub-matter expertise tags. To close this gap, one new join table is needed:
+  </p>
+
+<pre>create table firm_sub_matter_expertise (
+  id                uuid primary key default gen_random_uuid(),
+  firm_id           uuid references firms(id) on delete cascade,
+  practice_area_slug text not null,
+  sub_matter_slug   text not null,         -- e.g. 'commercial-litigation', 'securities-arbitration'
+  is_primary        boolean default false,  -- true if this is the firm's dominant sub-matter
+  unique (firm_id, practice_area_slug, sub_matter_slug)
+);</pre>
+
+  <p>
+    This table would be populated through the admin panel during firm onboarding. An admin tagging step of ~2 minutes per firm is sufficient.
+  </p>
+
+  <h2>The matching change</h2>
+
+  <p>
+    A new <code>scoreSubMatter()</code> function (~8 pts weight) would read the user's sub-matter answer from the intake and compare it against the firm's <code>firm_sub_matter_expertise</code> rows for the matching practice area. An exact sub-matter match gets full points; a practice-area match with no sub-matter data gets a neutral score; a sub-matter mismatch gets a low score. The function would be called from <code>matchFirms()</code> and automatically handled by the existing <code>(totalPts / maxPts) × 100</code> normalisation.
+  </p>
+
+  <div class="callout warning">
+    <div class="callout-label">This requires a schema migration</div>
+    Unlike the three bug fixes, this improvement requires creating the <code>firm_sub_matter_expertise</code> table, adding admin UI to tag firms, and a seeding pass across all existing firms. Estimated effort: 1–2 days including firm tagging.
+  </div>
+</div>
+
+
+<!-- ═══ PRIORITY 3 ═══ -->
+<div class="page page-break" id="p3">
+  <div class="section-tag">Priority 3</div>
+  <h1 class="section-title">Score the Intake Signals Already Being Collected</h1>
+
+  <p>
+    The three bug fixes already implemented addressed language preference, billing model, and individual-track industry bias. But the intake collects additional signals that still go unused in matching. These are the lowest-effort improvements remaining because the user-side data already exists.
+  </p>
+
+  <div class="priority-card">
+    <div class="priority-header">
+      <div class="priority-number" style="background:#b45309">A</div>
+      <div class="priority-title">Score prior counsel experience</div>
+    </div>
+    <div class="priority-meta">
+      <span class="badge no-change">No schema change</span>
+      <span class="badge code-change">~15 lines in matching.ts</span>
+    </div>
+    <div class="priority-body">
+      <p>
+        All three tracks ask whether the user has previously worked with a law firm (<code>sf6 / if2 / bf6</code>). This is stored per submission but not scored. It is a meaningful proxy for the user's sophistication level:
+      </p>
+      <ul>
+        <li><strong>First-time users</strong> benefit from firm sizes that offer more hand-holding (boutique or mid-size with high partner involvement)</li>
+        <li><strong>Repeat users</strong> may prefer efficiency-focused firms and are more comfortable with associate-heavy work</li>
+      </ul>
+      <p>
+        A <code>scorePriorCounsel()</code> function could use this signal to modulate the firm-size score, or as an independent 4-pt signal.
+      </p>
+    </div>
+  </div>
+
+  <div class="priority-card">
+    <div class="priority-header">
+      <div class="priority-number" style="background:#b45309">B</div>
+      <div class="priority-title">Score matter complexity indicators</div>
+    </div>
+    <div class="priority-meta">
+      <span class="badge no-change">No schema change</span>
+      <span class="badge code-change">~20 lines in matching.ts</span>
+    </div>
+    <div class="priority-body">
+      <p>
+        The intake already collects signals that proxy matter complexity but are currently unused in matching:
+      </p>
+      <ul>
+        <li><strong>Transaction size</strong> (<code>b4m</code>, <code>s5h</code>) — a $50M M&amp;A transaction needs a larger firm than a $1M deal</li>
+        <li><strong>Employee count</strong> (<code>b2</code>, <code>s5j</code>) — employment matters at 200-person companies need different expertise than at 10-person companies</li>
+        <li><strong>Founder/party count</strong> (<code>s4</code>) — multi-founder situations add complexity to equity and governance work</li>
+      </ul>
+      <p>
+        Complexity signals should influence the firm-size score (complex matters benefit from larger firms) rather than being scored independently.
+      </p>
+    </div>
+  </div>
+
+  <div class="priority-card">
+    <div class="priority-header">
+      <div class="priority-number" style="background:#b45309">C</div>
+      <div class="priority-title">Score entity type for corporate/small-business tracks</div>
+    </div>
+    <div class="priority-meta">
+      <span class="badge no-change">No schema change</span>
+      <span class="badge code-change">~12 lines in matching.ts</span>
+    </div>
+    <div class="priority-body">
+      <p>
+        The small-business track collects entity type (<code>b4b</code>): LLC, C-corp, S-corp, partnership, sole proprietorship. Some firms specialise in C-corp / venture-backed structures; others are generalists. If the <code>Firm</code> object carries entity type expertise (currently it doesn't, but it could be added to firm attributes without a migration), this becomes a direct scoring signal. Minimum viable version: weight C-corp formation intake answers toward larger firms that typically handle VC-backed entities.
+      </p>
+    </div>
+  </div>
+</div>
+
+
+<!-- ═══ PRIORITY 4 ═══ -->
+<div class="page page-break" id="p4">
+  <div class="section-tag">Priority 4</div>
+  <h1 class="section-title">Deepen Firm-Side Data</h1>
+
+  <p>
+    The algorithm can only score what it knows about each firm. Several firm attributes are either absent, stored at insufficient granularity, or populated inconsistently across the database. These gaps limit the ceiling on matching accuracy regardless of how many intake signals are added.
+  </p>
+
+  <table>
+    <thead>
+      <tr><th style="width:24%">Gap</th><th style="width:40%">Current state</th><th>What's needed</th></tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>Licensed jurisdictions</td>
+        <td>All firms assumed NY-licensed. Out-of-state capability inferred from HQ location string parsing — fragile.</td>
+        <td><code>firm_licensed_states: text[]</code> column. Firms licensed in CA, TX, DE, etc. should be tagged explicitly. Removes the HQ-parsing heuristic entirely.</td>
+      </tr>
+      <tr>
+        <td>Sub-matter expertise</td>
+        <td>Not represented at all. Firm's practice area is a flat array of slugs.</td>
+        <td><code>firm_sub_matter_expertise</code> join table (see Priority 2). Most important firm-side data gap.</td>
+      </tr>
+      <tr>
+        <td>Language coverage</td>
+        <td><code>languages: string[]</code> field exists on Firm, but population is inconsistent — many firms have an empty array even though their attorneys speak multiple languages.</td>
+        <td>Require language field during firm onboarding. Add to admin form validation. Run a backfill pass on existing firms.</td>
+      </tr>
+      <tr>
+        <td>Billing model granularity</td>
+        <td>Single <code>billingModel</code> value per firm. A firm that offers both hourly and flat-fee is forced to pick one.</td>
+        <td><code>billing_models: text[]</code> — array of offered models. One-line schema migration; the scoring function checks <code>.includes(pref)</code> instead of <code>=== pref</code>.</td>
+      </tr>
+      <tr>
+        <td>Practice area attorney depth</td>
+        <td>Firm size (boutique / mid-size / large) is a rough proxy for capacity. No data on how many attorneys work in a specific practice area.</td>
+        <td>Add <code>attorney_count</code> to <code>firm_practice_areas</code> join table. A "large" firm with 2 IP attorneys is worse for an IP matter than a boutique with 8. This is the highest-value firm attribute to add after sub-matter.</td>
+      </tr>
+      <tr>
+        <td>Assessment data freshness</td>
+        <td>LWYRD assessment scores are static snapshots with no date. A firm assessed 18 months ago may have changed significantly.</td>
+        <td>Add <code>assessed_at</code> timestamp to assessment records. Implement a staleness flag (e.g., &gt;12 months old). Surface staleness in admin panel. Penalise stale assessments slightly in <code>scoreQuality()</code>.</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <div class="callout">
+    <div class="callout-label">Highest impact firm-side improvement</div>
+    Language coverage backfill and billing model array migration are the cheapest wins — each is one admin pass plus a small schema change. Sub-matter tagging and licensed-states are the most impactful but require more onboarding investment.
+  </div>
+</div>
+
+
+<!-- ═══ PRIORITY 5 ═══ -->
+<div class="page page-break" id="p5">
+  <div class="section-tag">Priority 5 — After outcomes are collected</div>
+  <h1 class="section-title">Calibrate Weights Against Outcomes</h1>
+
+  <p>
+    The current weights — 24 pts for budget, 22 for quality, 18 for industry, etc. — were set by engineering judgement. They represent a reasonable hypothesis about what makes a good match, but they are not validated against data. This matters because wrong weights can invert rankings: if budget is actually less predictive of contact than industry fit, the current weighting is actively hurting result quality.
+  </p>
+
+  <h2>What calibration requires</h2>
+
+  <p>
+    You need two things: outcome labels (from Priority 1) and enough volume. As a rough threshold: 300–500 labelled contact events across a reasonably diverse set of intake types. Below that, any weight changes you make are just swapping one guess for another.
+  </p>
+
+  <h2>The simplest valid calibration approach</h2>
+
+  <p>
+    Once you have outcome labels, the simplest statistically valid approach is <strong>logistic regression</strong>. For each submission-firm pair, you have: the intake signal values, the match score components, and a binary outcome (contacted / not contacted). Fit a logistic regression model with the per-signal point totals as features and the contact event as the label. The learned coefficients become your new weights.
+  </p>
+
+<pre># Pseudocode — run once you have ~400 contact events
+from sklearn.linear_model import LogisticRegression
+
+X = [[budget_pts, quality_pts, industry_pts, stage_pts,
+      size_pts, location_pts, timeline_pts, billing_pts, lang_pts]
+     for each match_firm_pair]
+
+y = [1 if contact_event exists else 0
+     for each match_firm_pair]
+
+model = LogisticRegression().fit(X, y)
+new_weights = model.coef_[0]  # replace hardcoded MAX values</pre>
+
+  <p>
+    This approach is interpretable, fast, requires no ML infrastructure, and produces weights that can be read back into the existing scoring functions directly. It is the right first step before any more sophisticated model.
+  </p>
+
+  <div class="callout warning">
+    <div class="callout-label">Do not recalibrate from submission count alone</div>
+    The number of intake submissions is not a useful proxy for readiness to recalibrate. You need contact events — evidence that a user expressed real intent toward a specific firm. Without contact events, recalibration is just guessing with extra steps.
+  </div>
+</div>
+
+
+<!-- ═══ PRIORITY 6 ═══ -->
+<div class="page page-break" id="p6">
+  <div class="section-tag">Priority 6</div>
+  <h1 class="section-title">Fix Score Reliability at Thin Pool Sizes</h1>
+
+  <p>
+    When the matching pool shrinks to 2–4 firms (due to hard filters or niche practice areas), the current algorithm produces scores that look precise but are not. A rank-1 score of 74 and a rank-2 score of 71 suggest meaningful differentiation — but with only 3 firms in the pool, a 3-point difference is well within the noise of the current weight estimates.
+  </p>
+
+  <p>Two complementary fixes address this:</p>
+
+  <h2>1. Surface the pool size in the UI</h2>
+
+  <p>
+    Pass <code>poolSize</code> as a field in the <code>MatchResult</code> type. Display a soft notice on the results page when <code>poolSize &lt; 5</code>: "We found only a few firms matching your criteria — consider adjusting your state, budget, or firm size preference to see more options." This manages user expectations without changing any scoring logic.
+  </p>
+
+  <h2>2. Widen geographic coverage instead of softening filters</h2>
+
+  <p>
+    The root cause of thin pools for non-NY users is that the firm database is almost entirely NY-licensed. The correct fix is to onboard firms licensed in other high-demand states (CA, TX, FL, IL) rather than softening the hard filters. Softening filters would show users firms that genuinely cannot serve them, which is worse than showing fewer results.
+  </p>
+
+  <h2>3. Consider replacing point scores with match tiers for display</h2>
+
+  <p>
+    An alternative to displaying a raw integer score is a tier label: <strong>Strong match</strong> (score ≥ 75), <strong>Good match</strong> (score 55–74), <strong>Possible match</strong> (score &lt; 55). Tiers are less gameable, more honest about precision, and easier for users to interpret. The underlying integer score remains for ranking and analytics — only the display changes.
+  </p>
+
+  <div class="callout">
+    <div class="callout-label">Why this matters for retention</div>
+    A user who sees a "74 match score" next to a firm and then has a poor experience is confused — the number suggested precision. A user who sees "Strong match" with a clear rationale has better calibrated expectations. Tier labels reduce the risk of users blaming LWYRD for a score that looked authoritative but wasn't.
+  </div>
+</div>
+
+
+<!-- ═══ PRIORITY 7 ═══ -->
+<div class="page page-break" id="p7">
+  <div class="section-tag">Priority 7 — Long-term</div>
+  <h1 class="section-title">The Machine Learning Path — When and How</h1>
+
+  <p>
+    Machine learning is the right long-term architecture for a matching system at meaningful scale. It is not the right approach right now, and attempting it prematurely will cost engineering time without improving results. This section describes the correct conditions and method.
+  </p>
+
+  <h2>When ML becomes viable</h2>
+
+  <table>
+    <thead><tr><th>Condition</th><th>Threshold</th><th>Status</th></tr></thead>
+    <tbody>
+      <tr>
+        <td>Labelled outcome events</td>
+        <td>≥ 1,000 contact events across diverse intake types</td>
+        <td>Currently: 0 contact events collected</td>
+      </tr>
+      <tr>
+        <td>Outcome diversity</td>
+        <td>Outcomes distributed across multiple practice areas and firm types — not dominated by one category</td>
+        <td>Depends on outcome collection</td>
+      </tr>
+      <tr>
+        <td>Feature stability</td>
+        <td>Intake signals and firm attributes are stable (not changing every sprint)</td>
+        <td>Partially met — V2 intake is stable</td>
+      </tr>
+      <tr>
+        <td>Retraining infrastructure</td>
+        <td>A process to retrain and deploy updated weights without a code deploy</td>
+        <td>Not built</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <h2>The right model type</h2>
+
+  <p>
+    This is a <strong>Learning-to-Rank</strong> problem: given a user and a set of candidate firms, rank the firms by predicted engagement likelihood. The correct model family is <strong>gradient-boosted trees trained with a ranking loss</strong>.
+  </p>
+
+  <ul>
+    <li><strong>LightGBM with LambdaRank loss</strong> — fast, interpretable feature importances, works well at modest data volumes (&lt;100K training pairs)</li>
+    <li><strong>Features</strong> — all current signal values (per-criterion point totals) plus new signals from Priorities 2–4</li>
+    <li><strong>Label</strong> — binary (1 = contact event occurred within 14 days, 0 = no contact)</li>
+    <li><strong>Evaluation metric</strong> — NDCG@3 (normalized discounted cumulative gain at 3 results, since users rarely look past the third card)</li>
+  </ul>
+
+  <h2>Deployment</h2>
+
+  <p>
+    The cleanest deployment architecture for a Next.js / Supabase stack at current scale is to store trained model weights as a JSON blob in a <code>model_versions</code> table, load them at server startup, and run inference in the existing <code>matchFirms()</code> function by replacing the hardcoded per-signal weights with the loaded coefficients. No separate ML serving infrastructure is needed at this scale.
+  </p>
+
+  <div class="callout warning">
+    <div class="callout-label">Do not attempt ML before 1,000 labelled events</div>
+    With fewer labels, any ML model will overfit to noise in the training data and perform worse than the current weighted heuristic. The logistic regression calibration approach from Priority 5 is the correct intermediate step.
+  </div>
+</div>
+
+
+<!-- ═══ WHAT NOT TO DO ═══ -->
+<div class="page page-break" id="avoid">
+  <div class="section-tag">Guardrails</div>
+  <h1 class="section-title">What Not to Do</h1>
+
+  <table>
+    <thead><tr><th style="width:35%">Tempting path</th><th>Why to avoid it</th></tr></thead>
+    <tbody>
+      <tr>
+        <td>Train an ML model before collecting outcome data</td>
+        <td>No ground-truth labels → model trains on noise → worse rankings than the current heuristic, with more engineering complexity.</td>
+      </tr>
+      <tr>
+        <td>Soften the hard filter thresholds to increase pool sizes</td>
+        <td>This shows users firms that genuinely cannot serve them. Better to show 2 accurate results than 6 inaccurate ones. Grow the firm database instead.</td>
+      </tr>
+      <tr>
+        <td>Add more intake questions to collect signals</td>
+        <td>Intake completion rate drops with each additional question. The intake already collects signals that aren't being scored (prior counsel, entity type, complexity). Score existing signals before adding new questions.</td>
+      </tr>
+      <tr>
+        <td>Recalibrate weights manually without data</td>
+        <td>The current weights are already the result of engineering judgement. A second round of guessing doesn't make them more accurate — it just makes a different guess. Wait for outcome data.</td>
+      </tr>
+      <tr>
+        <td>Display high-precision scores (e.g., "87.4") to users</td>
+        <td>The algorithm's margin of error on individual scores is several points. Decimal precision implies accuracy that doesn't exist and erodes trust when users have a bad experience with a "87.4 match."</td>
+      </tr>
+      <tr>
+        <td>Build A/B testing before having a metric to optimize</td>
+        <td>A/B testing requires a north-star metric (e.g., contact rate per result page view). Without outcome tracking, there is no metric to optimise and A/B tests have no valid interpretation.</td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+
+<!-- ═══ ROADMAP ═══ -->
+<div class="page page-break" id="roadmap">
+  <div class="section-tag">Sequencing</div>
+  <h1 class="section-title">Suggested Sequencing</h1>
+
+  <p>This is a rough ordering based on impact and dependency. Items in each phase are independent within the phase.</p>
+
+  <div class="phase-row">
+    <div class="phase-dot"></div>
+    <div>
+      <div class="phase-label">Done — Bug fixes (matching.ts only, no schema)</div>
+      <div class="phase-items">Score language preference · Fix individual-track industry bias · Score billing model preference</div>
+    </div>
+  </div>
+
+  <div class="phase-row">
+    <div class="phase-dot"></div>
+    <div>
+      <div class="phase-label">Phase 1 — Infrastructure foundation (no ML, minimal schema)</div>
+      <div class="phase-items">
+        Build <code>match_events</code> table and log contact clicks · Backfill <code>languages[]</code> on all firms ·
+        Migrate <code>billingModel</code> to <code>billing_models[]</code> array ·
+        Surface pool size and thin-pool notice in results UI
+      </div>
+    </div>
+  </div>
+
+  <div class="phase-row">
+    <div class="phase-dot"></div>
+    <div>
+      <div class="phase-label">Phase 2 — Signal expansion (schema migrations + admin work)</div>
+      <div class="phase-items">
+        Create <code>firm_sub_matter_expertise</code> table · Tag all existing firms with sub-matter types ·
+        Add <code>firm_licensed_states[]</code> column · Replace HQ-string location heuristic with licensed-state check ·
+        Add <code>attorney_count</code> to <code>firm_practice_areas</code> · Score prior counsel signal · Score matter complexity
+      </div>
+    </div>
+  </div>
+
+  <div class="phase-row">
+    <div class="phase-dot future"></div>
+    <div>
+      <div class="phase-label">Phase 3 — Weight calibration (after ~400 contact events)</div>
+      <div class="phase-items">
+        Export match signal data + contact events · Run logistic regression ·
+        Replace hardcoded MAX weights with calibrated coefficients · Validate on held-out submissions
+      </div>
+    </div>
+  </div>
+
+  <div class="phase-row">
+    <div class="phase-dot future"></div>
+    <div>
+      <div class="phase-label">Phase 4 — Consider match tier display (UX change)</div>
+      <div class="phase-items">
+        Replace integer score display with Strong / Good / Possible tiers ·
+        Keep raw score for admin analytics · User-test both approaches
+      </div>
+    </div>
+  </div>
+
+  <div class="phase-row">
+    <div class="phase-dot future"></div>
+    <div>
+      <div class="phase-label">Phase 5 — ML ranking model (after ~1,000 labelled events)</div>
+      <div class="phase-items">
+        Train LightGBM LambdaRank on contact events ·
+        Store weights in <code>model_versions</code> table ·
+        Load at server startup in <code>matchFirms()</code> · Monitor NDCG@3
+      </div>
+    </div>
+  </div>
+
+  <div class="doc-footer">
+    <span>LWYRD · Matching Algorithm Improvement Roadmap · June 2026</span>
+    <span>Companion to: Matching Algorithm Technical Report</span>
+  </div>
+</div>
+
+</body>
+</html>

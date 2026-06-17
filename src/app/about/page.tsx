@@ -48,9 +48,9 @@ const stats = [
 ];
 
 const team = [
-  { name: "Jai Malhotra", role: "Co-Founder", image: "/Profile Pics/Jai_Profile.jpeg" },
-  { name: "Aidan Berkeley", role: "Co-Founder", image: "/Profile Pics/Aidan_Profile.png" },
-  { name: "Rahul Kochar", role: "Co-Founder", image: "/Profile Pics/Rahul_Profile.png" },
+  { name: "Jai Malhotra", role: "Co-Founder", image: "/Profile Pics/Jai_Profile.jpeg", linkedin: "https://www.linkedin.com/in/jaimalhotra7/" },
+  { name: "Aidan Berkeley", role: "Co-Founder", image: "/Profile Pics/Aidan_Profile.png", linkedin: "https://www.linkedin.com/in/aidan-berkeley/" },
+  { name: "Rahul Kochar", role: "Co-Founder", image: "/Profile Pics/Rahul_Profile.png", linkedin: "https://www.linkedin.com/in/rahulkochar23/" },
 ];
 
 export default function AboutPage() {
@@ -300,12 +300,15 @@ export default function AboutPage() {
                       className="w-full h-full object-cover"
                     />
                   </div>
-                  <p
-                    className="text-[#002452] text-lg mb-1"
+                  <a
+                    href={member.linkedin}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-block text-[#002452] text-lg mb-1 hover:underline"
                     style={{ ...lora, fontWeight: 500 }}
                   >
                     {member.name}
-                  </p>
+                  </a>
                   <p className="text-slate-400 text-xs font-medium tracking-wide uppercase">
                     {member.role}
                   </p>

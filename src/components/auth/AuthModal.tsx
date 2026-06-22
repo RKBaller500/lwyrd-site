@@ -174,23 +174,25 @@ export default function AuthModal() {
             <div>
               <p className="text-xs font-medium text-slate-500 mb-2 ml-1">I am:</p>
               <div className="grid grid-cols-2 gap-2">
-                {([
-                  { value: "client", label: "Looking for legal help" },
-                  { value: "firm", label: "A law firm" },
-                ] as const).map((opt) => (
-                  <button
-                    key={opt.value}
-                    type="button"
-                    onClick={() => setRole(opt.value)}
-                    className={`py-2.5 px-3 rounded-2xl border text-sm transition-all ${
-                      role === opt.value
-                        ? "border-[#002452] bg-[#002452] text-white"
-                        : "border-[#ddd7cc] bg-white text-slate-600 hover:border-[#002452]/40"
-                    }`}
-                  >
-                    {opt.label}
-                  </button>
-                ))}
+                <button
+                  type="button"
+                  onClick={() => setRole("client")}
+                  className={`py-2.5 px-3 rounded-2xl border text-sm transition-all ${
+                    role === "client"
+                      ? "border-[#002452] bg-[#002452] text-white"
+                      : "border-[#ddd7cc] bg-white text-slate-600 hover:border-[#002452]/40"
+                  }`}
+                >
+                  Looking for legal help
+                </button>
+                <div className="relative">
+                  <div className="py-2.5 px-3 rounded-2xl border border-[#ddd7cc] bg-[#f5f4f0] text-sm text-slate-300 cursor-not-allowed select-none">
+                    A law firm
+                  </div>
+                  <span className="absolute -top-2 -right-1 text-[10px] font-medium bg-[#002452] text-white px-2 py-0.5 rounded-full leading-none">
+                    Coming soon
+                  </span>
+                </div>
               </div>
               <p className="text-xs text-slate-400 mt-1.5 ml-1">
                 Role cannot be changed after account creation.

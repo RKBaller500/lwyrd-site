@@ -26,8 +26,8 @@ export const firms: Firm[] = [
   {
     id: "cooley-llp",
     name: "Cooley LLP",
-    tagline: "Big Law depth and resources for New York's most complex corporate matters.",
-    location: "Palo Alto, CA",
+    tagline: "Premier Big Law for venture-backed startups, growth companies, and emerging technology.",
+    location: "New York, NY",
     founded: 1920,
     size: "large",
     practiceAreas: ["corporate-formation", "intellectual-property", "fundraising", "employment-law", "contract-law", "regulatory-compliance", "mergers-acquisitions"],
@@ -48,7 +48,7 @@ export const firms: Firm[] = [
   {
     id: "wilson-sonsini",
     name: "Wilson Sonsini",
-    tagline: "Big Law depth and resources for New York's most complex corporate matters.",
+    tagline: "The Silicon Valley standard for startup and technology company legal work, with full New York presence.",
     location: "Palo Alto, CA",
     founded: 1961,
     size: "large",

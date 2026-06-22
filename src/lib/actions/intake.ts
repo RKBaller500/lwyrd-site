@@ -280,7 +280,7 @@ export async function runMatchingV2(
   try {
     const { data, error } = await supabase
       .from("firms")
-      .select("*, attorneys(*), firm_assessment_items(*)");
+      .select("*, attorneys(*), firm_assessment_items(*), firm_practice_areas(practice_area_slug)");
     if (!error && data && data.length > 0) {
       allFirms = (data as DbFirm[]).map(mapDbFirmToFirm);
     }
@@ -349,7 +349,7 @@ export async function runMatchingForSubmission(submissionId: string): Promise<{
   try {
     const { data, error } = await supabase
       .from("firms")
-      .select("*, attorneys(*), firm_assessment_items(*)");
+      .select("*, attorneys(*), firm_assessment_items(*), firm_practice_areas(practice_area_slug)");
     if (!error && data && data.length > 0) {
       allFirms = (data as DbFirm[]).map(mapDbFirmToFirm);
     }

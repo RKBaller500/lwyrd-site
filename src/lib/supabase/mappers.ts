@@ -10,7 +10,9 @@ export function mapDbFirmToFirm(row: DbFirm): Firm {
     location: row.location,
     founded: row.founded_year ?? row.founded ?? 0,
     size: row.size,
-    practiceAreas: row.practice_areas,
+    practiceAreas: (row.firm_practice_areas && row.firm_practice_areas.length > 0)
+      ? row.firm_practice_areas.map((pa) => pa.practice_area_slug).filter(Boolean)
+      : row.practice_areas,
     industries: row.industries,
     companyStages: row.company_stages,
     budgetRange: { min: row.typical_budget_min ?? row.budget_min, max: row.typical_budget_max ?? row.budget_max },

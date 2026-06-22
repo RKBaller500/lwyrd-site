@@ -315,7 +315,7 @@ function scoreStage(answers: IntakeAnswers, firm: Firm): { pts: number; max: num
 }
 
 function scoreFirmSize(answers: IntakeAnswers, firm: Firm): { pts: number; max: number; reason?: string } {
-  const MAX = 12;
+  const MAX = 18;
   const pref = answers["seniority-preference"] as string | undefined;
 
   if (!pref || pref.includes("No preference")) {
@@ -337,6 +337,14 @@ function scoreFirmSize(answers: IntakeAnswers, firm: Firm): { pts: number; max: 
     if (firm.size === "boutique") return { pts: MAX, max: MAX, reason: "Boutique firm — lean structure, competitive rates" };
     if (firm.size === "mid-size") return { pts: Math.round(MAX * 0.67), max: MAX };
     return { pts: Math.round(MAX * 0.33), max: MAX }; // Large firm = high overhead
+  }
+
+  if (pref.includes("Solo practitioner")) {
+    // No solo practitioners in the database; boutique is the closest available option
+    // but intentionally no positive reason so it doesn't surface as a green checkmark
+    if (firm.size === "boutique") return { pts: Math.round(MAX * 0.6), max: MAX };
+    if (firm.size === "mid-size") return { pts: Math.round(MAX * 0.33), max: MAX };
+    return { pts: Math.round(MAX * 0.1), max: MAX };
   }
 
   return { pts: Math.round(MAX * 0.75), max: MAX };
@@ -539,14 +547,33 @@ export function matchFirms(
 
     if (timelineResult.pts >= timelineResult.max * 0.7) matchedCriteria.push("timeline");
 
+    // Firm size — only track when a preference was explicitly expressed
+    const sizePref = answers["seniority-preference"] as string | undefined;
+    if (sizePref && !sizePref.includes("No preference")) {
+      if (sizeResult.pts >= sizeResult.max * 0.7) matchedCriteria.push("firm-size");
+      else missedCriteria.push("firm-size");
+    }
+
+    // Billing — only track when a preference was expressed (max > 0)
+    if (billingResult.max > 0) {
+      if (billingResult.pts >= billingResult.max * 0.7) matchedCriteria.push("billing");
+      else missedCriteria.push("billing");
+    }
+
+    // Language — only track when a non-English language was requested (max > 0)
+    if (languageResult.max > 0) {
+      if (languageResult.pts >= languageResult.max * 0.7) matchedCriteria.push("language");
+      else missedCriteria.push("language");
+    }
+
     return { firm, score: finalScore, reasons, matchedCriteria, missedCriteria };
   });
 
   // Step 4: Sort descending by score
   scored.sort((a, b) => b.score - a.score);
 
-  // Step 5: Mark best match (top result if score is meaningful)
-  return scored.map((r, i) => ({
+  // Step 5: Cap at 8 results, mark best match
+  return scored.slice(0, 8).map((r, i) => ({
     ...r,
     isBestMatch: i === 0 && r.score >= 60,
   }));
@@ -619,7 +646,7 @@ function mapV2AnswersForMatching(
   const firmTypeMap: Record<string, string> = {
     large: "Senior partner only — I want the most experienced attorney",
     boutique: "Cost-efficiency — I want the most economical option",
-    solo: "Cost-efficiency — I want the most economical option",
+    solo: "Solo practitioner — I want a single dedicated attorney",
     no_preference: "No preference",
   };
   const firmTypeAnswer = (v2Answers.sf1 ?? v2Answers.if1 ?? v2Answers.bf1) as string | undefined;

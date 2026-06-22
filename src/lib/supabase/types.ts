@@ -29,6 +29,7 @@ export interface DbFirm {
   // Joined relations
   attorneys?: DbAttorney[];
   firm_assessment_items?: DbAssessmentItem[];
+  firm_practice_areas?: { practice_area_slug: string }[];
 }
 
 export interface DbAttorney {

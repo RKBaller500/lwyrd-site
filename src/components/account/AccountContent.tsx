@@ -162,7 +162,7 @@ export default function AccountContent({ profile }: AccountContentProps) {
               </div>
               <div>
                 <p className="text-xs text-slate-400 font-medium mb-1">Plan</p>
-                <span className="inline-block text-xs font-medium px-2.5 py-1 rounded-full bg-[#002452]/10 text-[#002452]">
+                <span className="inline-flex items-center text-xs font-medium px-2.5 py-1 rounded-full bg-[#002452]/10 text-[#002452]">
                   {accessLevelLabels[profile.accessLevel]}
                 </span>
               </div>

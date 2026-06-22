@@ -188,17 +188,16 @@ function FirmProfileTab({ firmName }: { firmName: string }) {
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
-          {[
-            { label: "Practice Areas", value: "Managed by LWYRD" },
-            { label: "Firm Size", value: "Managed by LWYRD" },
-            { label: "Billing Model", value: "Managed by LWYRD" },
-            { label: "Response Time", value: "Managed by LWYRD" },
-            { label: "Languages", value: "Managed by LWYRD" },
-            { label: "Location", value: "Managed by LWYRD" },
-          ].map(({ label, value }) => (
+          {["Practice Areas", "Firm Size", "Billing Model", "Response Time", "Languages", "Location"].map((label) => (
             <div key={label}>
               <p className="text-xs text-slate-400 font-medium mb-0.5">{label}</p>
-              <p className="text-sm text-slate-500 italic">{value}</p>
+              <Link
+                href="/contact"
+                className="inline-flex items-center gap-1 text-xs text-[#002452]/50 hover:text-[#002452] transition-colors"
+              >
+                <Edit3 size={10} strokeWidth={1.5} />
+                Request update
+              </Link>
             </div>
           ))}
         </div>

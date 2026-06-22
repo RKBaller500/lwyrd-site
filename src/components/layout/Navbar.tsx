@@ -164,7 +164,7 @@ export default function Navbar() {
                 <Dropdown label={<span className="flex items-center gap-1.5"><Building2 size={14} strokeWidth={1.5} />{user.name}</span>}>
                   <DropdownItem href="/portal" icon={Briefcase}>Firm Profile</DropdownItem>
                   <DropdownItem href="/portal#clients" icon={Users}>Matched Clients</DropdownItem>
-                  <DropdownItem href="/portal#assessment" icon={ClipboardList}>Assessment Status</DropdownItem>
+                  <DropdownItem href="/portal" icon={ClipboardList}>Assessment Status</DropdownItem>
                   <DropdownItem href="/account" icon={Settings}>Settings</DropdownItem>
                   <DropdownDivider />
                   <DropdownItem onClick={() => logout()} danger icon={LogOut}>Sign out</DropdownItem>
@@ -247,7 +247,7 @@ export default function Navbar() {
                     {user.isAdmin && <MobileNavLink href="/admin" onClick={close}>Admin</MobileNavLink>}
                     <MobileNavLink href="/portal" onClick={close}>Firm Profile</MobileNavLink>
                     <MobileNavLink href="/portal#clients" onClick={close}>Matched Clients</MobileNavLink>
-                    <MobileNavLink href="/portal#assessment" onClick={close}>Assessment Status</MobileNavLink>
+                    <MobileNavLink href="/portal" onClick={close}>Assessment Status</MobileNavLink>
                     <MobileNavLink href="/account" onClick={close}>Settings</MobileNavLink>
                     <button
                       onClick={() => { close(); logout(); }}

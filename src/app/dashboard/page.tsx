@@ -179,9 +179,11 @@ function OverviewTab({
                       {intake.category_label ?? intake.category_slug}
                     </p>
                     <p className="text-slate-400 text-xs mt-0.5">
-                      {intake.track ? `${intake.track.replace(/_/g, " ")} · ` : ""}
+                      {intake.track ? (
+                        <span className="capitalize">{intake.track.replace(/_/g, " ")} · </span>
+                      ) : null}
                       {new Date(intake.created_at).toLocaleDateString("en-US", {
-                        month: "short",
+                        month: "long",
                         day: "numeric",
                         year: "numeric",
                       })}
@@ -525,7 +527,7 @@ function EngagementsTab() {
               onClick={() => router.push("/intake/start")}
               className="mt-2 inline-flex items-center gap-2 text-sm text-[#002452] font-medium hover:opacity-70 transition-opacity"
             >
-              Get matched with a firm <ArrowRight size={13} />
+              Start a new intake <ArrowRight size={13} />
             </button>
           }
         />

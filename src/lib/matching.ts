@@ -228,12 +228,12 @@ function scoreQuality(firm: Firm): { pts: number; max: number; reason?: string }
   if (firm.assessment.length > 0) {
     const passed = firm.assessment.filter((a) => a.passed).length;
     qualityRatio = passed / firm.assessment.length;
-    if (qualityRatio === 1) reason = "Meets every LWYRD vetting criterion";
-    else if (passed >= firm.assessment.length - 1) reason = "Meets nearly all LWYRD vetting criteria";
+    if (qualityRatio === 1) reason = "LWYRD quality score: passes all vetting criteria";
+    else if (passed >= firm.assessment.length - 1) reason = "LWYRD quality score: passes nearly all vetting criteria";
   } else {
     qualityRatio = firm.overallScore / 100;
-    if (firm.overallScore >= 90) reason = `LWYRD score ${firm.overallScore} — top-rated firm`;
-    else if (firm.overallScore >= 75) reason = `LWYRD score ${firm.overallScore}`;
+    if (firm.overallScore >= 90) reason = `LWYRD quality score: ${firm.overallScore}/100 — top-rated firm`;
+    else if (firm.overallScore >= 75) reason = `LWYRD quality score: ${firm.overallScore}/100`;
   }
 
   // Square the ratio to amplify separation between top-rated and average firms

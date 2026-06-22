@@ -2,13 +2,20 @@
 
 import Link from "next/link";
 import { Firm, MatchResult } from "@/types";
-import { Award, MapPin, Building2, ArrowRight, CheckCircle2, XCircle } from "lucide-react";
+import { Award, MapPin, Building2, CheckCircle2, XCircle, ArrowRight } from "lucide-react";
 import SaveFirmButton from "@/components/firms/SaveFirmButton";
 
 const sizeLabels: Record<string, string> = {
   boutique: "Boutique",
   "mid-size": "Mid-size",
   large: "Large",
+};
+
+const billingModelLabels: Record<string, string> = {
+  hourly: "Hourly",
+  "flat-fee": "Flat-fee",
+  retainer: "Retainer",
+  hybrid: "Hybrid",
 };
 
 const missedLabels: Record<string, string> = {
@@ -18,13 +25,6 @@ const missedLabels: Record<string, string> = {
   location: "Location — may not be licensed in your state",
   timeline: "Timeline — may not match your urgency",
   language: "Language — may not have attorneys who speak your language",
-};
-
-const billingModelLabels: Record<string, string> = {
-  hourly: "Hourly",
-  "flat-fee": "Flat-fee",
-  retainer: "Retainer",
-  hybrid: "Hybrid",
 };
 
 function formatK(n: number): string {
@@ -52,46 +52,42 @@ function getMissedLabel(criterion: string, firm: Firm): string {
 }
 
 function ScoreRing({ score }: { score: number }) {
-  const size = 68;
-  const radius = 27;
-  const stroke = 4.5;
+  const size = 124;
+  const radius = 49;
+  const stroke = 6.5;
   const circumference = 2 * Math.PI * radius;
   const filled = (score / 100) * circumference;
 
   return (
-    <div className="relative" style={{ width: size, height: size }}>
-      <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`} style={{ transform: "rotate(-90deg)" }}>
-        <circle
-          cx={size / 2} cy={size / 2} r={radius}
-          fill="none" stroke="#ddd7cc" strokeWidth={stroke}
-        />
-        <circle
-          cx={size / 2} cy={size / 2} r={radius}
-          fill="none" stroke="#002452" strokeWidth={stroke}
-          strokeDasharray={`${filled} ${circumference}`}
-          strokeLinecap="round"
-          style={{ transition: "stroke-dasharray 0.7s ease 0.3s" }}
-        />
-      </svg>
-      <div className="absolute inset-0 flex flex-col items-center justify-center">
-        <span
-          className="text-[#002452] leading-none"
-          style={{ fontFamily: '"Lora", Georgia, serif', fontWeight: 500, fontSize: "1.1rem" }}
-        >
-          {score}
-        </span>
-        <span className="text-[10px] text-slate-400 font-medium tracking-wide mt-0.5">%</span>
+    <div className="flex flex-col items-center gap-2.5 shrink-0">
+      <div className="relative" style={{ width: size, height: size }}>
+        <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`} style={{ transform: "rotate(-90deg)" }}>
+          <circle
+            cx={size / 2} cy={size / 2} r={radius}
+            fill="none" stroke="#ddd7cc" strokeWidth={stroke} strokeOpacity={0.7}
+          />
+          <circle
+            cx={size / 2} cy={size / 2} r={radius}
+            fill="none" stroke="#002452" strokeWidth={stroke}
+            strokeDasharray={`${filled} ${circumference}`}
+            strokeLinecap="round"
+            style={{ transition: "stroke-dasharray 0.85s cubic-bezier(0.25,0.46,0.45,0.94) 0.3s" }}
+          />
+        </svg>
+        <div className="absolute inset-0 flex items-center justify-center">
+          <div className="flex items-baseline gap-0.5">
+            <span
+              className="text-[#002452] leading-none tabular-nums"
+              style={{ fontFamily: '"Lora", Georgia, serif', fontWeight: 500, fontSize: "2rem" }}
+            >
+              {score}
+            </span>
+            <span className="text-sm text-slate-400 font-medium">%</span>
+          </div>
+        </div>
       </div>
+      <span className="text-[11px] text-slate-400 font-semibold tracking-widest uppercase">Match Score</span>
     </div>
-  );
-}
-
-function MetaChip({ icon: Icon, label }: { icon?: React.ElementType; label: string }) {
-  return (
-    <span className="inline-flex items-center gap-1.5 bg-[#002452]/[0.05] text-[#002452]/70 text-xs px-3 py-1.5 rounded-full font-medium">
-      {Icon && <Icon size={11} strokeWidth={1.75} />}
-      {label}
-    </span>
   );
 }
 
@@ -105,86 +101,120 @@ export default function MatchCard({ result, rank, initialSaved = false }: MatchC
   const { firm, score, reasons, isBestMatch } = result;
   const roundedScore = Math.round(score);
   const hasCriteria = reasons.length > 0 || result.missedCriteria.length > 0;
+  const hasBoth = reasons.length > 0 && result.missedCriteria.length > 0;
 
   return (
     <div
-      className={`rounded-3xl overflow-hidden border transition-shadow hover:shadow-md ${
+      className={`rounded-3xl bg-[#fbfaf6] overflow-hidden transition-all hover:shadow-lg ${
         isBestMatch
-          ? "bg-[#fbfaf6] border-[#002452]/25 shadow-sm"
-          : "bg-[#fbfaf6] border-[#ddd7cc] shadow-sm"
+          ? "border-2 border-[#c9a227] shadow-[0_4px_28px_rgba(201,162,39,0.18)]"
+          : "border-2 border-[#002452]/40 shadow-[0_4px_24px_rgba(0,36,82,0.10)]"
       }`}
     >
-      {/* Best match accent bar */}
-      {isBestMatch && (
-        <div className="h-[3px] bg-[#002452]" />
-      )}
+      {isBestMatch && <div className="h-[3px] bg-[#c9a227]" />}
 
-      <div className="p-7">
-        {/* Header row */}
-        <div className="flex items-start justify-between gap-6 mb-5">
+      <div className="p-8 sm:p-10">
+        {/* Header */}
+        <div className="flex items-start gap-8 mb-6">
           <div className="flex-1 min-w-0">
-            <div className="flex items-center gap-2 mb-2">
+            <div className="flex flex-wrap items-center gap-2 mb-3">
               {isBestMatch && (
-                <span className="inline-flex items-center gap-1.5 bg-[#002452] text-white text-[10px] px-2.5 py-1 rounded-full font-semibold tracking-widest uppercase">
+                <span className="inline-flex items-center gap-1.5 bg-[#002452] text-white text-[10px] font-semibold tracking-widest uppercase px-2.5 py-1 rounded-full">
                   <Award size={9} strokeWidth={2.5} />
                   Best Match
                 </span>
               )}
               {!isBestMatch && rank > 0 && (
-                <span className="text-[11px] text-slate-400 font-medium tracking-wide">#{rank}</span>
+                <span className="text-xs text-slate-400 font-medium">#{rank}</span>
               )}
             </div>
             <h3
-              className="text-[#002452] text-[1.4rem] leading-tight"
+              className="text-[#002452] text-3xl leading-snug mb-2"
               style={{ fontFamily: '"Lora", Georgia, serif', fontWeight: 500 }}
             >
               {firm.name}
             </h3>
-            <p className="text-slate-500 text-sm mt-1.5 leading-snug">{firm.tagline}</p>
+            <p className="text-slate-500 text-base leading-relaxed">{firm.tagline}</p>
           </div>
 
-          {/* Score ring */}
-          <div className="shrink-0 flex flex-col items-center gap-1 pt-1">
-            <ScoreRing score={roundedScore} />
-            <span className="text-[10px] text-slate-400 font-medium tracking-wide">Match</span>
-          </div>
+          <ScoreRing score={roundedScore} />
         </div>
 
-        {/* Meta chips */}
-        <div className="flex flex-wrap gap-2 mb-5">
-          <MetaChip icon={MapPin} label={firm.location} />
-          <MetaChip icon={Building2} label={`${sizeLabels[firm.size]} firm`} />
-          <MetaChip label={`Est. ${firm.founded}`} />
-          <MetaChip label={`${billingModelLabels[firm.billingModel] ?? firm.billingModel} billing`} />
+        {/* Meta row */}
+        <div className="flex flex-wrap items-center gap-x-4 gap-y-1.5 text-sm text-slate-400 pb-6 border-b border-[#ddd7cc]">
+          <span className="flex items-center gap-1.5">
+            <MapPin size={13} strokeWidth={1.75} className="shrink-0" />
+            {firm.location}
+          </span>
+          <span className="text-[#ddd7cc]">·</span>
+          <span className="flex items-center gap-1.5">
+            <Building2 size={13} strokeWidth={1.75} className="shrink-0" />
+            {sizeLabels[firm.size] ?? firm.size} firm
+          </span>
+          {firm.founded && (
+            <>
+              <span className="text-[#ddd7cc]">·</span>
+              <span>Est. {firm.founded}</span>
+            </>
+          )}
+          {firm.billingModel && (
+            <>
+              <span className="text-[#ddd7cc]">·</span>
+              <span>{billingModelLabels[firm.billingModel] ?? firm.billingModel} billing</span>
+            </>
+          )}
         </div>
 
-        {/* Criteria breakdown */}
+        {/* Criteria */}
         {hasCriteria && (
-          <div className="mb-5 bg-[#002452]/[0.025] rounded-2xl px-4 py-3.5 space-y-2">
-            {reasons.map((r, i) => (
-              <div key={i} className="flex items-start gap-2.5 text-sm text-slate-600">
-                <CheckCircle2 size={14} className="text-emerald-500 mt-0.5 shrink-0" />
-                {r}
-              </div>
-            ))}
-            {result.missedCriteria.map((c) => (
-              <div key={c} className="flex items-start gap-2.5 text-sm text-slate-400">
-                <XCircle size={14} className="text-rose-400/70 mt-0.5 shrink-0" />
-                {getMissedLabel(c, firm)}
-              </div>
-            ))}
+          <div className={`py-6 border-b border-[#ddd7cc] ${hasBoth ? "grid sm:grid-cols-2 gap-x-8 gap-y-2.5" : "space-y-2.5"}`}>
+            {hasBoth ? (
+              <>
+                <div className="space-y-2.5">
+                  {reasons.map((r, i) => (
+                    <div key={i} className="flex items-start gap-3 text-sm text-slate-600">
+                      <CheckCircle2 size={16} className="text-emerald-500 mt-0.5 shrink-0" />
+                      {r}
+                    </div>
+                  ))}
+                </div>
+                <div className="space-y-2.5">
+                  {result.missedCriteria.map((c) => (
+                    <div key={c} className="flex items-start gap-3 text-sm text-slate-400">
+                      <XCircle size={16} className="text-rose-400/80 mt-0.5 shrink-0" />
+                      {getMissedLabel(c, firm)}
+                    </div>
+                  ))}
+                </div>
+              </>
+            ) : (
+              <>
+                {reasons.map((r, i) => (
+                  <div key={i} className="flex items-start gap-3 text-sm text-slate-600">
+                    <CheckCircle2 size={16} className="text-emerald-500 mt-0.5 shrink-0" />
+                    {r}
+                  </div>
+                ))}
+                {result.missedCriteria.map((c) => (
+                  <div key={c} className="flex items-start gap-3 text-sm text-slate-400">
+                    <XCircle size={16} className="text-rose-400/80 mt-0.5 shrink-0" />
+                    {getMissedLabel(c, firm)}
+                  </div>
+                ))}
+              </>
+            )}
           </div>
         )}
 
         {/* CTA */}
-        <div className="flex items-center justify-end gap-2.5">
+        <div className="flex items-center justify-between gap-4 pt-6">
           <SaveFirmButton firmId={firm.id} initialSaved={initialSaved} compact />
           <Link
             href={`/firms/${firm.id}`}
-            className="inline-flex items-center gap-2 px-5 py-2.5 rounded-2xl bg-[#002452] text-white text-sm font-medium hover:opacity-90 transition-opacity focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#002452] focus-visible:ring-offset-2"
+            className="inline-flex items-center gap-2 px-6 py-3 rounded-2xl bg-[#002452] text-white text-sm font-medium hover:opacity-90 transition-opacity focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#002452] focus-visible:ring-offset-2"
           >
-            View Profile
-            <ArrowRight size={13} strokeWidth={2} />
+            View Full Profile
+            <ArrowRight size={14} strokeWidth={2} />
           </Link>
         </div>
       </div>

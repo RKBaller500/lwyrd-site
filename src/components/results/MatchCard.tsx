@@ -19,12 +19,12 @@ const billingModelLabels: Record<string, string> = {
 };
 
 const missedLabels: Record<string, string> = {
-  "company-stage": "Stage — doesn't specialize in your company stage",
-  budget: "Budget — outside your budget range",
-  industry: "Industry — doesn't serve your vertical",
-  location: "Location — may not be licensed in your state",
-  timeline: "Timeline — may not match your urgency",
-  language: "Language — may not have attorneys who speak your language",
+  "company-stage": "Stage: doesn't specialize in your company stage",
+  budget: "Budget: outside your budget range",
+  industry: "Industry: doesn't serve your vertical",
+  location: "Location: may not be licensed in your state",
+  timeline: "Timeline: may not match your urgency",
+  language: "Language: may not have attorneys who speak your language",
 };
 
 function formatK(n: number): string {
@@ -36,17 +36,17 @@ function formatK(n: number): string {
 function getMissedLabel(criterion: string, firm: Firm): string {
   if (criterion === "budget") {
     const { min, max } = firm.budgetRange;
-    if (min > 0 && max > 0) return `Budget — firm's typical range is ${formatK(min)}–${formatK(max)}`;
-    if (min > 0) return `Budget — firm typically starts at ${formatK(min)}`;
-    return "Budget — outside your budget range";
+    if (min > 0 && max > 0) return `Budget: firm's typical range is ${formatK(min)}–${formatK(max)}`;
+    if (min > 0) return `Budget: firm typically starts at ${formatK(min)}`;
+    return "Budget: outside your budget range";
   }
   if (criterion === "billing") {
     const model = billingModelLabels[firm.billingModel] ?? firm.billingModel;
-    return `Billing — this firm uses ${model.toLowerCase()} billing`;
+    return `Billing: this firm uses ${model.toLowerCase()} billing`;
   }
   if (criterion === "firm-size") {
     const size = sizeLabels[firm.size]?.toLowerCase() ?? firm.size;
-    return `Firm size — ${size} firm`;
+    return `Firm size: ${size} firm`;
   }
   return missedLabels[criterion] ?? criterion;
 }

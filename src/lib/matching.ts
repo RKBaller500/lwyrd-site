@@ -126,7 +126,7 @@ function isHardDisqualified(
   // If the user's stated budget is less than 28% of the firm's minimum retainer,
   // they simply cannot engage this firm.
   const firmMin = firm.budgetRange.min;
-  const isContingency = firm.billingModel === "flat-fee" && firmMin === 0;
+  const isContingency = firmMin === 0;
   if (!isContingency && budget > 0 && firmMin > 0) {
     if (budget < firmMin * 0.28) {
       return {
@@ -193,9 +193,9 @@ function scoreBudget(answers: IntakeAnswers, firm: Firm): { pts: number; max: nu
   const budget = (answers["budget-monthly"] as number) ?? 0;
   const { min, max } = firm.budgetRange;
 
-  // Contingency — client pays nothing upfront
-  if (firm.billingModel === "flat-fee" && min === 0 && max === 0) {
-    return { pts: MAX, max: MAX, reason: "Works on contingency — no upfront cost" };
+  // No minimum — contingency or open-ended pricing; budget doesn't penalise
+  if (min === 0) {
+    return { pts: MAX, max: MAX, reason: "Works on contingency, no upfront cost" };
   }
 
   if (budget === 0) {
@@ -228,12 +228,9 @@ function scoreQuality(firm: Firm): { pts: number; max: number; reason?: string }
   if (firm.assessment.length > 0) {
     const passed = firm.assessment.filter((a) => a.passed).length;
     qualityRatio = passed / firm.assessment.length;
-    if (qualityRatio === 1) reason = "LWYRD quality score: passes all vetting criteria";
-    else if (passed >= firm.assessment.length - 1) reason = "LWYRD quality score: passes nearly all vetting criteria";
+    // no reason — quality score affects ranking silently
   } else {
     qualityRatio = firm.overallScore / 100;
-    if (firm.overallScore >= 90) reason = `LWYRD quality score: ${firm.overallScore}/100 — top-rated firm`;
-    else if (firm.overallScore >= 75) reason = `LWYRD quality score: ${firm.overallScore}/100`;
   }
 
   // Square the ratio to amplify separation between top-rated and average firms
@@ -329,12 +326,12 @@ function scoreFirmSize(answers: IntakeAnswers, firm: Firm): { pts: number; max: 
   }
 
   if (pref.includes("mix is fine") || pref.includes("Mix is fine")) {
-    if (firm.size === "mid-size") return { pts: MAX, max: MAX, reason: "Mid-size firm — strong senior/associate mix" };
+    if (firm.size === "mid-size") return { pts: MAX, max: MAX, reason: "Mid-size firm, strong senior/associate mix" };
     return { pts: Math.round(MAX * 0.88), max: MAX }; // Any size works
   }
 
   if (pref.includes("Cost-efficiency")) {
-    if (firm.size === "boutique") return { pts: MAX, max: MAX, reason: "Boutique firm — lean structure, competitive rates" };
+    if (firm.size === "boutique") return { pts: MAX, max: MAX, reason: "Boutique firm, lean structure, competitive rates" };
     if (firm.size === "mid-size") return { pts: Math.round(MAX * 0.67), max: MAX };
     return { pts: Math.round(MAX * 0.33), max: MAX }; // Large firm = high overhead
   }
@@ -365,7 +362,7 @@ function scoreLocation(
 
   // Immigration is federal — can serve any state
   if (categorySlug === "immigration") {
-    return { pts: MAX, max: MAX, reason: "Immigration law is federal — can represent you in any state" };
+    return { pts: MAX, max: MAX, reason: "Immigration law is federal, can represent you in any state" };
   }
 
   // Delaware: corporate/startup firms regularly handle DE matters

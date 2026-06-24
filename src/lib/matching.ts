@@ -331,8 +331,9 @@ function scoreFirmSize(answers: IntakeAnswers, firm: Firm): { pts: number; max: 
   }
 
   if (pref.includes("Cost-efficiency")) {
+    // Intake has no mid-size option — mid-size is treated as equivalent to boutique
     if (firm.size === "boutique") return { pts: MAX, max: MAX, reason: "Boutique firm, lean structure, competitive rates" };
-    if (firm.size === "mid-size") return { pts: Math.round(MAX * 0.67), max: MAX };
+    if (firm.size === "mid-size") return { pts: MAX, max: MAX, reason: "Boutique firm, lean structure, competitive rates" };
     return { pts: Math.round(MAX * 0.33), max: MAX }; // Large firm = high overhead
   }
 

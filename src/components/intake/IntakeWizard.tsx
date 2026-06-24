@@ -228,19 +228,28 @@ function QuestionCard({
         <div className="space-y-2">
           {question.options.map((opt) => {
             const isSelected = opt.value === "other" ? isOtherSelected : selected === opt.value;
+            const isDisabled = opt.disabled === true;
             return (
               <div key={opt.value}>
                 <button
                   type="button"
-                  onClick={() => handleSelect(opt.value)}
+                  onClick={() => !isDisabled && handleSelect(opt.value)}
+                  disabled={isDisabled}
                   className={`w-full text-left px-5 py-3.5 rounded-2xl border text-sm transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#002452] focus-visible:ring-offset-2 ${
-                    isSelected
+                    isDisabled
+                      ? "bg-[#f5f4f0] border-[#ddd7cc] text-slate-300 cursor-not-allowed"
+                      : isSelected
                       ? "bg-[#002452] text-white border-[#002452]"
                       : "bg-white border-[#ddd7cc] text-slate-700 hover:border-[#002452]"
                   }`}
                 >
                   <span className="font-medium">{opt.label}</span>
-                  {opt.note && (
+                  {isDisabled && (
+                    <span className="block text-xs mt-0.5 text-slate-300">
+                      Not typically available for this practice area
+                    </span>
+                  )}
+                  {!isDisabled && opt.note && (
                     <span
                       className={`block text-xs mt-0.5 ${
                         isSelected ? "text-white/70" : "text-slate-400"

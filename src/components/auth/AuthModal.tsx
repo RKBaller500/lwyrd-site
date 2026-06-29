@@ -55,14 +55,14 @@ export default function AuthModal() {
   };
 
   const inputClass =
-    "w-full px-4 py-3 rounded-2xl border border-[#ddd7cc] bg-white text-slate-700 placeholder-slate-400 focus:outline-none focus:border-[#002452] transition-colors text-sm";
+    "w-full px-4 py-3 rounded-2xl border border-[#1F2A3D] bg-[#141C2E] text-[#E6EAF2] placeholder-[#8A93A6] focus:outline-none focus:border-[#3B82F6] transition-colors text-sm";
 
   if (activeTab === "forgot") {
     return (
       <Modal isOpen={isModalOpen} onClose={closeModal}>
         <button
           onClick={() => { setActiveTab("login"); setError(""); setForgotSent(false); }}
-          className="inline-flex items-center gap-1.5 text-slate-400 text-xs mb-6 hover:text-slate-600 transition-colors"
+          className="inline-flex items-center gap-1.5 text-[#8A93A6] text-xs mb-6 hover:text-[#C8CDD8] transition-colors"
         >
           <ArrowLeft size={13} />
           Back to sign in
@@ -70,14 +70,14 @@ export default function AuthModal() {
 
         <div className="mb-6">
           <h2
-            className="text-2xl text-[#002452] mb-1"
+            className="text-2xl text-[#E6EAF2] mb-1"
             style={{ fontFamily: '"Lora", Georgia, serif', fontWeight: 500 }}
           >
             Reset your password
           </h2>
-          <p className="text-slate-500 text-sm">
+          <p className="text-[#8A93A6] text-sm">
             {forgotSent
-              ? "Check your inbox — we've sent a reset link."
+              ? "Check your inbox, we've sent a reset link."
               : "Enter your email and we'll send you a reset link."}
           </p>
         </div>
@@ -109,11 +109,11 @@ export default function AuthModal() {
             </button>
           </form>
         ) : (
-          <p className="text-slate-500 text-sm">
+          <p className="text-[#8A93A6] text-sm">
             Didn&apos;t receive it? Check your spam folder or{" "}
             <button
               onClick={() => setForgotSent(false)}
-              className="text-[#002452] underline underline-offset-2"
+              className="text-[#E6EAF2] underline underline-offset-2"
             >
               try again
             </button>
@@ -128,12 +128,12 @@ export default function AuthModal() {
     <Modal isOpen={isModalOpen} onClose={closeModal}>
       <div className="mb-6">
         <h2
-          className="text-2xl text-[#002452] mb-1"
+          className="text-2xl text-[#E6EAF2] mb-1"
           style={{ fontFamily: '"Lora", Georgia, serif', fontWeight: 500 }}
         >
           {activeTab === "login" ? "Welcome back" : "Create your account"}
         </h2>
-        <p className="text-slate-500 text-sm">
+        <p className="text-[#8A93A6] text-sm">
           {activeTab === "login"
             ? "Sign in to access your LWYRD dashboard."
             : "Join LWYRD to find the right legal partner."}
@@ -141,7 +141,7 @@ export default function AuthModal() {
       </div>
 
       {/* Tab switcher */}
-      <div className="flex rounded-2xl bg-[#f5f4f0] p-1 mb-6 border border-[#ddd7cc]">
+      <div className="flex rounded-2xl bg-[#0A0F1C]/60 p-1 mb-6 border border-[#1F2A3D]">
         {(["login", "signup"] as const).map((tab) => (
           <button
             key={tab}
@@ -149,7 +149,7 @@ export default function AuthModal() {
             className={`flex-1 py-2 text-sm rounded-xl transition-all font-medium ${
               activeTab === tab
                 ? "bg-[#002452] text-white shadow-sm"
-                : "text-slate-500 hover:text-slate-700"
+                : "text-[#8A93A6] hover:text-[#C8CDD8]"
             }`}
           >
             {tab === "login" ? "Sign In" : "Sign Up"}
@@ -172,7 +172,7 @@ export default function AuthModal() {
 
             {/* Role selector */}
             <div>
-              <p className="text-xs font-medium text-slate-500 mb-2 ml-1">I am:</p>
+              <p className="text-xs font-medium text-[#8A93A6] mb-2 ml-1">I am:</p>
               <div className="grid grid-cols-2 gap-2">
                 <button
                   type="button"
@@ -180,13 +180,13 @@ export default function AuthModal() {
                   className={`py-2.5 px-3 rounded-2xl border text-sm transition-all ${
                     role === "client"
                       ? "border-[#002452] bg-[#002452] text-white"
-                      : "border-[#ddd7cc] bg-white text-slate-600 hover:border-[#002452]/40"
+                      : "border-[#1F2A3D] bg-[#0A0F1C] text-[#C8CDD8] hover:border-[#3B82F6]/40"
                   }`}
                 >
                   Looking for legal help
                 </button>
                 <div className="relative">
-                  <div className="py-2.5 px-3 rounded-2xl border border-[#ddd7cc] bg-[#f5f4f0] text-sm text-slate-300 cursor-not-allowed select-none">
+                  <div className="py-2.5 px-3 rounded-2xl border border-[#1F2A3D] bg-[#0A0F1C] text-sm text-slate-300 cursor-not-allowed select-none">
                     A law firm
                   </div>
                   <span className="absolute -top-2 -right-1 text-[10px] font-medium bg-[#002452] text-white px-2 py-0.5 rounded-full leading-none">
@@ -194,7 +194,7 @@ export default function AuthModal() {
                   </span>
                 </div>
               </div>
-              <p className="text-xs text-slate-400 mt-1.5 ml-1">
+              <p className="text-xs text-[#8A93A6] mt-1.5 ml-1">
                 Role cannot be changed after account creation.
               </p>
             </div>
@@ -225,13 +225,13 @@ export default function AuthModal() {
             <button
               type="button"
               onClick={() => { setActiveTab("forgot"); setError(""); }}
-              className="text-xs text-slate-400 mt-1.5 ml-1 hover:text-[#002452] transition-colors"
+              className="text-xs text-[#8A93A6] mt-1.5 ml-1 hover:text-[#E6EAF2] transition-colors"
             >
               Forgot your password?
             </button>
           )}
           {activeTab === "signup" && (
-            <p className="text-xs text-slate-400 mt-1.5 ml-1">Must be at least 8 characters.</p>
+            <p className="text-xs text-[#8A93A6] mt-1.5 ml-1">Must be at least 8 characters.</p>
           )}
         </div>
 
@@ -256,7 +256,7 @@ export default function AuthModal() {
         </button>
       </form>
 
-      <p className="text-center text-xs text-slate-400 mt-4">
+      <p className="text-center text-xs text-[#8A93A6] mt-4">
         Your information is secured and never shared.
       </p>
     </Modal>

@@ -13,30 +13,30 @@ export default function CategoryCard({ category }: CategoryCardProps) {
 
   return (
     <Link href={`/services/${category.slug}`}>
-      <div className="bg-[#fbfaf6] border border-[#ddd7cc] rounded-3xl shadow-sm p-7 h-full transition-all duration-200 hover:shadow-md hover:-translate-y-1 hover:border-[#002452]/30 group cursor-pointer">
+      <div className="bg-[#141C2E] border border-[#1F2A3D] rounded-3xl shadow-sm p-7 h-full transition-all duration-200 hover:shadow-md hover:-translate-y-1 hover:border-[#002452]/30 group cursor-pointer">
         {/* Icon box */}
-        <div className="inline-flex items-center justify-center w-11 h-11 rounded-2xl bg-[#002452]/8 border border-[#ddd7cc] mb-5 group-hover:bg-[#002452] group-hover:border-[#002452] transition-colors">
+        <div className="inline-flex items-center justify-center w-11 h-11 rounded-2xl bg-white/8 border border-[#1F2A3D] mb-5 group-hover:bg-[#002452] group-hover:border-[#002452] transition-colors">
           {IconComponent ? (
-            <IconComponent size={20} className="text-[#002452] group-hover:text-white transition-colors" strokeWidth={1.5} />
+            <IconComponent size={20} className="text-[#E6EAF2] group-hover:text-white transition-colors" strokeWidth={1.5} />
           ) : (
-            <span className="text-[#002452] group-hover:text-white text-sm font-bold transition-colors">{category.name[0]}</span>
+            <span className="text-[#E6EAF2] group-hover:text-white text-sm font-bold transition-colors">{category.name[0]}</span>
           )}
         </div>
 
         {/* Name */}
         <h3
-          className="text-[#002452] text-lg mb-2"
+          className="text-[#E6EAF2] text-lg mb-2"
           style={{ fontFamily: '"Lora", Georgia, serif', fontWeight: 500 }}
         >
           {category.name}
         </h3>
 
         {/* Short description */}
-        <p className="text-slate-500 text-sm leading-relaxed mb-5">{category.shortDescription}</p>
+        <p className="text-[#8A93A6] text-sm leading-relaxed mb-5">{category.shortDescription}</p>
 
         {/* Footer row */}
         <div className="flex items-center justify-end">
-          <span className="text-xs text-[#002452] font-medium opacity-0 group-hover:opacity-100 transition-opacity">
+          <span className="text-xs text-[#E6EAF2] font-medium opacity-0 group-hover:opacity-100 transition-opacity">
             Explore →
           </span>
         </div>

@@ -2,7 +2,7 @@ import Link from "next/link";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { Building2, Layers, ClipboardList, Users, ArrowRight, ListChecks, FileText } from "lucide-react";
 
-export const metadata = { title: "Admin Dashboard — LWYRD" };
+export const metadata = { title: "Admin Dashboard, LWYRD" };
 
 export default async function AdminDashboard() {
   const db = createAdminClient();

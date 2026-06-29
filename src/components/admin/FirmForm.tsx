@@ -237,7 +237,7 @@ export default function FirmForm({ initialData, mode, allCriteria, defaultAssess
         ))}
       </div>
 
-      {/* Assessment Items — standard checklist */}
+      {/* Assessment Items, standard checklist */}
       <div className={sectionClass}>
         <div>
           <h2 className="text-lg text-[#002452]" style={{ fontFamily: '"Lora", Georgia, serif', fontWeight: 500 }}>LWYRD Assessment</h2>

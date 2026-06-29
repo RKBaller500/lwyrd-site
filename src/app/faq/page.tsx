@@ -68,7 +68,7 @@ const faqData: Record<Tab, FaqItem[]> = {
       a: (
         <span>
           Visit our{" "}
-          <Link href="/for-law-firms" className="text-[#002452] font-medium hover:underline">
+          <Link href="/for-law-firms" className="text-[#E6EAF2] font-medium hover:underline">
             For Law Firms page →
           </Link>{" "}
           for the full picture, how the Assessment works, how matching operates, and how to apply.
@@ -86,7 +86,7 @@ const faqData: Record<Tab, FaqItem[]> = {
     {
       q: "How do I apply?",
       a: (
-        <Link href="/for-law-firms" className="text-[#002452] font-medium hover:underline">
+        <Link href="/for-law-firms" className="text-[#E6EAF2] font-medium hover:underline">
           Apply on the For Law Firms page →
         </Link>
       ),
@@ -104,7 +104,7 @@ export default function FaqPage() {
   const [activeTab, setActiveTab] = useState<Tab>("general");
 
   return (
-    <div className="flex flex-col min-h-screen bg-[#f5f4f0]">
+    <div className="flex flex-col min-h-screen bg-[#0A0F1C]">
       <Navbar />
 
       <main className="flex-1 max-w-3xl mx-auto w-full px-6 py-14">
@@ -114,16 +114,16 @@ export default function FaqPage() {
           transition={{ duration: 0.6, ease }}
           className="mb-10"
         >
-          <span className="inline-block bg-[#002452] text-white text-xs font-medium px-3 py-1.5 rounded-full tracking-wide mb-4">
+          <span className="text-[#C9962B] text-xs font-semibold tracking-widest uppercase mb-4">
             FAQ
           </span>
           <h1
-            className="text-4xl sm:text-5xl text-[#002452] mb-4"
+            className="text-4xl sm:text-5xl text-[#E6EAF2] mb-4"
             style={{ ...lora, fontWeight: 500 }}
           >
             Frequently Asked Questions
           </h1>
-          <p className="text-slate-500 text-base leading-relaxed max-w-xl">
+          <p className="text-[#8A93A6] text-base leading-relaxed max-w-xl">
             Answers to common questions about how LWYRD works, for clients and for law firms.
           </p>
         </motion.div>
@@ -142,7 +142,7 @@ export default function FaqPage() {
               className={`px-5 py-2 text-sm rounded-full transition-colors ${
                 activeTab === tab.id
                   ? "bg-[#002452] text-white font-medium"
-                  : "text-slate-500 hover:bg-[#002452]/8 hover:text-[#002452]"
+                  : "text-[#8A93A6] hover:bg-white/8 hover:text-[#E6EAF2]"
               }`}
             >
               {tab.label}
@@ -155,7 +155,7 @@ export default function FaqPage() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5, ease, delay: 0.15 }}
         >
-          <div className="bg-[#fbfaf6] border border-[#ddd7cc] rounded-3xl shadow-sm overflow-hidden">
+          <div className="bg-[#141C2E] border border-[#1F2A3D] rounded-3xl shadow-sm overflow-hidden">
             <AnimatePresence mode="wait">
               <motion.div
                 key={activeTab}
@@ -176,9 +176,9 @@ export default function FaqPage() {
             </AnimatePresence>
           </div>
 
-          <p className="text-center text-slate-400 text-sm mt-8">
+          <p className="text-center text-[#8A93A6] text-sm mt-8">
             Don&apos;t see your question?{" "}
-            <Link href="/contact" className="text-[#002452] font-medium hover:underline">
+            <Link href="/contact" className="text-[#E6EAF2] font-medium hover:underline">
               Get in touch
             </Link>
           </p>

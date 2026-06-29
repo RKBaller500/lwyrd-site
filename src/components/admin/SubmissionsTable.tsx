@@ -169,7 +169,7 @@ export default function SubmissionsTable({
               <tr key={sub.id} className={i < filtered.length - 1 ? "border-b border-[#ddd7cc]" : ""}>
                 <td className="px-5 py-4 text-slate-500 whitespace-nowrap">{formatDate(sub.created_at)}</td>
                 <td className="px-5 py-4">
-                  <p className="text-slate-700 font-medium">{sub.userName || "—"}</p>
+                  <p className="text-slate-700 font-medium">{sub.userName || " "}</p>
                   <p className="text-slate-400 text-xs">{sub.userEmail}</p>
                 </td>
                 <td className="px-5 py-4">{trackBadge(sub.track)}</td>
@@ -177,7 +177,7 @@ export default function SubmissionsTable({
                 <td className="px-5 py-4 text-slate-600">
                   {topMatch
                     ? <span>{topMatch.firmName} <span className="text-slate-400">({topMatch.score})</span></span>
-                    : "—"}
+                    : " "}
                 </td>
                 <td className="px-5 py-4 text-right">
                   <Link href={`/admin/submissions/${sub.id}`} className="inline-flex items-center gap-1.5 text-xs text-[#002452] hover:underline">

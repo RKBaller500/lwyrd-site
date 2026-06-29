@@ -14,10 +14,10 @@ export default function AuthGuard({ children }: { children: React.ReactNode }) {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-[#f5f4f0] flex items-center justify-center">
+      <div className="min-h-screen bg-[#0A0F1C] flex items-center justify-center">
         <div className="flex flex-col items-center gap-3">
           <div className="w-6 h-6 border-2 border-[#002452]/20 border-t-[#002452] rounded-full animate-spin" />
-          <p className="text-slate-400 text-sm">Loading…</p>
+          <p className="text-[#8A93A6] text-sm">Loading…</p>
         </div>
       </div>
     );
@@ -25,7 +25,7 @@ export default function AuthGuard({ children }: { children: React.ReactNode }) {
 
   if (!isAuthenticated) {
     return (
-      <div className="min-h-screen bg-[#f5f4f0] flex items-center justify-center">
+      <div className="min-h-screen bg-[#0A0F1C] flex items-center justify-center">
         <div className="flex flex-col items-center gap-3">
           <div className="w-6 h-6 border-2 border-[#002452]/20 border-t-[#002452] rounded-full animate-spin" />
         </div>

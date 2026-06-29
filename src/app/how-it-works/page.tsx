@@ -23,10 +23,10 @@ const steps = [
   {
     number: "01",
     icon: ClipboardList,
-    title: "Tell us your situation",
-    summary: "Start the guided intake, no legal background required.",
+    title: "The Guided Diagnosis",
+    summary: "You don't need to know the legal jargon.",
     detail:
-      "LWYRD's intake begins by asking who you are, a startup, a small business, or an individual, and what area of law you need help with. From there, you answer a focused set of questions about your specific situation: your stage, matter type, budget, timeline, and the kind of firm relationship you're looking for. The whole intake takes about five minutes.",
+      "Our interactive intake asks plain-English questions about your situation to pinpoint exactly what legal specialization you require. You tell us who you are, what you're facing, your timeline, and your budget. The whole thing takes about five minutes.",
     bullets: [
       "Three tracks: Startups, Small Businesses, Individuals",
       "Plain language, no legal training needed",
@@ -36,10 +36,10 @@ const steps = [
   {
     number: "02",
     icon: Search,
-    title: "We find your match",
+    title: "The Precision Match",
     summary: "Your answers drive the match, not a generic algorithm.",
     detail:
-      "Once you submit, LWYRD scores every vetted firm against your specific answers. Practice area alignment, matter specifics, your stage, budget range, firm size preference, and timeline all factor in. So does the firm's LWYRD Assessment score. The result isn't a ranked directory, it's a list of firms that are specifically suited to what you described.",
+      "LWYRD scores every vetted firm against your specific answers. Practice area alignment, matter type, your stage, budget range, firm size preference, and timeline all factor in. So does each firm's LWYRD Assessment score. The result is a curated shortlist of firms that are genuinely suited to what you described.",
     bullets: [
       "Matched on your specific answers, not generic criteria",
       "Assessment performance factors into every result",
@@ -49,10 +49,10 @@ const steps = [
   {
     number: "03",
     icon: Award,
-    title: "Connect when you're ready",
-    summary: "You're in control of the introduction.",
+    title: "The Introduction",
+    summary: "You're in control of every next step.",
     detail:
-      "After matching, you receive a ranked list of firms, each with a fit score and the specific reasons it's a strong match for your situation. You review, save, and compare at your own pace. When you're ready, you reach out. No firm contacts you until you make the first move.",
+      "You receive a ranked list of firms, each with a fit score and the specific reasons it's a strong match for your situation. Review, save, and compare at your own pace. When you're ready, you reach out. No firm contacts you until you make the first move.",
     bullets: [
       "Ranked matches with fit scores and match reasons",
       "Full firm profiles with Assessment results visible",
@@ -81,56 +81,45 @@ const cards = [
 
 export default function HowItWorksPage() {
   return (
-    <div className="flex flex-col min-h-screen bg-[#f5f4f0]">
+    <div className="flex flex-col min-h-screen bg-[#0A0F1C]">
       <Navbar />
 
       <main className="flex-1">
         {/* ── Hero ── */}
-        <section className="relative bg-[#f5f4f0] py-28 md:py-40 px-6 text-center overflow-hidden">
-          <motion.span
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 0.03 }}
-            transition={{ duration: 1.4, ease: "easeOut", delay: 0.5 }}
-            className="absolute -top-10 -right-8 text-[28rem] leading-none text-[#002452] pointer-events-none select-none"
-            style={{ ...lora, fontWeight: 600 }}
-            aria-hidden="true"
-          >
-            L
-          </motion.span>
-
+        <section className="relative bg-[#0A0F1C] py-28 md:py-40 px-6 text-center overflow-hidden">
           <div className="max-w-4xl mx-auto relative">
             <motion.span
               initial={{ opacity: 0, y: 12 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5, ease }}
-              className="inline-block bg-[#002452] text-white text-xs font-medium px-3 py-1.5 rounded-full tracking-wide mb-6"
+              className="text-[#C9962B] text-xs font-semibold tracking-widest uppercase mb-6 block"
             >
-              The Process
+              Process
             </motion.span>
 
             <motion.h1
               initial={{ opacity: 0, y: 30 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.75, ease, delay: 0.08 }}
-              className="text-4xl sm:text-5xl lg:text-6xl text-[#002452] leading-tight mb-7"
-              style={{ ...lora, fontWeight: 500 }}
+              className="text-6xl sm:text-7xl lg:text-8xl text-[#E6EAF2] leading-[1.0] mb-7"
+              style={{ ...lora, fontWeight: 700 }}
             >
-              From your legal situation to the right specialist.
+              How <span style={{ color: "#C9962B" }}>LWYRD</span> Works
             </motion.h1>
 
             <motion.p
               initial={{ opacity: 0, y: 22 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.7, ease, delay: 0.18 }}
-              className="text-slate-500 text-lg sm:text-xl leading-relaxed max-w-2xl mx-auto"
+              className="text-[#8A93A6] text-lg sm:text-xl leading-relaxed max-w-2xl mx-auto"
             >
-              A clear, guided path, no cold calls, no pay-to-play rankings, no guesswork. Here&apos;s exactly how LWYRD works.
+              Finding a lawyer shouldn&apos;t feel like a shot in the dark. We&apos;ve replaced the anxiety of the search with a calm, methodical matching process.
             </motion.p>
           </div>
         </section>
 
         {/* ── Steps ── */}
-        <section className="bg-[#f5f4f0] py-8 px-6 pb-20">
+        <section className="bg-[#0A0F1C] py-8 px-6 pb-20">
           <div className="max-w-5xl mx-auto space-y-6">
             {steps.map((step, index) => {
               const Icon = step.icon;
@@ -141,33 +130,33 @@ export default function HowItWorksPage() {
                   whileInView={{ opacity: 1, y: 0 }}
                   viewport={{ once: true, margin: "-60px" }}
                   transition={{ duration: 0.65, ease, delay: index * 0.07 }}
-                  className="border-t border-[#ddd7cc] pt-10 grid grid-cols-1 md:grid-cols-2 gap-10 items-start"
+                  className="border-t border-[#1F2A3D] pt-10 grid grid-cols-1 md:grid-cols-2 gap-10 items-start"
                 >
                   <div>
                     <div className="flex items-center gap-3 mb-5">
                       <span
-                        className="text-5xl leading-none text-[#002452]/15"
+                        className="text-5xl leading-none text-white/5"
                         style={{ ...lora, fontWeight: 600 }}
                       >
                         {step.number}
                       </span>
-                      <div className="flex items-center justify-center w-11 h-11 rounded-2xl bg-[#002452]/8 border border-[#ddd7cc]">
-                        <Icon size={20} className="text-[#002452]" strokeWidth={1.5} />
+                      <div className="flex items-center justify-center w-11 h-11 rounded-2xl bg-white/8 border border-[#1F2A3D]">
+                        <Icon size={20} className="text-[#E6EAF2]" strokeWidth={1.5} />
                       </div>
                     </div>
 
                     <h2
-                      className="text-[#002452] text-2xl sm:text-3xl mb-3"
-                      style={{ ...lora, fontWeight: 500 }}
+                      className="text-[#E6EAF2] text-3xl sm:text-4xl mb-3"
+                      style={{ ...lora, fontWeight: 700 }}
                     >
                       {step.title}
                     </h2>
-                    <p className="text-slate-400 text-sm font-medium mb-4">{step.summary}</p>
-                    <p className="text-slate-500 text-sm leading-relaxed">{step.detail}</p>
+                    <p className="text-[#8A93A6] text-sm font-medium mb-4">{step.summary}</p>
+                    <p className="text-[#8A93A6] text-sm leading-relaxed">{step.detail}</p>
                   </div>
 
-                  <div className="bg-[#fbfaf6] border border-[#ddd7cc] rounded-3xl shadow-sm p-7">
-                    <p className="text-slate-400 text-xs font-medium tracking-widest uppercase mb-4">
+                  <div className="bg-[#141C2E] border border-[#1F2A3D] rounded-3xl shadow-sm p-7">
+                    <p className="text-[#8A93A6] text-xs font-medium tracking-widest uppercase mb-4">
                       What to expect
                     </p>
                     <ul className="space-y-3">
@@ -178,7 +167,7 @@ export default function HowItWorksPage() {
                             className="text-emerald-500 shrink-0 mt-0.5"
                             strokeWidth={2}
                           />
-                          <span className="text-slate-600 text-sm leading-snug">{b}</span>
+                          <span className="text-[#C8CDD8] text-sm leading-snug">{b}</span>
                         </li>
                       ))}
                     </ul>
@@ -190,20 +179,20 @@ export default function HowItWorksPage() {
         </section>
 
         {/* ── Why LWYRD? ── */}
-        <section className="bg-[#f5f4f0] py-20 px-6">
+        <section className="bg-[#0A0F1C] py-20 px-6">
           <div className="max-w-5xl mx-auto">
             <motion.div
               initial={{ opacity: 0, y: 18 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true, margin: "-60px" }}
               transition={{ duration: 0.6, ease }}
-              className="border-t border-[#ddd7cc] pt-14 mb-10"
+              className="border-t border-[#1F2A3D] pt-14 mb-10"
             >
-              <p className="text-slate-400 text-xs font-medium tracking-widest uppercase mb-2">
+              <p className="text-[#8A93A6] text-xs font-medium tracking-widest uppercase mb-2">
                 Why LWYRD?
               </p>
               <h2
-                className="text-[#002452] text-3xl sm:text-4xl max-w-xl"
+                className="text-[#E6EAF2] text-3xl sm:text-4xl max-w-xl"
                 style={{ ...lora, fontWeight: 500 }}
               >
                 Three things that make this different.
@@ -221,16 +210,16 @@ export default function HowItWorksPage() {
                 <motion.div
                   key={card.title}
                   variants={item}
-                  className="bg-[#fbfaf6] border border-[#ddd7cc] rounded-3xl shadow-sm p-8"
+                  className="bg-[#141C2E] border border-[#1F2A3D] rounded-3xl shadow-sm p-8"
                 >
                   <h3
-                    className="text-[#002452] text-xl mb-1"
+                    className="text-[#E6EAF2] text-xl mb-1"
                     style={{ ...lora, fontWeight: 500 }}
                   >
                     {card.title}
                   </h3>
-                  <p className="text-slate-400 text-xs italic mb-3">{card.subtitle}</p>
-                  <p className="text-slate-500 text-sm leading-relaxed">{card.body}</p>
+                  <p className="text-[#8A93A6] text-xs italic mb-3">{card.subtitle}</p>
+                  <p className="text-[#8A93A6] text-sm leading-relaxed">{card.body}</p>
                 </motion.div>
               ))}
             </motion.div>
@@ -238,22 +227,22 @@ export default function HowItWorksPage() {
         </section>
 
         {/* ── CTA ── */}
-        <section className="bg-[#f5f4f0] pb-24 px-6">
+        <section className="bg-[#0A0F1C] pb-24 px-6">
           <div className="max-w-5xl mx-auto">
             <motion.div
               initial={{ opacity: 0, y: 18 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true, margin: "-60px" }}
               transition={{ duration: 0.6, ease }}
-              className="max-w-2xl mx-auto bg-[#fbfaf6] border border-[#ddd7cc] rounded-3xl shadow-sm p-10 text-center"
+              className="max-w-2xl mx-auto bg-[#141C2E] border border-[#1F2A3D] rounded-3xl shadow-sm p-10 text-center"
             >
               <h2
-                className="text-[#002452] text-3xl mb-3"
+                className="text-[#E6EAF2] text-3xl mb-3"
                 style={{ ...lora, fontWeight: 500 }}
               >
                 Ready to get started?
               </h2>
-              <p className="text-slate-500 text-sm leading-relaxed mb-8">
+              <p className="text-[#8A93A6] text-sm leading-relaxed mb-8">
                 The intake takes about five minutes. There&apos;s no cost to get matched.
               </p>
               <div className="flex flex-col sm:flex-row gap-3 justify-center">

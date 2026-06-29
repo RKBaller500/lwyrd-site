@@ -92,18 +92,18 @@ export default function IntakeQuestionComponent({ question, value, onChange }: I
   };
 
   return (
-    <div className="bg-[#fbfaf6] border border-[#ddd7cc] rounded-3xl p-8">
-      <p className="text-xs text-slate-400 uppercase tracking-widest font-medium mb-3">
+    <div className="bg-[#141C2E] border border-[#1F2A3D] rounded-3xl p-8">
+      <p className="text-xs text-[#8A93A6] uppercase tracking-widest font-medium mb-3">
         {question.required ? "Required" : "Optional"}
       </p>
       <h2
-        className="text-xl sm:text-2xl text-[#002452] mb-2"
+        className="text-xl sm:text-2xl text-[#E6EAF2] mb-2"
         style={{ fontFamily: '"Lora", Georgia, serif', fontWeight: 500 }}
       >
         {question.question}
       </h2>
       {question.subtext && (
-        <p className="text-slate-500 text-sm mb-6">{question.subtext}</p>
+        <p className="text-[#8A93A6] text-sm mb-6">{question.subtext}</p>
       )}
       {!question.subtext && <div className="mb-5" />}
 
@@ -123,7 +123,7 @@ export default function IntakeQuestionComponent({ question, value, onChange }: I
                   className={`w-full text-left px-5 py-3.5 rounded-2xl border text-sm transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#002452] focus-visible:ring-offset-2 ${
                     isSelected
                       ? "bg-[#002452] text-white border-[#002452]"
-                      : "bg-white border-[#ddd7cc] text-slate-700 hover:border-[#002452]"
+                      : "bg-white border-[#1F2A3D] text-[#C8CDD8] hover:border-[#002452]"
                   }`}
                 >
                   {opt}
@@ -135,7 +135,7 @@ export default function IntakeQuestionComponent({ question, value, onChange }: I
                     placeholder="Please specify…"
                     value={otherText}
                     onChange={(e) => handleSingleOtherText(e.target.value)}
-                    className="mt-2 w-full px-4 py-3 rounded-2xl border border-[#ddd7cc] bg-white text-slate-700 placeholder-slate-400 focus:outline-none focus:border-[#002452] transition-colors text-sm"
+                    className="mt-2 w-full px-4 py-3 rounded-2xl border border-[#1F2A3D] bg-[#141C2E] text-[#E6EAF2] placeholder-[#8A93A6] focus:outline-none focus:border-[#3B82F6] transition-colors text-sm"
                   />
                 )}
               </div>
@@ -159,7 +159,7 @@ export default function IntakeQuestionComponent({ question, value, onChange }: I
                   className={`w-full text-left px-5 py-3.5 rounded-2xl border text-sm transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#002452] focus-visible:ring-offset-2 ${
                     isSelected
                       ? "bg-[#002452] text-white border-[#002452]"
-                      : "bg-white border-[#ddd7cc] text-slate-700 hover:border-[#002452]"
+                      : "bg-white border-[#1F2A3D] text-[#C8CDD8] hover:border-[#002452]"
                   }`}
                 >
                   {opt}
@@ -171,7 +171,7 @@ export default function IntakeQuestionComponent({ question, value, onChange }: I
                     placeholder="Please specify…"
                     value={otherText}
                     onChange={(e) => handleMultiOtherText(e.target.value)}
-                    className="mt-2 w-full px-4 py-3 rounded-2xl border border-[#ddd7cc] bg-white text-slate-700 placeholder-slate-400 focus:outline-none focus:border-[#002452] transition-colors text-sm"
+                    className="mt-2 w-full px-4 py-3 rounded-2xl border border-[#1F2A3D] bg-[#141C2E] text-[#E6EAF2] placeholder-[#8A93A6] focus:outline-none focus:border-[#3B82F6] transition-colors text-sm"
                   />
                 )}
               </div>
@@ -183,7 +183,7 @@ export default function IntakeQuestionComponent({ question, value, onChange }: I
       {question.type === "text" && (
         <textarea
           rows={4}
-          className="w-full px-4 py-3 rounded-2xl border border-[#ddd7cc] bg-white text-slate-700 placeholder-slate-400 focus:outline-none focus:border-[#002452] transition-colors text-sm resize-none"
+          className="w-full px-4 py-3 rounded-2xl border border-[#1F2A3D] bg-[#141C2E] text-[#E6EAF2] placeholder-[#8A93A6] focus:outline-none focus:border-[#3B82F6] transition-colors text-sm resize-none"
           placeholder="Your answer..."
           value={(value as string) ?? ""}
           onChange={(e) => onChange(e.target.value)}
@@ -234,7 +234,7 @@ function BudgetRangeInput({
 
   return (
     <div className="space-y-4">
-      <p className="text-[#002452] text-2xl font-medium" style={{ fontFamily: '"Lora", Georgia, serif' }}>
+      <p className="text-[#E6EAF2] text-2xl font-medium" style={{ fontFamily: '"Lora", Georgia, serif' }}>
         {display}
       </p>
       <input
@@ -246,7 +246,7 @@ function BudgetRangeInput({
         onChange={(e) => onChange(Number(e.target.value))}
         className="w-full accent-[#002452]"
       />
-      <div className="flex justify-between text-xs text-slate-400">
+      <div className="flex justify-between text-xs text-[#8A93A6]">
         <span>No budget set</span>
         <span>${(max / 1000).toFixed(0)}k+</span>
       </div>
@@ -267,7 +267,7 @@ function ScaleInput({
 }) {
   return (
     <div className="space-y-4">
-      <p className="text-[#002452] text-3xl font-medium text-center" style={{ fontFamily: '"Lora", Georgia, serif' }}>
+      <p className="text-[#E6EAF2] text-3xl font-medium text-center" style={{ fontFamily: '"Lora", Georgia, serif' }}>
         {value}
       </p>
       <input
@@ -278,7 +278,7 @@ function ScaleInput({
         onChange={(e) => onChange(Number(e.target.value))}
         className="w-full accent-[#002452]"
       />
-      <div className="flex justify-between text-xs text-slate-400">
+      <div className="flex justify-between text-xs text-[#8A93A6]">
         <span>{min}</span>
         <span>{max}</span>
       </div>

@@ -3,7 +3,7 @@ import { createAdminClient } from "@/lib/supabase/admin";
 import QuestionForm from "@/components/admin/QuestionForm";
 import type { QuestionInput } from "@/lib/actions/admin/questions";
 
-export const metadata = { title: "Edit Question — Admin" };
+export const metadata = { title: "Edit Question, Admin" };
 
 export default async function EditQuestionPage({
   params,

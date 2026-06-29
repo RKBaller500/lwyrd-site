@@ -3,7 +3,6 @@
 import { motion } from "framer-motion";
 
 const ease = [0.25, 0.46, 0.45, 0.94] as const;
-const lora = { fontFamily: '"Lora", Georgia, serif' } as const;
 
 const stats = [
   { value: "$10M+", label: "in fees for partner firms" },
@@ -13,7 +12,7 @@ const stats = [
 
 const container = {
   hidden: {},
-  visible: { transition: { staggerChildren: 0.1, delayChildren: 0.1 } },
+  visible: { transition: { staggerChildren: 0.1, delayChildren: 0.05 } },
 };
 
 const item = {
@@ -23,25 +22,10 @@ const item = {
 
 export default function TrustStats() {
   return (
-    <section className="bg-[#f5f4f0] py-20 px-6">
+    <section className="bg-[#0A0F1C] py-24 px-6 border-t border-[#1F2A3D]">
       <div className="max-w-5xl mx-auto">
         <motion.div
-          initial={{ opacity: 0, y: 18 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true, margin: "-60px" }}
-          transition={{ duration: 0.6, ease }}
-          className="border-t border-[#ddd7cc] pt-14 mb-14"
-        >
-          <h2
-            className="text-[#002452] text-3xl sm:text-4xl text-center sm:text-left"
-            style={{ ...lora, fontWeight: 500 }}
-          >
-            Trust through Social Proof
-          </h2>
-        </motion.div>
-
-        <motion.div
-          className="grid grid-cols-1 sm:grid-cols-3 gap-10"
+          className="grid grid-cols-1 sm:grid-cols-3 gap-12 sm:gap-8"
           variants={container}
           initial="hidden"
           whileInView="visible"
@@ -49,13 +33,10 @@ export default function TrustStats() {
         >
           {stats.map((stat) => (
             <motion.div key={stat.value} variants={item} className="text-center sm:text-left">
-              <p
-                className="text-[#002452] text-5xl sm:text-6xl mb-3"
-                style={{ ...lora, fontWeight: 500 }}
-              >
+              <p className="text-[#C9962B] text-5xl sm:text-6xl font-bold tracking-tight mb-3">
                 {stat.value}
               </p>
-              <p className="text-slate-400 text-sm leading-snug">{stat.label}</p>
+              <p className="text-[#8A93A6] text-sm leading-snug">{stat.label}</p>
             </motion.div>
           ))}
         </motion.div>

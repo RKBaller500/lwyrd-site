@@ -64,11 +64,11 @@ function ScoreRing({ score }: { score: number }) {
         <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`} style={{ transform: "rotate(-90deg)" }}>
           <circle
             cx={size / 2} cy={size / 2} r={radius}
-            fill="none" stroke="#ddd7cc" strokeWidth={stroke} strokeOpacity={0.7}
+            fill="none" stroke="#1F2A3D" strokeWidth={stroke}
           />
           <circle
             cx={size / 2} cy={size / 2} r={radius}
-            fill="none" stroke="#002452" strokeWidth={stroke}
+            fill="none" stroke="#3B82F6" strokeWidth={stroke}
             strokeDasharray={`${filled} ${circumference}`}
             strokeLinecap="round"
             style={{ transition: "stroke-dasharray 0.85s cubic-bezier(0.25,0.46,0.45,0.94) 0.3s" }}
@@ -77,16 +77,16 @@ function ScoreRing({ score }: { score: number }) {
         <div className="absolute inset-0 flex items-center justify-center">
           <div className="flex items-baseline gap-0.5">
             <span
-              className="text-[#002452] leading-none tabular-nums"
+              className="text-[#E6EAF2] leading-none tabular-nums"
               style={{ fontFamily: '"Lora", Georgia, serif', fontWeight: 500, fontSize: "2rem" }}
             >
               {score}
             </span>
-            <span className="text-sm text-slate-400 font-medium">%</span>
+            <span className="text-sm text-[#8A93A6] font-medium">%</span>
           </div>
         </div>
       </div>
-      <span className="text-[11px] text-slate-400 font-semibold tracking-widest uppercase">Match Score</span>
+      <span className="text-[11px] text-[#8A93A6] font-semibold tracking-widest uppercase">Match Score</span>
     </div>
   );
 }
@@ -105,10 +105,10 @@ export default function MatchCard({ result, rank, initialSaved = false }: MatchC
 
   return (
     <div
-      className={`rounded-3xl bg-[#fbfaf6] overflow-hidden transition-all hover:shadow-lg ${
+      className={`rounded-3xl bg-[#141C2E] overflow-hidden transition-all hover:shadow-lg ${
         isBestMatch
-          ? "border-2 border-[#c9a227] shadow-[0_4px_28px_rgba(201,162,39,0.18)]"
-          : "border-2 border-[#002452]/40 shadow-[0_4px_24px_rgba(0,36,82,0.10)]"
+          ? "border-2 border-[#c9a227] shadow-[0_4px_28px_rgba(201,162,39,0.12)]"
+          : "border-2 border-[#1F2A3D] shadow-[0_4px_24px_rgba(0,0,0,0.2)]"
       }`}
     >
       {isBestMatch && <div className="h-[3px] bg-[#c9a227]" />}
@@ -119,47 +119,47 @@ export default function MatchCard({ result, rank, initialSaved = false }: MatchC
           <div className="flex-1 min-w-0">
             <div className="flex flex-wrap items-center gap-2 mb-3">
               {isBestMatch && (
-                <span className="inline-flex items-center gap-1.5 bg-[#002452] text-white text-[10px] font-semibold tracking-widest uppercase px-2.5 py-1 rounded-full">
+                <span className="inline-flex items-center gap-1.5 bg-[#c9a227] text-[#0A0F1C] text-[10px] font-semibold tracking-widest uppercase px-2.5 py-1 rounded-full">
                   <Award size={9} strokeWidth={2.5} />
                   Best Match
                 </span>
               )}
               {!isBestMatch && rank > 0 && (
-                <span className="text-xs text-slate-400 font-medium">#{rank}</span>
+                <span className="text-xs text-[#8A93A6] font-medium">#{rank}</span>
               )}
             </div>
             <h3
-              className="text-[#002452] text-3xl leading-snug mb-2"
+              className="text-[#E6EAF2] text-3xl leading-snug mb-2"
               style={{ fontFamily: '"Lora", Georgia, serif', fontWeight: 500 }}
             >
               {firm.name}
             </h3>
-            <p className="text-slate-500 text-base leading-relaxed">{firm.tagline}</p>
+            <p className="text-[#8A93A6] text-base leading-relaxed">{firm.tagline}</p>
           </div>
 
           <ScoreRing score={roundedScore} />
         </div>
 
         {/* Meta row */}
-        <div className="flex flex-wrap items-center gap-x-4 gap-y-1.5 text-sm text-slate-400 pb-6 border-b border-[#ddd7cc]">
+        <div className="flex flex-wrap items-center gap-x-4 gap-y-1.5 text-sm text-[#8A93A6] pb-6 border-b border-[#1F2A3D]">
           <span className="flex items-center gap-1.5">
             <MapPin size={13} strokeWidth={1.75} className="shrink-0" />
             {firm.location}
           </span>
-          <span className="text-[#ddd7cc]">·</span>
+          <span className="text-[#1F2A3D]">·</span>
           <span className="flex items-center gap-1.5">
             <Building2 size={13} strokeWidth={1.75} className="shrink-0" />
             {sizeLabels[firm.size] ?? firm.size} firm
           </span>
           {firm.founded && (
             <>
-              <span className="text-[#ddd7cc]">·</span>
+              <span className="text-[#1F2A3D]">·</span>
               <span>Est. {firm.founded}</span>
             </>
           )}
           {firm.billingModel && (
             <>
-              <span className="text-[#ddd7cc]">·</span>
+              <span className="text-[#1F2A3D]">·</span>
               <span>{billingModelLabels[firm.billingModel] ?? firm.billingModel} billing</span>
             </>
           )}
@@ -167,12 +167,12 @@ export default function MatchCard({ result, rank, initialSaved = false }: MatchC
 
         {/* Criteria */}
         {hasCriteria && (
-          <div className={`py-6 border-b border-[#ddd7cc] ${hasBoth ? "grid sm:grid-cols-2 gap-x-8 gap-y-2.5" : "space-y-2.5"}`}>
+          <div className={`py-6 border-b border-[#1F2A3D] ${hasBoth ? "grid sm:grid-cols-2 gap-x-8 gap-y-2.5" : "space-y-2.5"}`}>
             {hasBoth ? (
               <>
                 <div className="space-y-2.5">
                   {reasons.map((r, i) => (
-                    <div key={i} className="flex items-start gap-3 text-sm text-slate-600">
+                    <div key={i} className="flex items-start gap-3 text-sm text-[#C8CDD8]">
                       <CheckCircle2 size={16} className="text-emerald-500 mt-0.5 shrink-0" />
                       {r}
                     </div>
@@ -180,7 +180,7 @@ export default function MatchCard({ result, rank, initialSaved = false }: MatchC
                 </div>
                 <div className="space-y-2.5">
                   {result.missedCriteria.map((c) => (
-                    <div key={c} className="flex items-start gap-3 text-sm text-slate-400">
+                    <div key={c} className="flex items-start gap-3 text-sm text-[#8A93A6]">
                       <XCircle size={16} className="text-rose-400/80 mt-0.5 shrink-0" />
                       {getMissedLabel(c, firm)}
                     </div>
@@ -211,7 +211,7 @@ export default function MatchCard({ result, rank, initialSaved = false }: MatchC
           <SaveFirmButton firmId={firm.id} initialSaved={initialSaved} compact />
           <Link
             href={`/firms/${firm.id}`}
-            className="inline-flex items-center gap-2 px-6 py-3 rounded-2xl bg-[#002452] text-white text-sm font-medium hover:opacity-90 transition-opacity focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#002452] focus-visible:ring-offset-2"
+            className="inline-flex items-center gap-2 px-6 py-3 rounded-2xl bg-[#3B82F6] hover:bg-[#2563EB] text-white text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#3B82F6] focus-visible:ring-offset-2 focus-visible:ring-offset-[#141C2E]"
           >
             View Full Profile
             <ArrowRight size={14} strokeWidth={2} />

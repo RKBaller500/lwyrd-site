@@ -5,7 +5,6 @@ import Link from "next/link";
 import { Rocket, Briefcase, User, ArrowRight } from "lucide-react";
 
 const ease = [0.25, 0.46, 0.45, 0.94] as const;
-const lora = { fontFamily: '"Lora", Georgia, serif' } as const;
 
 const tracks = [
   {
@@ -13,7 +12,7 @@ const tracks = [
     label: "Startups",
     tagline: "Built for every stage of the founding journey.",
     description:
-      "Early-stage companies face a specific kind of legal complexity, formation, IP, fundraising, employment, contracts, that generalist firms often underestimate and large firms often overcharge for. LWYRD connects founders with specialists who have done this before, at your stage, in your industry.",
+      "Early-stage companies face a specific kind of legal complexity: formation, IP, fundraising, employment, and contracts that generalist firms often underestimate and large firms often overcharge for. LWYRD connects founders with specialists who have done this before, at your stage, in your industry.",
     examples: ["Entity formation", "Fundraising & SAFEs", "IP assignment", "Equity & cap tables"],
   },
   {
@@ -46,22 +45,19 @@ const item = {
 
 export default function CategoryPreview() {
   return (
-    <section className="bg-[#f5f4f0] pt-16 pb-14 px-6">
+    <section className="bg-[#0A0F1C] py-28 px-6">
       <div className="max-w-5xl mx-auto">
         <motion.div
           initial={{ opacity: 0, y: 18 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, margin: "-60px" }}
           transition={{ duration: 0.6, ease }}
-          className="mb-10"
+          className="mb-14"
         >
-          <p className="text-slate-400 text-xs font-medium tracking-widest uppercase mb-2">
+          <p className="text-xs font-medium tracking-widest uppercase text-[#8A93A6] mb-4">
             Who We Serve
           </p>
-          <h2
-            className="text-[#002452] text-3xl sm:text-4xl max-w-2xl"
-            style={{ ...lora, fontWeight: 500 }}
-          >
+          <h2 className="text-4xl sm:text-5xl font-semibold tracking-tight text-[#E6EAF2] max-w-2xl">
             Legal help built around who you are and what you actually need.
           </h2>
         </motion.div>
@@ -75,29 +71,21 @@ export default function CategoryPreview() {
         >
           {tracks.map(({ icon: Icon, label, tagline, description, examples }) => (
             <motion.div key={label} variants={item}>
-              <div className="bg-[#fbfaf6] border border-[#ddd7cc] rounded-3xl p-7 h-full flex flex-col">
-                <div className="flex items-center gap-3 mb-4">
-                  <div className="inline-flex items-center justify-center w-10 h-10 rounded-2xl bg-[#002452]/8 border border-[#ddd7cc] shrink-0">
-                    <Icon size={18} className="text-[#002452]" strokeWidth={1.5} />
-                  </div>
-                  <div>
-                    <h3
-                      className="text-[#002452] text-lg leading-tight"
-                      style={{ ...lora, fontWeight: 500 }}
-                    >
-                      {label}
-                    </h3>
-                    <p className="text-slate-400 text-xs mt-0.5 italic">{tagline}</p>
-                  </div>
+              <div className="bg-[#141C2E] border border-[#1F2A3D] rounded-3xl p-7 h-full flex flex-col hover:border-[#2A3850] transition-colors">
+                <div className="inline-flex items-center justify-center w-10 h-10 rounded-2xl bg-[#3B82F6]/10 border border-[#3B82F6]/20 shrink-0 mb-5">
+                  <Icon size={18} className="text-[#3B82F6]" strokeWidth={1.5} />
                 </div>
 
-                <p className="text-slate-500 text-sm leading-relaxed mb-5">{description}</p>
+                <h3 className="text-[#E6EAF2] text-lg font-semibold mb-1">{label}</h3>
+                <p className="text-[#8A93A6] text-xs mb-4">{tagline}</p>
+
+                <p className="text-[#8A93A6] text-sm leading-relaxed mb-6">{description}</p>
 
                 <div className="flex flex-wrap gap-2 mt-auto mb-6">
                   {examples.map((ex) => (
                     <span
                       key={ex}
-                      className="text-xs text-slate-500 bg-[#f0ede7] border border-[#ddd7cc] rounded-full px-3 py-1"
+                      className="text-xs text-[#8A93A6] bg-[#1F2A3D] border border-[#1F2A3D] rounded-full px-3 py-1"
                     >
                       {ex}
                     </span>
@@ -106,7 +94,7 @@ export default function CategoryPreview() {
 
                 <Link
                   href="/intake/start"
-                  className="inline-flex items-center gap-1.5 text-sm text-[#002452] font-medium hover:opacity-70 transition-opacity"
+                  className="inline-flex items-center gap-1.5 text-sm text-[#3B82F6] font-medium hover:text-[#60A5FA] transition-colors"
                 >
                   Get matched
                   <ArrowRight size={13} />

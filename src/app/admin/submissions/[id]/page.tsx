@@ -4,7 +4,7 @@ import { createAdminClient } from "@/lib/supabase/admin";
 import { DbIntakeSubmission } from "@/lib/supabase/types";
 import { ArrowLeft } from "lucide-react";
 
-export const metadata = { title: "Submission Detail — LWYRD Admin" };
+export const metadata = { title: "Submission Detail, LWYRD Admin" };
 
 const TRACK_LABELS: Record<string, string> = {
   startup: "Startup",
@@ -20,8 +20,8 @@ function formatDate(iso: string) {
 }
 
 function formatAnswerValue(val: unknown): string {
-  if (val === null || val === undefined) return "—";
-  if (Array.isArray(val)) return val.length ? val.join(", ") : "—";
+  if (val === null || val === undefined) return " ";
+  if (Array.isArray(val)) return val.length ? val.join(", ") : " ";
   if (typeof val === "number") {
     if (val >= 1000) return `$${(val / 1000).toFixed(0)}k/month`;
     return String(val);
@@ -114,7 +114,7 @@ export default async function SubmissionDetailPage({
               </div>
               <div>
                 <p className="text-xs text-slate-400 font-medium mb-0.5">Legal Category</p>
-                <p className="text-slate-700 text-sm">{sub.category_label ?? sub.legal_category ?? "—"}</p>
+                <p className="text-slate-700 text-sm">{sub.category_label ?? sub.legal_category ?? " "}</p>
               </div>
             </>
           )}
@@ -158,7 +158,7 @@ export default async function SubmissionDetailPage({
           </h2>
           <div className="space-y-2">
             {matchRows.map((m) => {
-              const firmName = (m.firms as unknown as { name: string } | null)?.name ?? "—";
+              const firmName = (m.firms as unknown as { name: string } | null)?.name ?? " ";
               return (
                 <div
                   key={m.firm_id}

@@ -35,20 +35,20 @@ const item = {
 
 export default function BenefitsCards() {
   return (
-    <section className="bg-[#f5f4f0] py-20 px-6">
+    <section className="bg-[#0A0F1C] py-20 px-6">
       <div className="max-w-5xl mx-auto">
         <motion.div
           initial={{ opacity: 0, y: 18 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, margin: "-60px" }}
           transition={{ duration: 0.6, ease }}
-          className="border-t border-[#ddd7cc] pt-14 mb-14"
+          className="border-t border-[#1F2A3D] pt-14 mb-14"
         >
-          <p className="text-slate-400 text-xs font-medium tracking-widest uppercase mb-3">
+          <p className="text-[#8A93A6] text-xs font-medium tracking-widest uppercase mb-3">
             Our Approach
           </p>
           <h2
-            className="text-[#002452] text-3xl sm:text-4xl leading-tight max-w-xl"
+            className="text-[#E6EAF2] text-3xl sm:text-4xl leading-tight max-w-xl"
             style={{ ...lora, fontWeight: 500 }}
           >
             A match built around your matter. Not the other way around.
@@ -65,22 +65,22 @@ export default function BenefitsCards() {
             <motion.div
               key={b.number}
               variants={item}
-              className={`flex gap-8 md:gap-16 py-8 ${i < benefits.length - 1 ? "border-b border-[#ddd7cc]" : ""}`}
+              className={`flex gap-8 md:gap-16 py-8 ${i < benefits.length - 1 ? "border-b border-[#1F2A3D]" : ""}`}
             >
               <p
-                className="text-[#002452]/20 text-4xl leading-none shrink-0 w-10 pt-1"
+                className="text-[#E6EAF2]/20 text-4xl leading-none shrink-0 w-10 pt-1"
                 style={lora}
               >
                 {b.number}
               </p>
               <div className="flex-1 md:flex md:gap-16 md:items-start">
                 <h3
-                  className="text-[#002452] text-xl mb-3 md:mb-0 md:w-72 shrink-0"
+                  className="text-[#E6EAF2] text-xl mb-3 md:mb-0 md:w-72 shrink-0"
                   style={{ ...lora, fontWeight: 500 }}
                 >
                   {b.title}
                 </h3>
-                <p className="text-slate-500 text-sm leading-relaxed">{b.body}</p>
+                <p className="text-[#8A93A6] text-sm leading-relaxed">{b.body}</p>
               </div>
             </motion.div>
           ))}

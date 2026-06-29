@@ -2,7 +2,7 @@ import { createAdminClient } from "@/lib/supabase/admin";
 import FirmForm from "@/components/admin/FirmForm";
 import type { AssessmentItemInput } from "@/lib/actions/admin/firms";
 
-export const metadata = { title: "New Firm — Admin" };
+export const metadata = { title: "New Firm, Admin" };
 
 export default async function NewFirmPage() {
   const db = createAdminClient();

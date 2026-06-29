@@ -1,5 +1,5 @@
 /**
- * Firm seed script — lwyrd_15_categories.xlsx (May 2026)
+ * Firm seed script, lwyrd_15_categories.xlsx (May 2026)
  *
  * Clears ALL existing firms, attorneys, and assessment items, then inserts
  * all 113 firms from the Excel spreadsheet.

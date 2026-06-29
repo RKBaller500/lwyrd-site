@@ -16,7 +16,7 @@ export default function ConsentBanner() {
   }, []);
 
   const accept = () => {
-    // grantConsent() writes "true" to localStorage and inits PostHog via React context —
+    // grantConsent() writes "true" to localStorage and inits PostHog via React context  
     // no forgeable global window event is involved.
     grantConsent();
     setVisible(false);
@@ -33,19 +33,19 @@ export default function ConsentBanner() {
     <div
       role="dialog"
       aria-label="Cookie consent"
-      className="fixed bottom-0 left-0 right-0 z-50 bg-white border-t border-[#ddd7cc] px-6 py-4 shadow-lg sm:flex sm:items-center sm:justify-between gap-6"
+      className="fixed bottom-0 left-0 right-0 z-50 bg-white border-t border-[#1F2A3D] px-6 py-4 shadow-lg sm:flex sm:items-center sm:justify-between gap-6"
     >
-      <p className="text-sm text-slate-600 mb-3 sm:mb-0">
+      <p className="text-sm text-[#C8CDD8] mb-3 sm:mb-0">
         We use analytics cookies to understand how you use Lwyrd and improve the platform.
         No personal data (name or email) is shared.{" "}
-        <a href="/privacy" className="text-[#002452] underline hover:opacity-75">
+        <a href="/privacy" className="text-[#E6EAF2] underline hover:opacity-75">
           Privacy Policy
         </a>
       </p>
       <div className="flex items-center gap-3 shrink-0">
         <button
           onClick={decline}
-          className="px-4 py-2 text-sm text-slate-600 border border-[#ddd7cc] rounded-xl hover:bg-[#f5f4f0] transition-colors"
+          className="px-4 py-2 text-sm text-[#C8CDD8] border border-[#1F2A3D] rounded-xl hover:bg-[#0A0F1C] transition-colors"
         >
           Decline
         </button>

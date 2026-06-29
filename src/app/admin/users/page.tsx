@@ -1,7 +1,7 @@
 import { getAllUsers } from "@/lib/actions/admin/users";
 import UsersTable from "@/components/admin/UsersTable";
 
-export const metadata = { title: "Users — Admin" };
+export const metadata = { title: "Users, Admin" };
 
 export default async function AdminUsersPage() {
   const { data: users, error } = await getAllUsers();

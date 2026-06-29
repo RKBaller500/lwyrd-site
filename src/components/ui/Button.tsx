@@ -17,9 +17,9 @@ interface ButtonProps {
 }
 
 const variantClasses: Record<Variant, string> = {
-  primary: "bg-[#002452] text-white hover:opacity-90",
-  outline: "border border-[#002452] text-[#002452] hover:bg-[#002452] hover:text-white",
-  ghost: "text-[#002452] hover:bg-[#002452]/10",
+  primary: "bg-white text-[#0A0F1C] hover:bg-[#E6EAF2] active:bg-[#C8CDD8]",
+  outline: "border border-[#1F2A3D] text-[#C8CDD8] hover:bg-[#1F2A3D] hover:text-[#E6EAF2]",
+  ghost: "text-[#C8CDD8] hover:bg-white/8",
 };
 
 const sizeClasses: Record<Size, string> = {

@@ -5,7 +5,7 @@ import {
   BookOpen, Target, Zap, Map, BarChart2, Calendar,
 } from "lucide-react";
 
-export const metadata = { title: "Analytics — LWYRD Admin" };
+export const metadata = { title: "Analytics, LWYRD Admin" };
 
 // ─────────────────────────────────────────────────────────────────────────────
 // PLACEHOLDER DATA
@@ -82,7 +82,7 @@ const TOP_STATES = [
   { state: "Massachusetts", abbr: "MA", count: 164, pct: 5.8 },
   { state: "Illinois", abbr: "IL", count: 141, pct: 5.0 },
   { state: "Colorado", abbr: "CO", count: 98, pct: 3.4 },
-  { state: "Other", abbr: "—", count: 606, pct: 21.3 },
+  { state: "Other", abbr: " ", count: 606, pct: 21.3 },
 ];
 
 // PostHog: $os, $browser, $device_type
@@ -103,7 +103,7 @@ const MACRO_FUNNEL = [
   { label: "Requested Contact", count: 87, pct: 3.1, drop: -64.3 },
 ];
 
-// PostHog: intake_started, intake_completed — grouped by category property
+// PostHog: intake_started, intake_completed, grouped by category property
 const COMPLETION_BY_CATEGORY = [
   { category: "Corporate & Business Law", started: 94, completed: 72, rate: 76.6 },
   { category: "Employment & Labor", started: 71, completed: 50, rate: 70.4 },
@@ -113,7 +113,7 @@ const COMPLETION_BY_CATEGORY = [
   { category: "Estate Planning", started: 11, completed: 9, rate: 81.8 },
 ];
 
-// PostHog: custom event intake_step_abandoned — property: step_index, step_id
+// PostHog: custom event intake_step_abandoned, property: step_index, step_id
 const QUESTION_DROPOFF = [
   { step: 1, label: "Company stage", completions: 384, dropPct: 4.2 },
   { step: 2, label: "Industry", completions: 368, dropPct: 6.8 },
@@ -125,7 +125,7 @@ const QUESTION_DROPOFF = [
   { step: 8, label: "Language", completions: 268, dropPct: 0.7 },
 ];
 
-// PostHog: intake_completed — property: duration_seconds
+// PostHog: intake_completed, property: duration_seconds
 const COMPLETION_TIME_BUCKETS = [
   { label: "< 2 min", count: 18 },
   { label: "2–4 min", count: 64 },
@@ -135,14 +135,14 @@ const COMPLETION_TIME_BUCKETS = [
   { label: "> 12 min", count: 15 },
 ];
 
-// PostHog: intake_started — grouped by $hour_of_day
+// PostHog: intake_started, grouped by $hour_of_day
 const INTAKE_BY_HOUR = [
   0, 0, 0, 1, 1, 2, 4, 9, 18, 26, 31, 28,
   22, 29, 32, 34, 28, 22, 18, 12, 9, 6, 3, 1,
 ];
 
 // ── Section 4: Match Quality & Demand ────────────────────────────────────────
-// PostHog: intake_completed — properties: top_score, result_count, category
+// PostHog: intake_completed, properties: top_score, result_count, category
 
 const SCORE_HISTOGRAM = [4, 6, 9, 14, 22, 38, 61, 82, 57, 28];
 
@@ -155,7 +155,7 @@ const SCORE_BY_CATEGORY = [
   { category: "Litigation & Disputes", avg: 71, low: 40, high: 89 },
 ];
 
-// PostHog: intake_completed — property: result_count === 0
+// PostHog: intake_completed, property: result_count === 0
 const ZERO_RESULTS_RATE = "4.2%"; // 11 of 261 completed intakes returned no matches
 
 // User profile breakdown from intake answers
@@ -195,7 +195,7 @@ const RESULTS_KPIS = [
   { label: "Zero-Results Rate", value: ZERO_RESULTS_RATE, note: "of completed intakes" },
 ];
 
-// PostHog: firm_profile_clicked — property: firm_id, firm_name
+// PostHog: firm_profile_clicked, property: firm_id, firm_name
 const TOP_CLICKED_FIRMS = [
   { name: "Wilson Sonsini", clicks: 94, ctr: "38%" },
   { name: "Cooley LLP", clicks: 81, ctr: "33%" },
@@ -204,7 +204,7 @@ const TOP_CLICKED_FIRMS = [
   { name: "Gunderson Dettmer", clicks: 44, ctr: "18%" },
 ];
 
-// PostHog: intake_completed — property: matched_criteria, missed_criteria
+// PostHog: intake_completed, property: matched_criteria, missed_criteria
 const CRITERIA_MISS_RATE = [
   { criterion: "budget", missRate: 22, label: "Budget out of range" },
   { criterion: "industry", missRate: 18, label: "Industry not covered" },
@@ -214,7 +214,7 @@ const CRITERIA_MISS_RATE = [
 ];
 
 // ── Section 6: Retention & Lifecycle ─────────────────────────────────────────
-// PostHog: $identify, intake_started — person properties
+// PostHog: $identify, intake_started, person properties
 
 const COHORT_RETENTION = [
   { cohort: "Feb 2026", size: 214, w1: 34, w2: 22, w4: 14, w8: 9 },
@@ -222,7 +222,7 @@ const COHORT_RETENTION = [
   { cohort: "Apr 2026", size: 311, w1: 41, w2: null, w4: null, w8: null },
 ];
 
-// PostHog: intake_started per person — count grouped by distinct_id
+// PostHog: intake_started per person, count grouped by distinct_id
 const REPEAT_INTAKE = [
   { label: "1 intake", count: 194, pct: 74 },
   { label: "2 intakes", count: 48, pct: 18 },
@@ -291,7 +291,7 @@ function SectionHeader({
 
 function TrendBadge({ change }: { change: number }) {
   if (change === 0) return (
-    <span className="inline-flex items-center gap-0.5 text-xs text-slate-400"><Minus size={11} /> —</span>
+    <span className="inline-flex items-center gap-0.5 text-xs text-slate-400"><Minus size={11} />  </span>
   );
   const up = change > 0;
   return (
@@ -434,7 +434,7 @@ export default function AnalyticsPage() {
         Analytics
       </h1>
       <p className="text-slate-500 text-sm mb-6">
-        Platform usage, intake funnel, match quality, and user behavior — last 30 days.
+        Platform usage, intake funnel, match quality, and user behavior, last 30 days.
       </p>
 
       {/* Jump nav */}
@@ -589,7 +589,7 @@ export default function AnalyticsPage() {
         {/* Exit pages */}
         <div className="bg-[#fbfaf6] border border-[#ddd7cc] rounded-3xl p-6">
           <p className="text-sm font-medium text-slate-700 mb-0.5">Top Exit Pages</p>
-          <p className="text-xs text-slate-400 mb-4">Last page viewed before session ended — high exit rates on mid-intake pages indicate friction</p>
+          <p className="text-xs text-slate-400 mb-4">Last page viewed before session ended, high exit rates on mid-intake pages indicate friction</p>
           <div className="grid grid-cols-2 sm:grid-cols-5 gap-3">
             {TOP_EXIT_PAGES.map(({ path, label, exits, exitRate }) => (
               <div key={path} className="bg-[#f5f4f0] rounded-2xl p-4 text-center">
@@ -681,7 +681,7 @@ export default function AnalyticsPage() {
 
             <div className="bg-[#fbfaf6] border border-[#ddd7cc] rounded-3xl p-6">
               <p className="text-sm font-medium text-slate-700 mb-0.5">Intake Volume by Hour</p>
-              <p className="text-xs text-slate-400 mb-3">UTC — when users are most active (intake_started)</p>
+              <p className="text-xs text-slate-400 mb-3">UTC, when users are most active (intake_started)</p>
               <div className="flex items-end gap-0.5 h-14">
                 {INTAKE_BY_HOUR.map((v, i) => {
                   const max = Math.max(...INTAKE_BY_HOUR);
@@ -689,7 +689,7 @@ export default function AnalyticsPage() {
                     <div
                       key={i}
                       className="flex-1 rounded-t-sm bg-[#002452]"
-                      title={`${i}:00 — ${v} intakes`}
+                      title={`${i}:00, ${v} intakes`}
                       style={{ height: `${(v / max) * 100}%`, opacity: 0.1 + (v / max) * 0.7 }}
                     />
                   );
@@ -708,7 +708,7 @@ export default function AnalyticsPage() {
         <div className="bg-[#fbfaf6] border border-[#ddd7cc] rounded-3xl p-6">
           <p className="text-sm font-medium text-slate-700 mb-0.5">Question-Level Drop-off</p>
           <p className="text-xs text-slate-400 mb-4">
-            Which intake step loses the most users — high drop-off on a question suggests it needs redesign or reordering.
+            Which intake step loses the most users, high drop-off on a question suggests it needs redesign or reordering.
             Requires a custom PostHog event: <code className="bg-[#f0ede8] px-1 rounded text-[10px]">intake_step_abandoned</code>
           </p>
           <div className="space-y-2.5">
@@ -737,7 +737,7 @@ export default function AnalyticsPage() {
         <SectionHeader
           id="quality"
           title="Match Quality & Demand Intelligence"
-          description="How well your firm supply meets user demand — critical for identifying gaps in coverage"
+          description="How well your firm supply meets user demand, critical for identifying gaps in coverage"
           tag="PostHog: intake_completed properties"
         />
 
@@ -782,7 +782,7 @@ export default function AnalyticsPage() {
 
           <div className="bg-[#fbfaf6] border border-[#ddd7cc] rounded-3xl p-6">
             <p className="text-sm font-medium text-slate-700 mb-0.5">Avg Score by Category</p>
-            <p className="text-xs text-slate-400 mb-4">Low scores signal supply gaps — not enough qualified firms for that practice area</p>
+            <p className="text-xs text-slate-400 mb-4">Low scores signal supply gaps, not enough qualified firms for that practice area</p>
             <div className="space-y-3">
               {SCORE_BY_CATEGORY.map(({ category, avg, low, high }) => (
                 <div key={category}>
@@ -842,7 +842,7 @@ export default function AnalyticsPage() {
         <SectionHeader
           id="post-match"
           title="Post-Match Engagement"
-          description="What users do after seeing their results — measures the quality and relevance of matches"
+          description="What users do after seeing their results, measures the quality and relevance of matches"
           tag="PostHog: results_viewed · firm_profile_clicked · firm_saved · contact_requested"
         />
 
@@ -861,7 +861,7 @@ export default function AnalyticsPage() {
           {/* Top clicked firms */}
           <div className="bg-[#fbfaf6] border border-[#ddd7cc] rounded-3xl p-6">
             <p className="text-sm font-medium text-slate-700 mb-0.5">Most-Clicked Firms from Results</p>
-            <p className="text-xs text-slate-400 mb-4">Which firms earn the most profile visits — reflects perceived relevance</p>
+            <p className="text-xs text-slate-400 mb-4">Which firms earn the most profile visits, reflects perceived relevance</p>
             <table className="w-full text-xs">
               <thead>
                 <tr className="border-b border-[#ddd7cc]">
@@ -886,7 +886,7 @@ export default function AnalyticsPage() {
           <div className="bg-[#fbfaf6] border border-[#ddd7cc] rounded-3xl p-6">
             <p className="text-sm font-medium text-slate-700 mb-0.5">Most Common Unmatched Criteria</p>
             <p className="text-xs text-slate-400 mb-4">
-              Criteria frequently missed by firms — high rates indicate gaps in your firm roster that depress match scores.
+              Criteria frequently missed by firms, high rates indicate gaps in your firm roster that depress match scores.
               <span className="block mt-1 text-[10px]">Source: intake_completed · property: missed_criteria[]</span>
             </p>
             <div className="space-y-3">
@@ -949,7 +949,7 @@ export default function AnalyticsPage() {
                             {v}%
                           </span>
                         ) : (
-                          <span className="text-slate-300">—</span>
+                          <span className="text-slate-300"> </span>
                         )}
                       </td>
                     ))}

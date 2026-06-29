@@ -1420,7 +1420,7 @@ export function getSubQuestions(track: V2Track, category: string): V2Question[] 
 }
 
 // Billing options to disable per track + category.
-// Only list values that should be greyed out — everything else remains selectable.
+// Only list values that should be greyed out, everything else remains selectable.
 const DISABLED_BILLING_OPTIONS: Partial<Record<V2Track, Record<string, string[]>>> = {
   individual: {
     // Contingency is only appropriate for personal injury and employment discrimination

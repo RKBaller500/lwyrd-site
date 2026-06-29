@@ -3,7 +3,7 @@ import { createAdminClient } from "@/lib/supabase/admin";
 import CategoryForm from "@/components/admin/CategoryForm";
 import type { CategoryInput } from "@/lib/actions/admin/categories";
 
-export const metadata = { title: "Edit Category — Admin" };
+export const metadata = { title: "Edit Category, Admin" };
 
 export default async function EditCategoryPage({
   params,

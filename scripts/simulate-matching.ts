@@ -65,7 +65,7 @@ function randomBudget(min: number, max: number, step: number): number {
 }
 
 function answerQuestion(q: V2Question): string | string[] | number {
-  if (q.type === "state-dropdown") return q.options.find((o) => o.value === "NY")?.value ?? "NY";
+  if (q.type === "state-dropdown") return q.options.find((o) => o.value === "FL")?.value ?? "FL";
   if (q.type === "single-select") return pick(q.options).value;
   if (q.type === "multi-select") return pickMulti(q.options);
   if (q.type === "budget-range") return randomBudget(q.min ?? 0, q.max ?? 100000, q.step ?? 2500);

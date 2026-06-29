@@ -1,7 +1,7 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { ClipboardList, Search, Award, CheckCircle2, ArrowRight } from "lucide-react";
+import { ArrowRight } from "lucide-react";
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
 import Button from "@/components/ui/Button";
@@ -22,42 +22,23 @@ const item = {
 const steps = [
   {
     number: "01",
-    icon: ClipboardList,
     title: "The Guided Diagnosis",
-    summary: "You don't need to know the legal jargon.",
-    detail:
-      "Our interactive intake asks plain-English questions about your situation to pinpoint exactly what legal specialization you require. You tell us who you are, what you're facing, your timeline, and your budget. The whole thing takes about five minutes.",
-    bullets: [
-      "Three tracks: Startups, Small Businesses, Individuals",
-      "Plain language, no legal training needed",
-      "Your answers are private and never shared without your knowledge",
-    ],
+    detail: "You don't need to know the legal jargon. Our interactive intake form asks plain-English questions about your situation to pinpoint exactly what legal specialization you require.",
   },
   {
     number: "02",
-    icon: Search,
-    title: "The Precision Match",
-    summary: "Your answers drive the match, not a generic algorithm.",
-    detail:
-      "LWYRD scores every vetted firm against your specific answers. Practice area alignment, matter type, your stage, budget range, firm size preference, and timeline all factor in. So does each firm's LWYRD Assessment score. The result is a curated shortlist of firms that are genuinely suited to what you described.",
-    bullets: [
-      "Matched on your specific answers, not generic criteria",
-      "Assessment performance factors into every result",
-      "No firm can pay its way to the top",
-    ],
+    title: "The Curated Search",
+    detail: "Behind the scenes, our matching engine cross-references your needs against our vetted network of specialized attorneys, filtering for expertise, availability, and budget fit.",
   },
   {
     number: "03",
-    icon: Award,
-    title: "The Introduction",
-    summary: "You're in control of every next step.",
-    detail:
-      "You receive a ranked list of firms, each with a fit score and the specific reasons it's a strong match for your situation. Review, save, and compare at your own pace. When you're ready, you reach out. No firm contacts you until you make the first move.",
-    bullets: [
-      "Ranked matches with fit scores and match reasons",
-      "Full firm profiles with Assessment results visible",
-      "Save and compare before deciding",
-    ],
+    title: "The Handshake",
+    detail: "We present you with 2-3 perfectly matched options. You review their profiles, past successes, and pricing structures before deciding who you'd like to consult with.",
+  },
+  {
+    number: "04",
+    title: "The Ongoing Relationship",
+    detail: "Once engaged, you work directly with your chosen firm. LWYRD remains available to ensure the relationship is productive and to assist if additional specializations are needed later.",
   },
 ];
 
@@ -119,62 +100,35 @@ export default function HowItWorksPage() {
         </section>
 
         {/* ── Steps ── */}
-        <section className="bg-[#0A0F1C] py-8 px-6 pb-20">
-          <div className="max-w-5xl mx-auto space-y-6">
-            {steps.map((step, index) => {
-              const Icon = step.icon;
-              return (
-                <motion.div
-                  key={step.number}
-                  initial={{ opacity: 0, y: 24 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true, margin: "-60px" }}
-                  transition={{ duration: 0.65, ease, delay: index * 0.07 }}
-                  className="border-t border-[#1F2A3D] pt-10 grid grid-cols-1 md:grid-cols-2 gap-10 items-start"
+        <section className="bg-[#0A0F1C] px-6 pb-24">
+          <div className="max-w-5xl mx-auto">
+            {steps.map((step, index) => (
+              <motion.div
+                key={step.number}
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true, margin: "-60px" }}
+                transition={{ duration: 0.6, ease, delay: index * 0.06 }}
+                className="border-t border-[#1F2A3D] py-10 grid grid-cols-[80px_1fr_1fr] md:grid-cols-[100px_1fr_1fr] gap-6 md:gap-10 items-start"
+              >
+                <span
+                  className="text-6xl md:text-7xl leading-none text-white/[0.07] select-none"
+                  style={{ ...lora, fontWeight: 700 }}
                 >
-                  <div>
-                    <div className="flex items-center gap-3 mb-5">
-                      <span
-                        className="text-5xl leading-none text-white/5"
-                        style={{ ...lora, fontWeight: 600 }}
-                      >
-                        {step.number}
-                      </span>
-                      <div className="flex items-center justify-center w-11 h-11 rounded-2xl bg-white/8 border border-[#1F2A3D]">
-                        <Icon size={20} className="text-[#E6EAF2]" strokeWidth={1.5} />
-                      </div>
-                    </div>
-
-                    <h2
-                      className="text-[#E6EAF2] text-3xl sm:text-4xl mb-3"
-                      style={{ ...lora, fontWeight: 700 }}
-                    >
-                      {step.title}
-                    </h2>
-                    <p className="text-[#8A93A6] text-sm font-medium mb-4">{step.summary}</p>
-                    <p className="text-[#8A93A6] text-sm leading-relaxed">{step.detail}</p>
-                  </div>
-
-                  <div className="bg-[#141C2E] border border-[#1F2A3D] rounded-3xl shadow-sm p-7">
-                    <p className="text-[#8A93A6] text-xs font-medium tracking-widest uppercase mb-4">
-                      What to expect
-                    </p>
-                    <ul className="space-y-3">
-                      {step.bullets.map((b) => (
-                        <li key={b} className="flex items-start gap-3">
-                          <CheckCircle2
-                            size={15}
-                            className="text-emerald-500 shrink-0 mt-0.5"
-                            strokeWidth={2}
-                          />
-                          <span className="text-[#C8CDD8] text-sm leading-snug">{b}</span>
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-                </motion.div>
-              );
-            })}
+                  {step.number}
+                </span>
+                <h2
+                  className="text-[#E6EAF2] text-xl sm:text-2xl md:text-3xl leading-snug"
+                  style={{ ...lora, fontWeight: 700 }}
+                >
+                  {step.title}
+                </h2>
+                <p className="text-[#8A93A6] text-sm leading-relaxed">
+                  {step.detail}
+                </p>
+              </motion.div>
+            ))}
+            <div className="border-t border-[#1F2A3D]" />
           </div>
         </section>
 

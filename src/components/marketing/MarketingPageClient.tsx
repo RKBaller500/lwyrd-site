@@ -40,18 +40,22 @@ export default function MarketingPageClient({
     let cleanup: void | (() => void);
 
     // Run the page's original JS (maze, reveals, accordions, smooth scroll).
+    // We inject it as a real inline <script> rather than eval/new Function so
+    // it runs under the production CSP's script-src 'unsafe-inline' (which does
+    // NOT permit eval). Wrapped in an IIFE so re-running on client navigation
+    // doesn't redeclare the design's top-level `const`/`let` globals.
+    let scriptEl: HTMLScriptElement | null = null;
     if (js) {
-      try {
-        new Function(js)();
-      } catch (err) {
-        console.error("Marketing page script error:", err);
-      }
+      scriptEl = document.createElement("script");
+      scriptEl.textContent = `;(function(){\ntry{\n${js}\n}catch(e){console.error("Marketing page script error:",e);}\n})();`;
+      document.body.appendChild(scriptEl);
     }
 
     if (onReady) cleanup = onReady(root);
 
     return () => {
       if (typeof cleanup === "function") cleanup();
+      if (scriptEl) scriptEl.remove();
     };
     // Re-run only when the page content changes.
     // eslint-disable-next-line react-hooks/exhaustive-deps

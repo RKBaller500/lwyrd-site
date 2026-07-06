@@ -271,3 +271,19 @@
 .auth-back{display:inline-flex;align-items:center;gap:.4em;color:var(--muted);font-size:.82rem;margin-bottom:1.2rem;transition:color .15s ease}
 .auth-back:hover{color:var(--ink)}
 .field-hint{font-size:.78rem;color:var(--faint);margin-top:.4rem}
+
+/* ---- app surfaces (browse/services/firms/results/access) ---- */
+.ds-shell{max-width:var(--maxw);margin:0 auto;padding:clamp(28px,5vw,56px) var(--pad)}
+.ds-eyebrow{font-size:.72rem;letter-spacing:.12em;text-transform:uppercase;color:var(--faint);font-weight:600}
+.ds-breadcrumb{display:flex;align-items:center;gap:.55rem;font-size:.85rem;color:var(--muted)}
+.ds-breadcrumb a:hover{color:var(--ink)}
+.ds-breadcrumb .sep{color:var(--faint)}
+.ds-card{background:#fff;border:1px solid var(--line);border-radius:18px;box-shadow:var(--shadow-sm);padding:clamp(22px,3vw,32px)}
+.ds-card-hover{transition:transform .2s ease,box-shadow .2s ease,border-color .2s ease}
+.ds-card-hover:hover{transform:translateY(-2px);box-shadow:var(--shadow-md);border-color:var(--navy-tint-2)}
+.navy-panel{background:var(--navy-gradient);color:#fff;border-radius:18px;padding:clamp(24px,3vw,34px)}
+.navy-panel h1,.navy-panel h2,.navy-panel h3{color:#fff}
+.icon-box{display:inline-flex;align-items:center;justify-content:center;width:44px;height:44px;border-radius:12px;background:var(--navy-tint);border:1px solid var(--navy-tint-2);color:var(--navy)}
+.btn-outline{color:var(--navy);border:1px solid var(--navy);background:#fff}
+.btn-outline:hover{background:var(--navy);color:#fff;transform:translateY(-1px)}
+.chip{display:inline-flex;align-items:center;gap:.4em;border:1px solid var(--line);background:var(--paper-alt);color:var(--ink-2);font-size:.78rem;font-weight:500;border-radius:var(--r-pill);padding:.3em .75em}

@@ -45,20 +45,20 @@ export default function ContactLwyrdModal({ isOpen, onClose, categoryName }: Con
   };
 
   const inputClass =
-    "w-full px-4 py-3 rounded-2xl border border-[#ddd7cc] bg-white text-slate-700 placeholder-slate-400 focus:outline-none focus:border-[#002452] focus:ring-2 focus:ring-[#002452]/15 transition-colors text-sm";
+    "w-full px-4 py-3 rounded-2xl border border-[#E7E7E3] bg-white text-[#2A2A2E] placeholder-slate-400 focus:outline-none focus:border-[#002B55] focus:ring-2 focus:ring-[#002B55]/15 transition-colors text-sm";
 
   return (
-    <Modal isOpen={isOpen} onClose={handleClose}>
+    <Modal isOpen={isOpen} onClose={handleClose} panelClassName="bg-white p-8" closeIconClassName="text-[#6B6B70]">
       <div className="flex items-center gap-2 mb-1">
-        <Calendar size={16} className="text-[#002452]" strokeWidth={1.5} />
+        <Calendar size={16} className="text-[#002B55]" strokeWidth={1.5} />
         <h2
-          className="text-2xl text-[#002452]"
-          style={{ fontFamily: '"Lora", Georgia, serif', fontWeight: 500 }}
+          className="text-2xl text-[#002B55]"
+          style={{ fontFamily: '"Libre Baskerville", Georgia, serif', fontWeight: 700 }}
         >
           Book a Consultation
         </h2>
       </div>
-      <p className="text-slate-500 text-sm mb-6">
+      <p className="text-[#6B6B70] text-sm mb-6">
         {categoryName
           ? `Tell us about your ${categoryName} needs and our team will follow up to match you with the right firm.`
           : "Tell us about your needs and our team will follow up personally."}
@@ -67,8 +67,8 @@ export default function ContactLwyrdModal({ isOpen, onClose, categoryName }: Con
       {status === "success" ? (
         <div className="py-8 text-center">
           <CheckCircle2 size={32} className="text-emerald-500 mx-auto mb-3" strokeWidth={1.5} />
-          <p className="text-[#002452] font-medium text-sm mb-1">Request received.</p>
-          <p className="text-slate-500 text-sm">Our team will be in touch with you shortly.</p>
+          <p className="text-[#002B55] font-medium text-sm mb-1">Request received.</p>
+          <p className="text-[#6B6B70] text-sm">Our team will be in touch with you shortly.</p>
         </div>
       ) : (
         <form onSubmit={handleSubmit} className="space-y-3">
@@ -106,7 +106,7 @@ export default function ContactLwyrdModal({ isOpen, onClose, categoryName }: Con
           <button
             type="submit"
             disabled={status === "loading"}
-            className="w-full py-3 rounded-2xl bg-[#002452] text-white text-sm font-medium hover:opacity-90 transition-opacity disabled:opacity-50"
+            className="w-full py-3 rounded-2xl bg-[#002B55] text-white text-sm font-medium hover:opacity-90 transition-opacity disabled:opacity-50"
           >
             {status === "loading" ? "Sending…" : "Send Request"}
           </button>

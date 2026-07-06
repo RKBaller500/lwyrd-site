@@ -1,10 +1,11 @@
 "use client";
 
+import "@/styles/lwyrd-ds.css";
 import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import { useRouter } from "next/navigation";
-import Navbar from "@/components/layout/Navbar";
-import Footer from "@/components/layout/Footer";
+import MarketingNav from "@/components/marketing/MarketingNav";
+import MarketingFooter from "@/components/marketing/MarketingFooter";
 import AuthGuard from "@/components/auth/AuthGuard";
 import MatchCard from "@/components/results/MatchCard";
 import { MatchResult } from "@/types";
@@ -12,7 +13,6 @@ import Link from "next/link";
 import { Info } from "lucide-react";
 
 const ease = [0.25, 0.46, 0.45, 0.94] as const;
-const lora = { fontFamily: '"Lora", Georgia, serif' } as const;
 
 const container = {
   hidden: {},
@@ -98,9 +98,9 @@ function ResultsContent() {
     : results;
 
   return (
-    <div className="flex flex-col min-h-screen bg-[#0A0F1C]">
-      <Navbar />
-      <main className="flex-1 max-w-4xl mx-auto w-full px-6 py-14">
+    <div className="lwyrd-ds ds-page">
+      <MarketingNav />
+      <main className="ds-main mx-auto w-full" style={{ maxWidth: 880, padding: "clamp(28px,5vw,56px) var(--pad)" }}>
         {/* Header */}
         <motion.div
           initial={{ opacity: 0, y: 18 }}
@@ -108,18 +108,13 @@ function ResultsContent() {
           transition={{ duration: 0.6, ease }}
           className="mb-10"
         >
-          <div className="flex items-center gap-2 text-sm text-[#8A93A6] mb-4">
-            <Link href="/dashboard" className="hover:text-[#3B82F6] transition-colors">My Dashboard</Link>
-            <span>/</span>
-            <span className="text-[#C8CDD8]">Your Matches</span>
-          </div>
-          <h1
-            className="text-4xl sm:text-5xl text-[#E6EAF2] mb-3"
-            style={{ ...lora, fontWeight: 500 }}
-          >
-            Your Matches
-          </h1>
-          <p className="text-[#8A93A6] text-base">
+          <nav className="ds-breadcrumb mb-4">
+            <Link href="/dashboard">My dashboard</Link>
+            <span className="sep">/</span>
+            <span style={{ color: "var(--ink-2)" }}>Your matches</span>
+          </nav>
+          <h1 style={{ fontSize: "clamp(2rem,4vw,3rem)", marginBottom: ".75rem" }}>Your matches</h1>
+          <p className="text-[#6B6B70] text-base">
             {results.length > 0
               ? `We found ${results.length} ${results.length === 1 ? "firm" : "firms"} that match your needs${categoryName ? ` in ${categoryName}` : ""}.`
               : "No firms matched your criteria, try adjusting your answers."}
@@ -132,10 +127,11 @@ function ResultsContent() {
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, ease, delay: 0.05 }}
-            className="flex items-start gap-3 bg-[#141C2E] border border-[#1F2A3D] rounded-2xl px-5 py-4 mb-6"
+            className="flex items-start gap-3 rounded-2xl px-5 py-4 mb-6"
+            style={{ background: "var(--navy-tint)", border: "1px solid var(--navy-tint-2)" }}
           >
-            <Info size={16} className="text-[#3B82F6]/50 mt-0.5 shrink-0" strokeWidth={2} />
-            <p className="text-sm text-[#8A93A6] leading-relaxed">{sizeGapNotice}</p>
+            <Info size={16} style={{ color: "var(--navy)", marginTop: 2, flexShrink: 0 }} strokeWidth={2} />
+            <p className="text-sm text-[#2A2A2E] leading-relaxed">{sizeGapNotice}</p>
           </motion.div>
         )}
 
@@ -144,39 +140,22 @@ function ResultsContent() {
             initial={{ opacity: 0, y: 14 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.55, ease, delay: 0.1 }}
-            className="bg-[#141C2E] border border-[#1F2A3D] rounded-3xl p-12 text-center"
+            className="ds-card text-center"
+            style={{ padding: "3rem" }}
           >
-            <h3
-              className="text-[#E6EAF2] font-medium text-lg mb-3"
-              style={lora}
-            >
-              No matches found.
-            </h3>
-            <p className="text-[#8A93A6] text-sm mb-6">
+            <h3 style={{ fontSize: "1.25rem", marginBottom: ".75rem" }}>No matches found.</h3>
+            <p className="text-[#6B6B70] text-sm mb-6">
               Try adjusting your preferences, a different budget range, timeline, or stage may surface more results.
             </p>
             <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
-              <Link
-                href="/intake/start"
-                className="text-[#3B82F6] text-sm font-medium px-5 py-2.5 rounded-2xl bg-[#3B82F6]/10 hover:bg-[#3B82F6]/20 transition-colors"
-              >
-                Refine my answers →
-              </Link>
-              <Link
-                href="/intake/start"
-                className="text-[#8A93A6] text-sm hover:text-[#E6EAF2] transition-colors"
-              >
+              <Link href="/intake/start" className="btn btn-primary">Refine my answers</Link>
+              <Link href="/intake/start" className="text-[#6B6B70] text-sm hover:text-[#0B0B0C] transition-colors">
                 Start a new intake →
               </Link>
             </div>
           </motion.div>
         ) : (
-          <motion.div
-            className="space-y-5"
-            variants={container}
-            initial="hidden"
-            animate="visible"
-          >
+          <motion.div className="space-y-5" variants={container} initial="hidden" animate="visible">
             {displayResults.map((result, i) => (
               <motion.div key={result.firm.id} variants={item}>
                 <MatchCard result={result} rank={i + 1} />
@@ -187,16 +166,16 @@ function ResultsContent() {
 
         {results.length > 0 && categorySlug && (
           <div className="mt-10 text-center">
-            <p className="text-[#8A93A6] text-sm">
+            <p className="text-[#6B6B70] text-sm">
               Didn&apos;t see what you needed?{" "}
-              <Link href="/intake/start" className="text-[#3B82F6] hover:underline">
+              <Link href="/intake/start" style={{ color: "var(--navy)", fontWeight: 600 }}>
                 Refine your answers →
               </Link>
             </p>
           </div>
         )}
       </main>
-      <Footer />
+      <MarketingFooter />
     </div>
   );
 }

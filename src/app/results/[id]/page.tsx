@@ -1,18 +1,18 @@
 "use client";
 
+import "@/styles/lwyrd-ds.css";
 import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import { useRouter, useParams } from "next/navigation";
 import Link from "next/link";
-import Navbar from "@/components/layout/Navbar";
-import Footer from "@/components/layout/Footer";
+import MarketingNav from "@/components/marketing/MarketingNav";
+import MarketingFooter from "@/components/marketing/MarketingFooter";
 import AuthGuard from "@/components/auth/AuthGuard";
 import MatchCard from "@/components/results/MatchCard";
 import { runMatchingForSubmission } from "@/lib/actions/intake";
 import { MatchResult } from "@/types";
 
 const ease = [0.25, 0.46, 0.45, 0.94] as const;
-const lora = { fontFamily: '"Lora", Georgia, serif' } as const;
 
 const container = {
   hidden: {},
@@ -62,17 +62,17 @@ function PastResultsContent() {
   // Loading skeleton
   if (loading) {
     return (
-      <div className="flex flex-col min-h-screen bg-[#0A0F1C]">
-        <Navbar />
-        <main className="flex-1 max-w-4xl mx-auto w-full px-6 py-14">
-          <div className="h-28 rounded-2xl bg-white border border-[#1F2A3D] animate-pulse mb-8" />
+      <div className="lwyrd-ds ds-page">
+        <MarketingNav />
+        <main className="ds-main mx-auto w-full" style={{ maxWidth: 880, padding: "clamp(28px,5vw,56px) var(--pad)" }}>
+          <div className="h-28 rounded-2xl bg-[#F6F6F4] border border-[#E7E7E3] animate-pulse mb-8" />
           <div className="space-y-4">
             {[1, 2, 3].map((i) => (
-              <div key={i} className="h-44 rounded-3xl bg-white border border-[#1F2A3D] animate-pulse" />
+              <div key={i} className="h-44 rounded-[18px] bg-[#F6F6F4] border border-[#E7E7E3] animate-pulse" />
             ))}
           </div>
         </main>
-        <Footer />
+        <MarketingFooter />
       </div>
     );
   }
@@ -82,9 +82,9 @@ function PastResultsContent() {
   const total = results.length;
 
   return (
-    <div className="flex flex-col min-h-screen bg-[#0A0F1C]">
-      <Navbar />
-      <main className="flex-1 max-w-4xl mx-auto w-full px-6 py-14">
+    <div className="lwyrd-ds ds-page">
+      <MarketingNav />
+      <main className="ds-main mx-auto w-full" style={{ maxWidth: 880, padding: "clamp(28px,5vw,56px) var(--pad)" }}>
         {/* Header */}
         <motion.div
           initial={{ opacity: 0, y: 18 }}
@@ -92,30 +92,19 @@ function PastResultsContent() {
           transition={{ duration: 0.6, ease }}
           className="mb-10"
         >
-          <div className="flex items-center gap-2 text-sm text-[#8A93A6] mb-4">
-            <Link href="/dashboard" className="hover:text-[#E6EAF2] transition-colors">
-              My Dashboard
-            </Link>
-            <span>/</span>
-            <Link href="/dashboard" className="hover:text-[#E6EAF2] transition-colors">
-              My Matches
-            </Link>
-            <span>/</span>
-            <span className="text-[#C8CDD8]">{categoryName || "Results"}</span>
-          </div>
+          <nav className="ds-breadcrumb mb-4">
+            <Link href="/dashboard">My dashboard</Link>
+            <span className="sep">/</span>
+            <span style={{ color: "var(--ink-2)" }}>{categoryName || "Results"}</span>
+          </nav>
 
-          <h1
-            className="text-4xl sm:text-5xl text-[#E6EAF2] mb-3"
-            style={{ ...lora, fontWeight: 500 }}
-          >
-            Your Matches
-          </h1>
-          <p className="text-[#8A93A6] text-base">
+          <h1 style={{ fontSize: "clamp(2rem,4vw,3rem)", marginBottom: ".75rem" }}>Your matches</h1>
+          <p className="text-[#6B6B70] text-base">
             {total > 0
               ? `${total} ${total === 1 ? "firm" : "firms"} matched${categoryName ? ` for ${categoryName}` : ""}`
               : "No firms matched your criteria."}
             {intakeDate && (
-              <span className="text-[#8A93A6]">
+              <span>
                 {" · "}Intake from{" "}
                 {new Date(intakeDate).toLocaleDateString("en-US", {
                   month: "long",
@@ -132,31 +121,20 @@ function PastResultsContent() {
             initial={{ opacity: 0, y: 14 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.55, ease, delay: 0.1 }}
-            className="bg-[#141C2E] border border-[#1F2A3D] rounded-3xl p-12 text-center"
+            className="ds-card text-center"
+            style={{ padding: "3rem" }}
           >
-            <h3 className="text-[#E6EAF2] font-medium text-lg mb-3" style={lora}>
-              No matches found.
-            </h3>
-            <p className="text-[#8A93A6] text-sm mb-6">
+            <h3 style={{ fontSize: "1.25rem", marginBottom: ".75rem" }}>No matches found.</h3>
+            <p className="text-[#6B6B70] text-sm mb-6">
               Try a new intake with adjusted preferences, a different budget range, timeline, or firm
               size may surface more results.
             </p>
             <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
-              <Link
-                href="/intake/start"
-                className="text-[#E6EAF2] text-sm font-medium px-5 py-2.5 rounded-2xl bg-white/8 hover:bg-[#002452]/15 transition-colors"
-              >
-                Start a new intake →
-              </Link>
+              <Link href="/intake/start" className="btn btn-primary">Start a new intake</Link>
             </div>
           </motion.div>
         ) : (
-          <motion.div
-            className="space-y-5"
-            variants={container}
-            initial="hidden"
-            animate="visible"
-          >
+          <motion.div className="space-y-5" variants={container} initial="hidden" animate="visible">
             {results.map((result, i) => (
               <motion.div key={result.firm.id} variants={cardItem}>
                 <MatchCard result={result} rank={i + 1} />
@@ -167,16 +145,16 @@ function PastResultsContent() {
 
         {total > 0 && categorySlug && (
           <div className="mt-10 text-center">
-            <p className="text-[#8A93A6] text-sm">
+            <p className="text-[#6B6B70] text-sm">
               Looking for something different?{" "}
-              <Link href="/intake/start" className="text-[#E6EAF2] hover:underline">
+              <Link href="/intake/start" style={{ color: "var(--navy)", fontWeight: 600 }}>
                 Start a new intake →
               </Link>
             </p>
           </div>
         )}
       </main>
-      <Footer />
+      <MarketingFooter />
     </div>
   );
 }

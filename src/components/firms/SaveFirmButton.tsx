@@ -54,10 +54,10 @@ export default function SaveFirmButton({
         onClick={handleClick}
         disabled={isPending}
         aria-label={saved ? "Remove from saved firms" : "Save this firm"}
-        className={`flex items-center justify-center w-10 h-10 rounded-2xl border transition-colors disabled:opacity-50 ${
+        className={`flex items-center justify-center w-10 h-10 rounded-full border transition-colors disabled:opacity-50 ${
           saved
-            ? "border-[#002452] text-[#002452] bg-[#002452]/5"
-            : "border-[#ddd7cc] text-slate-400 hover:border-[#002452] hover:text-[#002452]"
+            ? "border-[#002B55] text-[#002B55] bg-[#EEF3F8]"
+            : "border-[#E7E7E3] text-[#9A9AA0] hover:border-[#002B55] hover:text-[#002B55]"
         }`}
       >
         <Icon size={16} strokeWidth={1.5} />
@@ -70,10 +70,10 @@ export default function SaveFirmButton({
       onClick={handleClick}
       disabled={isPending}
       aria-label={saved ? "Remove from saved firms" : "Save this firm"}
-      className={`flex items-center gap-2 w-full py-3 rounded-2xl border text-sm font-medium transition-colors disabled:opacity-50 ${
+      className={`flex items-center gap-2 w-full py-3 rounded-full border text-sm font-medium transition-colors disabled:opacity-50 ${
         saved
-          ? "border-[#002452] text-[#002452] bg-[#002452]/5 hover:bg-[#002452]/10"
-          : "border-[#ddd7cc] text-slate-600 hover:border-[#002452] hover:text-[#002452]"
+          ? "border-[#002B55] text-[#002B55] bg-[#EEF3F8] hover:bg-[#E1EAF3]"
+          : "border-[#E7E7E3] text-[#2A2A2E] hover:border-[#002B55] hover:text-[#002B55]"
       }`}
       style={{ justifyContent: "center" }}
     >

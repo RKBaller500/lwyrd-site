@@ -1,6 +1,7 @@
+import "@/styles/lwyrd-ds.css";
 import { notFound } from "next/navigation";
-import Navbar from "@/components/layout/Navbar";
-import Footer from "@/components/layout/Footer";
+import MarketingNav from "@/components/marketing/MarketingNav";
+import MarketingFooter from "@/components/marketing/MarketingFooter";
 import AuthGuard from "@/components/auth/AuthGuard";
 import ServiceDetail from "@/components/services/ServiceDetail";
 import { getCategoryBySlug } from "@/lib/supabase/queries";
@@ -32,12 +33,12 @@ export default async function ServicePage({ params }: Props) {
 
   return (
     <AuthGuard>
-      <div className="flex flex-col min-h-screen bg-[#0A0F1C]">
-        <Navbar />
-        <main className="flex-1">
+      <div className="lwyrd-ds ds-page">
+        <MarketingNav />
+        <main className="ds-main">
           <ServiceDetail category={category} />
         </main>
-        <Footer />
+        <MarketingFooter />
       </div>
     </AuthGuard>
   );

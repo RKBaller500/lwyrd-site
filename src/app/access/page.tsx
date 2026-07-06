@@ -1,10 +1,11 @@
 "use client";
 
+import "@/styles/lwyrd-ds.css";
 import { useState } from "react";
 import { motion } from "framer-motion";
 import Link from "next/link";
-import Navbar from "@/components/layout/Navbar";
-import Footer from "@/components/layout/Footer";
+import MarketingNav from "@/components/marketing/MarketingNav";
+import MarketingFooter from "@/components/marketing/MarketingFooter";
 import AuthGuard from "@/components/auth/AuthGuard";
 import ContactLwyrdModal from "@/components/ui/ContactLwyrdModal";
 import { CheckCircle2, ArrowLeft, User, Building2 } from "lucide-react";
@@ -43,21 +44,13 @@ function AccessContent() {
         onClose={() => setModalOpen(false)}
         categoryName={modalCategory}
       />
-      <div className="flex flex-col min-h-screen bg-[#0A0F1C]">
-        <Navbar />
-        <main className="flex-1 max-w-5xl mx-auto w-full px-6 py-14">
+      <div className="lwyrd-ds ds-page">
+        <MarketingNav />
+        <main className="ds-main mx-auto w-full" style={{ maxWidth: 1040, padding: "clamp(28px,5vw,56px) var(--pad)" }}>
           {/* Back link */}
-          <motion.div
-            initial={{ opacity: 0, x: -10 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.4, ease }}
-          >
-            <Link
-              href="/results"
-              className="inline-flex items-center gap-1.5 text-sm text-[#8A93A6] hover:text-[#E6EAF2] transition-colors mb-10"
-            >
-              <ArrowLeft size={14} />
-              Back to your matches
+          <motion.div initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 0.4, ease }}>
+            <Link href="/results" className="ds-breadcrumb" style={{ marginBottom: "2.5rem" }}>
+              <ArrowLeft size={14} /> Back to your matches
             </Link>
           </motion.div>
 
@@ -68,17 +61,10 @@ function AccessContent() {
             transition={{ duration: 0.6, ease, delay: 0.05 }}
             className="mb-12"
           >
-            <span className="inline-block bg-[#002452] text-white text-xs font-medium px-3 py-1.5 rounded-full tracking-wide mb-4">
-              Get Access
-            </span>
-            <h1
-              className="text-4xl sm:text-5xl text-[#E6EAF2] mb-4"
-              style={{ fontFamily: '"Lora", Georgia, serif', fontWeight: 500 }}
-            >
-              Unlock your matches
-            </h1>
-            <p className="text-[#8A93A6] text-base max-w-2xl leading-relaxed">
-              You&apos;ve already completed your intake. LWYRD has your matches ready, get access to view the full results and connect directly with the right firm for your needs.
+            <span className="kicker">Get access</span>
+            <h1 style={{ fontSize: "clamp(2rem,4vw,3rem)", margin: ".4rem 0 1rem" }}>Unlock your matches</h1>
+            <p className="text-[#6B6B70] text-base max-w-2xl leading-relaxed">
+              You&apos;ve already completed your intake. LWYRD has your matches ready — get access to view the full results and connect directly with the right firm for your needs.
             </p>
           </motion.div>
 
@@ -90,46 +76,31 @@ function AccessContent() {
             className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-14"
           >
             {/* Individual */}
-            <div className="bg-[#141C2E] border border-[#1F2A3D] rounded-3xl p-8 flex flex-col">
-              <div className="inline-flex items-center justify-center w-11 h-11 rounded-2xl bg-white/8 border border-[#1F2A3D] mb-6">
-                <User size={20} className="text-[#E6EAF2]" strokeWidth={1.5} />
-              </div>
-              <h2
-                className="text-[#E6EAF2] text-2xl mb-2"
-                style={{ fontFamily: '"Lora", Georgia, serif', fontWeight: 500 }}
-              >
-                Individual Access
-              </h2>
-              <p className="text-[#8A93A6] text-sm leading-relaxed mb-6">
+            <div className="ds-card flex flex-col">
+              <div className="icon-box mb-6"><User size={20} strokeWidth={1.5} /></div>
+              <h2 style={{ fontSize: "1.5rem", marginBottom: ".5rem" }}>Individual Access</h2>
+              <p className="text-[#6B6B70] text-sm leading-relaxed mb-6">
                 For founders, executives, and individuals who need legal representation. Get full access to your matched firms and a personal debrief from the LWYRD team.
               </p>
               <div className="space-y-2.5 mb-8 flex-1">
                 {individualBenefits.map((b, i) => (
                   <div key={i} className="flex items-start gap-2.5">
-                    <CheckCircle2 size={14} className="text-emerald-500 mt-0.5 shrink-0" />
-                    <span className="text-[#C8CDD8] text-sm">{b}</span>
+                    <CheckCircle2 size={14} className="text-emerald-600 mt-0.5 shrink-0" />
+                    <span className="text-[#2A2A2E] text-sm">{b}</span>
                   </div>
                 ))}
               </div>
-              <button
-                onClick={() => openModal("Individual Access")}
-                className="flex items-center justify-center gap-2 w-full py-3 rounded-2xl bg-[#002452] text-white text-sm font-medium hover:opacity-90 transition-opacity"
-              >
+              <button onClick={() => openModal("Individual Access")} className="btn btn-primary" style={{ width: "100%", justifyContent: "center" }}>
                 Get in touch
               </button>
             </div>
 
             {/* Organization */}
-            <div className="bg-[#002452] rounded-3xl p-8 flex flex-col">
-              <div className="inline-flex items-center justify-center w-11 h-11 rounded-2xl bg-white/10 border border-white/20 mb-6">
+            <div className="navy-panel flex flex-col">
+              <div className="inline-flex items-center justify-center w-11 h-11 rounded-xl mb-6" style={{ background: "rgba(255,255,255,.12)", border: "1px solid rgba(255,255,255,.2)" }}>
                 <Building2 size={20} className="text-white" strokeWidth={1.5} />
               </div>
-              <h2
-                className="text-white text-2xl mb-2"
-                style={{ fontFamily: '"Lora", Georgia, serif', fontWeight: 500 }}
-              >
-                Organization Access
-              </h2>
+              <h2 style={{ fontSize: "1.5rem", marginBottom: ".5rem" }}>Organization Access</h2>
               <p className="text-white/70 text-sm leading-relaxed mb-6">
                 For entrepreneurship institutes, university clubs, accelerators, and incubators. Give your entire community access to LWYRD&apos;s legal matching platform.
               </p>
@@ -143,7 +114,8 @@ function AccessContent() {
               </div>
               <button
                 onClick={() => openModal("Organization Access")}
-                className="flex items-center justify-center gap-2 w-full py-3 rounded-2xl bg-white text-[#E6EAF2] text-sm font-medium hover:opacity-90 transition-opacity"
+                className="btn"
+                style={{ width: "100%", justifyContent: "center", background: "#fff", color: "var(--navy)" }}
               >
                 Partner with us
               </button>
@@ -155,20 +127,17 @@ function AccessContent() {
             initial={{ opacity: 0, y: 16 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, ease, delay: 0.24 }}
-            className="bg-[#141C2E] border border-[#1F2A3D] rounded-3xl p-8 text-center"
+            className="ds-card text-center"
           >
-            <p
-              className="text-[#E6EAF2] text-xl mb-3"
-              style={{ fontFamily: '"Lora", Georgia, serif', fontWeight: 500 }}
-            >
+            <p style={{ fontFamily: '"Libre Baskerville", Georgia, serif', fontSize: "1.25rem", marginBottom: ".75rem" }}>
               Your intake is already complete
             </p>
-            <p className="text-[#8A93A6] text-sm leading-relaxed max-w-xl mx-auto">
-              You&apos;ve already told us everything we need to find your match. Once you get access, LWYRD will walk you through your results personally, no need to start over.
+            <p className="text-[#6B6B70] text-sm leading-relaxed max-w-xl mx-auto">
+              You&apos;ve already told us everything we need to find your match. Once you get access, LWYRD will walk you through your results personally — no need to start over.
             </p>
           </motion.div>
         </main>
-        <Footer />
+        <MarketingFooter />
       </div>
     </>
   );

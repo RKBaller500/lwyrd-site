@@ -15,123 +15,115 @@ export default function ServiceDetail({ category }: ServiceDetailProps) {
 
   return (
     <>
-    <ContactLwyrdModal
-      isOpen={consultModalOpen}
-      onClose={() => setConsultModalOpen(false)}
-      categoryName={category.name}
-    />
-    <div className="max-w-7xl mx-auto px-6 py-14">
-      {/* Breadcrumb */}
-      <div className="flex items-center gap-2 text-sm text-[#8A93A6] mb-8">
-        <Link href="/intake" className="hover:text-[#E6EAF2] transition-colors">
-          Get Matched
-        </Link>
-        <span>/</span>
-        <span className="text-[#C8CDD8]">{category.name}</span>
-      </div>
+      <ContactLwyrdModal
+        isOpen={consultModalOpen}
+        onClose={() => setConsultModalOpen(false)}
+        categoryName={category.name}
+      />
+      <div className="ds-shell">
+        {/* Breadcrumb */}
+        <nav className="ds-breadcrumb" style={{ marginBottom: "2rem" }}>
+          <Link href="/intake">Get matched</Link>
+          <span className="sep">/</span>
+          <span style={{ color: "var(--ink-2)" }}>{category.name}</span>
+        </nav>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-10">
-        {/* Main content */}
-        <div className="lg:col-span-2 space-y-10">
-          {/* Hero */}
-          <div>
-            <span className="text-xs text-[#8A93A6] uppercase tracking-widest font-medium block mb-3">
-              {category.heroTag}
-            </span>
-            <h1
-              className="text-4xl sm:text-5xl text-[#E6EAF2] leading-snug mb-6"
-              style={{ fontFamily: '"Lora", Georgia, serif', fontWeight: 500 }}
-            >
-              {category.name}
-            </h1>
-            <div className="space-y-4">
-              {category.fullDescription.split("\n\n").map((para, i) => (
-                <p key={i} className="text-[#C8CDD8] text-base leading-relaxed">
-                  {para}
-                </p>
-              ))}
+        <div className="sd-grid">
+          {/* Main content */}
+          <div style={{ display: "grid", gap: "2.5rem" }}>
+            {/* Hero */}
+            <div>
+              <span className="ds-eyebrow" style={{ display: "block", marginBottom: ".8rem" }}>
+                {category.heroTag}
+              </span>
+              <h1 style={{ fontSize: "clamp(2rem,4vw,3rem)", marginBottom: "1.2rem" }}>
+                {category.name}
+              </h1>
+              <div style={{ display: "grid", gap: "1rem" }}>
+                {category.fullDescription.split("\n\n").map((para, i) => (
+                  <p key={i} style={{ color: "var(--muted)", fontSize: "1rem", lineHeight: 1.7 }}>
+                    {para}
+                  </p>
+                ))}
+              </div>
+            </div>
+
+            {/* What firms do */}
+            <div className="navy-panel">
+              <h2 style={{ fontSize: "clamp(1.35rem,2.4vw,1.8rem)", marginBottom: "1rem" }}>
+                What firms in this area do
+              </h2>
+              <p style={{ color: "rgba(255,255,255,.8)", fontSize: ".95rem", lineHeight: 1.7 }}>
+                {category.whatFirmsDo}
+              </p>
+            </div>
+
+            {/* Service examples */}
+            <div>
+              <h2 style={{ fontSize: "clamp(1.35rem,2.4vw,1.8rem)", marginBottom: "1.4rem" }}>
+                Specific services you might need
+              </h2>
+              <div className="sd-examples">
+                {category.serviceExamples.map((example, i) => (
+                  <div
+                    key={i}
+                    style={{
+                      display: "flex",
+                      alignItems: "flex-start",
+                      gap: ".75rem",
+                      background: "#fff",
+                      border: "1px solid var(--line)",
+                      borderRadius: 12,
+                      padding: "1rem",
+                    }}
+                  >
+                    <CheckCircle2 size={16} style={{ color: "var(--navy)", marginTop: 2, flexShrink: 0 }} strokeWidth={2} />
+                    <span style={{ color: "var(--ink-2)", fontSize: ".9rem", lineHeight: 1.4 }}>{example}</span>
+                  </div>
+                ))}
+              </div>
             </div>
           </div>
 
-          {/* What firms do */}
-          <div
-            className="bg-[#002452] p-8"
-            style={{ boxShadow: "0 25px 60px -5px rgba(0,0,0,0.45), 0 10px 25px -8px rgba(0,36,82,0.5)" }}
-          >
-            <h2
-              className="text-white text-2xl mb-4"
-              style={{ fontFamily: '"Lora", Georgia, serif', fontWeight: 500 }}
-            >
-              What firms in this area do
-            </h2>
-            <p className="text-white/75 text-sm leading-relaxed">{category.whatFirmsDo}</p>
-          </div>
-
-          {/* Service examples */}
-          <div>
-            <h2
-              className="text-[#E6EAF2] text-2xl mb-6"
-              style={{ fontFamily: '"Lora", Georgia, serif', fontWeight: 500 }}
-            >
-              Specific services you might need
-            </h2>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-              {category.serviceExamples.map((example, i) => (
-                <div
-                  key={i}
-                  className="flex items-start gap-3 bg-[#141C2E] border border-[#1F2A3D] rounded-2xl p-4"
-                >
-                  <CheckCircle2 size={16} className="text-[#E6EAF2] mt-0.5 shrink-0" strokeWidth={1.5} />
-                  <span className="text-[#C8CDD8] text-sm leading-snug">{example}</span>
-                </div>
-              ))}
+          {/* Sidebar: CTAs */}
+          <aside style={{ display: "grid", gap: "1.25rem", alignContent: "start" }}>
+            <div className="navy-panel">
+              <h3 style={{ fontSize: "1.5rem", marginBottom: ".75rem" }}>Find your match</h3>
+              <p style={{ color: "rgba(255,255,255,.72)", fontSize: ".9rem", lineHeight: 1.6, marginBottom: "1.5rem" }}>
+                Answer a short set of questions about your needs and we&apos;ll match you with the right firm.
+              </p>
+              <Link
+                href="/intake"
+                className="btn"
+                style={{ width: "100%", justifyContent: "center", background: "#fff", color: "var(--navy)" }}
+              >
+                Start intake <ArrowRight size={15} />
+              </Link>
             </div>
-          </div>
-        </div>
 
-        {/* Sidebar: CTAs */}
-        <div className="space-y-5">
-          {/* Start Intake CTA */}
-          <div className="bg-[#002452] rounded-3xl p-8 text-white">
-            <h3
-              className="text-2xl mb-3"
-              style={{ fontFamily: '"Lora", Georgia, serif', fontWeight: 500 }}
-            >
-              Find your match
-            </h3>
-            <p className="text-white/70 text-sm leading-relaxed mb-6">
-              Answer a short set of questions about your needs and we will match you with the right firm.
-            </p>
-            <Link
-              href="/intake"
-              className="flex items-center justify-center gap-2 w-full py-3 rounded-2xl bg-white text-[#E6EAF2] text-sm font-medium hover:opacity-90 transition-opacity"
-            >
-              Start Intake
-              <ArrowRight size={15} />
-            </Link>
-          </div>
-
-          {/* Book Consultation CTA */}
-          <div className="bg-[#141C2E] border border-[#1F2A3D] rounded-3xl p-8">
-            <h3
-              className="text-[#E6EAF2] text-2xl mb-3"
-              style={{ fontFamily: '"Lora", Georgia, serif', fontWeight: 500 }}
-            >
-              Book a consultation
-            </h3>
-            <p className="text-[#8A93A6] text-sm leading-relaxed mb-6">
-              Prefer to speak with the LWYRD team first? We will help you understand your needs and make a personal recommendation.
-            </p>
-            <button
-              onClick={() => setConsultModalOpen(true)}
-              className="flex items-center justify-center gap-2 w-full py-3 rounded-2xl border border-[#002452] text-[#E6EAF2] text-sm font-medium hover:bg-[#002452] hover:text-white transition-colors"
-            >
-              Get in touch
-            </button>
-          </div>
+            <div className="ds-card">
+              <h3 style={{ fontSize: "1.5rem", marginBottom: ".75rem" }}>Book a consultation</h3>
+              <p style={{ color: "var(--muted)", fontSize: ".9rem", lineHeight: 1.6, marginBottom: "1.5rem" }}>
+                Prefer to speak with the LWYRD team first? We&apos;ll help you understand your needs and make a personal recommendation.
+              </p>
+              <button
+                onClick={() => setConsultModalOpen(true)}
+                className="btn btn-outline"
+                style={{ width: "100%", justifyContent: "center" }}
+              >
+                Get in touch
+              </button>
+            </div>
+          </aside>
         </div>
       </div>
-    </div>
+
+      <style>{`
+        .sd-grid{display:grid;grid-template-columns:1fr;gap:2.5rem}
+        @media(min-width:960px){.sd-grid{grid-template-columns:2fr 1fr;gap:2.5rem}}
+        .sd-examples{display:grid;grid-template-columns:1fr;gap:.75rem}
+        @media(min-width:560px){.sd-examples{grid-template-columns:1fr 1fr}}
+      `}</style>
     </>
   );
 }

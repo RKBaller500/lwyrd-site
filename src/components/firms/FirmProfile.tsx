@@ -10,6 +10,7 @@ import ContactFirmModal from "@/components/ui/ContactFirmModal";
 import SaveFirmButton from "./SaveFirmButton";
 
 const ease = [0.25, 0.46, 0.45, 0.94] as const;
+const serif = { fontFamily: '"Libre Baskerville", Georgia, serif' } as const;
 
 const sizeLabels: Record<string, string> = {
   boutique: "Boutique",
@@ -64,298 +65,207 @@ export default function FirmProfile({ firm, initialSaved }: FirmProfileProps) {
 
   return (
     <>
-    <ContactFirmModal
-      isOpen={contactModalOpen}
-      onClose={() => setContactModalOpen(false)}
-      firmName={firm.name}
-    />
-    <div className="max-w-7xl mx-auto px-6 py-14">
-      {/* Breadcrumb */}
-      <motion.div
-        initial={{ opacity: 0, y: -8 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.4, ease }}
-        className="flex items-center gap-2 text-sm text-[#8A93A6] mb-8"
-      >
-        <Link href="/browse" className="hover:text-[#E6EAF2] transition-colors">Legal Services</Link>
-        <span>/</span>
-        <Link href="/results" className="hover:text-[#E6EAF2] transition-colors">Your Matches</Link>
-        <span>/</span>
-        <span className="text-[#C8CDD8]">{firm.name}</span>
-      </motion.div>
-
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-10">
-        {/* Main content */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
+      <ContactFirmModal
+        isOpen={contactModalOpen}
+        onClose={() => setContactModalOpen(false)}
+        firmName={firm.name}
+      />
+      <div className="ds-shell">
+        {/* Breadcrumb */}
+        <motion.nav
+          initial={{ opacity: 0, y: -8 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.65, ease, delay: 0.08 }}
-          className="lg:col-span-2 space-y-10"
+          transition={{ duration: 0.4, ease }}
+          className="ds-breadcrumb"
+          style={{ marginBottom: "2rem" }}
         >
-          {/* Hero */}
-          <div className="bg-[#141C2E] border border-[#1F2A3D] rounded-3xl p-8">
-            <div className="flex items-start justify-between gap-4 mb-4">
+          <Link href="/results">Your matches</Link>
+          <span className="sep">/</span>
+          <span style={{ color: "var(--ink-2)" }}>{firm.name}</span>
+        </motion.nav>
+
+        <div className="fp-grid">
+          {/* Main content */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.65, ease, delay: 0.08 }}
+            style={{ display: "grid", gap: "2.5rem" }}
+          >
+            {/* Hero */}
+            <div className="ds-card">
+              <div className="flex items-start justify-between gap-4">
+                <div>
+                  {firm.verified && (
+                    <div className="inline-flex items-center gap-1.5 text-white text-xs font-medium px-3 py-1.5 rounded-full mb-4" style={{ background: "var(--navy)" }}>
+                      <Shield size={11} />
+                      LWYRD Verified
+                    </div>
+                  )}
+                  <h1 style={{ fontSize: "clamp(2rem,4vw,3rem)", lineHeight: 1.1 }}>{firm.name}</h1>
+                  <p className="text-[#6B6B70] text-base mt-2">{firm.tagline}</p>
+                </div>
+                {/* Score */}
+                <div className="text-center shrink-0">
+                  <div style={{ ...serif, fontSize: "3rem", color: "var(--navy)", lineHeight: 1 }}>
+                    {matchScore ?? firm.overallScore}
+                  </div>
+                  <div className="text-xs text-[#9A9AA0] mt-1">
+                    {matchScore !== null ? "match score" : "LWYRD Score"}
+                  </div>
+                </div>
+              </div>
+
+              {/* Meta row */}
+              <div className="flex flex-wrap gap-4 text-sm text-[#6B6B70] pt-5 mt-5" style={{ borderTop: "1px solid var(--line)" }}>
+                <span className="flex items-center gap-1.5"><MapPin size={14} />{firm.location}</span>
+                <span className="flex items-center gap-1.5"><Calendar size={14} />Founded {firm.founded}</span>
+                <span className="flex items-center gap-1.5"><Users size={14} />{sizeLabels[firm.size]}</span>
+              </div>
+            </div>
+
+            {/* About */}
+            <div>
+              <h2 style={{ fontSize: "clamp(1.35rem,2.4vw,1.8rem)", marginBottom: "1rem" }}>About the firm</h2>
+              <p className="text-[#2A2A2E] text-sm leading-relaxed">{firm.description}</p>
+            </div>
+
+            {/* Strengths */}
+            {firm.strengths.length > 0 && (
               <div>
-                {firm.verified && (
-                  <div className="inline-flex items-center gap-1.5 bg-[#002452] text-white text-xs font-medium px-3 py-1.5 rounded-full mb-4">
-                    <Shield size={11} />
-                    LWYRD Verified
-                  </div>
-                )}
-                <h1
-                  className="text-4xl sm:text-5xl text-[#E6EAF2] leading-tight"
-                  style={{ fontFamily: '"Lora", Georgia, serif', fontWeight: 500 }}
-                >
-                  {firm.name}
-                </h1>
-                <p className="text-[#8A93A6] text-base mt-2">{firm.tagline}</p>
-              </div>
-              {/* Score */}
-              <div className="text-center shrink-0">
-                <div
-                  className="text-5xl text-[#E6EAF2]"
-                  style={{ fontFamily: '"Lora", Georgia, serif' }}
-                >
-                  {matchScore ?? firm.overallScore}
-                </div>
-                <div className="text-xs text-[#8A93A6]">
-                  {matchScore !== null ? "match score" : "LWYRD Score"}
+                <h2 style={{ fontSize: "clamp(1.35rem,2.4vw,1.8rem)", marginBottom: "1rem" }}>Key strengths</h2>
+                <div className="space-y-2">
+                  {firm.strengths.map((s, i) => (
+                    <div key={i} className="flex items-start gap-3 rounded-2xl p-4" style={{ background: "#fff", border: "1px solid var(--line)" }}>
+                      <Star size={14} style={{ color: "var(--navy)", marginTop: 2, flexShrink: 0 }} strokeWidth={2} />
+                      <span className="text-[#2A2A2E] text-sm">{s}</span>
+                    </div>
+                  ))}
                 </div>
               </div>
-            </div>
+            )}
 
-            {/* Meta row */}
-            <div className="flex flex-wrap gap-4 text-sm text-[#8A93A6] border-t border-[#1F2A3D] pt-5 mt-5">
-              <span className="flex items-center gap-1.5">
-                <MapPin size={14} />
-                {firm.location}
-              </span>
-              <span className="flex items-center gap-1.5">
-                <Calendar size={14} />
-                Founded {firm.founded}
-              </span>
-              <span className="flex items-center gap-1.5">
-                <Users size={14} />
-                {sizeLabels[firm.size]}
-              </span>
-            </div>
-          </div>
-
-          {/* About */}
-          <div>
-            <h2
-              className="text-[#E6EAF2] text-2xl mb-4"
-              style={{ fontFamily: '"Lora", Georgia, serif', fontWeight: 500 }}
-            >
-              About the firm
-            </h2>
-            <p className="text-[#C8CDD8] text-sm leading-relaxed">{firm.description}</p>
-          </div>
-
-          {/* Strengths */}
-          {firm.strengths.length > 0 && (
-            <div>
-              <h2
-                className="text-[#E6EAF2] text-2xl mb-4"
-                style={{ fontFamily: '"Lora", Georgia, serif', fontWeight: 500 }}
-              >
-                Key strengths
-              </h2>
-              <div className="space-y-2">
-                {firm.strengths.map((s, i) => (
-                  <div key={i} className="flex items-start gap-3 bg-[#141C2E] border border-[#1F2A3D] rounded-2xl p-4">
-                    <Star size={14} className="text-[#E6EAF2] mt-0.5 shrink-0" strokeWidth={1.5} />
-                    <span className="text-[#C8CDD8] text-sm">{s}</span>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
-
-          {/* Team */}
-          {firm.team.length > 0 && (
-            <div>
-              <h2
-                className="text-[#E6EAF2] text-2xl mb-5"
-                style={{ fontFamily: '"Lora", Georgia, serif', fontWeight: 500 }}
-              >
-                The team
-              </h2>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
-                {firm.team.map((attorney) => (
-                  <div key={attorney.name} className="bg-[#141C2E] border border-[#1F2A3D] rounded-3xl p-6">
-                    {/* Avatar placeholder */}
-                    <div className="w-12 h-12 rounded-full bg-white/10 border border-[#1F2A3D] flex items-center justify-center mb-4">
-                      <span
-                        className="text-[#E6EAF2] text-xl"
-                        style={{ fontFamily: '"Lora", Georgia, serif' }}
-                      >
-                        {attorney.name[0]}
-                      </span>
+            {/* Team */}
+            {firm.team.length > 0 && (
+              <div>
+                <h2 style={{ fontSize: "clamp(1.35rem,2.4vw,1.8rem)", marginBottom: "1.25rem" }}>The team</h2>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+                  {firm.team.map((attorney) => (
+                    <div key={attorney.name} className="ds-card">
+                      <div className="w-12 h-12 rounded-full flex items-center justify-center mb-4" style={{ background: "var(--navy-tint)", border: "1px solid var(--navy-tint-2)" }}>
+                        <span style={{ ...serif, color: "var(--navy)", fontSize: "1.25rem" }}>{attorney.name[0]}</span>
+                      </div>
+                      <p style={{ ...serif, fontSize: "1.1rem", marginBottom: 2 }}>{attorney.name}</p>
+                      <p className="text-[#6B6B70] text-xs font-medium mb-3">{attorney.title}</p>
+                      <p className="text-[#2A2A2E] text-sm leading-relaxed mb-3 line-clamp-3">{attorney.bio}</p>
+                      <div className="flex flex-wrap gap-1.5">
+                        {attorney.barAdmissions.map((b) => (
+                          <span key={b} className="chip" style={{ fontSize: ".72rem" }}>{b}</span>
+                        ))}
+                      </div>
                     </div>
-                    <p
-                      className="text-[#E6EAF2] text-lg mb-0.5"
-                      style={{ fontFamily: '"Lora", Georgia, serif', fontWeight: 500 }}
-                    >
-                      {attorney.name}
-                    </p>
-                    <p className="text-[#8A93A6] text-xs font-medium mb-3">{attorney.title}</p>
-                    <p className="text-[#C8CDD8] text-sm leading-relaxed mb-3 line-clamp-3">{attorney.bio}</p>
-                    <div className="flex flex-wrap gap-1.5">
-                      {attorney.barAdmissions.map((b) => (
-                        <span
-                          key={b}
-                          className="text-xs bg-white/8 text-[#E6EAF2] px-3 py-1 rounded-full"
-                        >
-                          {b}
-                        </span>
-                      ))}
-                    </div>
-                  </div>
-                ))}
+                  ))}
+                </div>
               </div>
-            </div>
-          )}
+            )}
 
-          {/* LWYRD Assessment */}
-          <div>
-            <div className="flex items-center justify-between mb-5">
-              <h2
-                className="text-[#E6EAF2] text-2xl"
-                style={{ fontFamily: '"Lora", Georgia, serif', fontWeight: 500 }}
-              >
-                LWYRD Assessment
-              </h2>
-              <span className="text-sm text-[#8A93A6]">
-                {passedItems}/{totalItems} criteria met
-              </span>
-            </div>
-            <div className="bg-[#141C2E] border border-[#1F2A3D] rounded-3xl overflow-hidden">
-              <div className="bg-[#002452] px-6 py-4">
-                <p className="text-white/85 text-sm leading-relaxed">
-                  Every firm in the LWYRD network is evaluated against a standard set of criteria before being listed. These assessments are conducted as part of our onboarding process and updated periodically.
-                </p>
+            {/* LWYRD Assessment */}
+            <div>
+              <div className="flex items-center justify-between mb-5">
+                <h2 style={{ fontSize: "clamp(1.35rem,2.4vw,1.8rem)" }}>LWYRD Assessment</h2>
+                <span className="text-sm text-[#6B6B70]">{passedItems}/{totalItems} criteria met</span>
               </div>
-              <div className="p-6 space-y-3">
-                {firm.assessment.map((item, i) => (
-                  <div key={i} className="flex items-start gap-3">
-                    {item.passed ? (
-                      <CheckCircle2 size={16} className="text-emerald-500 mt-0.5 shrink-0" />
-                    ) : (
-                      <XCircle size={16} className="text-amber-400 mt-0.5 shrink-0" />
-                    )}
-                    <div>
-                      <span className={`text-sm ${item.passed ? "text-[#C8CDD8]" : "text-[#8A93A6]"}`}>
-                        {item.label}
-                      </span>
-                      {item.note && (
-                        <p className="text-xs text-[#8A93A6] mt-0.5">{item.note}</p>
+              <div className="rounded-[18px] overflow-hidden" style={{ border: "1px solid var(--line)", boxShadow: "var(--shadow-sm)" }}>
+                <div className="px-6 py-4 navy-panel" style={{ borderRadius: 0 }}>
+                  <p className="text-white/85 text-sm leading-relaxed">
+                    Every firm in the LWYRD network is evaluated against a standard set of criteria before being listed. These assessments are conducted as part of our onboarding process and updated periodically.
+                  </p>
+                </div>
+                <div className="p-6 space-y-3" style={{ background: "#fff" }}>
+                  {firm.assessment.map((item, i) => (
+                    <div key={i} className="flex items-start gap-3">
+                      {item.passed ? (
+                        <CheckCircle2 size={16} className="text-emerald-600 mt-0.5 shrink-0" />
+                      ) : (
+                        <XCircle size={16} className="text-amber-500 mt-0.5 shrink-0" />
                       )}
+                      <div>
+                        <span className={`text-sm ${item.passed ? "text-[#2A2A2E]" : "text-[#9A9AA0]"}`}>{item.label}</span>
+                        {item.note && <p className="text-xs text-[#9A9AA0] mt-0.5">{item.note}</p>}
+                      </div>
                     </div>
-                  </div>
-                ))}
+                  ))}
+                </div>
               </div>
             </div>
-          </div>
-        </motion.div>
+          </motion.div>
 
-        {/* Sidebar */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.65, ease, delay: 0.18 }}
-          className="space-y-5"
-        >
-          {/* CTA card */}
-          <div className="bg-[#002452] rounded-3xl p-8 text-white">
-            <h3
-              className="text-2xl mb-3"
-              style={{ fontFamily: '"Lora", Georgia, serif', fontWeight: 500 }}
-            >
-              Connect with {firm.name}
-            </h3>
-            <p className="text-white/70 text-sm leading-relaxed mb-6">
-              Ready to reach out? Your intake summary will be shared with {firm.name} so they have context before your first conversation.
-            </p>
-            <button
-              onClick={() => setContactModalOpen(true)}
-              className="flex items-center justify-center gap-2 w-full py-3 rounded-2xl bg-white text-[#E6EAF2] text-sm font-medium hover:opacity-90 transition-opacity"
-            >
-              Contact This Firm
-              <ArrowRight size={14} />
-            </button>
-          </div>
-          <SaveFirmButton firmId={firm.id} initialSaved={initialSaved} />
-
-          {/* Firm details */}
-          <div className="bg-[#141C2E] border border-[#1F2A3D] rounded-3xl p-6 space-y-4">
-            <h3
-              className="text-[#E6EAF2] text-lg mb-3"
-              style={{ fontFamily: '"Lora", Georgia, serif', fontWeight: 500 }}
-            >
-              Firm details
-            </h3>
-            <DetailRow label="Billing model" value={billingLabels[firm.billingModel]} />
-            {firm.hourlyRate && (
-              <DetailRow label="Hourly rate (approx.)" value={`$${firm.hourlyRate.toLocaleString()}/hr`} />
-            )}
-            {firm.budgetRange.min > 0 && (
-              <DetailRow
-                label="Monthly range"
-                value={`$${(firm.budgetRange.min / 1000).toFixed(0)}k – $${(firm.budgetRange.max / 1000).toFixed(0)}k`}
-              />
-            )}
-            <DetailRow label="Response time" value={responseLabels[firm.responseTime]} />
-            {firm.languages.length > 1 && (
-              <DetailRow label="Languages" value={firm.languages.join(", ")} />
-            )}
-          </div>
-
-          {/* Practice areas */}
-          <div className="bg-[#141C2E] border border-[#1F2A3D] rounded-3xl p-6">
-            <h3
-              className="text-[#E6EAF2] text-lg mb-4"
-              style={{ fontFamily: '"Lora", Georgia, serif', fontWeight: 500 }}
-            >
-              Practice areas
-            </h3>
-            <div className="flex flex-wrap gap-2">
-              {firm.practiceAreas.map((slug) => (
-                <Link
-                  key={slug}
-                  href={`/services/${slug}`}
-                  className="text-xs bg-white/10 text-[#E6EAF2] px-3 py-1.5 rounded-full hover:bg-[#002452] hover:text-white transition-colors capitalize"
-                >
-                  {slug.replace(/-/g, " ")}
-                </Link>
-              ))}
-            </div>
-          </div>
-
-          {/* Industries */}
-          {firm.industries.length > 0 && (
-            <div className="bg-[#141C2E] border border-[#1F2A3D] rounded-3xl p-6">
-              <h3
-                className="text-[#E6EAF2] text-lg mb-4"
-                style={{ fontFamily: '"Lora", Georgia, serif', fontWeight: 500 }}
+          {/* Sidebar */}
+          <motion.aside
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.65, ease, delay: 0.18 }}
+            style={{ display: "grid", gap: "1.25rem", alignContent: "start" }}
+          >
+            {/* CTA card */}
+            <div className="navy-panel">
+              <h3 style={{ fontSize: "1.5rem", marginBottom: ".75rem" }}>Connect with {firm.name}</h3>
+              <p style={{ color: "rgba(255,255,255,.72)", fontSize: ".9rem", lineHeight: 1.6, marginBottom: "1.5rem" }}>
+                Ready to reach out? Your intake summary will be shared with {firm.name} so they have context before your first conversation.
+              </p>
+              <button
+                onClick={() => setContactModalOpen(true)}
+                className="btn"
+                style={{ width: "100%", justifyContent: "center", background: "#fff", color: "var(--navy)" }}
               >
-                Industries served
-              </h3>
+                Contact this firm <ArrowRight size={14} />
+              </button>
+            </div>
+            <SaveFirmButton firmId={firm.id} initialSaved={initialSaved} />
+
+            {/* Firm details */}
+            <div className="ds-card" style={{ display: "grid", gap: "1rem" }}>
+              <h3 style={{ fontSize: "1.15rem" }}>Firm details</h3>
+              <DetailRow label="Billing model" value={billingLabels[firm.billingModel]} />
+              {firm.hourlyRate && <DetailRow label="Hourly rate (approx.)" value={`$${firm.hourlyRate.toLocaleString()}/hr`} />}
+              {firm.budgetRange.min > 0 && (
+                <DetailRow label="Monthly range" value={`$${(firm.budgetRange.min / 1000).toFixed(0)}k – $${(firm.budgetRange.max / 1000).toFixed(0)}k`} />
+              )}
+              <DetailRow label="Response time" value={responseLabels[firm.responseTime]} />
+              {firm.languages.length > 1 && <DetailRow label="Languages" value={firm.languages.join(", ")} />}
+            </div>
+
+            {/* Practice areas */}
+            <div className="ds-card">
+              <h3 style={{ fontSize: "1.15rem", marginBottom: "1rem" }}>Practice areas</h3>
               <div className="flex flex-wrap gap-2">
-                {firm.industries.map((ind) => (
-                  <span
-                    key={ind}
-                    className="text-xs bg-[#0A0F1C] border border-[#1F2A3D] text-[#C8CDD8] px-3 py-1.5 rounded-full capitalize"
-                  >
-                    {ind.replace(/-/g, " ")}
-                  </span>
+                {firm.practiceAreas.map((slug) => (
+                  <Link key={slug} href={`/services/${slug}`} className="chip" style={{ textTransform: "capitalize" }}>
+                    {slug.replace(/-/g, " ")}
+                  </Link>
                 ))}
               </div>
             </div>
-          )}
-        </motion.div>
+
+            {/* Industries */}
+            {firm.industries.length > 0 && (
+              <div className="ds-card">
+                <h3 style={{ fontSize: "1.15rem", marginBottom: "1rem" }}>Industries served</h3>
+                <div className="flex flex-wrap gap-2">
+                  {firm.industries.map((ind) => (
+                    <span key={ind} className="chip" style={{ textTransform: "capitalize" }}>{ind.replace(/-/g, " ")}</span>
+                  ))}
+                </div>
+              </div>
+            )}
+          </motion.aside>
+        </div>
       </div>
-    </div>
+
+      <style>{`
+        .fp-grid{display:grid;grid-template-columns:1fr;gap:2.5rem}
+        @media(min-width:960px){.fp-grid{grid-template-columns:2fr 1fr}}
+      `}</style>
     </>
   );
 }
@@ -363,8 +273,8 @@ export default function FirmProfile({ firm, initialSaved }: FirmProfileProps) {
 function DetailRow({ label, value }: { label: string; value: string }) {
   return (
     <div>
-      <p className="text-xs text-[#8A93A6] font-medium mb-0.5">{label}</p>
-      <p className="text-[#C8CDD8] text-sm">{value}</p>
+      <p className="text-xs text-[#9A9AA0] font-medium mb-0.5">{label}</p>
+      <p className="text-[#2A2A2E] text-sm">{value}</p>
     </div>
   );
 }

@@ -247,7 +247,7 @@
 
 /* ---- redesigned-page helpers ---- */
 /* suppress the dark root-layout ambient gradient overlay on light pages */
-body > div[aria-hidden="true"]{display:none !important;}
+#ambient-overlay{display:none !important;}
 
 /* generic page scaffold */
 .ds-page{min-height:100vh;display:flex;flex-direction:column;background:var(--paper);color:var(--ink)}

@@ -2,6 +2,8 @@
 
 import { useEffect, useRef } from "react";
 import MarketingNav from "./MarketingNav";
+import { useAuth } from "@/context/AuthContext";
+import { useRouter } from "next/navigation";
 
 type Section =
   | "product"
@@ -33,6 +35,27 @@ export default function MarketingPageClient({
   onReady?: (root: HTMLElement) => void | (() => void);
 }) {
   const ref = useRef<HTMLDivElement>(null);
+  const { isAuthenticated, openModal } = useAuth();
+  const router = useRouter();
+
+  // Intercept the design's "Get matched" links (which point at /get-matched)
+  // so they open the auth modal in place instead of routing to a page.
+  useEffect(() => {
+    const root = ref.current;
+    if (!root) return;
+    const onClick = (e: MouseEvent) => {
+      const a = (e.target as HTMLElement)?.closest?.('a[href^="/get-matched"]');
+      if (!a) return;
+      e.preventDefault();
+      if (isAuthenticated) router.push("/intake/start");
+      else {
+        const login = (a.getAttribute("href") || "").includes("tab=login");
+        openModal(login ? "login" : "signup", "/intake/start");
+      }
+    };
+    root.addEventListener("click", onClick);
+    return () => root.removeEventListener("click", onClick);
+  }, [body, isAuthenticated, openModal, router]);
 
   useEffect(() => {
     const root = ref.current;
@@ -70,7 +93,7 @@ export default function MarketingPageClient({
             "@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;450;500;600&family=Libre+Baskerville:wght@400;700&display=swap');\n" +
             css +
             /* keep the dark root overlay off marketing pages */
-            '\nbody > div[aria-hidden="true"]{display:none !important;}\n',
+            "\n#ambient-overlay{display:none !important;}\n",
         }}
       />
       <MarketingNav current={current} />

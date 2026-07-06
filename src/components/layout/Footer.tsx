@@ -80,9 +80,6 @@ export default function Footer() {
               <Link href="/intake/start" className="text-white/60 text-sm hover:text-white transition-colors">
                 Get Matched
               </Link>
-              <Link href="/how-it-works" className="text-white/60 text-sm hover:text-white transition-colors">
-                How It Works
-              </Link>
               <Link href="/for-law-firms" className="text-white/60 text-sm hover:text-white transition-colors">
                 For Law Firms
               </Link>

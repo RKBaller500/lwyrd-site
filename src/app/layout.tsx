@@ -21,6 +21,7 @@ export default function RootLayout({
       <body className="min-h-full flex flex-col antialiased">
         {/* Persistent ambient gradient — sits above content via mix-blend-mode:screen */}
         <div
+          id="ambient-overlay"
           aria-hidden="true"
           style={{
             position: "fixed",

@@ -106,7 +106,6 @@ export default function AuthModal() {
 
   return (
     <Modal isOpen={isModalOpen} onClose={closeModal} panelClassName={panel} closeIconClassName={closeIcon}>
-      <span className="kicker">Get matched</span>
       <h2>{activeTab === "login" ? "Welcome back." : "Create your account"}</h2>
       <p className="am-sub">
         {activeTab === "login"

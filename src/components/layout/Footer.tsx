@@ -4,6 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import LwyrdLogo from "@/components/ui/LwyrdLogo";
 import { submitForm } from "@/lib/formsubmit";
+import SocialLinks from "@/components/ui/SocialLinks";
 
 export default function Footer() {
   const [email, setEmail] = useState("");
@@ -34,11 +35,14 @@ export default function Footer() {
           <div className="sm:col-span-1">
             <LwyrdLogo variant="white" className="h-6 w-auto mb-4" />
             <p
-              className="text-white/50 text-sm leading-relaxed mb-6"
+              className="text-white/50 text-sm leading-relaxed mb-4"
               style={{ fontFamily: '"Lora", Georgia, serif' }}
             >
               Connecting people with the right legal help.
             </p>
+
+            {/* Social links */}
+            <SocialLinks className="flex gap-2 mb-6" />
 
             {/* Newsletter */}
             <p className="text-white/30 text-xs font-medium tracking-widest uppercase mb-3">

@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
 import { Send, CheckCircle2, HelpCircle, MessageSquare, Building2, MoreHorizontal } from "lucide-react";
+import SocialLinks from "@/components/ui/SocialLinks";
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
 import { submitForm } from "@/lib/formsubmit";
@@ -232,9 +233,13 @@ export default function ContactPage() {
               >
                 We respond within one to two business days
               </p>
-              <p className="text-white/60 text-sm leading-relaxed">
+              <p className="text-white/60 text-sm leading-relaxed mb-5">
                 Every message goes directly to the LWYRD team. You will hear from a real person.
               </p>
+              <p className="text-white/30 text-xs font-medium tracking-widest uppercase mb-3">
+                Follow us
+              </p>
+              <SocialLinks />
             </div>
           </motion.div>
         </div>

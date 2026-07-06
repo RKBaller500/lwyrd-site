@@ -1,0 +1,22 @@
+/* Logged-in avatar chip for the marketing nav. Uses design tokens (--navy)
+   which are declared in each page's :root block. */
+.nav-avatar {
+  width: 34px;
+  height: 34px;
+  border-radius: 999px;
+  background: #002b55;
+  color: #fff;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 600;
+  font-size: 0.9rem;
+  line-height: 1;
+  text-decoration: none;
+  flex-shrink: 0;
+  transition: transform 0.18s ease, box-shadow 0.18s ease;
+}
+.nav-avatar:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0, 43, 85, 0.25);
+}

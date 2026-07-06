@@ -26,7 +26,7 @@ export default async function AccountPage() {
     .single();
 
   return (
-    <div className="flex flex-col min-h-screen bg-[#f5f4f0]">
+    <div className="flex flex-col min-h-screen bg-[#0A0F1C]">
       <Navbar />
       <main className="flex-1 max-w-4xl mx-auto w-full px-6 py-14">
         <AccountContent

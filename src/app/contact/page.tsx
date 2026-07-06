@@ -19,7 +19,7 @@ const reasons = [
 ];
 
 const inputClass =
-  "w-full px-4 py-3 rounded-2xl border border-[#ddd7cc] bg-white text-slate-700 placeholder-slate-400 focus:outline-none focus:border-[#002452] focus:ring-2 focus:ring-[#002452]/15 transition-all text-sm";
+  "w-full px-4 py-3 rounded-2xl border border-[#1F2A3D] bg-[#141C2E] text-[#E6EAF2] placeholder-[#8A93A6] focus:outline-none focus:border-[#3B82F6] focus:ring-2 focus:ring-[#3B82F6]/15 transition-all text-sm";
 
 export default function ContactPage() {
   const [name, setName] = useState("");
@@ -50,7 +50,7 @@ export default function ContactPage() {
   };
 
   return (
-    <div className="flex flex-col min-h-screen bg-[#f5f4f0]">
+    <div className="flex flex-col min-h-screen bg-[#0A0F1C]">
       <Navbar />
 
       <main className="flex-1 max-w-5xl mx-auto w-full px-6 py-14">
@@ -60,16 +60,16 @@ export default function ContactPage() {
           transition={{ duration: 0.6, ease }}
           className="mb-12"
         >
-          <span className="inline-block bg-[#002452] text-white text-xs font-medium px-3 py-1.5 rounded-full tracking-wide mb-4">
+          <span className="text-[#C9962B] text-xs font-semibold tracking-widest uppercase mb-4">
             Contact Us
           </span>
           <h1
-            className="text-4xl sm:text-5xl text-[#002452] mb-4"
+            className="text-4xl sm:text-5xl text-[#E6EAF2] mb-4"
             style={{ ...lora, fontWeight: 500 }}
           >
             Get in Touch
           </h1>
-          <p className="text-slate-500 text-base leading-relaxed max-w-xl">
+          <p className="text-[#8A93A6] text-base leading-relaxed max-w-xl">
             Whether you have a question, want to learn more, or are ready to get started, the LWYRD team responds within one to two business days.
           </p>
         </motion.div>
@@ -82,19 +82,19 @@ export default function ContactPage() {
             transition={{ duration: 0.65, ease, delay: 0.08 }}
             className="lg:col-span-3"
           >
-            <div className="bg-[#fbfaf6] border border-[#ddd7cc] rounded-3xl shadow-sm p-8">
+            <div className="bg-[#141C2E] border border-[#1F2A3D] rounded-3xl shadow-sm p-8">
               {status === "success" ? (
                 <div className="py-14 text-center">
                   <div className="inline-flex items-center justify-center w-14 h-14 rounded-full bg-emerald-50 border border-emerald-100 mb-5">
                     <CheckCircle2 size={26} className="text-emerald-500" strokeWidth={1.5} />
                   </div>
                   <h2
-                    className="text-[#002452] text-2xl mb-3"
+                    className="text-[#E6EAF2] text-2xl mb-3"
                     style={{ ...lora, fontWeight: 500 }}
                   >
                     Message received.
                   </h2>
-                  <p className="text-slate-500 text-sm leading-relaxed max-w-xs mx-auto">
+                  <p className="text-[#8A93A6] text-sm leading-relaxed max-w-xs mx-auto">
                     Someone from the LWYRD team will be in touch within one to two business days.
                   </p>
                 </div>
@@ -102,7 +102,7 @@ export default function ContactPage() {
                 <form onSubmit={handleSubmit} className="space-y-4">
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div>
-                      <label className="block text-xs font-medium text-slate-500 mb-1.5 ml-1">
+                      <label className="block text-xs font-medium text-[#8A93A6] mb-1.5 ml-1">
                         Full name <span className="text-red-400">*</span>
                       </label>
                       <input
@@ -115,7 +115,7 @@ export default function ContactPage() {
                       />
                     </div>
                     <div>
-                      <label className="block text-xs font-medium text-slate-500 mb-1.5 ml-1">
+                      <label className="block text-xs font-medium text-[#8A93A6] mb-1.5 ml-1">
                         Email address <span className="text-red-400">*</span>
                       </label>
                       <input
@@ -130,7 +130,7 @@ export default function ContactPage() {
                   </div>
 
                   <div>
-                    <label className="block text-xs font-medium text-slate-500 mb-1.5 ml-1">
+                    <label className="block text-xs font-medium text-[#8A93A6] mb-1.5 ml-1">
                       Organization or company
                     </label>
                     <input
@@ -143,7 +143,7 @@ export default function ContactPage() {
                   </div>
 
                   <div>
-                    <label className="block text-xs font-medium text-slate-500 mb-1.5 ml-1">
+                    <label className="block text-xs font-medium text-[#8A93A6] mb-1.5 ml-1">
                       Subject <span className="text-red-400">*</span>
                     </label>
                     <select
@@ -162,7 +162,7 @@ export default function ContactPage() {
                   </div>
 
                   <div>
-                    <label className="block text-xs font-medium text-slate-500 mb-1.5 ml-1">
+                    <label className="block text-xs font-medium text-[#8A93A6] mb-1.5 ml-1">
                       Message <span className="text-red-400">*</span>
                     </label>
                     <textarea
@@ -207,9 +207,9 @@ export default function ContactPage() {
             transition={{ duration: 0.65, ease, delay: 0.16 }}
             className="lg:col-span-2 flex flex-col gap-5"
           >
-            <div className="bg-[#fbfaf6] border border-[#ddd7cc] rounded-3xl shadow-sm p-7">
+            <div className="bg-[#141C2E] border border-[#1F2A3D] rounded-3xl shadow-sm p-7">
               <p
-                className="text-[#002452] text-lg mb-5"
+                className="text-[#E6EAF2] text-lg mb-5"
                 style={{ ...lora, fontWeight: 500 }}
               >
                 Common reasons to reach out
@@ -217,10 +217,10 @@ export default function ContactPage() {
               <div className="space-y-4">
                 {reasons.map(({ icon: Icon, label }) => (
                   <div key={label} className="flex items-start gap-3">
-                    <div className="inline-flex items-center justify-center w-8 h-8 rounded-xl bg-[#002452]/8 border border-[#ddd7cc] shrink-0 mt-0.5">
-                      <Icon size={14} className="text-[#002452]" strokeWidth={1.5} />
+                    <div className="inline-flex items-center justify-center w-8 h-8 rounded-xl bg-white/8 border border-[#1F2A3D] shrink-0 mt-0.5">
+                      <Icon size={14} className="text-[#E6EAF2]" strokeWidth={1.5} />
                     </div>
-                    <p className="text-slate-500 text-sm leading-snug">{label}</p>
+                    <p className="text-[#8A93A6] text-sm leading-snug">{label}</p>
                   </div>
                 ))}
               </div>

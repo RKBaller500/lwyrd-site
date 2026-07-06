@@ -124,10 +124,10 @@ export default function UsersTable({ users }: { users: AdminUserRow[] }) {
           {filtered.map((user, i) => (
             <tr key={user.id} className={`border-b border-[#ddd7cc] last:border-0 ${i % 2 === 0 ? "" : "bg-white/40"}`}>
               <td className="px-5 py-3.5">
-                <div className="font-medium text-slate-700">{user.name || "—"}</div>
+                <div className="font-medium text-slate-700">{user.name || " "}</div>
                 <div className="text-xs text-slate-400 font-mono">{user.id.slice(0, 8)}…</div>
               </td>
-              <td className="px-5 py-3.5 text-slate-600">{user.email || "—"}</td>
+              <td className="px-5 py-3.5 text-slate-600">{user.email || " "}</td>
               <td className="px-5 py-3.5 text-slate-500 text-xs">
                 {new Date(user.created_at).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}
               </td>

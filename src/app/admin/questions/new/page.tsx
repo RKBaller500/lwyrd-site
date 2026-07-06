@@ -1,7 +1,7 @@
 import { createAdminClient } from "@/lib/supabase/admin";
 import QuestionForm from "@/components/admin/QuestionForm";
 
-export const metadata = { title: "New Question — Admin" };
+export const metadata = { title: "New Question, Admin" };
 
 export default async function NewQuestionPage() {
   const db = createAdminClient();

@@ -14,7 +14,8 @@ const FIRM_SELECT = `
     note,
     display_order,
     assessment_criteria ( id, label, description, display_order )
-  )
+  ),
+  firm_practice_areas ( practice_area_slug )
 `;
 
 export async function getAllFirms(): Promise<Firm[]> {

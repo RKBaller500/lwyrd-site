@@ -2,7 +2,7 @@ import { notFound } from "next/navigation";
 import { createAdminClient } from "@/lib/supabase/admin";
 import AssessmentCriterionForm from "@/components/admin/AssessmentCriterionForm";
 
-export const metadata = { title: "Edit Criterion — Admin" };
+export const metadata = { title: "Edit Criterion, Admin" };
 
 export default async function EditCriterionPage({
   params,

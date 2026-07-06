@@ -70,7 +70,7 @@ const firmFaqs = [
 ];
 
 const inputClass =
-  "w-full px-4 py-3 rounded-2xl border border-[#ddd7cc] bg-white text-slate-700 placeholder-slate-400 focus:outline-none focus:border-[#002452] focus:ring-2 focus:ring-[#002452]/15 transition-all text-sm";
+  "w-full px-4 py-3 rounded-2xl border border-[#1F2A3D] bg-[#141C2E] text-[#E6EAF2] placeholder-[#8A93A6] focus:outline-none focus:border-[#3B82F6] focus:ring-2 focus:ring-[#3B82F6]/15 transition-all text-sm";
 
 export default function ForLawFirmsPage() {
   const [form, setForm] = useState({
@@ -105,29 +105,18 @@ export default function ForLawFirmsPage() {
   };
 
   return (
-    <div className="flex flex-col min-h-screen bg-[#f5f4f0]">
+    <div className="flex flex-col min-h-screen bg-[#0A0F1C]">
       <Navbar />
 
       <main className="flex-1">
         {/* ── Hero ── */}
-        <section className="relative bg-[#f5f4f0] py-28 md:py-40 px-6 overflow-hidden">
-          <motion.span
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 0.03 }}
-            transition={{ duration: 1.4, ease: "easeOut", delay: 0.5 }}
-            className="absolute -top-10 -right-8 text-[28rem] leading-none text-[#002452] pointer-events-none select-none"
-            style={{ ...lora, fontWeight: 600 }}
-            aria-hidden="true"
-          >
-            L
-          </motion.span>
-
+        <section className="relative bg-[#0A0F1C] py-28 md:py-40 px-6 overflow-hidden">
           <div className="max-w-4xl mx-auto relative">
             <motion.span
               initial={{ opacity: 0, y: 12 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5, ease }}
-              className="inline-block bg-[#002452] text-white text-xs font-medium px-3 py-1.5 rounded-full tracking-wide mb-6"
+              className="text-[#C9962B] text-xs font-semibold tracking-widest uppercase mb-6"
             >
               For Law Firms
             </motion.span>
@@ -136,7 +125,7 @@ export default function ForLawFirmsPage() {
               initial={{ opacity: 0, y: 30 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.75, ease, delay: 0.08 }}
-              className="text-4xl sm:text-5xl lg:text-6xl text-[#002452] leading-tight mb-7"
+              className="text-4xl sm:text-5xl lg:text-6xl text-[#E6EAF2] leading-tight mb-7"
               style={{ ...lora, fontWeight: 500 }}
             >
               The clients who find you through LWYRD already know what they need.
@@ -146,7 +135,7 @@ export default function ForLawFirmsPage() {
               initial={{ opacity: 0, y: 22 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.7, ease, delay: 0.18 }}
-              className="text-slate-500 text-lg leading-relaxed max-w-2xl mb-10"
+              className="text-[#8A93A6] text-lg leading-relaxed max-w-2xl mb-10"
             >
               Most legal referrals arrive with vague situations, unclear budgets, and no idea whether your practice area actually matches their matter. LWYRD clients arrive differently. Before they ever see your firm&apos;s name, they&apos;ve answered a structured intake covering their legal issue, matter specifics, timeline, budget, and the type of firm relationship they&apos;re looking for. The match happened before the introduction.
             </motion.p>
@@ -176,7 +165,7 @@ export default function ForLawFirmsPage() {
               viewport={{ once: true, margin: "-60px" }}
               transition={{ duration: 0.6, ease }}
             >
-              <p className="text-white/60 text-xs font-medium tracking-widest uppercase mb-3">
+              <p className="text-[#C9962B]/80 text-xs font-medium tracking-widest uppercase mb-3">
                 The Problem
               </p>
               <h2
@@ -201,20 +190,20 @@ export default function ForLawFirmsPage() {
         </section>
 
         {/* ── How LWYRD Is Different ── */}
-        <section className="bg-[#f5f4f0] py-20 px-6">
+        <section className="bg-[#0A0F1C] py-20 px-6">
           <div className="max-w-5xl mx-auto">
             <motion.div
               initial={{ opacity: 0, y: 18 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true, margin: "-60px" }}
               transition={{ duration: 0.6, ease }}
-              className="border-t border-[#ddd7cc] pt-14 mb-12"
+              className="border-t border-[#1F2A3D] pt-14 mb-12"
             >
-              <p className="text-slate-400 text-xs font-medium tracking-widest uppercase mb-2">
+              <p className="text-[#8A93A6] text-xs font-medium tracking-widest uppercase mb-2">
                 How It Works for Firms
               </p>
               <h2
-                className="text-[#002452] text-3xl sm:text-4xl"
+                className="text-[#E6EAF2] text-3xl sm:text-4xl"
                 style={{ ...lora, fontWeight: 500 }}
               >
                 Your firm appears when the match is real.
@@ -232,18 +221,18 @@ export default function ForLawFirmsPage() {
                 <motion.div
                   key={col.label}
                   variants={item}
-                  className="bg-[#fbfaf6] border border-[#ddd7cc] rounded-3xl p-7"
+                  className="bg-[#141C2E] border border-[#1F2A3D] rounded-3xl p-7"
                 >
-                  <p className="text-slate-400 text-xs font-medium tracking-widest uppercase mb-3">
+                  <p className="text-[#8A93A6] text-xs font-medium tracking-widest uppercase mb-3">
                     {col.label}
                   </p>
                   <h3
-                    className="text-[#002452] text-lg mb-3"
+                    className="text-[#E6EAF2] text-lg mb-3"
                     style={{ ...lora, fontWeight: 500 }}
                   >
                     {col.title}
                   </h3>
-                  <p className="text-slate-500 text-sm leading-relaxed">{col.body}</p>
+                  <p className="text-[#8A93A6] text-sm leading-relaxed">{col.body}</p>
                 </motion.div>
               ))}
             </motion.div>
@@ -251,20 +240,20 @@ export default function ForLawFirmsPage() {
         </section>
 
         {/* ── Objections Addressed ── */}
-        <section className="bg-[#f5f4f0] py-20 px-6">
+        <section className="bg-[#0A0F1C] py-20 px-6">
           <div className="max-w-3xl mx-auto">
             <motion.div
               initial={{ opacity: 0, y: 18 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true, margin: "-60px" }}
               transition={{ duration: 0.6, ease }}
-              className="border-t border-[#ddd7cc] pt-14 mb-12"
+              className="border-t border-[#1F2A3D] pt-14 mb-12"
             >
-              <p className="text-slate-400 text-xs font-medium tracking-widest uppercase mb-2">
+              <p className="text-[#8A93A6] text-xs font-medium tracking-widest uppercase mb-2">
                 Common Questions
               </p>
               <h2
-                className="text-[#002452] text-3xl sm:text-4xl"
+                className="text-[#E6EAF2] text-3xl sm:text-4xl"
                 style={{ ...lora, fontWeight: 500 }}
               >
                 We&apos;ve heard the concerns. Here&apos;s how LWYRD addresses them.
@@ -281,15 +270,15 @@ export default function ForLawFirmsPage() {
               {objections.map((obj, i) => (
                 <div
                   key={i}
-                  className="bg-[#fbfaf6] border border-[#ddd7cc] rounded-3xl p-7"
+                  className="bg-[#141C2E] border border-[#1F2A3D] rounded-3xl p-7"
                 >
                   <h3
-                    className="text-[#002452] text-lg mb-3"
+                    className="text-[#E6EAF2] text-lg mb-3"
                     style={{ ...lora, fontWeight: 500 }}
                   >
                     {obj.q}
                   </h3>
-                  <p className="text-slate-500 text-sm leading-relaxed">{obj.a}</p>
+                  <p className="text-[#8A93A6] text-sm leading-relaxed">{obj.a}</p>
                 </div>
               ))}
             </motion.div>
@@ -306,7 +295,7 @@ export default function ForLawFirmsPage() {
               transition={{ duration: 0.6, ease }}
               className="mb-10"
             >
-              <p className="text-white/60 text-xs font-medium tracking-widest uppercase mb-3">
+              <p className="text-[#C9962B]/80 text-xs font-medium tracking-widest uppercase mb-3">
                 Join the Network
               </p>
               <h2
@@ -325,18 +314,18 @@ export default function ForLawFirmsPage() {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true, margin: "-60px" }}
               transition={{ duration: 0.6, ease, delay: 0.05 }}
-              className="bg-[#fbfaf6] border border-white/15 rounded-3xl p-8"
+              className="bg-[#141C2E] border border-white/15 rounded-3xl p-8"
             >
               {status === "success" ? (
                 <div className="py-10 text-center">
                   <CheckCircle2 size={36} className="text-emerald-500 mx-auto mb-4" strokeWidth={1.5} />
                   <h3
-                    className="text-[#002452] text-2xl mb-2"
+                    className="text-[#E6EAF2] text-2xl mb-2"
                     style={{ ...lora, fontWeight: 500 }}
                   >
                     Application received.
                   </h3>
-                  <p className="text-slate-500 text-sm">
+                  <p className="text-[#8A93A6] text-sm">
                     Someone from the LWYRD team will be in touch within two business days.
                   </p>
                 </div>
@@ -344,7 +333,7 @@ export default function ForLawFirmsPage() {
                 <form onSubmit={handleSubmit} className="space-y-4">
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div>
-                      <label className="block text-xs font-medium text-slate-500 mb-1.5 ml-1">
+                      <label className="block text-xs font-medium text-[#8A93A6] mb-1.5 ml-1">
                         Firm name <span className="text-red-400">*</span>
                       </label>
                       <input
@@ -358,7 +347,7 @@ export default function ForLawFirmsPage() {
                       />
                     </div>
                     <div>
-                      <label className="block text-xs font-medium text-slate-500 mb-1.5 ml-1">
+                      <label className="block text-xs font-medium text-[#8A93A6] mb-1.5 ml-1">
                         Primary contact name <span className="text-red-400">*</span>
                       </label>
                       <input
@@ -374,7 +363,7 @@ export default function ForLawFirmsPage() {
                   </div>
 
                   <div>
-                    <label className="block text-xs font-medium text-slate-500 mb-1.5 ml-1">
+                    <label className="block text-xs font-medium text-[#8A93A6] mb-1.5 ml-1">
                       Email address <span className="text-red-400">*</span>
                     </label>
                     <input
@@ -389,7 +378,7 @@ export default function ForLawFirmsPage() {
                   </div>
 
                   <div>
-                    <label className="block text-xs font-medium text-slate-500 mb-1.5 ml-1">
+                    <label className="block text-xs font-medium text-[#8A93A6] mb-1.5 ml-1">
                       Primary practice areas <span className="text-red-400">*</span>
                     </label>
                     <input
@@ -404,7 +393,7 @@ export default function ForLawFirmsPage() {
                   </div>
 
                   <div>
-                    <label className="block text-xs font-medium text-slate-500 mb-1.5 ml-1">
+                    <label className="block text-xs font-medium text-[#8A93A6] mb-1.5 ml-1">
                       States where you&apos;re licensed <span className="text-red-400">*</span>
                     </label>
                     <input
@@ -419,7 +408,7 @@ export default function ForLawFirmsPage() {
                   </div>
 
                   <div>
-                    <label className="block text-xs font-medium text-slate-500 mb-1.5 ml-1">
+                    <label className="block text-xs font-medium text-[#8A93A6] mb-1.5 ml-1">
                       Why LWYRD? <span className="text-red-400">*</span>
                     </label>
                     <textarea
@@ -460,17 +449,17 @@ export default function ForLawFirmsPage() {
         </section>
 
         {/* ── Brief FAQ ── */}
-        <section className="bg-[#f5f4f0] py-20 px-6">
+        <section className="bg-[#0A0F1C] py-20 px-6">
           <div className="max-w-3xl mx-auto">
             <motion.div
               initial={{ opacity: 0, y: 18 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true, margin: "-60px" }}
               transition={{ duration: 0.6, ease }}
-              className="border-t border-[#ddd7cc] pt-14 mb-10"
+              className="border-t border-[#1F2A3D] pt-14 mb-10"
             >
               <h2
-                className="text-[#002452] text-2xl sm:text-3xl"
+                className="text-[#E6EAF2] text-2xl sm:text-3xl"
                 style={{ ...lora, fontWeight: 500 }}
               >
                 A few quick answers
@@ -485,35 +474,35 @@ export default function ForLawFirmsPage() {
                   whileInView={{ opacity: 1, y: 0 }}
                   viewport={{ once: true, margin: "-40px" }}
                   transition={{ duration: 0.55, ease, delay: i * 0.06 }}
-                  className="bg-[#fbfaf6] border border-[#ddd7cc] rounded-3xl overflow-hidden"
+                  className="bg-[#141C2E] border border-[#1F2A3D] rounded-3xl overflow-hidden"
                 >
                   <button
                     type="button"
                     onClick={() => setOpenFaq(openFaq === i ? null : i)}
-                    className="w-full flex items-center justify-between gap-4 px-7 py-5 text-left hover:bg-[#002452]/3 transition-colors"
+                    className="w-full flex items-center justify-between gap-4 px-7 py-5 text-left hover:bg-white/5 transition-colors"
                   >
                     <span
-                      className="text-[#002452] text-base"
+                      className="text-[#E6EAF2] text-base"
                       style={{ ...lora, fontWeight: 500 }}
                     >
                       {faq.q}
                     </span>
-                    <span className="text-slate-400 shrink-0 text-lg">
+                    <span className="text-[#8A93A6] shrink-0 text-lg">
                       {openFaq === i ? "−" : "+"}
                     </span>
                   </button>
                   {openFaq === i && (
                     <div className="px-7 pb-5">
-                      <p className="text-slate-500 text-sm leading-relaxed">{faq.a}</p>
+                      <p className="text-[#8A93A6] text-sm leading-relaxed">{faq.a}</p>
                     </div>
                   )}
                 </motion.div>
               ))}
             </div>
 
-            <p className="text-slate-400 text-sm mt-8">
+            <p className="text-[#8A93A6] text-sm mt-8">
               More questions?{" "}
-              <Link href="/faq" className="text-[#002452] font-medium hover:underline">
+              <Link href="/faq" className="text-[#E6EAF2] font-medium hover:underline">
                 See the full FAQ →
               </Link>
             </p>

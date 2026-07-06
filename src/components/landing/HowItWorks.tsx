@@ -5,7 +5,6 @@ import Link from "next/link";
 import { Search, ClipboardList, Award, ArrowRight } from "lucide-react";
 
 const ease = [0.25, 0.46, 0.45, 0.94] as const;
-const lora = { fontFamily: '"Lora", Georgia, serif' } as const;
 
 const steps = [
   {
@@ -41,89 +40,74 @@ const stepsItem = {
   visible: { opacity: 1, y: 0, transition: { duration: 0.6, ease } },
 };
 
-
 export default function HowItWorks() {
   return (
-    <>
-      {/* Steps (navy) */}
-      <section className="bg-[#002452] py-20 px-6">
-        <div className="max-w-5xl mx-auto">
+    <section className="bg-[#141C2E] py-28 px-6">
+      <div className="max-w-5xl mx-auto">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, margin: "-60px" }}
+          transition={{ duration: 0.6, ease }}
+          className="mb-16"
+        >
+          <p className="text-xs font-medium tracking-widest uppercase text-[#8A93A6] mb-4">
+            The Process
+          </p>
+          <h2 className="text-4xl sm:text-5xl font-semibold tracking-tight text-[#E6EAF2] leading-tight">
+            From intake to matched counsel in three steps.
+          </h2>
+        </motion.div>
+
+        <div className="relative">
+          <div className="hidden md:block absolute top-[18px] left-0 right-0 h-px bg-[#1F2A3D] z-0" />
+
           <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
+            className="grid grid-cols-1 md:grid-cols-3 gap-10 md:gap-8"
+            variants={stepsContainer}
+            initial="hidden"
+            whileInView="visible"
             viewport={{ once: true, margin: "-60px" }}
-            transition={{ duration: 0.6, ease }}
-            className="mb-14"
           >
-            <p className="text-white/60 text-xs font-medium tracking-widest uppercase mb-3">
-              The Process
-            </p>
-            <h2
-              className="text-white text-3xl sm:text-4xl leading-tight"
-              style={{ ...lora, fontWeight: 500 }}
-            >
-              From intake to matched counsel in three steps.
-            </h2>
-          </motion.div>
-
-          <div className="relative">
-            <div className="hidden md:block absolute top-[18px] left-0 right-0 h-px bg-white/15 z-0" />
-
-            <motion.div
-              className="grid grid-cols-1 md:grid-cols-3 gap-10 md:gap-8"
-              variants={stepsContainer}
-              initial="hidden"
-              whileInView="visible"
-              viewport={{ once: true, margin: "-60px" }}
-            >
-              {steps.map((step) => {
-                const Icon = step.icon;
-                return (
-                  <motion.div key={step.number} variants={stepsItem} className="relative z-10">
-                    <div className="inline-block bg-[#002452] pr-4 mb-6">
-                      <p className="text-white/25 text-4xl leading-none" style={lora}>
-                        {step.number}
-                      </p>
-                    </div>
-
-                    <div className="flex items-center justify-center w-11 h-11 rounded-2xl bg-white/10 border border-white/15 mb-5">
-                      <Icon size={18} className="text-white/80" strokeWidth={1.5} />
-                    </div>
-
-                    <h3
-                      className="text-white text-xl mb-2"
-                      style={{ ...lora, fontWeight: 500 }}
-                    >
-                      {step.title}
-                    </h3>
-
-                    <p className="text-white/60 text-sm leading-relaxed">
-                      {step.description}
+            {steps.map((step) => {
+              const Icon = step.icon;
+              return (
+                <motion.div key={step.number} variants={stepsItem} className="relative z-10">
+                  <div className="inline-block bg-[#141C2E] pr-4 mb-6">
+                    <p className="text-[#3B82F6] text-4xl font-bold tracking-tight leading-none">
+                      {step.number}
                     </p>
-                  </motion.div>
-                );
-              })}
-            </motion.div>
-          </div>
+                  </div>
 
-          <motion.div
-            initial={{ opacity: 0, y: 16 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true, margin: "-40px" }}
-            transition={{ duration: 0.55, ease, delay: 0.2 }}
-            className="mt-12 flex justify-start"
-          >
-            <Link
-              href="/how-it-works"
-              className="inline-flex items-center gap-2 text-white/70 text-sm hover:text-white transition-colors"
-            >
-              Learn more about the process
-              <ArrowRight size={14} strokeWidth={1.5} />
-            </Link>
+                  <div className="flex items-center justify-center w-11 h-11 rounded-2xl bg-[#1F2A3D] border border-[#2A3850] mb-5">
+                    <Icon size={18} className="text-[#8A93A6]" strokeWidth={1.5} />
+                  </div>
+
+                  <h3 className="text-[#E6EAF2] text-xl font-semibold mb-2">{step.title}</h3>
+
+                  <p className="text-[#8A93A6] text-sm leading-relaxed">{step.description}</p>
+                </motion.div>
+              );
+            })}
           </motion.div>
         </div>
-      </section>
 
-    </>
+        <motion.div
+          initial={{ opacity: 0, y: 16 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, margin: "-40px" }}
+          transition={{ duration: 0.55, ease, delay: 0.2 }}
+          className="mt-12 flex justify-start"
+        >
+          <Link
+            href="/how-it-works"
+            className="inline-flex items-center gap-2 text-[#8A93A6] text-sm hover:text-[#E6EAF2] transition-colors"
+          >
+            Learn more about the process
+            <ArrowRight size={14} strokeWidth={1.5} />
+          </Link>
+        </motion.div>
+      </div>
+    </section>
   );
 }

@@ -6,7 +6,7 @@ export async function GET(request: NextRequest) {
   const { searchParams, origin } = new URL(request.url);
   const code = searchParams.get("code");
   const rawNext = searchParams.get("next") ?? "/";
-  // Only allow relative paths — blocks @host and protocol-relative open-redirect attacks
+  // Only allow relative paths, blocks @host and protocol-relative open-redirect attacks
   const next = /^\/(?!\/)[^@]*$/.test(rawNext) ? rawNext : "/";
 
   if (code) {
@@ -31,6 +31,11 @@ export async function GET(request: NextRequest) {
     const { error } = await supabase.auth.exchangeCodeForSession(code);
     if (!error) {
       return NextResponse.redirect(`${origin}${next}`);
+    }
+    // Exchange failed (expired/invalid link), send to reset page so it can
+    // show an expired-link message rather than silently landing on home.
+    if (next === "/auth/reset-password") {
+      return NextResponse.redirect(`${origin}/auth/reset-password`);
     }
   }
 

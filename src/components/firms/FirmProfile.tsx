@@ -75,13 +75,13 @@ export default function FirmProfile({ firm, initialSaved }: FirmProfileProps) {
         initial={{ opacity: 0, y: -8 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.4, ease }}
-        className="flex items-center gap-2 text-sm text-slate-400 mb-8"
+        className="flex items-center gap-2 text-sm text-[#8A93A6] mb-8"
       >
-        <Link href="/browse" className="hover:text-[#002452] transition-colors">Legal Services</Link>
+        <Link href="/browse" className="hover:text-[#E6EAF2] transition-colors">Legal Services</Link>
         <span>/</span>
-        <Link href="/results" className="hover:text-[#002452] transition-colors">Your Matches</Link>
+        <Link href="/results" className="hover:text-[#E6EAF2] transition-colors">Your Matches</Link>
         <span>/</span>
-        <span className="text-slate-600">{firm.name}</span>
+        <span className="text-[#C8CDD8]">{firm.name}</span>
       </motion.div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-10">
@@ -93,7 +93,7 @@ export default function FirmProfile({ firm, initialSaved }: FirmProfileProps) {
           className="lg:col-span-2 space-y-10"
         >
           {/* Hero */}
-          <div className="bg-[#fbfaf6] border border-[#ddd7cc] rounded-3xl p-8">
+          <div className="bg-[#141C2E] border border-[#1F2A3D] rounded-3xl p-8">
             <div className="flex items-start justify-between gap-4 mb-4">
               <div>
                 {firm.verified && (
@@ -103,29 +103,29 @@ export default function FirmProfile({ firm, initialSaved }: FirmProfileProps) {
                   </div>
                 )}
                 <h1
-                  className="text-4xl sm:text-5xl text-[#002452] leading-tight"
+                  className="text-4xl sm:text-5xl text-[#E6EAF2] leading-tight"
                   style={{ fontFamily: '"Lora", Georgia, serif', fontWeight: 500 }}
                 >
                   {firm.name}
                 </h1>
-                <p className="text-slate-500 text-base mt-2">{firm.tagline}</p>
+                <p className="text-[#8A93A6] text-base mt-2">{firm.tagline}</p>
               </div>
               {/* Score */}
               <div className="text-center shrink-0">
                 <div
-                  className="text-5xl text-[#002452]"
+                  className="text-5xl text-[#E6EAF2]"
                   style={{ fontFamily: '"Lora", Georgia, serif' }}
                 >
                   {matchScore ?? firm.overallScore}
                 </div>
-                <div className="text-xs text-slate-400">
+                <div className="text-xs text-[#8A93A6]">
                   {matchScore !== null ? "match score" : "LWYRD Score"}
                 </div>
               </div>
             </div>
 
             {/* Meta row */}
-            <div className="flex flex-wrap gap-4 text-sm text-slate-500 border-t border-[#ddd7cc] pt-5 mt-5">
+            <div className="flex flex-wrap gap-4 text-sm text-[#8A93A6] border-t border-[#1F2A3D] pt-5 mt-5">
               <span className="flex items-center gap-1.5">
                 <MapPin size={14} />
                 {firm.location}
@@ -144,28 +144,28 @@ export default function FirmProfile({ firm, initialSaved }: FirmProfileProps) {
           {/* About */}
           <div>
             <h2
-              className="text-[#002452] text-2xl mb-4"
+              className="text-[#E6EAF2] text-2xl mb-4"
               style={{ fontFamily: '"Lora", Georgia, serif', fontWeight: 500 }}
             >
               About the firm
             </h2>
-            <p className="text-slate-600 text-sm leading-relaxed">{firm.description}</p>
+            <p className="text-[#C8CDD8] text-sm leading-relaxed">{firm.description}</p>
           </div>
 
           {/* Strengths */}
           {firm.strengths.length > 0 && (
             <div>
               <h2
-                className="text-[#002452] text-2xl mb-4"
+                className="text-[#E6EAF2] text-2xl mb-4"
                 style={{ fontFamily: '"Lora", Georgia, serif', fontWeight: 500 }}
               >
                 Key strengths
               </h2>
               <div className="space-y-2">
                 {firm.strengths.map((s, i) => (
-                  <div key={i} className="flex items-start gap-3 bg-[#fbfaf6] border border-[#ddd7cc] rounded-2xl p-4">
-                    <Star size={14} className="text-[#002452] mt-0.5 shrink-0" strokeWidth={1.5} />
-                    <span className="text-slate-600 text-sm">{s}</span>
+                  <div key={i} className="flex items-start gap-3 bg-[#141C2E] border border-[#1F2A3D] rounded-2xl p-4">
+                    <Star size={14} className="text-[#E6EAF2] mt-0.5 shrink-0" strokeWidth={1.5} />
+                    <span className="text-[#C8CDD8] text-sm">{s}</span>
                   </div>
                 ))}
               </div>
@@ -176,36 +176,36 @@ export default function FirmProfile({ firm, initialSaved }: FirmProfileProps) {
           {firm.team.length > 0 && (
             <div>
               <h2
-                className="text-[#002452] text-2xl mb-5"
+                className="text-[#E6EAF2] text-2xl mb-5"
                 style={{ fontFamily: '"Lora", Georgia, serif', fontWeight: 500 }}
               >
                 The team
               </h2>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
                 {firm.team.map((attorney) => (
-                  <div key={attorney.name} className="bg-[#fbfaf6] border border-[#ddd7cc] rounded-3xl p-6">
+                  <div key={attorney.name} className="bg-[#141C2E] border border-[#1F2A3D] rounded-3xl p-6">
                     {/* Avatar placeholder */}
-                    <div className="w-12 h-12 rounded-full bg-[#002452]/10 border border-[#ddd7cc] flex items-center justify-center mb-4">
+                    <div className="w-12 h-12 rounded-full bg-white/10 border border-[#1F2A3D] flex items-center justify-center mb-4">
                       <span
-                        className="text-[#002452] text-xl"
+                        className="text-[#E6EAF2] text-xl"
                         style={{ fontFamily: '"Lora", Georgia, serif' }}
                       >
                         {attorney.name[0]}
                       </span>
                     </div>
                     <p
-                      className="text-[#002452] text-lg mb-0.5"
+                      className="text-[#E6EAF2] text-lg mb-0.5"
                       style={{ fontFamily: '"Lora", Georgia, serif', fontWeight: 500 }}
                     >
                       {attorney.name}
                     </p>
-                    <p className="text-slate-400 text-xs font-medium mb-3">{attorney.title}</p>
-                    <p className="text-slate-600 text-sm leading-relaxed mb-3 line-clamp-3">{attorney.bio}</p>
+                    <p className="text-[#8A93A6] text-xs font-medium mb-3">{attorney.title}</p>
+                    <p className="text-[#C8CDD8] text-sm leading-relaxed mb-3 line-clamp-3">{attorney.bio}</p>
                     <div className="flex flex-wrap gap-1.5">
                       {attorney.barAdmissions.map((b) => (
                         <span
                           key={b}
-                          className="text-xs bg-[#002452]/8 text-[#002452] px-3 py-1 rounded-full"
+                          className="text-xs bg-white/8 text-[#E6EAF2] px-3 py-1 rounded-full"
                         >
                           {b}
                         </span>
@@ -221,16 +221,16 @@ export default function FirmProfile({ firm, initialSaved }: FirmProfileProps) {
           <div>
             <div className="flex items-center justify-between mb-5">
               <h2
-                className="text-[#002452] text-2xl"
+                className="text-[#E6EAF2] text-2xl"
                 style={{ fontFamily: '"Lora", Georgia, serif', fontWeight: 500 }}
               >
                 LWYRD Assessment
               </h2>
-              <span className="text-sm text-slate-500">
+              <span className="text-sm text-[#8A93A6]">
                 {passedItems}/{totalItems} criteria met
               </span>
             </div>
-            <div className="bg-[#fbfaf6] border border-[#ddd7cc] rounded-3xl overflow-hidden">
+            <div className="bg-[#141C2E] border border-[#1F2A3D] rounded-3xl overflow-hidden">
               <div className="bg-[#002452] px-6 py-4">
                 <p className="text-white/85 text-sm leading-relaxed">
                   Every firm in the LWYRD network is evaluated against a standard set of criteria before being listed. These assessments are conducted as part of our onboarding process and updated periodically.
@@ -245,11 +245,11 @@ export default function FirmProfile({ firm, initialSaved }: FirmProfileProps) {
                       <XCircle size={16} className="text-amber-400 mt-0.5 shrink-0" />
                     )}
                     <div>
-                      <span className={`text-sm ${item.passed ? "text-slate-700" : "text-slate-500"}`}>
+                      <span className={`text-sm ${item.passed ? "text-[#C8CDD8]" : "text-[#8A93A6]"}`}>
                         {item.label}
                       </span>
                       {item.note && (
-                        <p className="text-xs text-slate-400 mt-0.5">{item.note}</p>
+                        <p className="text-xs text-[#8A93A6] mt-0.5">{item.note}</p>
                       )}
                     </div>
                   </div>
@@ -279,7 +279,7 @@ export default function FirmProfile({ firm, initialSaved }: FirmProfileProps) {
             </p>
             <button
               onClick={() => setContactModalOpen(true)}
-              className="flex items-center justify-center gap-2 w-full py-3 rounded-2xl bg-white text-[#002452] text-sm font-medium hover:opacity-90 transition-opacity"
+              className="flex items-center justify-center gap-2 w-full py-3 rounded-2xl bg-white text-[#E6EAF2] text-sm font-medium hover:opacity-90 transition-opacity"
             >
               Contact This Firm
               <ArrowRight size={14} />
@@ -288,9 +288,9 @@ export default function FirmProfile({ firm, initialSaved }: FirmProfileProps) {
           <SaveFirmButton firmId={firm.id} initialSaved={initialSaved} />
 
           {/* Firm details */}
-          <div className="bg-[#fbfaf6] border border-[#ddd7cc] rounded-3xl p-6 space-y-4">
+          <div className="bg-[#141C2E] border border-[#1F2A3D] rounded-3xl p-6 space-y-4">
             <h3
-              className="text-[#002452] text-lg mb-3"
+              className="text-[#E6EAF2] text-lg mb-3"
               style={{ fontFamily: '"Lora", Georgia, serif', fontWeight: 500 }}
             >
               Firm details
@@ -312,9 +312,9 @@ export default function FirmProfile({ firm, initialSaved }: FirmProfileProps) {
           </div>
 
           {/* Practice areas */}
-          <div className="bg-[#fbfaf6] border border-[#ddd7cc] rounded-3xl p-6">
+          <div className="bg-[#141C2E] border border-[#1F2A3D] rounded-3xl p-6">
             <h3
-              className="text-[#002452] text-lg mb-4"
+              className="text-[#E6EAF2] text-lg mb-4"
               style={{ fontFamily: '"Lora", Georgia, serif', fontWeight: 500 }}
             >
               Practice areas
@@ -324,7 +324,7 @@ export default function FirmProfile({ firm, initialSaved }: FirmProfileProps) {
                 <Link
                   key={slug}
                   href={`/services/${slug}`}
-                  className="text-xs bg-[#002452]/10 text-[#002452] px-3 py-1.5 rounded-full hover:bg-[#002452] hover:text-white transition-colors capitalize"
+                  className="text-xs bg-white/10 text-[#E6EAF2] px-3 py-1.5 rounded-full hover:bg-[#002452] hover:text-white transition-colors capitalize"
                 >
                   {slug.replace(/-/g, " ")}
                 </Link>
@@ -334,9 +334,9 @@ export default function FirmProfile({ firm, initialSaved }: FirmProfileProps) {
 
           {/* Industries */}
           {firm.industries.length > 0 && (
-            <div className="bg-[#fbfaf6] border border-[#ddd7cc] rounded-3xl p-6">
+            <div className="bg-[#141C2E] border border-[#1F2A3D] rounded-3xl p-6">
               <h3
-                className="text-[#002452] text-lg mb-4"
+                className="text-[#E6EAF2] text-lg mb-4"
                 style={{ fontFamily: '"Lora", Georgia, serif', fontWeight: 500 }}
               >
                 Industries served
@@ -345,7 +345,7 @@ export default function FirmProfile({ firm, initialSaved }: FirmProfileProps) {
                 {firm.industries.map((ind) => (
                   <span
                     key={ind}
-                    className="text-xs bg-[#f5f4f0] border border-[#ddd7cc] text-slate-600 px-3 py-1.5 rounded-full capitalize"
+                    className="text-xs bg-[#0A0F1C] border border-[#1F2A3D] text-[#C8CDD8] px-3 py-1.5 rounded-full capitalize"
                   >
                     {ind.replace(/-/g, " ")}
                   </span>
@@ -363,8 +363,8 @@ export default function FirmProfile({ firm, initialSaved }: FirmProfileProps) {
 function DetailRow({ label, value }: { label: string; value: string }) {
   return (
     <div>
-      <p className="text-xs text-slate-400 font-medium mb-0.5">{label}</p>
-      <p className="text-slate-700 text-sm">{value}</p>
+      <p className="text-xs text-[#8A93A6] font-medium mb-0.5">{label}</p>
+      <p className="text-[#C8CDD8] text-sm">{value}</p>
     </div>
   );
 }

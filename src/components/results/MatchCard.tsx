@@ -1,8 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import { MatchResult } from "@/types";
-import { CheckCircle2, XCircle, Award, MapPin, Building2, ArrowRight } from "lucide-react";
+import { Firm, MatchResult } from "@/types";
+import { Award, MapPin, Building2, CheckCircle2, XCircle, ArrowRight } from "lucide-react";
 import SaveFirmButton from "@/components/firms/SaveFirmButton";
 
 const sizeLabels: Record<string, string> = {
@@ -11,114 +11,212 @@ const sizeLabels: Record<string, string> = {
   large: "Large",
 };
 
+const billingModelLabels: Record<string, string> = {
+  hourly: "Hourly",
+  "flat-fee": "Flat-fee",
+  retainer: "Retainer",
+  hybrid: "Hybrid",
+};
+
+const missedLabels: Record<string, string> = {
+  "company-stage": "Stage: doesn't specialize in your company stage",
+  budget: "Budget: outside your budget range",
+  industry: "Industry: doesn't serve your vertical",
+  location: "Location: may not be licensed in your state",
+  timeline: "Timeline: may not match your urgency",
+  language: "Language: may not have attorneys who speak your language",
+};
+
+function formatK(n: number): string {
+  if (n === 0) return "$0";
+  if (n >= 1000) return `$${Math.round(n / 1000)}K`;
+  return `$${n}`;
+}
+
+function getMissedLabel(criterion: string, firm: Firm): string {
+  if (criterion === "budget") {
+    const { min, max } = firm.budgetRange;
+    if (min > 0 && max > 0) return `Budget: firm's typical range is ${formatK(min)}–${formatK(max)}`;
+    if (min > 0) return `Budget: firm typically starts at ${formatK(min)}`;
+    return "Budget: outside your budget range";
+  }
+  if (criterion === "billing") {
+    const model = billingModelLabels[firm.billingModel] ?? firm.billingModel;
+    return `Billing: this firm uses ${model.toLowerCase()} billing`;
+  }
+  if (criterion === "firm-size") {
+    const size = sizeLabels[firm.size]?.toLowerCase() ?? firm.size;
+    return `Firm size: ${size} firm`;
+  }
+  return missedLabels[criterion] ?? criterion;
+}
+
+function ScoreRing({ score }: { score: number }) {
+  const size = 124;
+  const radius = 49;
+  const stroke = 6.5;
+  const circumference = 2 * Math.PI * radius;
+  const filled = (score / 100) * circumference;
+
+  return (
+    <div className="flex flex-col items-center gap-2.5 shrink-0">
+      <div className="relative" style={{ width: size, height: size }}>
+        <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`} style={{ transform: "rotate(-90deg)" }}>
+          <circle
+            cx={size / 2} cy={size / 2} r={radius}
+            fill="none" stroke="#1F2A3D" strokeWidth={stroke}
+          />
+          <circle
+            cx={size / 2} cy={size / 2} r={radius}
+            fill="none" stroke="#3B82F6" strokeWidth={stroke}
+            strokeDasharray={`${filled} ${circumference}`}
+            strokeLinecap="round"
+            style={{ transition: "stroke-dasharray 0.85s cubic-bezier(0.25,0.46,0.45,0.94) 0.3s" }}
+          />
+        </svg>
+        <div className="absolute inset-0 flex items-center justify-center">
+          <div className="flex items-baseline gap-0.5">
+            <span
+              className="text-[#E6EAF2] leading-none tabular-nums"
+              style={{ fontFamily: '"Lora", Georgia, serif', fontWeight: 500, fontSize: "2rem" }}
+            >
+              {score}
+            </span>
+            <span className="text-sm text-[#8A93A6] font-medium">%</span>
+          </div>
+        </div>
+      </div>
+      <span className="text-[11px] text-[#8A93A6] font-semibold tracking-widest uppercase">Match Score</span>
+    </div>
+  );
+}
+
 interface MatchCardProps {
   result: MatchResult;
   rank: number;
   initialSaved?: boolean;
 }
 
-export default function MatchCard({
-  result,
-  rank,
-  initialSaved = false,
-}: MatchCardProps) {
+export default function MatchCard({ result, rank, initialSaved = false }: MatchCardProps) {
   const { firm, score, reasons, isBestMatch } = result;
-  const passedCount = firm.assessment.filter((a) => a.passed).length;
-  const totalCount = firm.assessment.length;
+  const roundedScore = Math.round(score);
+  const hasCriteria = reasons.length > 0 || result.missedCriteria.length > 0;
+  const hasBoth = reasons.length > 0 && result.missedCriteria.length > 0;
 
   return (
     <div
-      className={`rounded-3xl shadow-sm p-8 border border-l-4 transition-shadow hover:shadow-md ${
+      className={`rounded-3xl bg-[#141C2E] overflow-hidden transition-all hover:shadow-lg ${
         isBestMatch
-          ? "bg-[#002452]/[0.03] border-[#002452]/30 border-l-[#002452]"
-          : "bg-[#fbfaf6] border-[#ddd7cc] border-l-[#ddd7cc]"
+          ? "border-2 border-[#c9a227] shadow-[0_4px_28px_rgba(201,162,39,0.12)]"
+          : "border-2 border-[#1F2A3D] shadow-[0_4px_24px_rgba(0,0,0,0.2)]"
       }`}
     >
-      <div className="flex items-start justify-between gap-4 mb-5">
-        {/* Left: firm info */}
-        <div className="flex-1 min-w-0">
-          <div className="flex items-center gap-2 flex-wrap mb-1">
-            {isBestMatch && (
-              <span className="inline-flex items-center gap-1 bg-[#002452] text-white text-xs px-3 py-1 rounded-full font-medium">
-                <Award size={11} />
-                Best Match
-              </span>
-            )}
-            {rank > 1 && (
-              <span className="text-xs text-slate-400">#{rank}</span>
-            )}
-          </div>
-          <h3
-            className="text-[#002452] text-2xl leading-tight"
-            style={{ fontFamily: '"Lora", Georgia, serif', fontWeight: 500 }}
-          >
-            {firm.name}
-          </h3>
-          <p className="text-slate-500 text-sm mt-1">{firm.tagline}</p>
-        </div>
+      {isBestMatch && <div className="h-[3px] bg-[#c9a227]" />}
 
-        {/* Right: score */}
-        <div className="text-right shrink-0">
-          <div
-            className="text-4xl text-[#002452]"
-            style={{ fontFamily: '"Lora", Georgia, serif' }}
-          >
-            {score}
-          </div>
-          <div className="text-xs text-slate-400">match score</div>
-          <div className="mt-2 h-1.5 w-20 bg-[#ddd7cc] rounded-full overflow-hidden">
-            <div
-              className="h-full bg-[#002452] rounded-full transition-all duration-700 delay-300"
-              style={{ width: `${score}%` }}
-            />
-          </div>
-        </div>
-      </div>
-
-      {/* Meta row */}
-      <div className="flex flex-wrap gap-3 mb-5 text-xs text-slate-500">
-        <span className="flex items-center gap-1">
-          <MapPin size={12} />
-          {firm.location}
-        </span>
-        <span className="flex items-center gap-1">
-          <Building2 size={12} />
-          {sizeLabels[firm.size]} firm
-        </span>
-        <span>Est. {firm.founded}</span>
-        <span className="capitalize">{firm.billingModel} billing</span>
-      </div>
-
-      {/* Match reasons */}
-      {reasons.length > 0 && (
-        <div className="mb-5 space-y-1.5">
-          {reasons.map((r, i) => (
-            <div key={i} className="flex items-start gap-2 text-sm text-slate-600">
-              <CheckCircle2 size={14} className="text-emerald-500 mt-0.5 shrink-0" />
-              {r}
+      <div className="p-8 sm:p-10">
+        {/* Header */}
+        <div className="flex items-start gap-8 mb-6">
+          <div className="flex-1 min-w-0">
+            <div className="flex flex-wrap items-center gap-2 mb-3">
+              {isBestMatch && (
+                <span className="inline-flex items-center gap-1.5 bg-[#c9a227] text-[#0A0F1C] text-[10px] font-semibold tracking-widest uppercase px-2.5 py-1 rounded-full">
+                  <Award size={9} strokeWidth={2.5} />
+                  Best Match
+                </span>
+              )}
+              {!isBestMatch && rank > 0 && (
+                <span className="text-xs text-[#8A93A6] font-medium">#{rank}</span>
+              )}
             </div>
-          ))}
-        </div>
-      )}
+            <h3
+              className="text-[#E6EAF2] text-3xl leading-snug mb-2"
+              style={{ fontFamily: '"Lora", Georgia, serif', fontWeight: 500 }}
+            >
+              {firm.name}
+            </h3>
+            <p className="text-[#8A93A6] text-base leading-relaxed">{firm.tagline}</p>
+          </div>
 
-      {/* Missed criteria */}
-      {result.missedCriteria.includes("location") && (
-        <div className="flex items-center gap-2 text-xs text-slate-400 mb-4">
-          <XCircle size={12} className="text-amber-400 shrink-0" />
-          May not be licensed in your preferred state
+          <ScoreRing score={roundedScore} />
         </div>
-      )}
 
-      {/* CTA */}
-      <div className="flex items-center justify-end gap-3">
-        <SaveFirmButton firmId={firm.id} initialSaved={initialSaved} compact />
-        <Link
-          href={`/firms/${firm.id}`}
-          className="flex items-center gap-2 px-6 py-3 rounded-2xl bg-[#002452] text-white text-sm font-medium hover:opacity-90 transition-opacity focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#002452] focus-visible:ring-offset-2"
-        >
-          View Profile
-          <ArrowRight size={14} />
-        </Link>
+        {/* Meta row */}
+        <div className="flex flex-wrap items-center gap-x-4 gap-y-1.5 text-sm text-[#8A93A6] pb-6 border-b border-[#1F2A3D]">
+          <span className="flex items-center gap-1.5">
+            <MapPin size={13} strokeWidth={1.75} className="shrink-0" />
+            {firm.location}
+          </span>
+          <span className="text-[#1F2A3D]">·</span>
+          <span className="flex items-center gap-1.5">
+            <Building2 size={13} strokeWidth={1.75} className="shrink-0" />
+            {sizeLabels[firm.size] ?? firm.size} firm
+          </span>
+          {firm.founded && (
+            <>
+              <span className="text-[#1F2A3D]">·</span>
+              <span>Est. {firm.founded}</span>
+            </>
+          )}
+          {firm.billingModel && (
+            <>
+              <span className="text-[#1F2A3D]">·</span>
+              <span>{billingModelLabels[firm.billingModel] ?? firm.billingModel} billing</span>
+            </>
+          )}
+        </div>
+
+        {/* Criteria */}
+        {hasCriteria && (
+          <div className={`py-6 border-b border-[#1F2A3D] ${hasBoth ? "grid sm:grid-cols-2 gap-x-8 gap-y-2.5" : "space-y-2.5"}`}>
+            {hasBoth ? (
+              <>
+                <div className="space-y-2.5">
+                  {reasons.map((r, i) => (
+                    <div key={i} className="flex items-start gap-3 text-sm text-[#C8CDD8]">
+                      <CheckCircle2 size={16} className="text-emerald-500 mt-0.5 shrink-0" />
+                      {r}
+                    </div>
+                  ))}
+                </div>
+                <div className="space-y-2.5">
+                  {result.missedCriteria.map((c) => (
+                    <div key={c} className="flex items-start gap-3 text-sm text-[#8A93A6]">
+                      <XCircle size={16} className="text-rose-400/80 mt-0.5 shrink-0" />
+                      {getMissedLabel(c, firm)}
+                    </div>
+                  ))}
+                </div>
+              </>
+            ) : (
+              <>
+                {reasons.map((r, i) => (
+                  <div key={i} className="flex items-start gap-3 text-sm text-slate-600">
+                    <CheckCircle2 size={16} className="text-emerald-500 mt-0.5 shrink-0" />
+                    {r}
+                  </div>
+                ))}
+                {result.missedCriteria.map((c) => (
+                  <div key={c} className="flex items-start gap-3 text-sm text-slate-400">
+                    <XCircle size={16} className="text-rose-400/80 mt-0.5 shrink-0" />
+                    {getMissedLabel(c, firm)}
+                  </div>
+                ))}
+              </>
+            )}
+          </div>
+        )}
+
+        {/* CTA */}
+        <div className="flex items-center justify-between gap-4 pt-6">
+          <SaveFirmButton firmId={firm.id} initialSaved={initialSaved} compact />
+          <Link
+            href={`/firms/${firm.id}`}
+            className="inline-flex items-center gap-2 px-6 py-3 rounded-2xl bg-[#3B82F6] hover:bg-[#2563EB] text-white text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#3B82F6] focus-visible:ring-offset-2 focus-visible:ring-offset-[#141C2E]"
+          >
+            View Full Profile
+            <ArrowRight size={14} strokeWidth={2} />
+          </Link>
+        </div>
       </div>
     </div>
   );

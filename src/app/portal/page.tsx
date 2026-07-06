@@ -37,11 +37,11 @@ const NAV_ITEMS: { id: TabId; label: string; icon: React.ElementType }[] = [
 
 function StatCard({ value, label, sublabel }: { value: number | string; label: string; sublabel?: string }) {
   return (
-    <div className="bg-white rounded-2xl border border-[#ddd7cc] p-5 flex flex-col gap-1">
-      <span className="text-3xl text-[#002452]" style={{ ...lora, fontWeight: 500 }}>
+    <div className="bg-white rounded-2xl border border-[#1F2A3D] p-5 flex flex-col gap-1">
+      <span className="text-3xl text-[#E6EAF2]" style={{ ...lora, fontWeight: 500 }}>
         {value}
       </span>
-      <span className="text-xs text-slate-400 font-medium uppercase tracking-wide">{label}</span>
+      <span className="text-xs text-[#8A93A6] font-medium uppercase tracking-wide">{label}</span>
       {sublabel && <span className="text-xs text-slate-300">{sublabel}</span>}
     </div>
   );
@@ -54,10 +54,10 @@ function EmptyState({ icon: Icon, title, body, cta }: {
   cta?: React.ReactNode;
 }) {
   return (
-    <div className="bg-white border border-[#ddd7cc] rounded-3xl p-12 flex flex-col items-center text-center gap-3">
+    <div className="bg-white border border-[#1F2A3D] rounded-3xl p-12 flex flex-col items-center text-center gap-3">
       <Icon size={32} className="text-slate-200" strokeWidth={1.2} />
-      <p className="text-slate-700 font-medium text-sm">{title}</p>
-      <p className="text-slate-400 text-sm max-w-sm leading-relaxed">{body}</p>
+      <p className="text-[#C8CDD8] font-medium text-sm">{title}</p>
+      <p className="text-[#8A93A6] text-sm max-w-sm leading-relaxed">{body}</p>
       {cta}
     </div>
   );
@@ -76,21 +76,21 @@ function OverviewTab({ firmName, setActiveTab }: { firmName: string; setActiveTa
       </div>
 
       {/* Status card */}
-      <div className="bg-white border border-[#ddd7cc] rounded-2xl p-6 flex items-start gap-4">
+      <div className="bg-white border border-[#1F2A3D] rounded-2xl p-6 flex items-start gap-4">
         <div className="w-10 h-10 rounded-xl bg-emerald-50 flex items-center justify-center shrink-0">
           <CheckCircle2 size={18} className="text-emerald-500" strokeWidth={1.5} />
         </div>
         <div>
-          <p className="text-[#002452] font-semibold text-sm" style={lora}>
+          <p className="text-[#E6EAF2] font-semibold text-sm" style={lora}>
             {firmName} is live on LWYRD
           </p>
-          <p className="text-slate-500 text-sm mt-1 leading-relaxed">
+          <p className="text-[#8A93A6] text-sm mt-1 leading-relaxed">
             Your firm profile is active. Clients whose intake answers match your practice areas, size,
             and billing preferences will see your listing in their results.
           </p>
           <button
             onClick={() => setActiveTab("profile")}
-            className="mt-3 inline-flex items-center gap-1.5 text-xs text-[#002452] font-medium hover:opacity-70 transition-opacity"
+            className="mt-3 inline-flex items-center gap-1.5 text-xs text-[#E6EAF2] font-medium hover:opacity-70 transition-opacity"
           >
             View firm profile <ChevronRight size={12} />
           </button>
@@ -99,7 +99,7 @@ function OverviewTab({ firmName, setActiveTab }: { firmName: string; setActiveTa
 
       {/* Quick links */}
       <div>
-        <h3 className="text-sm font-semibold text-slate-500 uppercase tracking-wide mb-3">Quick Actions</h3>
+        <h3 className="text-sm font-semibold text-[#8A93A6] uppercase tracking-wide mb-3">Quick Actions</h3>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           {[
             {
@@ -129,19 +129,19 @@ function OverviewTab({ firmName, setActiveTab }: { firmName: string; setActiveTa
           ].map(({ icon: Icon, label, desc, onClick, href }) => {
             const inner = (
               <>
-                <div className="w-9 h-9 rounded-xl bg-[#002452]/8 flex items-center justify-center shrink-0">
-                  <Icon size={15} className="text-[#002452]" strokeWidth={1.5} />
+                <div className="w-9 h-9 rounded-xl bg-white/8 flex items-center justify-center shrink-0">
+                  <Icon size={15} className="text-[#E6EAF2]" strokeWidth={1.5} />
                 </div>
                 <div className="flex-1 min-w-0">
-                  <p className="text-[#002452] text-sm font-medium">{label}</p>
-                  <p className="text-slate-400 text-xs mt-0.5">{desc}</p>
+                  <p className="text-[#E6EAF2] text-sm font-medium">{label}</p>
+                  <p className="text-[#8A93A6] text-xs mt-0.5">{desc}</p>
                 </div>
                 <ChevronRight size={14} className="text-slate-300 shrink-0" />
               </>
             );
 
             const cls =
-              "bg-white border border-[#ddd7cc] rounded-2xl p-4 flex items-center gap-3 hover:shadow-sm hover:-translate-y-0.5 transition-all text-left";
+              "bg-white border border-[#1F2A3D] rounded-2xl p-4 flex items-center gap-3 hover:shadow-sm hover:-translate-y-0.5 transition-all text-left";
 
             if (href) {
               return (
@@ -167,20 +167,20 @@ function OverviewTab({ firmName, setActiveTab }: { firmName: string; setActiveTa
 function FirmProfileTab({ firmName }: { firmName: string }) {
   return (
     <div className="space-y-6">
-      <div className="bg-white border border-[#ddd7cc] rounded-2xl p-6">
+      <div className="bg-white border border-[#1F2A3D] rounded-2xl p-6">
         <div className="flex items-start justify-between gap-4 mb-6">
           <div>
             <div className="inline-flex items-center gap-1.5 text-xs font-medium text-emerald-600 bg-emerald-50 px-2.5 py-1 rounded-full mb-3">
               <CheckCircle2 size={11} />
               Live on LWYRD
             </div>
-            <h2 className="text-2xl text-[#002452]" style={{ ...lora, fontWeight: 500 }}>
+            <h2 className="text-2xl text-[#E6EAF2]" style={{ ...lora, fontWeight: 500 }}>
               {firmName}
             </h2>
           </div>
           <Link
             href="/contact"
-            className="shrink-0 inline-flex items-center gap-2 border border-[#002452] text-[#002452] text-sm font-medium px-4 py-2 rounded-xl hover:bg-[#002452] hover:text-white transition-colors"
+            className="shrink-0 inline-flex items-center gap-2 border border-[#002452] text-[#E6EAF2] text-sm font-medium px-4 py-2 rounded-xl hover:bg-[#002452] hover:text-white transition-colors"
           >
             <Edit3 size={13} strokeWidth={1.5} />
             Request Update
@@ -188,32 +188,31 @@ function FirmProfileTab({ firmName }: { firmName: string }) {
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
-          {[
-            { label: "Practice Areas", value: "Managed by LWYRD" },
-            { label: "Firm Size", value: "Managed by LWYRD" },
-            { label: "Billing Model", value: "Managed by LWYRD" },
-            { label: "Response Time", value: "Managed by LWYRD" },
-            { label: "Languages", value: "Managed by LWYRD" },
-            { label: "Location", value: "Managed by LWYRD" },
-          ].map(({ label, value }) => (
+          {["Practice Areas", "Firm Size", "Billing Model", "Response Time", "Languages", "Location"].map((label) => (
             <div key={label}>
-              <p className="text-xs text-slate-400 font-medium mb-0.5">{label}</p>
-              <p className="text-sm text-slate-500 italic">{value}</p>
+              <p className="text-xs text-[#8A93A6] font-medium mb-0.5">{label}</p>
+              <Link
+                href="/contact"
+                className="inline-flex items-center gap-1 text-xs text-[#E6EAF2]/50 hover:text-[#E6EAF2] transition-colors"
+              >
+                <Edit3 size={10} strokeWidth={1.5} />
+                Request update
+              </Link>
             </div>
           ))}
         </div>
       </div>
 
-      <div className="bg-[#f5f4f0] border border-[#ddd7cc] rounded-2xl p-6">
+      <div className="bg-[#0A0F1C] border border-[#1F2A3D] rounded-2xl p-6">
         <div className="flex items-start gap-3">
-          <div className="w-9 h-9 rounded-xl bg-[#002452]/10 flex items-center justify-center shrink-0">
-            <FileText size={15} className="text-[#002452]" strokeWidth={1.5} />
+          <div className="w-9 h-9 rounded-xl bg-white/10 flex items-center justify-center shrink-0">
+            <FileText size={15} className="text-[#E6EAF2]" strokeWidth={1.5} />
           </div>
           <div className="flex-1">
-            <p className="text-[#002452] text-sm font-semibold mb-1" style={lora}>
+            <p className="text-[#E6EAF2] text-sm font-semibold mb-1" style={lora}>
               Need to update your firm profile?
             </p>
-            <p className="text-slate-500 text-sm leading-relaxed mb-4">
+            <p className="text-[#8A93A6] text-sm leading-relaxed mb-4">
               Your public profile drives which clients see your firm in match results. To update your
               practice areas, billing structure, team members, or any other details, reach out to the
               LWYRD team and we&apos;ll make the changes promptly.
@@ -239,14 +238,14 @@ function InquiriesTab() {
     <div className="space-y-5">
       <div className="flex items-center justify-between">
         <div>
-          <h3 className="text-sm font-semibold text-slate-500 uppercase tracking-wide">
+          <h3 className="text-sm font-semibold text-[#8A93A6] uppercase tracking-wide">
             Inbound Inquiries
           </h3>
-          <p className="text-xs text-slate-400 mt-0.5">
+          <p className="text-xs text-[#8A93A6] mt-0.5">
             Clients whose intake results matched your firm profile
           </p>
         </div>
-        <span className="text-xs text-slate-400 bg-white border border-[#ddd7cc] px-3 py-1.5 rounded-xl">
+        <span className="text-xs text-[#8A93A6] bg-white border border-[#1F2A3D] px-3 py-1.5 rounded-xl">
           0 new
         </span>
       </div>
@@ -258,7 +257,7 @@ function InquiriesTab() {
         cta={
           <Link
             href="/contact"
-            className="mt-2 inline-flex items-center gap-2 text-sm text-[#002452] font-medium hover:opacity-70 transition-opacity"
+            className="mt-2 inline-flex items-center gap-2 text-sm text-[#E6EAF2] font-medium hover:opacity-70 transition-opacity"
           >
             Questions about matching? <ArrowRight size={13} />
           </Link>
@@ -275,7 +274,7 @@ function EngagementsTab() {
 
   return (
     <div className="space-y-5">
-      <div className="flex gap-1 bg-white border border-[#ddd7cc] rounded-xl p-1 w-fit">
+      <div className="flex gap-1 bg-white border border-[#1F2A3D] rounded-xl p-1 w-fit">
         {(["active", "past"] as const).map((t) => (
           <button
             key={t}
@@ -283,7 +282,7 @@ function EngagementsTab() {
             className={`px-4 py-1.5 rounded-lg text-sm font-medium transition-colors capitalize ${
               subTab === t
                 ? "bg-[#002452] text-white"
-                : "text-slate-500 hover:text-[#002452]"
+                : "text-[#8A93A6] hover:text-[#E6EAF2]"
             }`}
           >
             {t === "active" ? "Active" : "Past"}
@@ -295,7 +294,7 @@ function EngagementsTab() {
         <EmptyState
           icon={Briefcase}
           title="No active engagements"
-          body="Once you accept a client introduction and begin working together, the engagement details — communications, key documents, and status — will be tracked here."
+          body="Once you accept a client introduction and begin working together, the engagement details, communications, key documents, and status, will be tracked here."
         />
       ) : (
         <EmptyState
@@ -317,7 +316,7 @@ function PortalContent() {
   const firmName = user?.name ?? "Your Firm";
 
   return (
-    <div className="flex flex-col min-h-screen bg-[#f5f4f0]">
+    <div className="flex flex-col min-h-screen bg-[#0A0F1C]">
       <Navbar />
 
       <main className="flex-1 max-w-6xl mx-auto w-full px-4 sm:px-6 py-8">
@@ -334,7 +333,7 @@ function PortalContent() {
                   className={`flex items-center gap-1.5 px-3 py-2 rounded-xl text-sm font-medium whitespace-nowrap transition-colors shrink-0 ${
                     activeTab === id
                       ? "bg-[#002452] text-white"
-                      : "bg-white border border-[#ddd7cc] text-slate-500 hover:text-[#002452]"
+                      : "bg-white border border-[#1F2A3D] text-[#8A93A6] hover:text-[#E6EAF2]"
                   }`}
                 >
                   <Icon size={14} strokeWidth={1.5} />
@@ -344,11 +343,11 @@ function PortalContent() {
             </div>
 
             {/* Desktop: vertical sidebar */}
-            <div className="hidden lg:flex flex-col bg-white border border-[#ddd7cc] rounded-2xl p-3 sticky top-6">
+            <div className="hidden lg:flex flex-col bg-white border border-[#1F2A3D] rounded-2xl p-3 sticky top-6">
               {/* Firm identity */}
               <div className="px-3 py-3 mb-2 border-b border-[#f0ece5]">
-                <p className="text-xs text-slate-400 font-medium">Firm Portal</p>
-                <p className="text-sm text-[#002452] font-semibold mt-0.5 truncate" style={lora}>
+                <p className="text-xs text-[#8A93A6] font-medium">Firm Portal</p>
+                <p className="text-sm text-[#E6EAF2] font-semibold mt-0.5 truncate" style={lora}>
                   {firmName}
                 </p>
                 <div className="flex items-center gap-1 mt-1">
@@ -366,7 +365,7 @@ function PortalContent() {
                     className={`w-full flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-sm font-medium transition-colors text-left ${
                       activeTab === id
                         ? "bg-[#002452] text-white"
-                        : "text-slate-500 hover:bg-[#f5f4f0] hover:text-[#002452]"
+                        : "text-[#8A93A6] hover:bg-[#0A0F1C] hover:text-[#E6EAF2]"
                     }`}
                   >
                     <Icon size={15} strokeWidth={1.5} />
@@ -381,7 +380,7 @@ function PortalContent() {
               {/* Account settings */}
               <Link
                 href="/account"
-                className="w-full flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-sm font-medium text-slate-400 hover:text-[#002452] hover:bg-[#f5f4f0] transition-colors"
+                className="w-full flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-sm font-medium text-[#8A93A6] hover:text-[#E6EAF2] hover:bg-[#0A0F1C] transition-colors"
               >
                 <Settings size={14} strokeWidth={1.5} />
                 Account Settings
@@ -401,40 +400,40 @@ function PortalContent() {
             >
               {activeTab === "overview" && (
                 <>
-                  <h1 className="text-3xl sm:text-4xl text-[#002452]" style={{ ...lora, fontWeight: 500 }}>
+                  <h1 className="text-3xl sm:text-4xl text-[#E6EAF2]" style={{ ...lora, fontWeight: 500 }}>
                     {firmName}
                   </h1>
-                  <p className="text-slate-500 text-sm mt-1">
-                    Your firm dashboard — manage your profile, inquiries, and client engagements.
+                  <p className="text-[#8A93A6] text-sm mt-1">
+                    Your firm dashboard, manage your profile, inquiries, and client engagements.
                   </p>
                 </>
               )}
               {activeTab === "profile" && (
                 <>
-                  <h1 className="text-3xl sm:text-4xl text-[#002452]" style={{ ...lora, fontWeight: 500 }}>
+                  <h1 className="text-3xl sm:text-4xl text-[#E6EAF2]" style={{ ...lora, fontWeight: 500 }}>
                     Firm Profile
                   </h1>
-                  <p className="text-slate-500 text-sm mt-1">
+                  <p className="text-[#8A93A6] text-sm mt-1">
                     Your public listing on LWYRD. Contact us to request updates.
                   </p>
                 </>
               )}
               {activeTab === "inquiries" && (
                 <>
-                  <h1 className="text-3xl sm:text-4xl text-[#002452]" style={{ ...lora, fontWeight: 500 }}>
+                  <h1 className="text-3xl sm:text-4xl text-[#E6EAF2]" style={{ ...lora, fontWeight: 500 }}>
                     Client Inquiries
                   </h1>
-                  <p className="text-slate-500 text-sm mt-1">
+                  <p className="text-[#8A93A6] text-sm mt-1">
                     Potential clients whose intake results matched your firm.
                   </p>
                 </>
               )}
               {activeTab === "engagements" && (
                 <>
-                  <h1 className="text-3xl sm:text-4xl text-[#002452]" style={{ ...lora, fontWeight: 500 }}>
+                  <h1 className="text-3xl sm:text-4xl text-[#E6EAF2]" style={{ ...lora, fontWeight: 500 }}>
                     Engagements
                   </h1>
-                  <p className="text-slate-500 text-sm mt-1">
+                  <p className="text-[#8A93A6] text-sm mt-1">
                     Active and past client engagements and their details.
                   </p>
                 </>

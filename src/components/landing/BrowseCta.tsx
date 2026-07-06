@@ -42,7 +42,7 @@ export default function BrowseCta() {
 
         <button
           onClick={handleBrowse}
-          className="shrink-0 inline-flex items-center gap-2 bg-white text-[#002452] text-sm font-medium px-7 py-3.5 rounded-2xl hover:bg-[#f5f4f0] active:bg-[#ddd7cc] transition-colors"
+          className="shrink-0 inline-flex items-center gap-2 bg-white text-[#E6EAF2] text-sm font-medium px-7 py-3.5 rounded-2xl hover:bg-[#0A0F1C] active:bg-[#ddd7cc] transition-colors"
         >
           Get Matched
           <ArrowRight size={15} strokeWidth={1.5} />

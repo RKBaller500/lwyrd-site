@@ -3,7 +3,7 @@ import { createAdminClient } from "@/lib/supabase/admin";
 import { Plus } from "lucide-react";
 import CriteriaTable from "@/components/admin/CriteriaTable";
 
-export const metadata = { title: "Assessment Criteria — Admin" };
+export const metadata = { title: "Assessment Criteria, Admin" };
 
 export default async function AdminCriteriaPage() {
   const db = createAdminClient();

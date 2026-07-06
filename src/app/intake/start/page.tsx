@@ -21,21 +21,21 @@ function OrientationContent() {
   const router = useRouter();
 
   return (
-    <div className="flex flex-col min-h-screen bg-[#f5f4f0]">
+    <div className="flex flex-col min-h-screen bg-[#0A0F1C]">
       <Navbar />
       <main className="flex-1 flex items-center justify-center px-6 py-14">
         <motion.div
           initial={{ opacity: 0, y: 24 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.65, ease }}
-          className="max-w-xl w-full bg-[#fbfaf6] border border-[#ddd7cc] rounded-3xl shadow-sm p-10"
+          className="max-w-xl w-full bg-[#141C2E] border border-[#1F2A3D] rounded-3xl shadow-sm p-10"
         >
-          <span className="inline-block bg-[#002452] text-white text-xs font-medium px-3 py-1.5 rounded-full tracking-wide mb-6">
+          <span className="inline-block bg-[#3B82F6] text-white text-xs font-medium px-3 py-1.5 rounded-full tracking-wide mb-6">
             Before you begin
           </span>
 
           <h2
-            className="text-[#002452] text-3xl mb-8"
+            className="text-[#E6EAF2] text-3xl mb-8"
             style={{ ...lora, fontWeight: 500 }}
           >
             Here&apos;s what to expect.
@@ -50,10 +50,10 @@ function OrientationContent() {
                 transition={{ duration: 0.5, ease, delay: 0.1 + i * 0.08 }}
                 className="flex items-start gap-4"
               >
-                <div className="flex items-center justify-center w-9 h-9 rounded-2xl bg-[#002452]/8 border border-[#ddd7cc] shrink-0 mt-0.5">
-                  <Icon size={16} className="text-[#002452]" strokeWidth={1.5} />
+                <div className="flex items-center justify-center w-9 h-9 rounded-2xl bg-[#3B82F6]/10 border border-[#1F2A3D] shrink-0 mt-0.5">
+                  <Icon size={16} className="text-[#3B82F6]" strokeWidth={1.5} />
                 </div>
-                <p className="text-slate-600 text-sm leading-relaxed pt-1.5">{text}</p>
+                <p className="text-[#8A93A6] text-sm leading-relaxed pt-1.5">{text}</p>
               </motion.div>
             ))}
           </div>
@@ -63,7 +63,7 @@ function OrientationContent() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, ease, delay: 0.5 }}
             onClick={() => router.push("/intake")}
-            className="w-full inline-flex items-center justify-center gap-2 bg-[#002452] text-white px-8 py-4 rounded-2xl text-base font-medium hover:opacity-90 active:opacity-75 transition-opacity"
+            className="w-full inline-flex items-center justify-center gap-2 bg-[#3B82F6] hover:bg-[#2563EB] text-white px-8 py-4 rounded-2xl text-base font-medium transition-colors"
           >
             Let&apos;s Get Started
             <ArrowRight size={16} />

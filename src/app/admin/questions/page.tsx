@@ -3,7 +3,7 @@ import { createAdminClient } from "@/lib/supabase/admin";
 import { Plus } from "lucide-react";
 import QuestionsTable from "@/components/admin/QuestionsTable";
 
-export const metadata = { title: "Questions — Admin" };
+export const metadata = { title: "Questions, Admin" };
 
 export default async function AdminQuestionsPage() {
   const db = createAdminClient();

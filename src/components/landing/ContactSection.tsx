@@ -29,12 +29,12 @@ export default function ContactSection() {
   };
 
   const inputClass =
-    "w-full px-4 py-3 rounded-2xl border border-[#ddd7cc] bg-white text-slate-700 placeholder-slate-400 focus:outline-none focus:border-[#002452] focus:ring-2 focus:ring-[#002452]/15 transition-all text-sm";
+    "w-full px-4 py-3 rounded-2xl border border-[#1F2A3D] bg-[#141C2E] text-[#E6EAF2] placeholder-[#8A93A6] focus:outline-none focus:border-[#3B82F6] focus:ring-2 focus:ring-[#3B82F6]/15 transition-all text-sm";
 
   return (
     <section
       id="contact"
-      className="bg-[#f5f4f0] border-t border-[#ddd7cc] py-16 px-6"
+      className="bg-[#0A0F1C] border-t border-[#1F2A3D] py-16 px-6"
     >
       <div className="max-w-5xl mx-auto">
         <motion.div
@@ -42,24 +42,24 @@ export default function ContactSection() {
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, margin: "-60px" }}
           transition={{ duration: 0.6, ease }}
-          className="max-w-xl mx-auto bg-[#fbfaf6] border border-[#ddd7cc] rounded-3xl shadow-sm p-8"
+          className="max-w-xl mx-auto bg-[#141C2E] border border-[#1F2A3D] rounded-3xl shadow-sm p-8"
         >
           <div className="flex items-center gap-3 mb-2">
-            <Mail size={18} className="text-[#002452]" strokeWidth={1.5} />
+            <Mail size={18} className="text-[#E6EAF2]" strokeWidth={1.5} />
             <h3
-              className="text-[#002452] text-2xl"
+              className="text-[#E6EAF2] text-2xl"
               style={{ fontFamily: '"Lora", Georgia, serif', fontWeight: 500 }}
             >
               Stay Updated
             </h3>
           </div>
-          <p className="text-slate-500 text-sm mb-6">
+          <p className="text-[#8A93A6] text-sm mb-6">
             Subscribe to receive product updates, new firm announcements, and legal insights.
           </p>
 
           {updateStatus === "success" ? (
             <div className="py-6 text-center">
-              <p className="text-[#002452] font-medium text-sm">
+              <p className="text-[#E6EAF2] font-medium text-sm">
                 You are on the list. We will keep you posted.
               </p>
             </div>

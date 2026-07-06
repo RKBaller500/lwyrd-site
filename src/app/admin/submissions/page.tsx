@@ -1,7 +1,7 @@
 import { createAdminClient } from "@/lib/supabase/admin";
 import SubmissionsTable from "@/components/admin/SubmissionsTable";
 
-export const metadata = { title: "Submissions — LWYRD Admin" };
+export const metadata = { title: "Submissions, LWYRD Admin" };
 
 export default async function SubmissionsPage() {
   const db = createAdminClient();
@@ -31,7 +31,7 @@ export default async function SubmissionsPage() {
       userEmail: emailMap[sub.user_id] ?? "",
       top_matches: matchList.map((m) => ({
         firmId: m.firm_id,
-        firmName: m.firms?.name ?? "—",
+        firmName: m.firms?.name ?? " ",
         score: m.match_score,
       })),
     };
@@ -48,7 +48,7 @@ export default async function SubmissionsPage() {
         Intake Submissions
       </h1>
       <p className="text-slate-500 text-sm mb-10">
-        Every intake questionnaire submitted by a user — {rows.length} total.
+        Every intake questionnaire submitted by a user, {rows.length} total.
       </p>
 
       <SubmissionsTable submissions={rows} tracks={tracks} />

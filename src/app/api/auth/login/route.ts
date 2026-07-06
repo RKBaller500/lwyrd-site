@@ -24,7 +24,7 @@ function memClear(key: string) {
 }
 
 // ── Upstash Redis REST API (multi-instance safe) ──────────────────────────────
-// Uses Upstash's HTTP pipeline endpoint — no package required.
+// Uses Upstash's HTTP pipeline endpoint, no package required.
 // Set UPSTASH_REDIS_REST_URL and UPSTASH_REDIS_REST_TOKEN env vars to enable.
 async function redisCheck(key: string, url: string, token: string): Promise<boolean> {
   const redisKey = `rl:login:${key}`;
@@ -62,7 +62,7 @@ async function checkRateLimit(key: string): Promise<boolean> {
     try {
       return await redisCheck(key, url, token);
     } catch {
-      // Redis unavailable — fall through to in-memory limiter
+      // Redis unavailable, fall through to in-memory limiter
     }
   }
   return memCheck(key);

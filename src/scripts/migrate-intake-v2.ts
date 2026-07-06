@@ -1,5 +1,5 @@
 /**
- * Migration: Intake Flow v2.0 — Three-track schema
+ * Migration: Intake Flow v2.0, Three-track schema
  *
  * Run with: npx tsx src/scripts/migrate-intake-v2.ts
  *
@@ -32,7 +32,7 @@ ALTER TABLE intake_submissions
   ADD COLUMN IF NOT EXISTS category_label TEXT;
 
 -- ─────────────────────────────────────────────────────────────────────────────
--- 2. startup_submissions — Schema 3A
+-- 2. startup_submissions, Schema 3A
 -- ─────────────────────────────────────────────────────────────────────────────
 CREATE TABLE IF NOT EXISTS startup_submissions (
   id                      UUID        DEFAULT gen_random_uuid() PRIMARY KEY,
@@ -62,7 +62,7 @@ CREATE TABLE IF NOT EXISTS startup_submissions (
 );
 
 -- ─────────────────────────────────────────────────────────────────────────────
--- 3. individual_submissions — Schema 3B
+-- 3. individual_submissions, Schema 3B
 -- ─────────────────────────────────────────────────────────────────────────────
 CREATE TABLE IF NOT EXISTS individual_submissions (
   id                      UUID        DEFAULT gen_random_uuid() PRIMARY KEY,
@@ -88,7 +88,7 @@ CREATE TABLE IF NOT EXISTS individual_submissions (
 );
 
 -- ─────────────────────────────────────────────────────────────────────────────
--- 4. small_business_submissions — Schema 3C
+-- 4. small_business_submissions, Schema 3C
 -- ─────────────────────────────────────────────────────────────────────────────
 CREATE TABLE IF NOT EXISTS small_business_submissions (
   id                      UUID        DEFAULT gen_random_uuid() PRIMARY KEY,
@@ -182,7 +182,7 @@ async function run() {
   const { error } = await supabase.rpc("exec_sql", { sql: SQL }).single();
 
   if (error) {
-    // Supabase JS doesn't expose raw SQL exec — fall back to individual statements via REST
+    // Supabase JS doesn't expose raw SQL exec, fall back to individual statements via REST
     console.warn("exec_sql RPC not available; running statements individually via REST.");
     console.log("\nPlease run the following SQL directly in your Supabase SQL editor:\n");
     console.log(SQL);

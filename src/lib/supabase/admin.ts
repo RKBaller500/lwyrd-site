@@ -1,7 +1,7 @@
 import { createClient as createSupabaseClient } from "@supabase/supabase-js";
 import { createClient } from "./server";
 
-// Service-role client — bypasses RLS entirely.
+// Service-role client, bypasses RLS entirely.
 // Use ONLY inside server actions, AFTER verifyAdmin() has confirmed the caller is an admin.
 export function createAdminClient() {
   return createSupabaseClient(

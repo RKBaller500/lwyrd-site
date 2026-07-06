@@ -16,7 +16,7 @@ export async function saveFirm(firmId: string): Promise<{ error?: string }> {
     .insert({ user_id: user.id, firm_id: firmId });
 
   if (error && error.code !== "23505") {
-    // 23505 = unique_violation (already saved — not an error)
+    // 23505 = unique_violation (already saved, not an error)
     return { error: error.message };
   }
 

@@ -47,7 +47,7 @@ export default function PostHogProvider({
     }
   }, []);
 
-  // Called by ConsentBanner via context — no global event bus
+  // Called by ConsentBanner via context, no global event bus
   const handleConsent = useCallback(() => {
     localStorage.setItem(CONSENT_KEY, "true");
     initPostHog();

@@ -30,7 +30,7 @@ async function fetchFirms(): Promise<Firm[]> {
     const supabase = createBuildTimeClient();
     const { data, error } = await supabase
       .from("firms")
-      .select("*, attorneys(*), firm_assessment_items(id, criterion_id, passed, note, display_order, assessment_criteria(id, label, description, display_order))")
+      .select("*, attorneys(*), firm_assessment_items(id, criterion_id, passed, note, display_order, assessment_criteria(id, label, description, display_order)), firm_practice_areas(practice_area_slug)")
       .order("overall_score", { ascending: false });
     if (!error && data && data.length > 0) return (data as DbFirm[]).map(mapDbFirmToFirm);
   } catch {}
@@ -52,15 +52,17 @@ function pickMulti(opts: { value: string }[]): string[] {
 }
 
 function randomBudget(min: number, max: number, step: number): number {
+  // Log-normal via Box-Muller: mode ~14% of range, median ~22%, mean ~29%
+  const u1 = Math.random(), u2 = Math.random();
+  const z = Math.sqrt(-2 * Math.log(u1)) * Math.cos(2 * Math.PI * u2);
+  const t = Math.max(0, Math.min(1, Math.exp(-1.5 + 0.7 * z)));
   const steps = Math.floor((max - min) / step);
-  // Cubing the random value biases the distribution toward lower budgets
-  const t = Math.random() ** 3;
   return min + Math.floor(t * (steps + 1)) * step;
 }
 
 function answerQuestion(q: V2Question): string | string[] | number {
   if (q.type === "state-dropdown") {
-    return pick(q.options).value;
+    return q.options.find((o) => o.value === "NY")?.value ?? "NY";
   }
   if (q.type === "single-select") {
     return pick(q.options).value;

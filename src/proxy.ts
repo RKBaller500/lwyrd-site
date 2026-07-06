@@ -25,7 +25,7 @@ export async function proxy(request: NextRequest) {
     }
   );
 
-  // Refresh the session — required to keep auth state alive
+  // Refresh the session, required to keep auth state alive
   await supabase.auth.getUser();
 
   return supabaseResponse;

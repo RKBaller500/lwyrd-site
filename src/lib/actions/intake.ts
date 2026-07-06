@@ -8,7 +8,7 @@ import type { DbFirm } from "@/lib/supabase/types";
 import { firms as localFirms } from "@/data/firms";
 import { CATEGORY_SLUG_MAP } from "@/data/intakeV2";
 
-// Legacy action — kept for backward compatibility
+// Legacy action, kept for backward compatibility
 export async function saveIntakeSubmission(
   categorySlug: string,
   answers: IntakeAnswers,
@@ -34,7 +34,7 @@ export async function saveIntakeSubmission(
   });
 }
 
-// V2 action — writes to general table + track-specific table + matches table
+// V2 action, writes to general table + track-specific table + matches table
 export async function saveIntakeSubmissionV2(
   track: string,
   category: string,
@@ -72,7 +72,7 @@ export async function saveIntakeSubmissionV2(
     .single();
 
   if (generalError) {
-    // Swallow — never block UX
+    // Swallow, never block UX
     return;
   }
 
@@ -171,7 +171,7 @@ export async function saveIntakeSubmissionV2(
         matched_criteria: result.matchedCriteria,
         missed_criteria: result.missedCriteria,
         is_best_match: rank === 1 && result.score >= 60,
-        // legacy columns — keep writing until told otherwise
+        // legacy columns, keep writing until told otherwise
         score: result.score,
         rank,
       };
@@ -280,7 +280,7 @@ export async function runMatchingV2(
   try {
     const { data, error } = await supabase
       .from("firms")
-      .select("*, attorneys(*), firm_assessment_items(*)");
+      .select("*, attorneys(*), firm_assessment_items(*), firm_practice_areas(practice_area_slug)");
     if (!error && data && data.length > 0) {
       allFirms = (data as DbFirm[]).map(mapDbFirmToFirm);
     }
@@ -332,7 +332,7 @@ export async function runMatchingForSubmission(submissionId: string): Promise<{
   } = await supabase.auth.getUser();
   if (!user) return { ...empty, error: "Not authenticated" };
 
-  // Ownership enforced server-side — users can only load their own submissions
+  // Ownership enforced server-side, users can only load their own submissions
   const { data: submission, error: subError } = await supabase
     .from("intake_submissions")
     .select("track, category_slug, practice_area_slug, category_label, answers, created_at")
@@ -349,7 +349,7 @@ export async function runMatchingForSubmission(submissionId: string): Promise<{
   try {
     const { data, error } = await supabase
       .from("firms")
-      .select("*, attorneys(*), firm_assessment_items(*)");
+      .select("*, attorneys(*), firm_assessment_items(*), firm_practice_areas(practice_area_slug)");
     if (!error && data && data.length > 0) {
       allFirms = (data as DbFirm[]).map(mapDbFirmToFirm);
     }

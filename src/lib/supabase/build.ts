@@ -1,4 +1,4 @@
-// Build-time Supabase client — does NOT use cookies.
+// Build-time Supabase client, does NOT use cookies.
 // Use only inside generateStaticParams() which runs without an HTTP request context.
 import { createClient } from "@supabase/supabase-js";
 import { firms as localFirms } from "@/data/firms";

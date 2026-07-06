@@ -3,7 +3,7 @@ import { createAdminClient } from "@/lib/supabase/admin";
 import FirmForm from "@/components/admin/FirmForm";
 import type { FirmInput } from "@/lib/actions/admin/firms";
 
-export const metadata = { title: "Edit Firm — Admin" };
+export const metadata = { title: "Edit Firm, Admin" };
 
 export default async function EditFirmPage({
   params,

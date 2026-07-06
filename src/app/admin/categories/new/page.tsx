@@ -1,6 +1,6 @@
 import CategoryForm from "@/components/admin/CategoryForm";
 
-export const metadata = { title: "New Category — Admin" };
+export const metadata = { title: "New Category, Admin" };
 
 export default function NewCategoryPage() {
   return (

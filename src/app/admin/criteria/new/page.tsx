@@ -1,7 +1,7 @@
 import { createAdminClient } from "@/lib/supabase/admin";
 import AssessmentCriterionForm from "@/components/admin/AssessmentCriterionForm";
 
-export const metadata = { title: "New Criterion — Admin" };
+export const metadata = { title: "New Criterion, Admin" };
 
 export default async function NewCriterionPage() {
   const db = createAdminClient();

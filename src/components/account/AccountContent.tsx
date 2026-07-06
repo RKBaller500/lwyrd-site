@@ -45,7 +45,7 @@ function formatMemberSince(isoDate: string): string {
 }
 
 const inputClass =
-  "w-full px-4 py-3 rounded-2xl border border-[#ddd7cc] bg-white text-slate-700 placeholder-slate-400 focus:outline-none focus:border-[#002452] transition-colors text-sm";
+  "w-full px-4 py-3 rounded-2xl border border-[#1F2A3D] bg-[#141C2E] text-[#E6EAF2] placeholder-[#8A93A6] focus:outline-none focus:border-[#3B82F6] transition-colors text-sm";
 
 export default function AccountContent({ profile }: AccountContentProps) {
   const { logout } = useAuth();
@@ -113,10 +113,10 @@ export default function AccountContent({ profile }: AccountContentProps) {
     <motion.div className="space-y-12" variants={container} initial="hidden" animate="visible">
       {/* Page header */}
       <motion.div variants={item}>
-        <h1 className="text-4xl sm:text-5xl text-[#002452]" style={{ ...lora, fontWeight: 500 }}>
+        <h1 className="text-4xl sm:text-5xl text-[#E6EAF2]" style={{ ...lora, fontWeight: 500 }}>
           My Account
         </h1>
-        <p className="text-slate-500 text-sm mt-2">
+        <p className="text-[#8A93A6] text-sm mt-2">
           Manage your profile settings and account security.
         </p>
       </motion.div>
@@ -124,16 +124,16 @@ export default function AccountContent({ profile }: AccountContentProps) {
       {/* ── Profile Settings ───────────────────────────────── */}
       <motion.section variants={item}>
         <div className="flex items-center gap-2 mb-5">
-          <User size={18} className="text-[#002452]" strokeWidth={1.5} />
-          <h2 className="text-2xl text-[#002452]" style={{ ...lora, fontWeight: 500 }}>
+          <User size={18} className="text-[#E6EAF2]" strokeWidth={1.5} />
+          <h2 className="text-2xl text-[#E6EAF2]" style={{ ...lora, fontWeight: 500 }}>
             Profile Settings
           </h2>
         </div>
 
-        <div className="bg-[#fbfaf6] border border-[#ddd7cc] rounded-3xl p-8 max-w-md">
+        <div className="bg-[#141C2E] border border-[#1F2A3D] rounded-3xl p-8 max-w-md">
           <form onSubmit={handleProfileSave} className="space-y-5">
             <div>
-              <label className="block text-xs text-slate-400 font-medium mb-1.5">Full name</label>
+              <label className="block text-xs text-[#8A93A6] font-medium mb-1.5">Full name</label>
               <input
                 type="text"
                 value={name}
@@ -145,24 +145,24 @@ export default function AccountContent({ profile }: AccountContentProps) {
             </div>
 
             <div>
-              <label className="block text-xs text-slate-400 font-medium mb-1.5">Email</label>
+              <label className="block text-xs text-[#8A93A6] font-medium mb-1.5">Email</label>
               <input
                 type="email"
                 value={profile.email}
                 disabled
-                className="w-full px-4 py-3 rounded-2xl border border-[#ddd7cc] bg-[#f5f4f0] text-slate-400 text-sm cursor-not-allowed"
+                className="w-full px-4 py-3 rounded-2xl border border-[#1F2A3D] bg-[#0A0F1C] text-[#8A93A6] text-sm cursor-not-allowed"
               />
-              <p className="text-xs text-slate-400 mt-1">Email cannot be changed here.</p>
+              <p className="text-xs text-[#8A93A6] mt-1">Email cannot be changed here.</p>
             </div>
 
             <div className="grid grid-cols-2 gap-4 pt-1">
               <div>
-                <p className="text-xs text-slate-400 font-medium mb-1">Member since</p>
-                <p className="text-sm text-slate-600">{formatMemberSince(profile.createdAt)}</p>
+                <p className="text-xs text-[#8A93A6] font-medium mb-1">Member since</p>
+                <p className="text-sm text-[#C8CDD8]">{formatMemberSince(profile.createdAt)}</p>
               </div>
               <div>
-                <p className="text-xs text-slate-400 font-medium mb-1">Plan</p>
-                <span className="inline-block text-xs font-medium px-2.5 py-1 rounded-full bg-[#002452]/10 text-[#002452]">
+                <p className="text-xs text-[#8A93A6] font-medium mb-1">Plan</p>
+                <span className="inline-flex items-center text-xs font-medium px-2.5 py-1 rounded-full bg-white/10 text-[#E6EAF2]">
                   {accessLevelLabels[profile.accessLevel]}
                 </span>
               </div>
@@ -188,17 +188,17 @@ export default function AccountContent({ profile }: AccountContentProps) {
       {/* ── Security ───────────────────────────────── */}
       <motion.section variants={item}>
         <div className="flex items-center gap-2 mb-5">
-          <Lock size={18} className="text-[#002452]" strokeWidth={1.5} />
-          <h2 className="text-2xl text-[#002452]" style={{ ...lora, fontWeight: 500 }}>
+          <Lock size={18} className="text-[#E6EAF2]" strokeWidth={1.5} />
+          <h2 className="text-2xl text-[#E6EAF2]" style={{ ...lora, fontWeight: 500 }}>
             Security
           </h2>
         </div>
 
-        <div className="bg-[#fbfaf6] border border-[#ddd7cc] rounded-3xl p-8 max-w-md space-y-4">
+        <div className="bg-[#141C2E] border border-[#1F2A3D] rounded-3xl p-8 max-w-md space-y-4">
           <div>
-            <p className="text-sm text-slate-700 font-medium">Password</p>
-            <p className="text-xs text-slate-400 mt-0.5">
-              We&apos;ll send a reset link to <span className="text-slate-500">{profile.email}</span>.
+            <p className="text-sm text-[#C8CDD8] font-medium">Password</p>
+            <p className="text-xs text-[#8A93A6] mt-0.5">
+              We&apos;ll send a reset link to <span className="text-[#8A93A6]">{profile.email}</span>.
             </p>
           </div>
 
@@ -211,7 +211,7 @@ export default function AccountContent({ profile }: AccountContentProps) {
           <button
             onClick={handlePasswordReset}
             disabled={isResetPending || resetMessage?.type === "success"}
-            className="w-full py-3 rounded-2xl border border-[#002452] text-[#002452] text-sm font-medium hover:bg-[#002452] hover:text-white transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            className="w-full py-3 rounded-2xl border border-[#002452] text-[#E6EAF2] text-sm font-medium hover:bg-[#002452] hover:text-white transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {isResetPending ? "Sending..." : "Send Password Reset Email"}
           </button>
@@ -222,7 +222,7 @@ export default function AccountContent({ profile }: AccountContentProps) {
       <motion.div variants={item}>
         <button
           onClick={() => logout()}
-          className="inline-flex items-center gap-2 text-sm text-slate-400 hover:text-red-500 transition-colors"
+          className="inline-flex items-center gap-2 text-sm text-[#8A93A6] hover:text-red-500 transition-colors"
         >
           <LogOut size={14} strokeWidth={1.5} />
           Sign out
@@ -241,9 +241,9 @@ export default function AccountContent({ profile }: AccountContentProps) {
         <div className="border border-red-200 rounded-3xl p-8 max-w-md bg-red-50/40">
           {!showDeleteConfirm ? (
             <div>
-              <p className="text-sm text-slate-700 font-medium mb-1">Delete Account</p>
-              <p className="text-xs text-slate-500 mb-5 leading-relaxed">
-                Permanently delete your account and all associated data — including your intake history,
+              <p className="text-sm text-[#C8CDD8] font-medium mb-1">Delete Account</p>
+              <p className="text-xs text-[#8A93A6] mb-5 leading-relaxed">
+                Permanently delete your account and all associated data, including your intake history,
                 saved firms, and profile information. This action cannot be undone.
               </p>
               <button
@@ -265,7 +265,7 @@ export default function AccountContent({ profile }: AccountContentProps) {
               </div>
 
               <div>
-                <label className="block text-xs text-slate-500 font-medium mb-1.5">
+                <label className="block text-xs text-[#8A93A6] font-medium mb-1.5">
                   Type <span className="font-bold text-red-600">DELETE</span> to confirm
                 </label>
                 <input
@@ -273,7 +273,7 @@ export default function AccountContent({ profile }: AccountContentProps) {
                   value={deleteConfirmText}
                   onChange={(e) => setDeleteConfirmText(e.target.value)}
                   placeholder="DELETE"
-                  className="w-full px-4 py-3 rounded-2xl border border-red-300 bg-white text-slate-700 placeholder-slate-300 focus:outline-none focus:border-red-500 transition-colors text-sm"
+                  className="w-full px-4 py-3 rounded-2xl border border-red-300 bg-[#141C2E] text-[#E6EAF2] placeholder-slate-300 focus:outline-none focus:border-red-500 transition-colors text-sm"
                   autoComplete="off"
                 />
               </div>
@@ -290,7 +290,7 @@ export default function AccountContent({ profile }: AccountContentProps) {
                     setDeleteMessage(null);
                   }}
                   disabled={isDeletePending}
-                  className="flex-1 py-2.5 rounded-2xl border border-[#ddd7cc] text-slate-600 text-sm font-medium hover:bg-slate-50 transition-colors disabled:opacity-50"
+                  className="flex-1 py-2.5 rounded-2xl border border-[#1F2A3D] text-[#C8CDD8] text-sm font-medium hover:bg-slate-50 transition-colors disabled:opacity-50"
                 >
                   Cancel
                 </button>

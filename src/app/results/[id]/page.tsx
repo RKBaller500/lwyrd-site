@@ -62,13 +62,13 @@ function PastResultsContent() {
   // Loading skeleton
   if (loading) {
     return (
-      <div className="flex flex-col min-h-screen bg-[#f5f4f0]">
+      <div className="flex flex-col min-h-screen bg-[#0A0F1C]">
         <Navbar />
         <main className="flex-1 max-w-4xl mx-auto w-full px-6 py-14">
-          <div className="h-28 rounded-2xl bg-white border border-[#ddd7cc] animate-pulse mb-8" />
+          <div className="h-28 rounded-2xl bg-white border border-[#1F2A3D] animate-pulse mb-8" />
           <div className="space-y-4">
             {[1, 2, 3].map((i) => (
-              <div key={i} className="h-44 rounded-3xl bg-white border border-[#ddd7cc] animate-pulse" />
+              <div key={i} className="h-44 rounded-3xl bg-white border border-[#1F2A3D] animate-pulse" />
             ))}
           </div>
         </main>
@@ -82,7 +82,7 @@ function PastResultsContent() {
   const total = results.length;
 
   return (
-    <div className="flex flex-col min-h-screen bg-[#f5f4f0]">
+    <div className="flex flex-col min-h-screen bg-[#0A0F1C]">
       <Navbar />
       <main className="flex-1 max-w-4xl mx-auto w-full px-6 py-14">
         {/* Header */}
@@ -92,30 +92,30 @@ function PastResultsContent() {
           transition={{ duration: 0.6, ease }}
           className="mb-10"
         >
-          <div className="flex items-center gap-2 text-sm text-slate-400 mb-4">
-            <Link href="/dashboard" className="hover:text-[#002452] transition-colors">
+          <div className="flex items-center gap-2 text-sm text-[#8A93A6] mb-4">
+            <Link href="/dashboard" className="hover:text-[#E6EAF2] transition-colors">
               My Dashboard
             </Link>
             <span>/</span>
-            <Link href="/dashboard" className="hover:text-[#002452] transition-colors">
+            <Link href="/dashboard" className="hover:text-[#E6EAF2] transition-colors">
               My Matches
             </Link>
             <span>/</span>
-            <span className="text-slate-600">{categoryName || "Results"}</span>
+            <span className="text-[#C8CDD8]">{categoryName || "Results"}</span>
           </div>
 
           <h1
-            className="text-4xl sm:text-5xl text-[#002452] mb-3"
+            className="text-4xl sm:text-5xl text-[#E6EAF2] mb-3"
             style={{ ...lora, fontWeight: 500 }}
           >
             Your Matches
           </h1>
-          <p className="text-slate-500 text-base">
+          <p className="text-[#8A93A6] text-base">
             {total > 0
               ? `${total} ${total === 1 ? "firm" : "firms"} matched${categoryName ? ` for ${categoryName}` : ""}`
               : "No firms matched your criteria."}
             {intakeDate && (
-              <span className="text-slate-400">
+              <span className="text-[#8A93A6]">
                 {" · "}Intake from{" "}
                 {new Date(intakeDate).toLocaleDateString("en-US", {
                   month: "long",
@@ -132,19 +132,19 @@ function PastResultsContent() {
             initial={{ opacity: 0, y: 14 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.55, ease, delay: 0.1 }}
-            className="bg-[#fbfaf6] border border-[#ddd7cc] rounded-3xl p-12 text-center"
+            className="bg-[#141C2E] border border-[#1F2A3D] rounded-3xl p-12 text-center"
           >
-            <h3 className="text-[#002452] font-medium text-lg mb-3" style={lora}>
+            <h3 className="text-[#E6EAF2] font-medium text-lg mb-3" style={lora}>
               No matches found.
             </h3>
-            <p className="text-slate-500 text-sm mb-6">
-              Try a new intake with adjusted preferences — a different budget range, timeline, or firm
+            <p className="text-[#8A93A6] text-sm mb-6">
+              Try a new intake with adjusted preferences, a different budget range, timeline, or firm
               size may surface more results.
             </p>
             <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
               <Link
                 href="/intake/start"
-                className="text-[#002452] text-sm font-medium px-5 py-2.5 rounded-2xl bg-[#002452]/8 hover:bg-[#002452]/15 transition-colors"
+                className="text-[#E6EAF2] text-sm font-medium px-5 py-2.5 rounded-2xl bg-white/8 hover:bg-[#002452]/15 transition-colors"
               >
                 Start a new intake →
               </Link>
@@ -167,9 +167,9 @@ function PastResultsContent() {
 
         {total > 0 && categorySlug && (
           <div className="mt-10 text-center">
-            <p className="text-slate-400 text-sm">
+            <p className="text-[#8A93A6] text-sm">
               Looking for something different?{" "}
-              <Link href="/intake/start" className="text-[#002452] hover:underline">
+              <Link href="/intake/start" className="text-[#E6EAF2] hover:underline">
                 Start a new intake →
               </Link>
             </p>

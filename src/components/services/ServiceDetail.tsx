@@ -22,12 +22,12 @@ export default function ServiceDetail({ category }: ServiceDetailProps) {
     />
     <div className="max-w-7xl mx-auto px-6 py-14">
       {/* Breadcrumb */}
-      <div className="flex items-center gap-2 text-sm text-slate-400 mb-8">
-        <Link href="/intake" className="hover:text-[#002452] transition-colors">
+      <div className="flex items-center gap-2 text-sm text-[#8A93A6] mb-8">
+        <Link href="/intake" className="hover:text-[#E6EAF2] transition-colors">
           Get Matched
         </Link>
         <span>/</span>
-        <span className="text-slate-600">{category.name}</span>
+        <span className="text-[#C8CDD8]">{category.name}</span>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-10">
@@ -35,18 +35,18 @@ export default function ServiceDetail({ category }: ServiceDetailProps) {
         <div className="lg:col-span-2 space-y-10">
           {/* Hero */}
           <div>
-            <span className="text-xs text-slate-400 uppercase tracking-widest font-medium block mb-3">
+            <span className="text-xs text-[#8A93A6] uppercase tracking-widest font-medium block mb-3">
               {category.heroTag}
             </span>
             <h1
-              className="text-4xl sm:text-5xl text-[#002452] leading-snug mb-6"
+              className="text-4xl sm:text-5xl text-[#E6EAF2] leading-snug mb-6"
               style={{ fontFamily: '"Lora", Georgia, serif', fontWeight: 500 }}
             >
               {category.name}
             </h1>
             <div className="space-y-4">
               {category.fullDescription.split("\n\n").map((para, i) => (
-                <p key={i} className="text-slate-600 text-base leading-relaxed">
+                <p key={i} className="text-[#C8CDD8] text-base leading-relaxed">
                   {para}
                 </p>
               ))}
@@ -70,7 +70,7 @@ export default function ServiceDetail({ category }: ServiceDetailProps) {
           {/* Service examples */}
           <div>
             <h2
-              className="text-[#002452] text-2xl mb-6"
+              className="text-[#E6EAF2] text-2xl mb-6"
               style={{ fontFamily: '"Lora", Georgia, serif', fontWeight: 500 }}
             >
               Specific services you might need
@@ -79,10 +79,10 @@ export default function ServiceDetail({ category }: ServiceDetailProps) {
               {category.serviceExamples.map((example, i) => (
                 <div
                   key={i}
-                  className="flex items-start gap-3 bg-[#fbfaf6] border border-[#ddd7cc] rounded-2xl p-4"
+                  className="flex items-start gap-3 bg-[#141C2E] border border-[#1F2A3D] rounded-2xl p-4"
                 >
-                  <CheckCircle2 size={16} className="text-[#002452] mt-0.5 shrink-0" strokeWidth={1.5} />
-                  <span className="text-slate-600 text-sm leading-snug">{example}</span>
+                  <CheckCircle2 size={16} className="text-[#E6EAF2] mt-0.5 shrink-0" strokeWidth={1.5} />
+                  <span className="text-[#C8CDD8] text-sm leading-snug">{example}</span>
                 </div>
               ))}
             </div>
@@ -104,7 +104,7 @@ export default function ServiceDetail({ category }: ServiceDetailProps) {
             </p>
             <Link
               href="/intake"
-              className="flex items-center justify-center gap-2 w-full py-3 rounded-2xl bg-white text-[#002452] text-sm font-medium hover:opacity-90 transition-opacity"
+              className="flex items-center justify-center gap-2 w-full py-3 rounded-2xl bg-white text-[#E6EAF2] text-sm font-medium hover:opacity-90 transition-opacity"
             >
               Start Intake
               <ArrowRight size={15} />
@@ -112,19 +112,19 @@ export default function ServiceDetail({ category }: ServiceDetailProps) {
           </div>
 
           {/* Book Consultation CTA */}
-          <div className="bg-[#fbfaf6] border border-[#ddd7cc] rounded-3xl p-8">
+          <div className="bg-[#141C2E] border border-[#1F2A3D] rounded-3xl p-8">
             <h3
-              className="text-[#002452] text-2xl mb-3"
+              className="text-[#E6EAF2] text-2xl mb-3"
               style={{ fontFamily: '"Lora", Georgia, serif', fontWeight: 500 }}
             >
               Book a consultation
             </h3>
-            <p className="text-slate-500 text-sm leading-relaxed mb-6">
+            <p className="text-[#8A93A6] text-sm leading-relaxed mb-6">
               Prefer to speak with the LWYRD team first? We will help you understand your needs and make a personal recommendation.
             </p>
             <button
               onClick={() => setConsultModalOpen(true)}
-              className="flex items-center justify-center gap-2 w-full py-3 rounded-2xl border border-[#002452] text-[#002452] text-sm font-medium hover:bg-[#002452] hover:text-white transition-colors"
+              className="flex items-center justify-center gap-2 w-full py-3 rounded-2xl border border-[#002452] text-[#E6EAF2] text-sm font-medium hover:bg-[#002452] hover:text-white transition-colors"
             >
               Get in touch
             </button>

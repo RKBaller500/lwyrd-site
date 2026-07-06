@@ -4,6 +4,7 @@ export interface V2Option {
   value: string;
   label: string;
   note?: string;
+  disabled?: boolean;
 }
 
 export interface V2Question {
@@ -1418,6 +1419,61 @@ export function getSubQuestions(track: V2Track, category: string): V2Question[] 
   return [];
 }
 
+// Billing options to disable per track + category.
+// Only list values that should be greyed out, everything else remains selectable.
+const DISABLED_BILLING_OPTIONS: Partial<Record<V2Track, Record<string, string[]>>> = {
+  individual: {
+    // Contingency is only appropriate for personal injury and employment discrimination
+    family:          ['contingency'],
+    estate:          ['contingency'],
+    real_estate:     ['contingency'],
+    immigration:     ['contingency'],
+    tax:             ['contingency'],
+    criminal:        ['contingency'],
+    bankruptcy:      ['contingency'],
+    consumer:        ['contingency'],
+  },
+  startup: {
+    // Equity/deferred only makes sense for formation and fundraising rounds
+    // Flat-fee doesn't work for unpredictable/complex matters (deals, disputes, ongoing)
+    ip:           ['equity'],
+    employment:   ['equity'],
+    contracts:    ['equity'],
+    regulatory:   ['equity'],
+    governance:   ['equity', 'flat_fee'],  // board/shareholder work is retainer or hourly
+    ma:           ['equity', 'flat_fee'],  // deal complexity makes fixed pricing impractical
+    dispute:      ['equity', 'flat_fee'],  // litigation duration is unpredictable
+    fundraising:  ['flat_fee'],            // round/securities work is too variable for fixed pricing
+  },
+  small_business: {
+    // Flat-fee doesn't work where scope/duration is unpredictable
+    disputes:   ['flat_fee'],  // litigation
+    ma:         ['flat_fee'],  // transaction complexity
+    regulatory: ['flat_fee'],  // ongoing compliance work
+  },
+};
+
+const BILLING_QUESTION_IDS = new Set(['sf2', 'if2', 'bf2']);
+
+function applyDisabledBilling(
+  questions: V2Question[],
+  track: V2Track,
+  category: string
+): V2Question[] {
+  const disabled = DISABLED_BILLING_OPTIONS[track]?.[category];
+  if (!disabled || disabled.length === 0) return questions;
+  const disabledSet = new Set(disabled);
+  return questions.map((q) => {
+    if (!BILLING_QUESTION_IDS.has(q.id)) return q;
+    return {
+      ...q,
+      options: q.options.map((opt) =>
+        disabledSet.has(opt.value) ? { ...opt, disabled: true } : opt
+      ),
+    };
+  });
+}
+
 export function getQuestionSequence(
   track: V2Track | null,
   category: string | null
@@ -1428,9 +1484,13 @@ export function getQuestionSequence(
   questions.push(getQ2ForTrack(track));
   if (!category) return questions;
 
-  questions.push(...TRACK_CONTEXT_QUESTIONS[track]);
-  questions.push(...getSubQuestions(track, category));
-  questions.push(...CLOSING_QUESTIONS[track]);
+  const sequence = [
+    ...TRACK_CONTEXT_QUESTIONS[track],
+    ...getSubQuestions(track, category),
+    ...CLOSING_QUESTIONS[track],
+  ];
+
+  questions.push(...applyDisabledBilling(sequence, track, category));
 
   return questions;
 }

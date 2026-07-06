@@ -9,7 +9,7 @@ import FinalCta from "@/components/landing/FinalCta";
 
 export default function HomePage() {
   return (
-    <div className="flex flex-col min-h-screen bg-[#f5f4f0]">
+    <div className="flex flex-col min-h-screen bg-[#0A0F1C]">
       <Navbar />
       <main className="flex-1">
         <HeroSection />

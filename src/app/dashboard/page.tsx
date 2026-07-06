@@ -68,11 +68,11 @@ const sizeLabels: Record<string, string> = {
 
 function StatCard({ value, label }: { value: number | string; label: string }) {
   return (
-    <div className="bg-white rounded-2xl border border-[#ddd7cc] p-5 flex flex-col gap-1">
-      <span className="text-3xl text-[#002452]" style={{ ...lora, fontWeight: 500 }}>
+    <div className="bg-[#141C2E] rounded-2xl border border-[#1F2A3D] p-5 flex flex-col gap-1">
+      <span className="text-3xl text-[#E6EAF2]" style={{ ...lora, fontWeight: 500 }}>
         {value}
       </span>
-      <span className="text-xs text-slate-400 font-medium uppercase tracking-wide">{label}</span>
+      <span className="text-xs text-[#8A93A6] font-medium uppercase tracking-wide">{label}</span>
     </div>
   );
 }
@@ -84,10 +84,10 @@ function EmptyState({ icon: Icon, title, body, cta }: {
   cta?: React.ReactNode;
 }) {
   return (
-    <div className="bg-white border border-[#ddd7cc] rounded-3xl p-12 flex flex-col items-center text-center gap-3">
-      <Icon size={32} className="text-slate-200" strokeWidth={1.2} />
-      <p className="text-slate-700 font-medium text-sm">{title}</p>
-      <p className="text-slate-400 text-sm max-w-xs leading-relaxed">{body}</p>
+    <div className="bg-[#141C2E] border border-[#1F2A3D] rounded-3xl p-12 flex flex-col items-center text-center gap-3">
+      <Icon size={32} className="text-[#1F2A3D]" strokeWidth={1.2} />
+      <p className="text-[#C8CDD8] font-medium text-sm">{title}</p>
+      <p className="text-[#8A93A6] text-sm max-w-xs leading-relaxed">{body}</p>
       {cta}
     </div>
   );
@@ -114,7 +114,7 @@ function OverviewTab({
     return (
       <div className="space-y-6">
         {[1, 2, 3].map((i) => (
-          <div key={i} className="h-20 rounded-2xl bg-white border border-[#ddd7cc] animate-pulse" />
+          <div key={i} className="h-20 rounded-2xl bg-[#141C2E] border border-[#1F2A3D] animate-pulse" />
         ))}
       </div>
     );
@@ -131,18 +131,18 @@ function OverviewTab({
 
       {/* Active results banner */}
       {currentResults && (
-        <div className="bg-[#002452] rounded-2xl p-5 flex items-center justify-between gap-4">
+        <div className="bg-[#3B82F6]/10 border border-[#3B82F6]/20 rounded-2xl p-5 flex items-center justify-between gap-4">
           <div>
-            <p className="text-white text-sm font-medium" style={lora}>
+            <p className="text-[#E6EAF2] text-sm font-medium" style={lora}>
               {currentResults.categoryName || "Latest intake"}
             </p>
-            <p className="text-white/60 text-xs mt-0.5">
+            <p className="text-[#8A93A6] text-xs mt-0.5">
               {currentResults.count} matched {currentResults.count === 1 ? "firm" : "firms"} ready to review
             </p>
           </div>
           <Link
             href="/results"
-            className="shrink-0 inline-flex items-center gap-1.5 bg-white text-[#002452] text-xs font-semibold px-4 py-2 rounded-xl hover:opacity-90 transition-opacity"
+            className="shrink-0 inline-flex items-center gap-1.5 bg-[#3B82F6] text-white text-xs font-semibold px-4 py-2 rounded-xl hover:bg-[#2563EB] transition-colors"
           >
             View Results
             <ArrowRight size={12} />
@@ -154,34 +154,36 @@ function OverviewTab({
       {intakes.length > 0 && (
         <div>
           <div className="flex items-center justify-between mb-3">
-            <h3 className="text-sm font-semibold text-slate-500 uppercase tracking-wide">Recent Intakes</h3>
+            <h3 className="text-sm font-semibold text-[#8A93A6] uppercase tracking-wide">Recent Intakes</h3>
             <button
               onClick={() => setActiveTab("matches")}
-              className="text-xs text-[#002452] font-medium hover:opacity-70 transition-opacity flex items-center gap-1"
+              className="text-xs text-[#3B82F6] font-medium hover:opacity-70 transition-opacity flex items-center gap-1"
             >
               View all <ChevronRight size={12} />
             </button>
           </div>
-          <div className="bg-white border border-[#ddd7cc] rounded-2xl overflow-hidden">
+          <div className="bg-[#141C2E] border border-[#1F2A3D] rounded-2xl overflow-hidden">
             {intakes.slice(0, 3).map((intake, i) => (
               <div
                 key={intake.id}
-                className={`flex items-center justify-between gap-4 px-5 py-4 hover:bg-slate-50/50 transition-colors ${
-                  i < Math.min(intakes.length, 3) - 1 ? "border-b border-[#ddd7cc]" : ""
+                className={`flex items-center justify-between gap-4 px-5 py-4 hover:bg-[#1F2A3D]/50 transition-colors ${
+                  i < Math.min(intakes.length, 3) - 1 ? "border-b border-[#1F2A3D]" : ""
                 }`}
               >
                 <div className="flex items-center gap-3">
-                  <div className="w-8 h-8 rounded-xl bg-[#002452]/8 flex items-center justify-center shrink-0">
-                    <Scale size={14} className="text-[#002452]" strokeWidth={1.5} />
+                  <div className="w-8 h-8 rounded-xl bg-[#3B82F6]/10 flex items-center justify-center shrink-0">
+                    <Scale size={14} className="text-[#3B82F6]" strokeWidth={1.5} />
                   </div>
                   <div>
-                    <p className="text-[#002452] text-sm font-medium leading-snug" style={lora}>
+                    <p className="text-[#E6EAF2] text-sm font-medium leading-snug" style={lora}>
                       {intake.category_label ?? intake.category_slug}
                     </p>
-                    <p className="text-slate-400 text-xs mt-0.5">
-                      {intake.track ? `${intake.track.replace(/_/g, " ")} · ` : ""}
+                    <p className="text-[#8A93A6] text-xs mt-0.5">
+                      {intake.track ? (
+                        <span className="capitalize">{intake.track.replace(/_/g, " ")} · </span>
+                      ) : null}
                       {new Date(intake.created_at).toLocaleDateString("en-US", {
-                        month: "short",
+                        month: "long",
                         day: "numeric",
                         year: "numeric",
                       })}
@@ -190,7 +192,7 @@ function OverviewTab({
                 </div>
                 <Link
                   href={`/results/${intake.id}`}
-                  className="text-xs text-[#002452] font-medium hover:opacity-70 transition-opacity shrink-0 flex items-center gap-1"
+                  className="text-xs text-[#3B82F6] font-medium hover:opacity-70 transition-opacity shrink-0 flex items-center gap-1"
                 >
                   Results <ChevronRight size={12} />
                 </Link>
@@ -204,10 +206,10 @@ function OverviewTab({
       {savedFirms.length > 0 && (
         <div>
           <div className="flex items-center justify-between mb-3">
-            <h3 className="text-sm font-semibold text-slate-500 uppercase tracking-wide">Saved Firms</h3>
+            <h3 className="text-sm font-semibold text-[#8A93A6] uppercase tracking-wide">Saved Firms</h3>
             <button
               onClick={() => setActiveTab("saved")}
-              className="text-xs text-[#002452] font-medium hover:opacity-70 transition-opacity flex items-center gap-1"
+              className="text-xs text-[#3B82F6] font-medium hover:opacity-70 transition-opacity flex items-center gap-1"
             >
               View all <ChevronRight size={12} />
             </button>
@@ -217,17 +219,17 @@ function OverviewTab({
               <Link
                 key={sf.firm_id}
                 href={`/firms/${sf.firm_id}`}
-                className="bg-white border border-[#ddd7cc] rounded-2xl p-4 hover:shadow-sm hover:-translate-y-0.5 transition-all flex items-center gap-3"
+                className="bg-[#141C2E] border border-[#1F2A3D] rounded-2xl p-4 hover:border-[#2A3850] hover:-translate-y-0.5 transition-all flex items-center gap-3"
               >
-                <div className="w-9 h-9 rounded-xl bg-[#002452]/8 flex items-center justify-center shrink-0">
-                  <Bookmark size={14} className="text-[#002452]" strokeWidth={1.5} />
+                <div className="w-9 h-9 rounded-xl bg-[#3B82F6]/10 flex items-center justify-center shrink-0">
+                  <Bookmark size={14} className="text-[#3B82F6]" strokeWidth={1.5} />
                 </div>
                 <div className="min-w-0">
-                  <p className="text-[#002452] text-sm font-medium truncate" style={lora}>
+                  <p className="text-[#E6EAF2] text-sm font-medium truncate" style={lora}>
                     {sf.firms?.name ?? "Law Firm"}
                   </p>
                   {sf.firms?.location && (
-                    <p className="text-slate-400 text-xs flex items-center gap-1 mt-0.5">
+                    <p className="text-[#8A93A6] text-xs flex items-center gap-1 mt-0.5">
                       <MapPin size={10} />
                       {sf.firms.location}
                     </p>
@@ -248,7 +250,7 @@ function OverviewTab({
           cta={
             <button
               onClick={() => router.push("/intake/start")}
-              className="mt-2 inline-flex items-center gap-2 bg-[#002452] text-white text-sm font-medium px-5 py-2.5 rounded-2xl hover:opacity-90 transition-opacity"
+              className="mt-2 inline-flex items-center gap-2 bg-[#3B82F6] hover:bg-[#2563EB] text-white text-sm font-medium px-5 py-2.5 rounded-2xl transition-colors"
             >
               Start Intake
               <ArrowRight size={14} />
@@ -274,25 +276,25 @@ function MatchesTab({
   const router = useRouter();
 
   if (loading) {
-    return <div className="h-40 rounded-2xl bg-white border border-[#ddd7cc] animate-pulse" />;
+    return <div className="h-40 rounded-2xl bg-[#141C2E] border border-[#1F2A3D] animate-pulse" />;
   }
 
   return (
     <div className="space-y-6">
       {currentResults && (
-        <div className="bg-[#002452] rounded-2xl p-6 flex items-center justify-between gap-4">
+        <div className="bg-[#3B82F6]/10 border border-[#3B82F6]/20 rounded-2xl p-6 flex items-center justify-between gap-4">
           <div>
-            <p className="text-white/60 text-xs font-medium uppercase tracking-wide mb-1">Active Session</p>
-            <p className="text-white font-medium" style={lora}>
+            <p className="text-[#8A93A6] text-xs font-medium uppercase tracking-wide mb-1">Active Session</p>
+            <p className="text-[#E6EAF2] font-medium" style={lora}>
               {currentResults.categoryName || "Latest intake"}
             </p>
-            <p className="text-white/60 text-xs mt-1">
+            <p className="text-[#8A93A6] text-xs mt-1">
               {currentResults.count} matched {currentResults.count === 1 ? "firm" : "firms"}
             </p>
           </div>
           <Link
             href="/results"
-            className="shrink-0 inline-flex items-center gap-2 bg-white text-[#002452] text-sm font-semibold px-5 py-2.5 rounded-2xl hover:opacity-90 transition-opacity"
+            className="shrink-0 inline-flex items-center gap-2 bg-[#3B82F6] hover:bg-[#2563EB] text-white text-sm font-semibold px-5 py-2.5 rounded-2xl transition-colors"
           >
             View Results
             <ArrowRight size={14} />
@@ -308,7 +310,7 @@ function MatchesTab({
           cta={
             <button
               onClick={() => router.push("/intake/start")}
-              className="mt-2 inline-flex items-center gap-2 bg-[#002452] text-white text-sm font-medium px-5 py-2.5 rounded-2xl hover:opacity-90 transition-opacity"
+              className="mt-2 inline-flex items-center gap-2 bg-[#3B82F6] hover:bg-[#2563EB] text-white text-sm font-medium px-5 py-2.5 rounded-2xl transition-colors"
             >
               Start Intake
               <ArrowRight size={14} />
@@ -317,26 +319,26 @@ function MatchesTab({
         />
       ) : (
         <div>
-          <h3 className="text-sm font-semibold text-slate-500 uppercase tracking-wide mb-3">
+          <h3 className="text-sm font-semibold text-[#8A93A6] uppercase tracking-wide mb-3">
             Intake History
           </h3>
-          <div className="bg-white border border-[#ddd7cc] rounded-2xl overflow-hidden">
+          <div className="bg-[#141C2E] border border-[#1F2A3D] rounded-2xl overflow-hidden">
             {intakes.map((intake, i) => (
               <div
                 key={intake.id}
-                className={`flex items-center justify-between gap-4 px-5 py-4 hover:bg-slate-50/50 transition-colors ${
-                  i < intakes.length - 1 ? "border-b border-[#ddd7cc]" : ""
+                className={`flex items-center justify-between gap-4 px-5 py-4 hover:bg-[#1F2A3D]/50 transition-colors ${
+                  i < intakes.length - 1 ? "border-b border-[#1F2A3D]" : ""
                 }`}
               >
                 <div className="flex items-center gap-3">
-                  <div className="w-9 h-9 rounded-xl bg-[#002452]/8 flex items-center justify-center shrink-0">
-                    <Scale size={15} className="text-[#002452]" strokeWidth={1.5} />
+                  <div className="w-9 h-9 rounded-xl bg-[#3B82F6]/10 flex items-center justify-center shrink-0">
+                    <Scale size={15} className="text-[#3B82F6]" strokeWidth={1.5} />
                   </div>
                   <div>
-                    <p className="text-[#002452] text-sm font-medium" style={lora}>
+                    <p className="text-[#E6EAF2] text-sm font-medium" style={lora}>
                       {intake.category_label ?? intake.category_slug}
                     </p>
-                    <p className="text-slate-400 text-xs mt-0.5">
+                    <p className="text-[#8A93A6] text-xs mt-0.5">
                       {intake.track ? (
                         <span className="capitalize">{intake.track.replace(/_/g, " ")} · </span>
                       ) : null}
@@ -350,13 +352,13 @@ function MatchesTab({
                 </div>
                 <div className="flex items-center gap-3 shrink-0">
                   {intake.matches && intake.matches.length > 0 && (
-                    <span className="hidden sm:inline text-xs text-slate-400">
+                    <span className="hidden sm:inline text-xs text-[#8A93A6]">
                       {intake.matches.length} matches
                     </span>
                   )}
                   <Link
                     href={`/results/${intake.id}`}
-                    className="text-xs text-[#002452] font-medium hover:opacity-70 transition-opacity flex items-center gap-1"
+                    className="text-xs text-[#3B82F6] font-medium hover:opacity-70 transition-opacity flex items-center gap-1"
                   >
                     Results <ChevronRight size={12} />
                   </Link>
@@ -395,7 +397,7 @@ function SavedFirmsTab({
     return (
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         {[1, 2, 3, 4].map((i) => (
-          <div key={i} className="h-36 rounded-2xl bg-white border border-[#ddd7cc] animate-pulse" />
+          <div key={i} className="h-36 rounded-2xl bg-[#141C2E] border border-[#1F2A3D] animate-pulse" />
         ))}
       </div>
     );
@@ -410,7 +412,7 @@ function SavedFirmsTab({
         cta={
           <button
             onClick={() => router.push("/intake/start")}
-            className="mt-2 inline-flex items-center gap-2 text-sm text-[#002452] font-medium hover:opacity-70 transition-opacity"
+            className="mt-2 inline-flex items-center gap-2 text-sm text-[#3B82F6] font-medium hover:opacity-70 transition-opacity"
           >
             Start a new intake <ArrowRight size={13} />
           </button>
@@ -421,7 +423,7 @@ function SavedFirmsTab({
 
   return (
     <div>
-      <p className="text-xs text-slate-400 mb-4">{savedFirms.length} saved {savedFirms.length === 1 ? "firm" : "firms"}</p>
+      <p className="text-xs text-[#8A93A6] mb-4">{savedFirms.length} saved {savedFirms.length === 1 ? "firm" : "firms"}</p>
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         {savedFirms.map(({ firm_id, firms }) => {
           const firm = firms;
@@ -429,32 +431,32 @@ function SavedFirmsTab({
           return (
             <div
               key={firm_id}
-              className="bg-white border border-[#ddd7cc] rounded-2xl p-5 flex flex-col gap-4"
+              className="bg-[#141C2E] border border-[#1F2A3D] rounded-2xl p-5 flex flex-col gap-4"
             >
               <div className="flex items-start justify-between gap-3">
                 <div className="flex-1 min-w-0">
                   {firm.verified && (
-                    <div className="inline-flex items-center gap-1 text-[#002452] text-xs font-medium mb-1.5">
+                    <div className="inline-flex items-center gap-1 text-[#3B82F6] text-xs font-medium mb-1.5">
                       <Shield size={10} />
                       LWYRD Verified
                     </div>
                   )}
-                  <h3 className="text-[#002452] text-base font-medium leading-snug truncate" style={lora}>
+                  <h3 className="text-[#E6EAF2] text-base font-medium leading-snug truncate" style={lora}>
                     {firm.name}
                   </h3>
                   {firm.tagline && (
-                    <p className="text-slate-400 text-xs mt-1 line-clamp-2">{firm.tagline}</p>
+                    <p className="text-[#8A93A6] text-xs mt-1 line-clamp-2">{firm.tagline}</p>
                   )}
                 </div>
                 <div className="text-right shrink-0">
-                  <div className="text-2xl text-[#002452]" style={lora}>
+                  <div className="text-2xl text-[#E6EAF2]" style={lora}>
                     {firm.overall_score}
                   </div>
-                  <div className="text-xs text-slate-300">score</div>
+                  <div className="text-xs text-[#8A93A6]">score</div>
                 </div>
               </div>
 
-              <div className="flex flex-wrap gap-2 text-xs text-slate-400">
+              <div className="flex flex-wrap gap-2 text-xs text-[#8A93A6]">
                 {firm.location && (
                   <span className="flex items-center gap-1">
                     <MapPin size={10} />
@@ -470,13 +472,13 @@ function SavedFirmsTab({
                 <button
                   onClick={() => handleUnsave(firm_id)}
                   title="Remove from saved"
-                  className="flex items-center justify-center w-10 h-10 rounded-xl border border-[#ddd7cc] text-slate-400 hover:border-red-300 hover:text-red-500 transition-colors shrink-0"
+                  className="flex items-center justify-center w-10 h-10 rounded-xl border border-[#1F2A3D] text-[#8A93A6] hover:border-red-500/40 hover:text-red-400 transition-colors shrink-0"
                 >
                   <BookmarkX size={15} strokeWidth={1.5} />
                 </button>
                 <Link
                   href={`/firms/${firm_id}`}
-                  className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl bg-[#002452] text-white text-sm font-medium hover:opacity-90 transition-opacity"
+                  className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl bg-[#3B82F6] hover:bg-[#2563EB] text-white text-sm font-medium transition-colors"
                 >
                   View Profile
                   <ArrowRight size={13} />
@@ -499,15 +501,15 @@ function EngagementsTab() {
   return (
     <div className="space-y-5">
       {/* Sub-tab toggle */}
-      <div className="flex gap-1 bg-white border border-[#ddd7cc] rounded-xl p-1 w-fit">
+      <div className="flex gap-1 bg-[#141C2E] border border-[#1F2A3D] rounded-xl p-1 w-fit">
         {(["active", "past"] as const).map((t) => (
           <button
             key={t}
             onClick={() => setSubTab(t)}
             className={`px-4 py-1.5 rounded-lg text-sm font-medium transition-colors capitalize ${
               subTab === t
-                ? "bg-[#002452] text-white"
-                : "text-slate-500 hover:text-[#002452]"
+                ? "bg-[#3B82F6] text-white"
+                : "text-[#8A93A6] hover:text-[#E6EAF2]"
             }`}
           >
             {t === "active" ? "Active" : "Past"}
@@ -519,13 +521,13 @@ function EngagementsTab() {
         <EmptyState
           icon={Briefcase}
           title="No active engagements"
-          body="Once you connect with a firm and begin working together, your active engagement details — communications, key documents, and milestones — will appear here."
+          body="Once you connect with a firm and begin working together, your active engagement details, communications, key documents, and milestones, will appear here."
           cta={
             <button
               onClick={() => router.push("/intake/start")}
-              className="mt-2 inline-flex items-center gap-2 text-sm text-[#002452] font-medium hover:opacity-70 transition-opacity"
+              className="mt-2 inline-flex items-center gap-2 text-sm text-[#3B82F6] font-medium hover:opacity-70 transition-opacity"
             >
-              Get matched with a firm <ArrowRight size={13} />
+              Start a new intake <ArrowRight size={13} />
             </button>
           }
         />
@@ -602,7 +604,7 @@ function DashboardContent() {
   }, [user]); // eslint-disable-line react-hooks/exhaustive-deps
 
   return (
-    <div className="flex flex-col min-h-screen bg-[#f5f4f0]">
+    <div className="flex flex-col min-h-screen bg-[#0A0F1C]">
       <Navbar />
 
       <main className="flex-1 max-w-6xl mx-auto w-full px-4 sm:px-6 py-8">
@@ -618,8 +620,8 @@ function DashboardContent() {
                   onClick={() => setActiveTab(id)}
                   className={`flex items-center gap-1.5 px-3 py-2 rounded-xl text-sm font-medium whitespace-nowrap transition-colors shrink-0 ${
                     activeTab === id
-                      ? "bg-[#002452] text-white"
-                      : "bg-white border border-[#ddd7cc] text-slate-500 hover:text-[#002452]"
+                      ? "bg-[#3B82F6] text-white"
+                      : "bg-[#141C2E] border border-[#1F2A3D] text-[#8A93A6] hover:text-[#E6EAF2]"
                   }`}
                 >
                   <Icon size={14} strokeWidth={1.5} />
@@ -629,11 +631,11 @@ function DashboardContent() {
             </div>
 
             {/* Desktop: vertical sidebar */}
-            <div className="hidden lg:flex flex-col bg-white border border-[#ddd7cc] rounded-2xl p-3 sticky top-6">
+            <div className="hidden lg:flex flex-col bg-[#141C2E] border border-[#1F2A3D] rounded-2xl p-3 sticky top-6">
               {/* User greeting */}
-              <div className="px-3 py-3 mb-2 border-b border-[#f0ece5]">
-                <p className="text-xs text-slate-400 font-medium">Signed in as</p>
-                <p className="text-sm text-[#002452] font-semibold mt-0.5 truncate" style={lora}>
+              <div className="px-3 py-3 mb-2 border-b border-[#1F2A3D]">
+                <p className="text-xs text-[#8A93A6] font-medium">Signed in as</p>
+                <p className="text-sm text-[#E6EAF2] font-semibold mt-0.5 truncate" style={lora}>
                   {firstName}
                 </p>
               </div>
@@ -646,15 +648,15 @@ function DashboardContent() {
                     onClick={() => setActiveTab(id)}
                     className={`w-full flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-sm font-medium transition-colors text-left ${
                       activeTab === id
-                        ? "bg-[#002452] text-white"
-                        : "text-slate-500 hover:bg-[#f5f4f0] hover:text-[#002452]"
+                        ? "bg-[#3B82F6] text-white"
+                        : "text-[#8A93A6] hover:bg-[#1F2A3D] hover:text-[#E6EAF2]"
                     }`}
                   >
                     <Icon size={15} strokeWidth={1.5} />
                     {label}
                     {id === "saved" && savedFirms.length > 0 && (
                       <span className={`ml-auto text-xs px-1.5 py-0.5 rounded-full ${
-                        activeTab === id ? "bg-white/20 text-white" : "bg-[#002452]/10 text-[#002452]"
+                        activeTab === id ? "bg-white/20 text-white" : "bg-[#3B82F6]/10 text-[#3B82F6]"
                       }`}>
                         {savedFirms.length}
                       </span>
@@ -664,12 +666,12 @@ function DashboardContent() {
               </nav>
 
               {/* Divider */}
-              <div className="my-3 border-t border-[#f0ece5]" />
+              <div className="my-3 border-t border-[#1F2A3D]" />
 
               {/* Start new intake CTA */}
               <button
                 onClick={() => router.push("/intake/start")}
-                className="w-full flex items-center gap-2 px-3 py-2.5 rounded-xl bg-[#002452] text-white text-sm font-medium hover:opacity-90 transition-opacity"
+                className="w-full flex items-center gap-2 px-3 py-2.5 rounded-xl bg-[#3B82F6] hover:bg-[#2563EB] text-white text-sm font-medium transition-colors"
               >
                 <Plus size={14} strokeWidth={2} />
                 New Intake
@@ -678,7 +680,7 @@ function DashboardContent() {
               {/* Account settings link */}
               <Link
                 href="/account"
-                className="mt-1 w-full flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-sm font-medium text-slate-400 hover:text-[#002452] hover:bg-[#f5f4f0] transition-colors"
+                className="mt-1 w-full flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-sm font-medium text-[#8A93A6] hover:text-[#E6EAF2] hover:bg-[#1F2A3D] transition-colors"
               >
                 <Settings size={14} strokeWidth={1.5} />
                 Account Settings
@@ -698,40 +700,40 @@ function DashboardContent() {
             >
               {activeTab === "overview" && (
                 <>
-                  <h1 className="text-3xl sm:text-4xl text-[#002452]" style={{ ...lora, fontWeight: 500 }}>
+                  <h1 className="text-3xl sm:text-4xl text-[#E6EAF2]" style={{ ...lora, fontWeight: 500 }}>
                     Welcome back, {firstName}.
                   </h1>
-                  <p className="text-slate-500 text-sm mt-1">
+                  <p className="text-[#8A93A6] text-sm mt-1">
                     Here&apos;s an overview of your LWYRD activity.
                   </p>
                 </>
               )}
               {activeTab === "matches" && (
                 <>
-                  <h1 className="text-3xl sm:text-4xl text-[#002452]" style={{ ...lora, fontWeight: 500 }}>
+                  <h1 className="text-3xl sm:text-4xl text-[#E6EAF2]" style={{ ...lora, fontWeight: 500 }}>
                     My Matches
                   </h1>
-                  <p className="text-slate-500 text-sm mt-1">
+                  <p className="text-[#8A93A6] text-sm mt-1">
                     Your intake submissions and matched law firms.
                   </p>
                 </>
               )}
               {activeTab === "saved" && (
                 <>
-                  <h1 className="text-3xl sm:text-4xl text-[#002452]" style={{ ...lora, fontWeight: 500 }}>
+                  <h1 className="text-3xl sm:text-4xl text-[#E6EAF2]" style={{ ...lora, fontWeight: 500 }}>
                     Saved Firms
                   </h1>
-                  <p className="text-slate-500 text-sm mt-1">
+                  <p className="text-[#8A93A6] text-sm mt-1">
                     Firms you&apos;ve bookmarked from your match results.
                   </p>
                 </>
               )}
               {activeTab === "engagements" && (
                 <>
-                  <h1 className="text-3xl sm:text-4xl text-[#002452]" style={{ ...lora, fontWeight: 500 }}>
+                  <h1 className="text-3xl sm:text-4xl text-[#E6EAF2]" style={{ ...lora, fontWeight: 500 }}>
                     Engagements
                   </h1>
-                  <p className="text-slate-500 text-sm mt-1">
+                  <p className="text-[#8A93A6] text-sm mt-1">
                     Your active and past legal engagements.
                   </p>
                 </>

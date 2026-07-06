@@ -1,0 +1,1344 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LWYRD: Find the right lawyer for your situation</title>
+<link rel="icon" href="Logos/LWYRD_Favicon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;450;500;600&family=Libre+Baskerville:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#0B0B0C;
+    --ink-2:#2A2A2E;
+    --muted:#6B6B70;
+    --faint:#9A9AA0;
+    --navy:#002B55;
+    --navy-2:#013a72;
+    --navy-tint:#EEF3F8;
+    --navy-tint-2:#E1EAF3;
+    /* beam: the maze light, reused for the exit line, the spine, and the arrow */
+    --beam:#6FAEEC;
+    --beam-core:#EAF6FF;
+    --beam-soon:#9FB8D4;
+    --navy-gradient:radial-gradient(circle at 22% 18%,rgba(255,255,255,.22),transparent 42%),radial-gradient(circle at 82% 12%,rgba(128,170,212,.42),transparent 46%),linear-gradient(145deg,#001d3a 0%,#013a72 50%,#011a33 100%);
+    --spine-track:#E6EBF2;
+    --paper:#FFFFFF;
+    --paper-alt:#F6F6F4;
+    --line:#E7E7E3;
+    --line-2:#ECECEA;
+    --r:12px;
+    --r-sm:8px;
+    --r-pill:999px;
+    --shadow-sm:0 1px 2px rgba(11,11,12,.04),0 4px 16px rgba(11,11,12,.04);
+    --shadow-md:0 4px 12px rgba(11,11,12,.06),0 20px 48px rgba(11,11,12,.08);
+    --maxw:1200px;
+    --pad:clamp(20px,5vw,40px);
+    --sec:clamp(72px,10vw,132px);
+    --display:'Libre Baskerville',Georgia,serif;
+    --body:'Inter',system-ui,sans-serif;
+  }
+
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{scroll-behavior:auto}
+  body{
+    font-family:var(--body);
+    color:var(--ink);
+    background:var(--paper);
+    line-height:1.6;
+    -webkit-font-smoothing:antialiased;
+  }
+  a{color:inherit;text-decoration:none}
+  button{font-family:inherit;cursor:pointer;border:none;background:none}
+  img{max-width:100%;display:block}
+
+  .wrap{max-width:var(--maxw);margin:0 auto;padding-left:var(--pad);padding-right:var(--pad)}
+
+  h1,h2,h3{font-family:var(--display);font-weight:700;letter-spacing:0;line-height:1.08}
+  h2{font-size:clamp(1.9rem,4vw,2.9rem)}
+  h3{font-size:1.15rem;letter-spacing:0;line-height:1.25}
+
+  .btn{
+    display:inline-flex;align-items:center;gap:.5em;
+    font-family:var(--body);font-weight:500;font-size:.95rem;
+    padding:.72em 1.35em;border-radius:var(--r-pill);
+    transition:transform .18s ease,background .18s ease,color .18s ease,border-color .18s ease;
+  }
+  .btn-primary{background:var(--navy-gradient);color:#fff}
+  .btn-primary:hover{background:var(--navy-gradient);transform:translateY(-1px)}
+  #heroCta{position:relative;overflow:visible}
+  #heroCta .cta-outline{position:absolute;inset:0;width:100%;height:100%;overflow:visible;pointer-events:none;z-index:2}
+  #heroCta.ignited{
+    background:var(--navy-gradient);
+    color:#fff;
+    box-shadow:0 0 0 1px rgba(120,175,235,.5),0 8px 28px rgba(3,58,114,.5),0 0 36px rgba(90,155,232,.55);
+    transition:background .55s ease,box-shadow .6s ease;
+  }
+  #heroCta.ignited:hover{transform:translateY(-1px)}
+  .btn-ghost{color:var(--ink);border:1px solid var(--line)}
+  .btn-ghost:hover{border-color:var(--ink);transform:translateY(-1px)}
+  .btn-link{color:var(--ink);font-weight:500;font-size:.95rem;display:inline-flex;align-items:center;gap:.4em}
+  .btn-link .arw{transition:transform .18s ease}
+  .btn-link:hover .arw{transform:translateX(3px)}
+
+  /* ---------- NAV ---------- */
+  header.nav{
+    position:sticky;top:0;z-index:50;
+    background:rgba(255,255,255,.82);
+    backdrop-filter:saturate(180%) blur(12px);
+    border-bottom:1px solid transparent;
+    transition:border-color .2s ease,box-shadow .2s ease;
+  }
+  header.nav.scrolled{border-bottom-color:var(--line);box-shadow:0 1px 0 rgba(11,11,12,.02)}
+  .nav-inner{display:flex;align-items:center;justify-content:space-between;height:68px}
+  .brand{display:flex;align-items:center;gap:.5em}
+  .brand-logo{height:22px;width:auto;display:block}
+  .foot-brand .brand-logo{height:26px}
+  .nav-links{display:flex;align-items:center;gap:1.5rem;height:100%}
+  .nav-item{position:relative;height:100%;display:flex;align-items:center}
+  .nav-trigger{font-size:.92rem;color:var(--ink-2);font-weight:450;display:inline-flex;align-items:center;padding:.5em .72em;border-radius:var(--r-pill);transition:color .15s ease,background .15s ease,box-shadow .15s ease}
+  .nav-item:hover .nav-trigger,.nav-item:focus-within .nav-trigger{color:var(--ink);background:var(--navy-tint);box-shadow:inset 0 0 0 1px var(--navy-tint-2)}
+  .nav-menu{position:absolute;top:calc(100% - 8px);left:50%;min-width:244px;transform:translateX(-50%) translateY(8px);padding:10px;background:#fff;border:1px solid var(--line);border-radius:12px;box-shadow:var(--shadow-md);opacity:0;visibility:hidden;pointer-events:none;transition:opacity .16s ease,transform .16s ease,visibility .16s ease}
+  .nav-item:hover .nav-menu,.nav-item:focus-within .nav-menu{opacity:1;visibility:visible;pointer-events:auto;transform:translateX(-50%) translateY(0)}
+  .nav-menu a{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:10px 12px;border-radius:8px;color:var(--ink-2);font-size:.9rem;line-height:1.2;white-space:nowrap;transition:background .15s ease,color .15s ease}
+  .nav-menu a:hover{background:var(--navy-tint);color:var(--ink)}
+  .soon-disabled{pointer-events:none;opacity:.45;cursor:default}
+  .nav-menu a.soon-disabled:hover{background:none;color:var(--ink-2)}
+  .nav-pill{font-size:.62rem;letter-spacing:.03em;text-transform:uppercase;color:var(--navy);background:var(--navy-tint);border:1px solid var(--navy-tint-2);border-radius:var(--r-pill);padding:.22em .52em;white-space:nowrap;font-weight:600}
+  .nav-cta{display:flex;align-items:center;gap:.8rem}
+  .nav-cta .btn{padding:.5em 1.05em;font-size:.85rem}
+  .nav-toggle{display:none;width:40px;height:40px;border-radius:var(--r-sm);align-items:center;justify-content:center}
+  .nav-toggle span{width:18px;height:1.5px;background:var(--ink);position:relative;transition:.2s}
+  .nav-toggle span::before,.nav-toggle span::after{content:'';position:absolute;left:0;width:18px;height:1.5px;background:var(--ink);transition:.2s}
+  .nav-toggle span::before{top:-5px}.nav-toggle span::after{top:5px}
+
+  /* ---------- HERO (full-bleed maze) ---------- */
+  .hero{position:relative;overflow:hidden;background:#fff}
+  .hero-maze{position:absolute;inset:0;z-index:0;pointer-events:none}
+  .hero-maze svg{width:100%;height:100%}
+  .hero-maze .mz-walls{fill:none;stroke:#E6EBF2;stroke-width:1.3;stroke-linecap:round}
+  .hero-maze .mz-sol{fill:none;stroke:#C6D4E7;stroke-width:2.4;stroke-linecap:round;stroke-linejoin:round;transition:stroke .5s ease,stroke-width .5s ease}
+  .hero-veil{position:absolute;inset:0;z-index:1;pointer-events:none;background:radial-gradient(58% 56% at 50% 46%,rgba(255,255,255,.95),rgba(255,255,255,.72) 52%,rgba(255,255,255,.2) 78%,transparent)}
+  .hero-center{position:relative;z-index:3;min-height:clamp(560px,90vh,900px);display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;padding:clamp(90px,12vh,140px) 0 clamp(72px,10vh,120px)}
+  .hero-center h1{font-size:clamp(2.5rem,5vw,4.1rem);max-width:16ch;margin-bottom:1.3rem;color:var(--ink);letter-spacing:.02em}
+  .hero-center h1 .accent{color:var(--ink)}
+  .hero-sub{font-size:clamp(1.05rem,1.6vw,1.22rem);color:var(--ink);max-width:40ch;margin:0 auto 2rem}
+  .hero-actions{display:flex;align-items:center;justify-content:center;gap:1.4rem;flex-wrap:wrap}
+
+  /* the path lands on a clickable scroll arrow near the hero's lower edge */
+  .hero-exit{position:absolute;inset:0;z-index:4;pointer-events:none}
+  .exit-stub{position:absolute;width:2px;transform:translateX(-50%);border-radius:2px;background:var(--spine-track);opacity:0;transition:opacity .6s ease .15s;z-index:3;overflow:visible}
+  .exit-stub.show{opacity:1}
+  .exit-stub-beam{position:absolute;left:0;top:0;width:100%;height:0;border-radius:2px;background:var(--beam);box-shadow:0 0 8px rgba(111,174,236,.55),0 0 2px rgba(234,246,255,.9)}
+  /* a quiet beam-colored chevron, in the same family as the spine's end arrow */
+  .scroll-arrow{position:absolute;left:50%;bottom:5%;width:40px;height:40px;
+    display:flex;align-items:center;justify-content:center;
+    color:var(--beam);cursor:default;pointer-events:none;border-radius:50%;
+    background:rgba(255,255,255,.78);box-shadow:0 0 0 1px rgba(111,174,236,.24),0 8px 24px rgba(0,43,85,.08);
+    opacity:0;transform:translateX(-50%) translateY(6px);
+    transition:opacity .6s ease,transform .6s cubic-bezier(.2,.7,.2,1)}
+  .scroll-arrow.show{opacity:1;transform:translateX(-50%) translateY(0);animation:saBob 2.2s ease-in-out infinite 1s}
+  .scroll-arrow svg{position:relative;z-index:2;width:25px;height:25px;stroke:currentColor;stroke-width:2.3;fill:none;stroke-linecap:round;stroke-linejoin:round;filter:drop-shadow(0 0 5px rgba(111,174,236,.65))}
+  .scroll-arrow .sa-ring{position:absolute;inset:5px;border-radius:50%;border:1px solid rgba(111,174,236,.42);box-shadow:inset 0 0 12px rgba(111,174,236,.12)}
+  @keyframes saBob{0%,100%{transform:translateX(-50%) translateY(0)}50%{transform:translateX(-50%) translateY(5px)}}
+
+  /* floating UI cards */
+  .hero-floats{display:none}
+  .hf{position:absolute;opacity:0;animation:hfIn .8s cubic-bezier(.2,.7,.2,1) forwards}
+  .hf-card{background:#fff;border:1px solid var(--line);border-radius:14px;box-shadow:var(--shadow-md);padding:14px 16px;animation:hfBob 7s ease-in-out infinite}
+  .hf-1{top:9%;left:4.5%;animation-delay:.35s}
+  .hf-2{top:12%;right:5.5%;animation-delay:.6s}
+  .hf-3{left:6%;bottom:34%;animation-delay:.85s}
+  .hf-4{right:4.5%;bottom:13%;animation-delay:1.05s}
+  .hf-2 .hf-card{animation-delay:-2.3s}
+  .hf-3 .hf-card{animation-delay:-4.6s}
+  .hf-4 .hf-card{animation-delay:-3.5s}
+  .hf-eyebrow{font-size:.66rem;letter-spacing:.05em;text-transform:uppercase;color:var(--faint);font-weight:600;margin-bottom:9px;display:flex;align-items:center;gap:.5em}
+  .hf-eyebrow .d{width:6px;height:6px;border-radius:50%;background:var(--navy)}
+  .hf-chips{display:flex;gap:6px;flex-wrap:wrap;max-width:196px}
+  .hf-firm{display:flex;align-items:center;gap:11px}
+  .hf-logo{width:38px;height:38px;border-radius:9px;background:var(--navy);color:#fff;display:flex;align-items:center;justify-content:center;font-family:var(--display);font-weight:600;font-size:.95rem;flex-shrink:0}
+  .hf-firm .fn{font-family:var(--display);font-weight:600;font-size:.9rem;line-height:1.15}
+  .hf-firm .fr{font-size:.72rem;color:var(--muted);margin-top:3px;display:flex;align-items:center;gap:.4em}
+  .hf-firm .fr .stars{color:var(--navy);letter-spacing:1px}
+  .hf-stat .n{font-family:var(--display);font-weight:700;font-size:1.55rem;color:var(--navy);line-height:1}
+  .hf-stat .l{font-size:.74rem;color:var(--muted);margin-top:5px;max-width:132px}
+  .hf-step{display:flex;align-items:center;gap:11px}
+  .hf-step .ring{width:30px;height:30px;flex-shrink:0}
+  .hf-step .st-t{font-size:.82rem;font-weight:500;color:var(--ink)}
+  .hf-step .st-s{font-size:.72rem;color:var(--muted);margin-top:2px}
+  @keyframes hfIn{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
+  @keyframes hfBob{0%,100%{transform:translateY(0)}50%{transform:translateY(-7px)}}
+
+  /* product mock */
+  .mock{position:relative;background:#fff;border:1px solid var(--line);border-radius:16px;box-shadow:var(--shadow-md);overflow:hidden}
+  .mock-bar{display:flex;align-items:center;gap:6px;padding:12px 16px;border-bottom:1px solid var(--line-2);background:var(--paper-alt)}
+  .mock-bar i{width:9px;height:9px;border-radius:50%;background:#D9D9D5;display:block}
+  .mock-bar .url{margin-left:10px;font-size:.72rem;color:var(--faint)}
+  .mock-body{padding:22px}
+  .mock-label{font-size:.72rem;letter-spacing:.04em;text-transform:uppercase;color:var(--faint);margin-bottom:10px}
+  .intake-row{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:20px}
+  .chip{font-size:.8rem;padding:.35em .8em;border-radius:var(--r-pill);background:var(--navy-tint);color:var(--navy);font-weight:500;border:1px solid var(--navy-tint-2)}
+  .match-line{display:flex;align-items:center;gap:10px;margin:18px 0;color:var(--faint)}
+  .match-line .ln{height:1px;flex:1;background:linear-gradient(90deg,transparent,var(--line),transparent)}
+  .match-line .mtag{font-size:.7rem;letter-spacing:.06em;text-transform:uppercase;color:var(--navy);font-weight:500}
+  .firm-card{border:1px solid var(--line);border-radius:var(--r);padding:16px;display:flex;gap:14px;align-items:center}
+  .firm-logo{width:44px;height:44px;border-radius:10px;background:var(--navy);color:#fff;display:flex;align-items:center;justify-content:center;font-family:var(--display);font-weight:600;font-size:1.05rem;flex-shrink:0}
+  .firm-meta{flex:1;min-width:0}
+  .firm-meta .fname{font-family:var(--display);font-weight:600;font-size:.98rem;margin-bottom:3px}
+  .firm-meta .frow{display:flex;align-items:center;gap:8px;font-size:.76rem;color:var(--muted)}
+  .firm-meta .stars{color:var(--navy);letter-spacing:1px}
+  .firm-badge{font-size:.66rem;letter-spacing:.04em;text-transform:uppercase;color:#1a7a4a;background:#e8f6ee;padding:.3em .6em;border-radius:var(--r-pill);white-space:nowrap;font-weight:500}
+
+  /* ---------- SECTION HEAD ---------- */
+  .sec-head{max-width:60ch;margin-bottom:clamp(40px,5vw,64px)}
+  .sec-head p{color:var(--muted);font-size:1.08rem;margin-top:.9rem}
+  /* layout variants */
+  .sec-head.center{text-align:center;margin-left:auto;margin-right:auto}
+  .sec-head.split{max-width:none;display:grid;grid-template-columns:1.15fr .85fr;gap:clamp(24px,5vw,64px);align-items:end}
+  .sec-head.split h2{margin:0}
+  .sec-head.split p{margin-top:0}
+
+  /* ---------- WHO IT'S FOR (accordion) ---------- */
+  .segments{padding-top:var(--sec);padding-bottom:var(--sec)}
+  .seg-row{display:flex;gap:12px;height:440px}
+  .seg-eye{font-size:.76rem;letter-spacing:.14em;text-transform:uppercase;color:var(--navy);font-weight:600;margin-bottom:.85rem}
+  .seg-eye::before{content:'';display:inline-block;width:22px;height:1px;background:var(--navy);vertical-align:middle;margin-right:.6em;opacity:.5}
+  .seg-eye::after{content:'';display:inline-block;width:22px;height:1px;background:var(--navy);vertical-align:middle;margin-left:.6em;opacity:.5}
+  .segment{position:relative;flex:1;border-radius:16px;overflow:hidden;cursor:pointer;transition:flex .5s cubic-bezier(.4,0,.2,1),box-shadow .4s ease;color:#fff;border:1px solid rgba(255,255,255,.08)}
+  .segment.is-open{flex:3.2;box-shadow:0 22px 46px -18px rgba(0,43,85,.45)}
+  .segment::after{content:'';position:absolute;top:0;left:0;right:0;height:3px;z-index:4;background:linear-gradient(90deg,rgba(128,170,212,.9),rgba(255,255,255,.55));opacity:0;transform:scaleX(.4);transform-origin:left;transition:opacity .45s ease,transform .55s cubic-bezier(.4,0,.2,1)}
+  .segment.is-open::after{opacity:1;transform:scaleX(1)}
+  .segment .bg{position:absolute;inset:0;z-index:0}
+  .seg-tech .bg{background:linear-gradient(150deg,#0a1a33,#013a72 55%,#00509e)}
+  .seg-main .bg{background:linear-gradient(150deg,#3a2a1a,#6b4f31 55%,#a67a45)}
+  .seg-fam .bg{background:linear-gradient(150deg,#12331f,#245c38 55%,#4a8a5a)}
+  .segment .photo{position:absolute;inset:0;z-index:1;background-size:cover;background-position:center;background-repeat:no-repeat;filter:brightness(.72) saturate(.95)}
+  .seg-tech .photo{background-image:url('https://images.unsplash.com/photo-1522071820081-009f0129c71c?auto=format&fit=crop&w=1100&q=80')}
+  .seg-main .photo{background-image:url('https://images.unsplash.com/photo-1648877794940-4a24e7fb87f8?auto=format&fit=crop&w=1200&q=82')}
+  .seg-fam .photo{background-image:url('https://images.unsplash.com/photo-1511895426328-dc8714191300?auto=format&fit=crop&w=1100&q=80')}
+  .segment .bg-tint{position:absolute;inset:0;z-index:2;background:linear-gradient(180deg,rgba(5,10,18,.54) 0%,rgba(6,11,18,.58) 42%,rgba(5,8,13,.93) 100%)}
+  .seg-inner{position:relative;z-index:3;height:100%;padding:28px;display:flex;flex-direction:column;justify-content:flex-end}
+  .seg-num{display:inline-flex;align-items:center;gap:.5em;font-size:.72rem;letter-spacing:.1em;text-transform:uppercase;opacity:.9;margin-bottom:auto;text-shadow:0 1px 10px rgba(0,0,0,.45)}
+  .seg-num::before{content:'';width:6px;height:6px;border-radius:50%;background:rgba(128,170,212,.95);box-shadow:0 0 0 4px rgba(128,170,212,.22)}
+  .seg-title{position:relative;display:inline-block;font-family:var(--display);font-weight:700;font-size:1.4rem;letter-spacing:0;text-shadow:0 2px 14px rgba(0,0,0,.55);padding-bottom:.32rem}
+  .seg-title::after{content:'';position:absolute;left:0;bottom:0;height:2px;width:38px;background:linear-gradient(90deg,rgba(128,170,212,1),rgba(255,255,255,.35));border-radius:2px;transform:scaleX(0);transform-origin:left;opacity:0;transition:transform .5s cubic-bezier(.4,0,.2,1) .1s,opacity .4s ease .1s}
+  .segment.is-open .seg-title::after{transform:scaleX(1);opacity:1}
+  .seg-body{max-height:0;opacity:0;overflow:hidden;transition:max-height .5s ease,opacity .4s ease,margin .5s ease}
+  .segment.is-open .seg-body{max-height:300px;opacity:1;margin-top:.9rem}
+  .seg-body p{font-size:.96rem;line-height:1.55;color:rgba(255,255,255,.95);max-width:42ch;text-shadow:0 1px 10px rgba(0,0,0,.48)}
+  .seg-meta{display:flex;flex-wrap:wrap;gap:8px;margin-top:1rem}
+  .seg-meta span{font-size:.72rem;line-height:1;padding:.55em .72em;border:1px solid rgba(255,255,255,.28);border-radius:var(--r-pill);background:rgba(255,255,255,.12);backdrop-filter:blur(8px);color:rgba(255,255,255,.9)}
+  .seg-meta .seg-more{border-style:dashed;background:rgba(255,255,255,.07);color:rgba(255,255,255,.78);font-weight:600;letter-spacing:.01em}
+  @media(hover:hover) and (pointer:fine){
+    .seg-row:hover .segment{flex:1;box-shadow:none}
+    .seg-row:hover .segment::after,.seg-row:hover .segment .seg-title::after{opacity:0;transform:scaleX(.4)}
+    .seg-row:hover .segment .seg-title::after{transform:scaleX(0)}
+    .seg-row:hover .segment .seg-body{max-height:0;opacity:0;margin-top:0}
+    .seg-row .segment:hover{flex:3.2;box-shadow:0 22px 46px -18px rgba(0,43,85,.45)}
+    .seg-row .segment:hover::after{opacity:1;transform:scaleX(1)}
+    .seg-row .segment:hover .seg-title::after{transform:scaleX(1);opacity:1}
+    .seg-row .segment:hover .seg-body{max-height:300px;opacity:1;margin-top:.9rem}
+  }
+
+  /* ---------- PARTNER ---------- */
+  .partner{padding-top:var(--sec);padding-bottom:var(--sec);background:#fff}
+  .partner-stack{display:flex;flex-direction:column;gap:clamp(56px,7vw,88px)}
+  .partner-split{display:grid;grid-template-columns:1fr 1fr;gap:clamp(28px,5vw,72px);align-items:center}
+  .partner-split.flip .partner-copy{order:1}
+  .partner-split.flip .partner-img{order:2}
+  .partner-img{min-height:390px;border-radius:16px;overflow:hidden;position:relative;box-shadow:var(--shadow-md)}
+  .partner-icon-panel{display:grid;place-items:center;background:radial-gradient(circle at 50% 46%,rgba(220,238,255,.55) 0%,rgba(220,238,255,.14) 40%,transparent 66%),linear-gradient(160deg,#fbfdff 0%,#f2f8fe 100%);border:1px solid var(--navy-tint-2)}
+  .partner-icon-panel::after{content:'';position:absolute;inset:0;background:linear-gradient(160deg,rgba(255,255,255,.5),transparent 40%);pointer-events:none}
+  .partner-icon{position:relative;z-index:2;width:min(278px,58%);aspect-ratio:1;color:var(--navy);filter:drop-shadow(0 18px 26px rgba(0,43,85,.12))}
+  .partner-asset{position:relative;z-index:2;width:min(300px,64%);aspect-ratio:1;object-fit:contain;filter:drop-shadow(0 20px 30px rgba(0,43,85,.1))}
+  .partner-icon .halo{fill:rgba(255,255,255,.88);stroke:rgba(0,43,85,.09);stroke-width:1.1}
+  .partner-icon .wash{fill:url(#partnerIconWash)}
+  .partner-icon .line{fill:none;stroke:currentColor;stroke-width:8;stroke-linecap:round;stroke-linejoin:round}
+  .partner-icon .fine{fill:none;stroke:#6faeec;stroke-width:5;stroke-linecap:round;stroke-linejoin:round}
+  .partner-icon .fill{fill:currentColor}
+  .partner-icon .soft{fill:#dceeff}
+  .partner-copy{padding:clamp(8px,2vw,24px)}
+  .partner-copy .p-eye{font-size:.78rem;letter-spacing:.08em;text-transform:uppercase;color:var(--navy);font-weight:600;margin-bottom:1.2rem}
+  .partner-copy h3{font-size:clamp(1.8rem,3.5vw,2.7rem);margin-bottom:1rem}
+  .partner-copy p{color:var(--muted);font-size:1.04rem;margin-bottom:1.6rem;max-width:43ch}
+  .partner-points{display:grid;gap:.7rem;margin:0 0 2rem;padding:0;list-style:none}
+  .partner-points li{display:flex;align-items:flex-start;gap:.65rem;color:var(--ink-2);font-size:.95rem}
+  .partner-points li::before{content:'';width:7px;height:7px;border-radius:50%;background:var(--navy);margin-top:.55em;flex-shrink:0}
+  .partner-actions{display:flex;align-items:center;gap:1.2rem;flex-wrap:wrap}
+
+  /* ---------- BLOG ---------- */
+  .blog{padding-top:var(--sec);padding-bottom:var(--sec);background:#fff}
+  .posts{display:grid;grid-template-columns:repeat(3,1fr);gap:clamp(18px,2.5vw,28px)}
+  .post{background:#fff;border:1px solid var(--line);border-radius:var(--r);overflow:hidden;transition:transform .2s ease,box-shadow .2s ease,border-color .2s ease;display:flex;flex-direction:column;min-height:100%}
+  .post:hover{transform:translateY(-3px);box-shadow:var(--shadow-md);border-color:var(--line-2)}
+  .post .p-img{height:168px;position:relative;border-bottom:1px solid var(--line-2);overflow:hidden}
+  .post .p-img img{width:100%;height:100%;object-fit:cover}
+  .post .p-in{padding:22px;display:flex;flex-direction:column;flex:1}
+  .post .p-meta{display:flex;gap:.65rem;align-items:center;flex-wrap:wrap;color:var(--faint);font-size:.84rem;margin-bottom:.75rem}
+  .post .p-cat{display:inline-flex;align-items:center;border:1px solid var(--navy-tint-2);background:var(--navy-tint);color:var(--navy);font-size:.76rem;font-weight:600;border-radius:var(--r-pill);padding:.28em .72em}
+  .post h3{font-size:1.14rem;line-height:1.28;margin-bottom:.8rem}
+  .post p{color:var(--muted);font-size:.92rem;margin-bottom:0}
+  .blog-foot{display:flex;justify-content:center;margin-top:clamp(36px,4vw,52px)}
+
+  /* ---------- FAQ ---------- */
+  .faq{padding-top:var(--sec);padding-bottom:var(--sec)}
+  .faq-narrow{max-width:760px;margin:0 auto}
+  .faq-list{border-top:1px solid var(--line)}
+  .qa{border-bottom:1px solid var(--line)}
+  .qa button{width:100%;display:flex;justify-content:space-between;align-items:center;gap:1rem;padding:1.35rem 0;text-align:left;font-family:var(--display);font-weight:500;font-size:1.08rem;color:var(--ink)}
+  .qa .plus{position:relative;width:16px;height:16px;flex-shrink:0}
+  .qa .plus::before,.qa .plus::after{content:'';position:absolute;background:var(--navy);transition:transform .25s ease}
+  .qa .plus::before{top:7px;left:0;width:16px;height:1.5px}
+  .qa .plus::after{top:0;left:7px;width:1.5px;height:16px}
+  .qa.open .plus::after{transform:scaleY(0)}
+  .qa .ans{max-height:0;overflow:hidden;transition:max-height .3s ease}
+  .qa .ans p{color:var(--muted);font-size:.98rem;padding-bottom:1.35rem;max-width:60ch}
+  .qa.open .ans{max-height:240px}
+
+  /* ---------- SPINE (the path continues down the page) ---------- */
+  .spine-sec{background:#fff;position:relative;padding-top:clamp(2px,0.6vw,6px);padding-bottom:0}
+  .spine{--rail:9px;position:relative}
+  .spine-track,.spine-beam{position:absolute;left:var(--rail);width:2px;transform:translateX(-50%);border-radius:2px;top:0;z-index:0}
+  .spine-track{bottom:34px;background:var(--spine-track)}
+  .spine-beam{height:0;background:var(--beam);box-shadow:0 0 8px rgba(111,174,236,.55),0 0 2px rgba(234,246,255,.9)}
+  .spine-beam::after{content:'';position:absolute;inset:0;border-radius:2px;background:linear-gradient(180deg,transparent,var(--beam-core));opacity:.5}
+  .node{position:relative;padding-left:clamp(44px,6vw,68px);padding-bottom:clamp(88px,11vw,150px)}
+  .node-dot{position:absolute;left:var(--rail);top:5px;transform:translateX(-50%);width:14px;height:14px;border-radius:50%;background:#fff;border:2px solid var(--spine-track);z-index:2;transition:background .35s ease,border-color .35s ease,box-shadow .35s ease}
+  .node.lit .node-dot{background:var(--navy);border-color:var(--beam);box-shadow:0 0 0 4px rgba(111,174,236,.16),0 0 14px rgba(111,174,236,.55)}
+  .node-eyebrow{font-size:.72rem;letter-spacing:.09em;text-transform:uppercase;color:var(--navy);font-weight:600;margin-bottom:1rem}
+  .node h2{font-size:clamp(1.7rem,3.2vw,2.5rem);margin-bottom:clamp(26px,3.4vw,42px);max-width:22ch}
+  /* node 1: proof */
+  .node-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:clamp(14px,1.5vw,18px);align-items:stretch}
+  .node-stats .s{position:relative;display:flex;flex-direction:column;padding:clamp(26px,2.6vw,34px);border:1px solid var(--line);border-radius:18px;background:#fff;box-shadow:var(--shadow-sm);transition:box-shadow .3s ease,transform .3s ease,border-color .3s ease}
+  .node-stats .s:hover{box-shadow:var(--shadow-md);transform:translateY(-3px);border-color:var(--navy-tint-2)}
+  /* stat cards: number and label anchored the same way, so numbers align across cards */
+  .node-stats .s:not(.s-quote){justify-content:center}
+  .node-stats .n{font-family:var(--display);font-weight:700;font-size:clamp(2.7rem,5vw,3.7rem);line-height:1;letter-spacing:-.015em;background:linear-gradient(158deg,var(--navy) 0%,#013a72 58%,#2f6dab 100%);-webkit-background-clip:text;background-clip:text;color:transparent}
+  .node-stats .l{margin-top:1rem;min-height:2.7em;color:var(--muted);font-size:.92rem;font-weight:450;line-height:1.45;letter-spacing:.01em}
+  /* quote card: same shell as the stats, differentiated only by the voice */
+  .s-quote blockquote{position:relative;padding-top:1.7rem;font-size:clamp(.9rem,1.1vw,.98rem);line-height:1.62;color:var(--ink-2)}
+  .s-quote blockquote::before{content:'\201C';position:absolute;top:.02em;left:-.02em;font-family:var(--display);font-size:2.5rem;line-height:1;color:var(--beam);opacity:.35}
+  .s-quote figcaption{margin-top:auto;padding-top:1.2rem;color:var(--muted);font-size:.84rem;font-weight:500}
+  /* node 2: coverage */
+  .tracks{display:grid;grid-template-columns:repeat(3,1fr);gap:clamp(26px,4vw,54px);max-width:960px}
+  .track h3{font-size:1.05rem;margin-bottom:1.1rem;display:flex;align-items:center;gap:.5rem}
+  .track h3 i{width:8px;height:8px;border-radius:50%;background:var(--navy);flex-shrink:0}
+  .track ul{list-style:none;display:flex;flex-direction:column;gap:.6rem}
+  .track li{font-size:.93rem;color:var(--ink-2);line-height:1.3}
+  .track li.more{color:var(--navy);font-weight:500;font-style:italic;font-size:.88rem}
+  .onramp{display:inline-flex;align-items:center;gap:.72rem;flex-wrap:wrap;margin-top:clamp(34px,3.8vw,52px);padding:10px;background:rgba(255,255,255,.76);border:1px solid var(--line);border-radius:999px;box-shadow:0 14px 36px rgba(0,43,85,.08),0 2px 10px rgba(11,11,12,.04);backdrop-filter:saturate(180%) blur(12px)}
+  .onramp::after{content:'';order:-1;width:8px;height:8px;border-radius:50%;background:var(--beam);box-shadow:0 0 0 4px rgba(111,174,236,.14);margin-left:.15rem}
+  .onramp .om-label{font-size:.92rem;color:var(--muted);margin-right:.1rem}
+  .onramp select{min-width:210px;font-family:var(--body);font-size:.95rem;font-weight:500;color:var(--ink);padding:.86em 2.8em .86em 1.15em;border:1px solid transparent;border-radius:var(--r-pill);background-color:var(--paper-alt);background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23002B55' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 1.05em center;background-size:15px;appearance:none;-webkit-appearance:none;cursor:pointer;transition:border-color .15s ease,background-color .15s ease,box-shadow .15s ease}
+  .onramp select:hover{background-color:#fff;border-color:var(--navy-tint-2)}
+  .onramp select:focus-visible{outline:none;border-color:rgba(0,43,85,.32);box-shadow:0 0 0 4px rgba(111,174,236,.16)}
+  .onramp .btn{padding:.86em 1.45em;box-shadow:0 8px 22px rgba(0,43,85,.18)}
+  /* node 3: reach */
+  .reach{display:grid;grid-template-columns:1.8fr 1fr;gap:clamp(28px,4vw,56px);align-items:center}
+  .usmap-svg{width:100%;height:auto;display:block}
+  .usmap-svg .us-state{fill:#EEF1F5;stroke:#fff;stroke-width:1.4;stroke-linejoin:round}
+  .usmap-svg .pin circle.pin-dot{stroke:#fff;stroke-width:1.4}
+  .usmap-svg .pin.live circle.pin-dot{fill:var(--navy)}
+  .usmap-svg .pin.soon circle.pin-dot{fill:var(--beam-soon)}
+  .usmap-svg .pin .pin-halo{fill:none;opacity:.5}
+  .usmap-svg .pin.live .pin-halo{stroke:var(--navy)}
+  .usmap-svg .pin.soon .pin-halo{stroke:var(--beam-soon)}
+  .usmap-svg .state-label rect{fill:rgba(255,255,255,.88);stroke:rgba(0,43,85,.14);stroke-width:1}
+  .usmap-svg .state-label text{font-family:var(--body);font-size:10px;font-weight:700;letter-spacing:.04em;fill:var(--navy);text-anchor:middle;dominant-baseline:middle}
+  .usmap-svg .state-label.soon text{fill:#5d7592}
+  .reach-lists{display:grid;grid-template-columns:1fr 1fr;gap:clamp(18px,2vw,30px);align-items:start}
+  .reach-lists .rl-group{margin-bottom:0}
+  .reach-lists h4{font-size:.76rem;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);font-weight:600;margin-bottom:.75rem;display:flex;align-items:center;gap:.5rem}
+  .reach-lists h4 i{width:11px;height:11px;border-radius:50%;flex-shrink:0}
+  .reach-lists ul{list-style:none;display:flex;flex-direction:column;gap:.42rem}
+  .reach-lists li{font-size:.95rem;color:var(--ink-2)}
+  /* arrow: the path's last gesture, then a hard stop */
+  .spine-end{position:relative;height:34px}
+  .spine-arrowhead{position:absolute;left:var(--rail);bottom:0;transform:translateX(-50%);width:24px;height:24px;color:var(--spine-track);transition:color .4s ease,filter .4s ease;z-index:2}
+  .spine.arr-lit .spine-arrowhead{color:var(--beam);filter:drop-shadow(0 0 6px rgba(111,174,236,.65))}
+  .spine-arrowhead svg{width:24px;height:24px;stroke:currentColor;stroke-width:2.4;fill:none;stroke-linecap:round;stroke-linejoin:round;display:block}
+
+  /* ---------- PRODUCT (clean start, its own logic) ---------- */
+  .product{background:#fff;padding-top:clamp(48px,7vw,86px);padding-bottom:var(--sec)}
+  .product-eye{font-size:.82rem;letter-spacing:.1em;text-transform:uppercase;color:var(--navy);font-weight:600;margin-bottom:clamp(28px,3.6vw,46px)}
+  .product-grid{display:grid;grid-template-columns:1.5fr 1fr;gap:clamp(16px,2.2vw,26px);align-items:stretch}
+  .pcard{border:1px solid var(--line);border-radius:20px;padding:clamp(26px,3vw,40px);display:flex;flex-direction:column;background:#fff}
+  .pcard-primary{grid-row:span 2;background:linear-gradient(158deg,#fff 0%,var(--navy-tint) 100%);border-color:var(--navy-tint-2);box-shadow:var(--shadow-md)}
+  .pcard .ptag{align-self:flex-start;font-size:.7rem;letter-spacing:.05em;text-transform:uppercase;font-weight:600;color:var(--muted);background:var(--paper-alt);border:1px solid var(--line);padding:.4em .8em;border-radius:var(--r-pill);margin-bottom:1.1rem}
+  .pcard .ptag-soon{display:inline-flex;align-items:center;gap:.45em;color:var(--navy);background:linear-gradient(135deg,#fff,var(--navy-tint));border-color:var(--navy-tint-2);box-shadow:0 6px 18px rgba(0,43,85,.08)}
+  .pcard .ptag-soon::before{content:'';width:7px;height:7px;border-radius:50%;background:var(--beam);box-shadow:0 0 0 3px rgba(111,174,236,.18)}
+  .pcard .ptitle{font-family:var(--display);font-weight:700;font-size:1.4rem;line-height:1.15;margin-bottom:.5rem}
+  .pcard-primary .ptitle{font-size:clamp(1.9rem,2.8vw,2.4rem);margin-bottom:.7rem}
+  .pcard .pone{font-size:1.02rem;color:var(--navy);font-weight:500;margin-bottom:1.1rem}
+  .pcard-primary .pone{font-size:1.15rem}
+  .pcard .pbody{color:var(--muted);font-size:.95rem;line-height:1.6;flex:1;max-width:52ch}
+  .pcard-primary .pbody{font-size:1rem}
+  .pcard-actions{display:flex;align-items:center;gap:1rem 1.15rem;flex-wrap:wrap;margin-top:1.9rem}
+  .pcard .btn{align-self:flex-start}
+  .pcard .product-more{padding:.45em 0;color:var(--ink)}
+  .pcard .product-more:hover{color:var(--ink)}
+  .pcard-primary .btn{background:var(--navy-gradient);color:#fff}
+  .pcard-primary .btn:hover{background:var(--navy-gradient);transform:translateY(-1px)}
+
+  @media(max-width:760px){
+    .spine{--rail:7px}
+    .node{padding-left:38px}
+    .node-stats,.tracks{grid-template-columns:1fr;gap:24px;max-width:none}
+    .reach{grid-template-columns:1fr;gap:26px}
+    .product-grid{grid-template-columns:1fr}
+    .pcard-primary{grid-row:auto}
+  }
+
+  /* ---------- FINAL CTA ---------- */
+  .cta-band{background:radial-gradient(circle at 20% 15%,rgba(255,255,255,.16),transparent 30%),radial-gradient(circle at 78% 8%,rgba(128,170,212,.28),transparent 28%),linear-gradient(145deg,#001d3a 0%,#002b55 52%,#011a33 100%);color:#fff;padding-top:var(--sec);padding-bottom:clamp(80px,10vw,124px);text-align:center;position:relative;overflow:hidden}
+  .cta-band::before{content:'';position:absolute;left:50%;bottom:-110px;width:min(760px,85vw);height:260px;transform:translateX(-50%);background:radial-gradient(ellipse at center,rgba(255,255,255,.24),rgba(255,255,255,.08) 42%,transparent 70%);filter:blur(2px);opacity:.75}
+  .cta-band::after{content:'';position:absolute;inset:auto 0 0;height:90px;background:linear-gradient(180deg,transparent,rgba(1,26,51,.92))}
+  .cta-band .wrap{position:relative;z-index:2}
+  .cta-band h2{color:#fff;margin:0 0 1.6rem;font-size:clamp(2.2rem,4.5vw,3.4rem)}
+  .cta-band p{color:rgba(255,255,255,.75);max-width:46ch;margin:0 auto 2.4rem;font-size:1.08rem}
+  .cta-band .btn-primary{background:linear-gradient(135deg,#ffffff 0%,#fbfdff 32%,#dff0ff 62%,#bfe0ff 100%);color:var(--navy);border:1px solid rgba(255,255,255,.92);box-shadow:0 20px 42px rgba(0,0,0,.26),0 0 0 1px rgba(111,174,236,.28),inset 0 1px 0 rgba(255,255,255,1),inset 0 -12px 20px rgba(111,174,236,.2)}
+  .cta-band .btn-primary:hover{background:linear-gradient(135deg,#ffffff 0%,#f5fbff 28%,#d4ebff 60%,#acd5ff 100%);box-shadow:0 22px 46px rgba(0,0,0,.28),0 0 0 1px rgba(111,174,236,.34),inset 0 1px 0 rgba(255,255,255,1),inset 0 -14px 22px rgba(111,174,236,.24);transform:translateY(-1px)}
+
+  /* ---------- FOOTER ---------- */
+  footer{padding-top:clamp(56px,7vw,84px);padding-bottom:40px;border-top:1px solid rgba(255,255,255,.08);background:#011a33;color:#fff}
+  .foot-grid{display:grid;grid-template-columns:1.6fr 1fr 1fr 1fr 1fr;gap:clamp(24px,3vw,44px);padding-bottom:clamp(40px,5vw,60px)}
+  .foot-brand .brand{margin-bottom:1rem}
+  footer .brand .dot{background:#fff}
+  .foot-brand p{color:rgba(255,255,255,.62);font-size:.92rem;max-width:34ch}
+  .foot-col h4{font-size:.8rem;letter-spacing:.02em;color:rgba(255,255,255,.45);font-weight:600;margin-bottom:1.1rem}
+  .foot-col a{display:block;color:rgba(255,255,255,.74);font-size:.92rem;margin-bottom:.7rem;transition:color .15s ease}
+  .foot-col a:hover{color:#fff}
+  .foot-legal{border-top:1px solid rgba(255,255,255,.1);padding-top:28px;display:flex;flex-direction:column;gap:16px}
+  .foot-disclaimer{font-size:.78rem;color:rgba(255,255,255,.45);line-height:1.6}
+  .foot-bottom{display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap;font-size:.82rem;color:rgba(255,255,255,.5)}
+  .foot-bottom .fb-links{display:flex;gap:1.5rem}
+
+  /* ---------- reveal ---------- */
+  .rv{opacity:0;transform:translateY(24px);transition:opacity .75s cubic-bezier(.22,.68,.2,1),transform .75s cubic-bezier(.22,.68,.2,1)}
+  .rv.in{opacity:1;transform:none}
+  .post.rv.in{transition:transform .2s ease,box-shadow .2s ease,border-color .2s ease}
+  .post.rv:hover,.post.rv.in:hover{transform:translateY(-3px);box-shadow:var(--shadow-md);border-color:var(--line-2)}
+
+  /* sequenced reveal: the container stays put while its pieces cascade in */
+  .rv-seq{opacity:1;transform:none}
+  .rv-seq .node-eyebrow,.rv-seq h2{opacity:0;transform:translateY(22px);transition:opacity .7s cubic-bezier(.22,.68,.2,1),transform .7s cubic-bezier(.22,.68,.2,1)}
+  .rv-seq.in .node-eyebrow{opacity:1;transform:none;transition-delay:.04s}
+  .rv-seq.in h2{opacity:1;transform:none;transition-delay:.13s}
+  /* grid items cascade after the header */
+  .rv-seq .node-stats .s,.rv-seq .track,.rv-seq .reach>*,.rv-seq .onramp{opacity:0;transform:translateY(22px);transition:opacity .65s cubic-bezier(.22,.68,.2,1),transform .65s cubic-bezier(.22,.68,.2,1)}
+  .rv-seq.in .node-stats .s,.rv-seq.in .track,.rv-seq.in .reach>*,.rv-seq.in .onramp{opacity:1;transform:none}
+  .rv-seq.in .node-stats .s:nth-child(1),.rv-seq.in .track:nth-child(1),.rv-seq.in .reach>*:nth-child(1){transition-delay:.24s}
+  .rv-seq.in .node-stats .s:nth-child(2),.rv-seq.in .track:nth-child(2),.rv-seq.in .reach>*:nth-child(2){transition-delay:.35s}
+  .rv-seq.in .node-stats .s:nth-child(3),.rv-seq.in .track:nth-child(3){transition-delay:.46s}
+  .rv-seq.in .onramp{transition-delay:.52s}
+  /* map pins drop in with a soft spring: live markets first, then coming-soon */
+  .usmap-svg .pin circle{transform:scale(0);transform-box:fill-box;transform-origin:center;opacity:0;transition:transform .55s cubic-bezier(.34,1.5,.5,1),opacity .35s ease}
+  .rv-seq.in .usmap-svg .pin circle{transform:scale(1);opacity:1}
+  .rv-seq.in .pin.live circle{transition-delay:.5s}
+  .rv-seq.in .pin.soon circle{transition-delay:.72s}
+
+  /* ---------- responsive ---------- */
+  @media(max-width:1080px){
+    .hero-floats{display:none}
+  }
+  @media(max-width:940px){
+    .map{grid-template-columns:1fr;gap:56px;max-width:480px;margin:0 auto}
+    .branch{padding:0}
+    .branch h3{margin-bottom:24px}
+    .items{width:min(100%,380px)}
+    .items::before{bottom:2.1rem}
+    .stats-panel{grid-template-columns:1fr}
+    .stat + .stat{border-left:none;border-top:1px solid var(--line-2)}
+    .steps{grid-template-columns:1fr;gap:28px}
+    .step:not(:last-child)::after{display:none}
+    .pack-grid{grid-template-columns:1fr;gap:22px;max-width:420px}
+    .pack:hover{transform:none}
+    .sec-head.split{grid-template-columns:1fr;gap:14px}
+    .inc-grid{grid-template-columns:1fr;gap:.85rem;max-width:420px}
+    .ent-inner{grid-template-columns:1fr;gap:32px}
+    .partner-split{grid-template-columns:1fr;gap:28px}
+    .partner-split.flip .partner-copy,.partner-split.flip .partner-img{order:initial}
+    .partner-img{min-height:320px}
+    .posts{grid-template-columns:1fr}
+    .foot-grid{grid-template-columns:1fr 1fr}
+  }
+  @media(max-width:760px){
+    .nav-links,.nav-cta .btn-ghost{display:none}
+    .nav-toggle{display:flex}
+    .nav-menu-open .nav-links{display:flex;position:absolute;top:68px;left:0;right:0;flex-direction:column;align-items:stretch;height:auto;background:#fff;padding:20px var(--pad);gap:.9rem;border-bottom:1px solid var(--line);box-shadow:var(--shadow-md)}
+    .nav-item{height:auto;display:block}
+    .nav-trigger{width:100%;justify-content:flex-start;border-radius:10px}
+    .nav-menu{position:static;transform:none;min-width:0;margin-top:.55rem;opacity:1;visibility:visible;pointer-events:auto;box-shadow:none;border-radius:10px;background:var(--paper-alt)}
+    .nav-item:hover .nav-menu,.nav-item:focus-within .nav-menu{transform:none}
+    .onramp{display:flex;align-items:stretch;border-radius:24px;padding:12px;width:100%}
+    .onramp::after{margin-top:.45rem}
+    .onramp select,.onramp .btn{width:100%;justify-content:center}
+    .seg-row{flex-direction:column;height:auto}
+    .segment{flex:none;height:96px}
+    .segment.is-open{flex:none;height:360px}
+    .seg-inner{padding:22px}
+    .foot-grid{grid-template-columns:1fr}
+    .foot-bottom{flex-direction:column;align-items:flex-start}
+  }
+  @media(prefers-reduced-motion:reduce){
+    *{scroll-behavior:auto!important}
+    .rv{transition:none;opacity:1;transform:none}
+    .segment,.seg-body{transition:none}
+    .hf{opacity:1;animation:none}
+    .hf-card{animation:none}
+    .scroll-arrow,.scroll-arrow .sa-ring{animation:none!important}
+    .scroll-arrow.show{opacity:1;transform:translateX(-50%)}
+    .rv-seq .node-eyebrow,.rv-seq h2,.rv-seq .node-stats .s,.rv-seq .track,.rv-seq .reach>*,.rv-seq .onramp{opacity:1!important;transform:none!important;transition:none!important}
+    .usmap-svg .pin circle{opacity:1!important;transform:scale(1)!important;transition:none!important}
+  }
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<header class="nav" id="nav">
+  <div class="wrap nav-inner">
+    <a href="#" class="brand" aria-label="LWYRD home"><img src="Logos/LWYRD_Navy.png" alt="LWYRD" class="brand-logo"></a>
+    <nav class="nav-links" aria-label="Primary">
+      <div class="nav-item">
+        <button class="nav-trigger" type="button">Product</button>
+        <div class="nav-menu" aria-label="Product menu">
+          <a href="product/matching.html">Matching</a>
+          <a href="product/consultations.html">Consultations</a>
+          <a href="#" aria-disabled="true" class="soon-disabled" tabindex="-1">LWYRD Chatbot <span class="nav-pill">Soon</span></a>
+        </div>
+      </div>
+      <div class="nav-item">
+        <button class="nav-trigger" type="button">Clients</button>
+        <div class="nav-menu" aria-label="Clients menu">
+          <a href="#" aria-disabled="true">Startups</a>
+          <a href="#" aria-disabled="true">SMBs</a>
+          <a href="#" aria-disabled="true">Individuals</a>
+        </div>
+      </div>
+      <div class="nav-item">
+        <a href="#" class="nav-trigger" aria-disabled="true">Law Firms</a>
+      </div>
+      <div class="nav-item">
+        <a href="#" class="nav-trigger" aria-disabled="true">About Us</a>
+      </div>
+      <div class="nav-item">
+        <a href="blog.html" class="nav-trigger">Blog</a>
+      </div>
+      <div class="nav-item">
+        <button class="nav-trigger" type="button">Help Center</button>
+        <div class="nav-menu" aria-label="Help Center menu">
+          <a href="faq.html">FAQ</a>
+          <a href="contact.html">Contact</a>
+        </div>
+      </div>
+    </nav>
+    <div class="nav-cta">
+      <a href="#" class="btn btn-ghost">Sign in</a>
+      <a href="#" class="btn btn-primary">Get matched</a>
+      <button class="nav-toggle" id="navToggle" aria-label="Menu"><span></span></button>
+    </div>
+  </div>
+</header>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-maze" id="heroMaze" aria-hidden="true"></div>
+  <div class="hero-veil"></div>
+
+  <!-- the solved path lands here: a clickable arrow that carries you into the journey -->
+  <div class="hero-exit" id="heroExit">
+    <span class="exit-stub" id="exitStub" aria-hidden="true"><span class="exit-stub-beam" id="exitStubBeam"></span></span>
+    <div class="scroll-arrow" id="scrollArrow" aria-hidden="true">
+      <span class="sa-ring"></span>
+      <svg viewBox="0 0 24 24"><path d="M12 5v13"/><path d="M6 12l6 6 6-6"/></svg>
+    </div>
+  </div>
+
+  <div class="hero-floats" aria-hidden="true">
+    <div class="hf hf-1">
+      <div class="hf-card">
+        <div class="hf-eyebrow"><span class="d"></span>Your intake</div>
+        <div class="hf-chips">
+          <span class="chip">Startup</span>
+          <span class="chip">Fundraising</span>
+          <span class="chip">Series A</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="hf hf-2">
+      <div class="hf-card hf-stat">
+        <div class="n">48h</div>
+        <div class="l">Median time to first match</div>
+      </div>
+    </div>
+
+    <div class="hf hf-3">
+      <div class="hf-card hf-step">
+        <svg class="ring" viewBox="0 0 36 36" fill="none">
+          <circle cx="18" cy="18" r="15" stroke="#E1EAF3" stroke-width="3"/>
+          <circle cx="18" cy="18" r="15" stroke="#002B55" stroke-width="3" stroke-linecap="round" stroke-dasharray="94.2" stroke-dashoffset="31" transform="rotate(-90 18 18)"/>
+        </svg>
+        <div>
+          <div class="st-t">Matching you now</div>
+          <div class="st-s">Step 2 of 3</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="hf hf-4">
+      <div class="hf-card hf-firm">
+        <div class="hf-logo">MV</div>
+        <div>
+          <div class="fn">Meridian Venture Counsel</div>
+          <div class="fr"><span class="stars">★★★★★</span> Vetted</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="wrap hero-center">
+    <h1>Find the right lawyer for your <span class="accent">situation</span>.</h1>
+    <p class="hero-sub">Tell us your situation, and we'll match you to vetted law firms built for your exact needs.</p>
+    <div class="hero-actions">
+      <a href="#" class="btn btn-primary ignited" id="heroCta">Get matched</a>
+      <a href="product/consultations.html" class="btn btn-ghost">Book a call</a>
+    </div>
+  </div>
+</section>
+
+<!-- SPINE (hero path continues; Proof -> Coverage -> Reach) -->
+<section class="spine-sec" id="journey">
+  <div class="wrap">
+    <div class="spine" id="spine">
+      <span class="spine-track" id="spineTrack" aria-hidden="true"></span>
+      <span class="spine-beam" id="spineBeam" aria-hidden="true"></span>
+
+      <!-- NODE 1: PROOF -->
+      <div class="node rv-seq" data-node>
+        <span class="node-dot"></span>
+        <div class="node-eyebrow">Proof</div>
+        <h2>The model already works.</h2>
+        <div class="node-stats">
+          <div class="s"><div class="n">$60M+</div><div class="l">recovered for clients</div></div>
+          <div class="s"><div class="n">200+</div><div class="l">clients matched to the right firm</div></div>
+          <figure class="s s-quote">
+            <blockquote>I had two legal things going on, an IP matter I needed to get right and could spend on, and formation work I needed to keep cheap. LWYRD matched me to the right lawyer for each instead of one price for all of it.</blockquote>
+            <figcaption>Student founder, IP and formation</figcaption>
+          </figure>
+        </div>
+      </div>
+
+      <!-- NODE 2: COVERAGE -->
+      <div class="node rv-seq" data-node>
+        <span class="node-dot"></span>
+        <div class="node-eyebrow">Coverage</div>
+        <h2>Whatever your legal need, there's a firm for it.</h2>
+        <div class="seg-row rv" id="segRow">
+          <div class="segment seg-tech is-open" data-seg tabindex="0" role="button" aria-expanded="true">
+            <div class="bg"></div><div class="photo"></div><div class="bg-tint"></div>
+            <div class="seg-inner">
+              <div class="seg-num">Startups</div>
+              <div class="seg-title">For startups</div>
+              <div class="seg-body">
+                <p>From incorporation to your next round, get matched to firms who already speak the language of venture terms, cap tables, and IP.</p>
+                <div class="seg-meta"><span>Formation</span><span>Fundraising</span><span>Securities</span><span>IP &amp; trademarks</span><span>Contracts</span><span>Employment</span><span>Cap table &amp; equity</span></div>
+              </div>
+            </div>
+          </div>
+          <div class="segment seg-main" data-seg tabindex="0" role="button" aria-expanded="false">
+            <div class="bg"></div><div class="photo"></div><div class="bg-tint"></div>
+            <div class="seg-inner">
+              <div class="seg-num">Small business</div>
+              <div class="seg-title">For small businesses</div>
+              <div class="seg-body">
+                <p>Employment questions, vendor contracts, tax credits, and disputes, handled by firms that understand main street economics.</p>
+                <div class="seg-meta"><span>Business tax</span><span>Tax credits</span><span>Employment &amp; HR</span><span>Contracts</span><span>Vendors</span><span>Compliance</span><span>Disputes</span></div>
+              </div>
+            </div>
+          </div>
+          <div class="segment seg-fam" data-seg tabindex="0" role="button" aria-expanded="false">
+            <div class="bg"></div><div class="photo"></div><div class="bg-tint"></div>
+            <div class="seg-inner">
+              <div class="seg-num">Individuals</div>
+              <div class="seg-title">For individuals</div>
+              <div class="seg-body">
+                <p>Life happens. Estate planning, family, immigration, and property matters, matched to counsel who treat it with care.</p>
+                <div class="seg-meta"><span>Estate planning</span><span>Wills &amp; trusts</span><span>Family</span><span>Immigration</span><span>Real estate</span><span>Property</span></div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="onramp">
+          <select id="trackSelect" aria-label="Select a track">
+            <option value="" selected>Select a track…</option>
+            <option value="startup">Startup</option>
+            <option value="small-business">Small business</option>
+            <option value="individual">Individual</option>
+          </select>
+          <a href="#" class="btn btn-primary" id="getMatched">Get matched</a>
+        </div>
+      </div>
+
+      <!-- NODE 3: REACH -->
+      <div class="node rv-seq" data-node>
+        <span class="node-dot"></span>
+        <div class="node-eyebrow">Reach</div>
+        <h2>Available now, and expanding.</h2>
+        <div class="reach">
+          <div class="usmap-wrap">
+            <svg class="usmap-svg" viewBox="0 0 960 600" role="img" aria-label="Map of the United States showing states where LWYRD is live now and coming soon">
+              <g class="us-states">
+<path class="us-state" d="M668,473L671,472L671,471L672,472L672,473L671,472L670,473L669,473ZM662,370L661,370L671,369L675,369L685,368L691,368L693,367L703,366L707,366L708,372L711,380L712,387L714,392L715,398L719,411L720,411L720,412L720,413L721,415L722,417L723,418L723,419L724,420L724,422L725,422L726,423L725,424L725,424L725,425L724,425L723,426L723,427L724,429L723,430L723,432L722,433L723,435L723,436L724,437L725,439L725,441L725,441L724,443L725,444L724,445L725,446L725,447L726,448L727,449L727,450L723,451L718,452L711,452L699,454L690,454L680,455L680,456L679,458L679,459L681,460L681,461L684,462L684,463L683,465L684,466L685,467L684,468L683,469L683,470L683,470L682,471L680,471L677,472L674,473L675,472L676,472L678,471L678,471L677,470L676,469L675,468L674,467L675,465L675,464L674,463L673,463L672,464L672,464L671,465L672,466L671,467L671,469L671,471L670,471L670,470L669,470L668,470L667,470L666,470L666,466L665,459L664,452L662,437L662,432L663,419L663,415L663,394L663,391L663,379L664,372L662,372Z"/>
+<path class="us-state" d="M192,392L192,392L194,392L195,392L195,391L197,390L197,389L197,386L196,386L195,386L194,385L194,386L194,384L194,383L195,380L194,380L195,378L195,377L196,378L198,375L199,375L199,374L199,372L200,372L200,371L200,369L200,369L200,369L200,367L200,367L202,365L202,364L203,364L205,363L205,363L207,363L207,362L208,361L209,360L208,359L207,359L206,357L205,356L205,355L204,351L203,349L203,348L202,347L203,344L204,342L203,342L205,341L205,340L205,337L205,335L204,334L204,333L205,333L205,331L205,330L205,329L205,329L205,328L205,327L205,326L206,325L206,325L205,323L206,322L205,320L207,320L208,320L208,320L209,320L210,320L210,320L211,320L212,321L213,322L213,323L214,324L215,324L217,321L218,321L219,316L220,311L221,303L233,306L246,308L265,311L271,312L281,314L281,314L295,316L305,317L301,348L300,353L300,353L298,370L296,382L296,384L295,386L288,439L284,438L271,436L263,435L251,433L230,421L217,413L211,410L189,396L190,395L189,395L190,394L190,394Z"/>
+<path class="us-state" d="M317,231L331,233L339,234L358,236L362,237L370,238L384,239L384,239L396,240L413,241L420,242L429,243L427,264L427,271L426,279L426,283L425,306L424,309L423,329L412,328L411,328L407,328L395,327L384,326L373,325L371,325L353,323L342,322L341,322L332,321L318,319L305,317L306,306L307,306L308,292L308,290L310,280L310,276L315,242L315,241Z"/>
+<path class="us-state" d="M825,569L826,568L826,569L826,570ZM823,571L824,570L825,570L824,570ZM818,574L822,571L822,572L819,574ZM805,579L806,576L808,575L809,574L810,574L812,572L815,573L815,574L816,575L816,575L813,576L813,576L811,576L811,577L808,578L805,579ZM802,580L804,579L804,580L802,580L802,580ZM799,580L799,579L800,579L800,580ZM790,535L790,535L792,539L793,539L794,540L795,539L796,540L795,540L794,540L793,540L792,539L791,537L790,536ZM783,580L784,580L785,580L783,581ZM736,475L738,474L738,475L737,476L736,476ZM727,450L728,452L728,453L729,454L729,456L730,456L739,456L756,455L770,454L779,453L779,453L779,454L780,455L780,456L780,457L783,457L783,455L783,454L783,452L782,451L782,450L782,449L782,448L782,448L783,448L783,447L784,447L785,447L786,447L787,447L787,448L790,448L791,448L792,448L793,448L793,448L793,450L793,452L793,452L794,453L795,454L795,456L798,463L799,465L799,466L802,472L805,476L807,480L813,487L816,490L816,491L817,493L816,494L816,495L816,497L817,499L818,501L819,503L822,508L824,510L824,512L825,512L826,515L828,517L828,518L829,520L830,522L832,526L833,531L833,534L833,538L833,538L834,544L834,547L834,548L834,550L834,551L833,550L834,549L833,549L832,550L832,551L831,552L831,553L831,554L831,555L832,556L832,557L832,557L832,558L831,558L831,559L833,558L834,554L834,554L834,554L834,556L832,560L832,562L830,564L828,567L827,568L827,568L829,565L830,565L830,564L830,562L830,561L830,561L829,561L828,561L828,561L826,562L825,563L824,563L823,563L822,563L821,564L820,565L818,565L817,564L816,563L816,562L816,560L816,560L816,560L815,558L814,557L814,557L813,556L813,555L812,554L812,553L811,554L810,552L808,552L808,551L807,551L805,550L804,551L804,551L802,549L801,547L800,544L799,542L799,541L796,539L796,539L795,538L794,538L795,539L794,539L793,538L793,536L792,535L792,535L793,535L793,535L794,532L793,531L793,531L793,530L793,530L793,529L792,529L792,530L791,530L792,533L791,533L790,534L790,535L790,533L789,532L788,531L786,528L785,526L783,524L781,522L780,521L779,520L778,519L779,519L779,519L780,519L781,517L781,517L782,515L783,514L783,514L784,513L784,511L784,510L782,510L783,512L781,512L781,511L781,510L781,509L778,508L778,509L778,510L778,511L779,511L781,512L780,513L780,514L780,515L779,515L778,516L779,516L778,517L778,516L778,515L777,513L776,513L775,512L775,509L775,508L774,505L775,505L775,506L776,508L776,508L775,505L776,504L776,504L776,503L776,502L777,501L777,500L777,499L777,498L777,496L776,495L776,494L775,494L776,493L775,491L775,490L774,488L774,487L773,486L772,486L773,486L773,485L772,485L769,485L768,486L768,486L767,484L767,483L766,483L765,483L765,482L764,481L764,480L763,480L762,479L760,478L760,476L760,475L759,475L758,475L757,474L756,473L756,473L755,472L755,471L754,470L752,470L749,469L747,467L747,468L745,468L743,468L743,469L741,470L742,472L742,472L741,473L740,473L740,472L738,473L736,474L732,477L732,477L732,476L732,476L731,477L730,478L728,478L729,479L729,480L730,480L732,479L734,478L736,476L736,476L734,478L733,479L730,480L730,481L729,480L728,480L726,479L725,479L724,480L723,478L722,476L723,475L723,477L723,479L724,479L725,478L724,477L723,475L722,474L721,474L720,473L718,472L716,471L715,470L712,469L709,468L705,467L703,466L699,467L696,467L693,468L689,469L687,469L687,469L682,471L683,470L683,470L683,469L684,468L685,467L684,466L683,465L684,463L684,462L681,461L681,460L679,459L679,458L680,456L680,455L690,454L699,454L711,452L718,452L723,451Z"/>
+<path class="us-state" d="M707,366L709,366L717,365L729,363L741,362L741,362L750,360L750,362L748,363L747,365L747,366L746,367L747,368L749,369L750,369L752,371L753,372L755,371L755,371L756,372L756,373L757,374L758,375L758,376L758,377L759,378L760,378L761,379L762,380L763,382L763,382L764,383L766,384L769,385L769,386L770,387L770,388L771,388L771,388L773,389L774,390L775,390L775,391L775,392L775,392L775,393L777,394L777,395L778,396L779,395L779,396L779,397L781,398L782,397L783,398L784,399L784,400L785,401L785,402L786,402L786,404L787,404L786,405L787,405L787,406L787,407L788,408L790,408L790,409L791,410L791,410L792,412L793,412L793,413L793,414L794,415L793,416L794,417L795,417L796,417L798,418L798,418L799,418L799,419L798,420L797,420L797,421L798,421L797,422L796,422L796,423L796,423L796,424L795,425L794,425L794,426L795,426L795,426L795,428L795,429L793,429L793,430L794,430L795,430L794,433L794,434L794,434L794,435L794,437L793,437L793,439L792,439L792,440L792,441L792,441L791,442L792,443L792,442L793,444L792,447L793,448L792,448L791,448L790,448L787,448L787,447L786,447L785,447L784,447L783,447L783,448L782,448L782,448L782,449L782,450L782,451L783,452L783,454L783,455L783,457L780,457L780,456L780,455L779,454L779,453L779,453L770,454L756,455L739,456L730,456L729,456L729,454L728,453L728,452L727,450L727,449L726,448L725,447L725,446L724,445L725,444L724,443L725,441L725,441L725,439L724,437L723,436L723,435L722,433L723,432L723,430L724,429L723,427L723,426L724,425L725,425L725,424L725,424L726,423L725,422L724,422L724,420L723,419L723,418L722,417L721,415L720,413L720,412L720,411L719,411L715,398L714,392L712,387L711,380L708,372Z"/>
+<path class="us-state" d="M660,224L661,225L662,225L662,225L662,226L664,226L665,226L667,225L670,223L671,222L676,222L688,221L698,219L703,219L703,220L704,225L707,250L708,258L709,266L709,271L710,276L709,277L709,277L710,278L710,279L709,280L710,280L711,280L711,281L710,282L711,283L709,283L708,283L708,283L706,285L705,285L704,285L703,285L702,285L701,285L700,286L701,288L701,289L700,290L700,291L698,292L698,295L697,296L696,295L695,296L695,297L694,298L694,300L694,301L694,302L692,302L692,303L691,302L690,302L688,301L688,299L687,298L686,298L686,299L687,299L687,300L686,300L686,300L685,300L685,301L686,301L685,302L684,302L684,304L685,304L683,305L683,306L683,306L682,306L682,305L682,305L681,305L681,305L680,303L679,304L678,305L676,305L676,306L676,308L675,308L675,308L674,307L673,307L671,306L670,306L669,306L668,306L667,306L667,305L666,305L666,306L667,307L666,308L665,308L665,307L665,307L663,307L662,307L661,307L661,307L662,309L661,310L659,309L659,309L658,309L659,309L658,307L660,307L659,307L659,306L659,304L659,304L660,304L660,303L659,303L661,302L660,301L659,300L660,300L660,299L661,299L661,298L661,299L662,297L663,297L663,295L663,294L664,294L664,292L665,291L665,290L666,290L667,288L666,288L665,286L666,284L665,283L665,282L664,281L663,279L664,278L664,277L664,276L664,276L665,275L664,269L664,269L663,261L664,261L663,256L663,251L661,229Z"/>
+<path class="us-state" d="M427,264L442,265L448,265L464,266L480,267L489,267L505,267L521,267L529,267L537,267L538,268L539,269L539,269L540,269L540,270L541,270L542,269L543,270L543,270L543,271L544,271L544,272L543,272L543,272L544,272L544,273L544,273L543,273L542,274L542,275L541,275L541,276L540,277L540,277L541,278L541,279L542,279L543,280L544,280L544,281L544,281L544,283L545,284L545,284L546,284L546,285L547,285L547,285L548,285L549,285L549,286L549,295L549,297L549,310L549,311L549,325L549,327L549,332L534,332L522,332L512,332L498,332L486,332L470,331L464,331L454,331L445,330L433,330L423,329L424,309L425,306L426,283L426,279L427,271Z"/>
+<path class="us-state" d="M944,116L944,115L944,116ZM942,117L942,115L942,116L944,116L943,117L943,117ZM940,113L940,112L941,113ZM936,117L937,116L938,117ZM938,125L938,124L938,125ZM936,120L936,119L937,118L938,118L937,119L939,120L938,121L937,121L936,121L937,120L936,120ZM935,117L935,116L935,114L935,114L935,114L935,115L935,116L935,117L935,118ZM916,149L913,148L913,147L913,146L910,144L910,143L910,142L909,141L909,140L909,139L907,134L907,132L902,117L897,104L898,103L898,103L900,103L900,104L900,104L901,104L901,103L901,101L901,101L901,100L901,100L902,101L903,100L903,100L902,99L901,98L902,96L903,95L903,94L903,94L904,93L905,92L904,91L905,90L906,88L906,87L906,87L905,87L904,86L905,85L904,85L905,84L905,83L904,82L904,80L904,80L904,79L905,78L905,77L906,77L905,71L912,52L912,52L914,52L914,52L914,53L915,55L916,56L918,56L919,55L920,54L921,54L922,53L923,52L924,52L924,51L925,50L926,50L927,50L928,51L930,51L932,53L932,54L934,54L937,64L941,76L941,77L942,77L941,78L942,79L942,80L943,83L944,82L944,82L945,83L946,83L948,83L948,82L949,83L949,84L949,84L948,85L949,86L950,87L950,88L950,89L952,91L952,91L953,92L953,91L953,90L954,90L955,90L956,91L957,92L956,92L957,93L958,94L959,95L960,97L960,98L959,98L959,98L958,101L957,102L957,102L957,103L957,102L956,100L955,101L956,102L955,103L955,103L954,104L953,104L953,104L953,105L954,105L953,107L953,106L952,105L951,106L951,106L951,106L950,106L950,107L950,107L950,109L949,108L949,109L949,109L948,110L948,109L948,111L946,111L946,110L946,111L945,111L946,112L945,113L946,114L944,115L943,114L941,113L942,112L943,111L942,111L941,112L941,111L941,111L941,112L941,112L941,111L940,112L940,113L940,114L941,115L941,116L940,117L941,117L940,118L941,119L941,120L941,121L940,119L940,119L940,118L939,118L938,117L939,115L937,115L938,114L937,114L936,115L936,113L936,112L936,111L935,111L935,112L935,113L934,113L934,113L933,113L934,115L934,116L934,116L934,118L934,119L933,121L935,121L934,121L935,122L935,123L933,124L933,125L932,125L932,126L932,127L931,126L932,125L931,125L931,125L930,126L930,125L929,125L930,126L929,127L929,128L928,127L928,128L928,129L927,128L927,130L926,129L926,131L925,132L925,132L924,131L923,131L922,132L922,133L921,133L921,134L920,134L920,135L920,136L920,136L920,137L919,137L918,138L918,139L919,140L918,141L918,141L918,142L918,142L917,142L916,143L916,145L917,145L916,147L916,147L916,149Z"/>
+<path class="us-state" d="M932,184L933,184L935,183L936,183L936,181L937,183L937,183L937,184L935,184L932,184ZM923,185L924,185L925,183L926,181L927,182L928,183L929,183L929,182L929,184L927,184L925,185L925,186ZM879,166L891,163L902,161L909,159L909,158L910,158L910,157L911,156L912,156L912,154L914,153L915,154L915,153L915,155L917,157L918,157L919,156L920,157L919,159L918,159L916,160L917,161L916,162L916,162L916,163L915,163L915,164L916,165L915,165L915,165L916,166L915,166L916,166L916,166L917,165L918,166L919,166L920,167L921,168L922,169L922,170L922,171L922,171L922,171L923,172L924,172L924,172L925,173L925,174L926,175L928,175L930,175L930,175L931,174L932,174L933,173L933,172L933,171L932,170L932,170L931,169L931,168L930,167L929,168L929,168L928,168L929,167L930,167L932,168L933,170L935,172L935,174L935,177L935,178L935,177L935,175L934,175L933,175L931,177L929,177L929,178L928,178L927,180L926,180L924,182L923,183L922,184L921,184L921,184L923,183L924,182L925,180L925,180L924,178L925,177L923,177L923,178L923,178L923,178L922,179L922,179L921,180L920,181L921,182L921,182L919,183L919,183L918,183L917,180L916,180L915,179L915,179L913,178L913,177L913,176L912,176L911,173L905,175L905,175L894,178L892,178L890,179L890,179L889,180L889,179L886,179L880,181L879,181L878,180L878,173Z"/>
+<path class="us-state" d="M508,74L512,74L526,74L538,74L538,66L539,66L540,66L542,67L542,68L543,71L544,72L545,76L544,78L544,79L545,79L547,80L548,80L548,80L551,80L551,81L554,81L557,82L557,83L557,84L557,84L560,84L560,83L561,83L562,83L562,82L564,81L566,81L566,81L569,81L573,83L574,83L574,84L573,84L573,85L574,85L576,85L577,86L576,86L577,87L578,89L579,89L579,87L580,87L580,87L582,86L583,87L583,88L584,89L585,89L585,89L588,90L588,91L588,91L589,92L590,91L590,93L591,92L592,93L593,92L594,92L597,89L598,89L598,89L599,88L600,88L600,89L601,90L601,90L601,91L602,91L604,90L604,91L606,91L607,91L608,90L610,90L612,91L613,92L614,93L615,92L616,92L617,92L618,92L619,92L620,92L619,93L618,92L618,93L617,93L616,95L614,95L613,96L610,97L608,98L607,98L605,99L605,99L602,101L600,103L597,106L596,107L593,111L592,112L591,113L589,115L589,115L587,117L587,117L584,119L583,120L584,121L585,122L583,121L583,121L583,121L582,122L582,122L582,123L580,123L581,135L580,135L580,137L579,136L578,137L578,137L577,138L576,138L575,139L574,142L573,143L572,145L572,146L574,147L574,146L575,147L575,147L576,149L576,150L575,151L575,151L575,152L575,154L575,155L575,156L574,157L575,158L575,159L575,160L575,161L575,162L574,164L575,164L575,165L577,166L577,167L578,167L578,168L581,168L582,168L582,169L583,170L586,171L587,172L588,172L588,173L589,174L589,175L590,176L591,177L592,177L594,179L596,179L597,180L598,183L599,184L599,186L599,187L599,188L599,189L600,190L588,190L576,191L570,191L557,191L547,192L530,192L519,192L519,169L519,167L519,162L519,153L518,152L516,151L515,150L515,149L514,148L513,146L513,145L514,144L516,144L516,142L517,142L517,139L517,137L517,137L517,133L517,131L516,130L515,128L515,128L515,125L514,124L514,124L514,122L514,120L514,120L514,118L514,118L514,117L514,114L513,112L513,110L514,109L513,107L513,103L513,103L513,102L512,100L512,100L511,98L511,97L510,96L510,94L509,92L509,90L510,89L509,87L509,86L509,85L509,83L509,82L510,82L510,80L509,79L509,77L509,76L508,75Z"/>
+<path class="us-state" d="M858,240L858,238L859,237L859,236L859,235L860,234L862,233L864,232L863,231L864,230L864,230L866,228L867,227L867,226L868,226L869,225L868,224L866,224L866,223L864,222L864,221L862,221L862,220L862,219L861,218L860,218L859,218L859,217L859,216L859,216L859,214L859,214L860,211L858,210L859,209L860,208L860,207L860,206L861,205L861,204L862,202L863,200L863,200L869,202L878,205L878,205L877,209L877,210L877,211L877,212L877,212L875,213L875,215L874,215L874,216L875,217L876,217L877,217L878,217L879,217L879,217L880,218L880,220L880,224L880,228L881,231L879,236L879,237L878,238L879,238L878,239L878,241L878,241L876,242L875,245L874,247L873,250L872,252L871,252L871,252L871,250L871,248L871,247L870,247L869,247L868,246L867,247L867,247L866,247L866,246L865,246L864,245L864,246L863,245L862,245L861,244L860,243L859,243L859,240L858,240Z"/>
+<path class="us-state" d="M872,318L873,318L874,320L875,320L874,320L874,320ZM871,338L872,337L872,336L875,334L875,334L876,333L877,333L878,332L878,332L879,330L878,326L878,325L877,323L876,321L876,321L878,323L878,325L879,327L879,332L877,333L875,335L872,337ZM769,323L774,322L778,322L784,321L786,321L793,320L796,320L806,318L823,315L827,314L843,311L850,310L849,309L851,309L859,308L867,306L867,307L869,311L871,314L873,316L876,321L876,321L874,318L873,317L872,317L871,314L869,311L869,311L869,310L868,309L867,308L867,307L865,307L865,307L864,307L865,308L866,309L867,309L867,310L868,312L869,313L869,314L870,315L870,316L869,315L869,314L868,313L867,313L867,312L867,313L867,314L868,314L866,314L864,312L863,312L864,314L865,314L866,315L865,315L864,316L862,315L863,316L864,316L863,317L861,316L860,316L860,316L859,316L860,317L862,317L861,317L860,318L859,319L859,320L858,320L857,319L856,319L855,317L854,316L855,315L854,315L854,316L854,317L855,319L856,320L856,321L856,322L859,321L861,320L861,320L862,320L863,319L864,319L866,318L867,319L867,320L867,321L867,322L868,325L869,325L869,323L868,320L869,319L868,319L869,318L871,318L872,320L873,321L873,322L874,323L873,324L874,325L873,326L872,326L872,326L871,327L871,327L870,328L870,329L870,329L870,330L869,331L869,332L868,332L868,333L866,333L865,333L863,333L862,333L862,333L861,332L860,330L861,330L862,329L860,330L859,330L859,331L860,332L860,333L860,333L858,333L857,333L856,333L854,332L852,332L852,332L853,333L855,333L859,334L862,334L862,335L863,335L862,336L862,338L862,338L862,339L861,340L858,343L855,341L855,343L857,343L859,344L861,342L862,341L863,341L863,339L864,339L865,341L865,341L866,341L865,340L867,340L867,342L866,343L865,344L866,344L865,345L864,346L864,348L863,348L863,346L862,346L863,347L862,348L864,348L865,346L867,343L868,342L870,338L871,338L870,340L868,342L867,343L866,345L865,347L865,349L864,350L864,349L862,348L859,349L856,350L854,351L853,352L851,354L849,355L848,357L846,359L845,361L844,363L844,365L843,368L843,369L843,370L842,370L842,370L840,370L839,370L837,370L835,371L833,372L833,372L826,367L818,362L816,360L810,355L806,356L801,357L790,358L790,356L787,353L785,354L785,354L785,353L785,352L781,352L775,353L763,354L762,355L762,354L761,355L760,355L759,356L759,356L757,357L756,358L755,358L750,360L741,362L741,362L729,363L729,358L730,357L730,358L732,357L733,356L733,355L733,355L733,354L734,352L735,352L735,351L736,351L737,350L742,349L742,348L743,347L744,347L744,347L745,346L745,345L746,345L747,344L748,343L749,344L751,341L750,340L751,339L752,340L753,338L755,336L755,337L755,338L756,339L758,337L759,335L759,335L760,334L761,334L762,333L763,333L763,334L764,334L765,334L766,330L767,328L768,328L769,328L770,328L769,327L769,326L769,326L769,324Z"/>
+<path class="us-state" d="M411,69L421,70L437,71L448,72L453,72L462,72L471,73L478,73L485,73L498,74L508,74L508,75L509,76L509,77L509,79L510,80L510,82L509,82L509,83L509,85L509,86L509,87L510,89L509,90L509,92L510,94L510,96L511,97L511,98L512,100L512,100L513,102L513,103L513,103L513,107L514,109L513,110L513,112L514,114L514,117L514,118L514,118L514,120L514,120L514,122L514,124L514,124L515,125L515,128L515,128L516,130L517,131L517,133L517,137L517,137L517,139L506,139L496,139L490,139L476,138L466,138L456,137L443,137L436,136L420,135L411,134L406,134L410,82L410,82Z"/>
+<path class="us-state" d="M407,328L411,328L412,328L423,329L433,330L445,330L454,331L464,331L470,331L486,332L498,332L512,332L522,332L534,332L549,332L549,343L550,345L550,349L551,352L552,358L552,360L553,367L553,373L553,378L553,382L553,385L553,393L553,405L552,405L551,404L550,404L550,404L549,404L547,402L546,403L546,403L544,401L544,400L543,400L541,399L539,398L539,399L538,400L537,400L535,400L535,400L534,400L533,399L533,399L531,400L530,400L530,400L529,400L529,401L527,400L527,400L525,401L524,401L524,401L523,401L523,403L522,403L520,402L520,404L519,404L519,404L518,402L517,402L516,401L516,401L515,401L515,400L514,399L513,401L512,401L512,400L511,400L511,401L510,400L510,398L509,398L508,399L508,398L508,400L507,401L506,400L507,401L506,402L506,403L506,403L505,403L504,401L505,401L505,400L504,399L504,399L504,400L503,400L502,400L501,401L500,401L500,400L500,399L499,399L498,399L497,399L498,398L496,397L496,397L495,398L493,400L492,400L491,400L491,400L491,398L491,398L491,397L491,397L490,397L489,397L488,395L489,395L489,394L487,394L486,394L485,394L484,393L483,394L483,395L482,395L480,394L479,393L478,394L477,394L476,393L475,393L474,393L473,392L472,392L472,392L471,392L471,392L469,392L469,389L468,388L468,388L467,387L466,386L466,388L465,388L464,387L463,387L462,388L461,388L459,386L457,383L456,384L457,342L450,341L439,341L430,340L419,340L406,339L406,337Z"/>
+<path class="us-state" d="M770,205L772,203L775,201L775,201L775,200L776,199L776,200L778,198L781,196L782,202L782,202L796,200L800,199L809,197L823,194L829,193L835,192L844,190L850,189L851,190L851,189L852,191L853,191L855,191L855,192L855,193L856,193L857,196L856,196L858,198L858,198L859,198L860,199L860,199L861,199L862,199L862,199L862,199L863,200L863,200L862,202L861,204L861,205L860,206L860,207L860,208L859,209L858,210L860,211L859,214L859,214L859,216L859,216L859,217L859,218L860,218L861,218L862,219L862,220L862,221L864,221L864,222L866,223L866,224L868,224L869,225L868,226L867,226L867,227L866,228L864,230L864,230L863,231L864,232L862,233L860,234L859,235L858,235L857,235L855,236L855,237L854,238L841,241L835,242L826,244L812,247L795,250L785,252L778,253L775,233Z"/>
+<path class="us-state" d="M404,154L404,154L405,138L406,134L411,134L420,135L436,136L443,137L456,137L466,138L476,138L490,139L496,139L506,139L517,139L517,142L516,142L516,144L514,144L513,145L513,146L514,148L515,149L515,150L516,151L518,152L519,153L519,162L519,167L519,169L519,192L516,192L517,192L516,193L518,194L517,196L517,196L517,197L517,198L518,198L518,199L519,200L519,201L518,201L518,202L518,203L518,203L517,204L517,206L517,206L516,207L516,207L516,209L517,209L518,210L518,212L518,213L519,213L518,214L517,213L516,213L516,212L515,211L515,210L514,210L513,210L513,209L512,208L511,208L510,208L508,207L508,207L507,206L507,206L505,205L504,205L504,205L503,206L502,205L501,206L500,205L499,206L498,205L497,205L496,205L496,207L495,207L494,207L492,206L490,205L487,203L487,202L480,202L470,201L461,201L449,201L438,200L434,200L425,199L417,198L400,197L401,191L401,191L404,157Z"/>
+<path class="us-state" d="M406,339L419,340L430,340L439,341L450,341L457,342L456,384L457,383L459,386L461,388L462,388L463,387L464,387L465,388L466,388L466,386L467,387L468,388L468,388L469,389L469,392L471,392L471,392L472,392L472,392L473,392L474,393L475,393L476,393L477,394L478,394L479,393L480,394L482,395L483,395L483,394L484,393L485,394L486,394L487,394L489,394L489,395L488,395L489,397L490,397L491,397L491,397L491,398L491,398L491,400L491,400L492,400L493,400L495,398L496,397L496,397L498,398L497,399L498,399L499,399L500,399L500,400L500,401L501,401L502,400L503,400L504,400L504,399L504,399L505,400L505,401L504,401L505,403L506,403L506,403L506,402L507,401L506,400L507,401L508,400L508,398L508,399L509,398L510,398L510,400L511,401L511,400L512,400L512,401L513,401L514,399L515,400L515,401L516,401L516,401L517,402L518,402L519,404L519,404L520,404L520,402L522,403L523,403L523,401L524,401L524,401L525,401L527,400L527,400L529,401L529,400L530,400L530,400L531,400L533,399L533,399L534,400L535,400L535,400L537,400L538,400L539,399L539,398L541,399L543,400L544,400L544,401L546,403L546,403L547,402L549,404L550,404L550,404L551,404L552,405L553,405L553,405L553,406L554,406L554,406L554,407L555,407L555,406L556,407L556,406L557,407L558,406L559,406L559,407L559,406L560,407L560,407L560,407L561,418L561,440L562,441L562,442L564,442L564,444L565,445L565,446L566,447L565,447L565,448L565,449L565,450L566,450L567,450L567,451L567,451L568,452L568,453L568,453L568,454L568,455L569,456L569,456L570,458L571,458L571,459L571,460L571,461L570,461L570,462L571,463L571,463L570,464L571,465L570,466L570,467L569,468L569,469L568,470L568,471L567,472L568,472L568,474L567,475L567,476L568,477L568,478L568,479L569,480L568,481L568,482L568,483L567,483L566,485L565,486L564,487L564,488L565,488L566,490L566,490L563,490L560,491L552,495L550,496L549,497L548,497L550,496L550,495L551,495L552,494L552,493L553,494L554,494L553,493L549,494L549,493L550,491L550,490L550,489L549,489L549,488L548,489L547,489L547,490L546,491L545,490L544,491L544,491L545,492L544,493L545,494L546,494L546,495L546,496L547,497L546,498L546,499L545,499L544,500L543,501L542,501L541,501L541,503L542,503L543,502L544,501L545,501L547,499L548,498L548,498L549,498L548,499L544,502L542,503L542,504L540,505L537,508L536,508L532,511L529,512L526,514L522,516L519,518L518,518L517,520L514,522L512,523L509,526L507,528L506,530L505,531L503,535L501,539L500,541L499,544L499,546L499,548L500,552L501,556L501,558L502,562L503,567L503,566L502,564L502,560L501,557L499,557L500,557L500,555L499,554L499,552L499,550L499,547L499,545L500,540L501,537L502,534L503,533L504,531L504,531L504,530L505,528L506,528L507,527L508,524L510,523L511,522L512,522L514,520L516,520L517,519L517,518L518,518L517,518L516,518L515,519L514,520L513,520L512,519L512,518L511,518L511,518L511,520L510,520L511,521L510,522L509,523L508,524L507,524L506,523L506,522L504,523L503,525L504,525L506,524L506,525L506,526L503,530L502,530L502,529L500,529L500,529L498,529L497,529L497,529L498,530L499,530L499,530L499,531L500,532L501,532L502,533L500,535L499,539L499,541L497,541L497,542L496,541L497,541L497,540L497,540L496,540L494,542L494,542L496,543L498,542L498,542L498,544L498,544L498,548L497,552L497,552L498,556L498,557L498,559L499,559L501,563L501,563L500,564L501,565L500,566L501,567L502,567L502,568L503,568L503,570L502,570L501,570L501,570L499,571L499,572L498,572L497,571L496,571L496,570L495,570L494,568L491,568L491,568L490,568L489,567L487,568L487,567L486,567L486,568L485,567L484,567L483,567L483,567L482,567L481,567L482,566L481,566L480,565L479,565L478,564L477,564L476,563L474,563L473,563L472,561L472,561L471,561L471,560L470,561L468,560L467,560L467,559L466,560L465,559L466,558L465,557L464,557L464,555L464,554L464,553L463,552L463,551L463,550L462,549L462,549L461,548L460,548L461,547L460,546L459,546L459,545L460,545L460,543L460,543L460,541L459,541L459,540L458,540L459,539L459,538L459,537L459,536L458,536L459,535L458,533L457,534L457,533L456,533L456,532L455,532L454,531L453,531L453,530L452,530L452,529L452,528L451,528L452,527L451,526L451,525L450,525L449,523L449,523L448,522L446,521L446,520L445,520L444,519L444,518L443,516L444,515L443,514L444,514L443,514L442,513L443,512L442,511L442,511L441,510L441,509L441,509L440,508L440,507L440,507L439,505L439,505L438,504L438,503L438,501L437,500L436,499L436,499L436,498L434,497L434,496L433,495L432,495L431,493L431,493L429,492L429,491L428,491L428,490L428,489L427,489L427,490L427,490L427,489L426,488L425,486L424,486L424,485L423,486L423,485L422,485L419,485L418,485L418,485L417,485L415,485L415,484L413,484L413,485L411,484L411,483L410,483L409,482L408,483L407,485L405,484L404,485L404,485L402,485L402,485L401,486L401,486L400,487L400,488L400,488L399,489L399,489L399,490L398,491L398,492L398,493L397,493L397,494L396,495L397,495L397,496L395,497L395,496L394,498L393,498L392,499L392,500L391,500L390,500L389,500L388,499L386,499L385,497L383,496L382,496L381,495L380,494L379,493L376,492L375,492L374,491L373,490L372,489L372,488L372,487L370,487L369,487L369,486L367,484L367,483L366,481L366,480L365,479L365,478L365,477L364,476L365,474L365,473L365,472L365,471L364,470L364,470L363,469L363,468L362,468L362,467L362,464L361,463L361,463L360,461L359,461L358,460L358,459L357,459L356,458L356,458L355,458L353,457L353,456L351,453L350,451L349,451L348,450L348,449L347,449L347,449L346,447L344,446L344,445L343,444L342,444L340,442L339,440L339,440L339,439L338,437L337,436L336,435L335,435L335,435L335,434L334,434L334,433L333,433L333,432L333,432L334,430L355,432L371,434L386,435L398,436L399,413L400,409L400,406L401,398L401,394L403,366L404,358L405,343L405,339Z"/>
+<path class="us-state" d="M404,154L404,157L401,191L401,191L400,197L396,240L384,239L384,239L370,238L362,237L358,236L339,234L331,233L317,231L309,230L301,229L298,229L290,228L285,227L286,219L287,215L288,205L290,193L291,190L294,170L294,169L296,160L296,155L297,153L297,149L298,144L298,141L302,142L304,142L308,143L309,143L311,143L313,143L317,144L328,146L328,146L340,147L357,149L358,150L366,151L375,152L377,152L384,152L397,154Z"/>
+<path class="us-state" d="M879,181L880,181L886,179L889,179L889,180L890,179L890,179L892,178L894,178L905,175L905,175L905,177L907,181L907,184L908,188L907,188L908,189L908,190L907,190L906,190L905,191L904,191L904,192L903,191L902,192L900,193L900,193L899,193L897,194L897,194L895,194L895,195L894,195L892,196L892,195L891,195L890,197L890,197L889,199L888,198L887,200L886,200L885,200L886,201L885,201L884,202L883,203L882,203L881,204L881,203L880,202L883,199L882,197L881,194L880,189Z"/>
+<path class="us-state" d="M530,255L539,255L548,255L557,255L565,254L569,254L580,254L589,253L595,253L595,253L595,254L597,254L597,255L597,256L598,256L598,257L599,257L600,257L599,258L599,260L599,262L599,265L600,267L600,267L600,268L600,269L601,270L602,270L601,271L603,273L604,274L605,274L605,275L606,275L607,277L608,278L611,280L613,282L613,283L613,285L613,285L614,287L614,288L615,289L616,289L617,289L617,287L618,287L620,288L621,288L623,289L623,290L622,291L622,292L622,294L622,294L621,296L621,298L620,300L620,301L620,302L620,303L621,304L622,306L624,306L625,307L625,307L626,308L627,308L627,309L627,309L627,310L628,310L629,309L630,310L630,310L631,311L632,312L632,313L633,313L634,313L635,314L635,315L636,316L635,316L635,317L637,320L637,321L636,321L635,322L636,323L636,324L637,326L638,327L638,328L640,329L640,328L639,327L640,327L641,328L642,329L642,329L643,329L643,331L642,331L642,332L642,332L643,333L643,334L642,334L642,334L642,335L642,336L641,337L641,338L640,336L639,337L638,339L638,340L637,340L637,339L637,339L637,338L636,338L635,338L636,339L636,340L636,341L637,342L637,343L635,343L635,344L636,344L637,345L636,345L634,345L634,345L635,347L636,348L634,349L634,350L633,350L622,351L623,349L625,348L625,348L625,347L626,346L627,345L627,345L627,342L626,342L626,341L626,340L604,341L584,342L576,342L562,343L549,343L549,332L549,327L549,325L549,311L549,310L549,297L549,295L549,286L549,285L548,285L547,285L547,285L546,285L546,284L545,284L545,284L544,283L544,281L544,281L544,280L543,280L542,279L541,279L541,278L540,277L540,277L541,276L541,275L542,275L542,274L543,273L544,273L544,273L544,272L543,272L543,272L544,272L544,271L543,271L543,270L543,270L542,269L541,270L540,270L540,269L539,269L539,269L538,268L537,267L535,266L536,265L534,263L534,262L533,262L533,261L532,261L531,258L531,258L531,257L531,256L531,256L531,255L531,256L529,256Z"/>
+<path class="us-state" d="M748,286L749,286L751,285L753,285L753,284L753,282L753,281L754,281L755,281L754,279L753,277L754,276L754,275L755,273L755,272L756,271L757,272L757,272L758,273L758,274L758,274L759,274L759,273L759,273L760,273L760,271L759,271L759,270L760,269L760,268L760,267L761,266L761,265L762,265L762,264L764,262L765,262L765,263L766,263L767,262L768,262L768,261L769,260L769,259L770,258L771,256L772,256L772,254L773,254L772,253L773,252L772,251L773,250L773,249L773,249L773,248L773,248L773,246L773,245L773,244L774,243L774,242L774,241L774,240L774,238L774,237L773,236L772,235L773,234L774,234L775,233L778,253L785,252L795,250L796,261L797,261L799,259L799,258L800,257L801,256L802,254L802,254L804,254L805,253L806,250L807,250L806,250L807,251L807,251L809,252L810,251L810,252L812,251L812,251L812,250L813,250L812,249L813,249L813,248L814,249L816,247L817,247L818,248L819,248L820,248L821,248L822,248L822,248L821,249L822,250L823,250L823,251L824,251L824,252L824,253L825,253L824,254L824,258L818,255L814,252L814,253L814,254L814,254L814,255L813,257L814,257L813,258L814,259L813,260L813,260L812,262L812,262L812,264L811,263L811,265L810,265L810,264L809,266L808,269L806,267L805,269L805,270L805,271L804,272L804,273L804,275L802,277L799,277L798,275L796,275L796,277L796,278L795,279L794,281L795,282L794,282L793,284L793,285L793,286L793,286L793,287L792,289L791,290L790,292L789,294L789,295L789,296L789,296L790,297L790,298L789,298L789,299L789,299L789,300L787,302L786,301L785,301L784,302L782,304L782,303L780,303L780,304L781,304L780,306L779,306L776,307L775,308L773,307L772,306L772,306L771,308L770,308L770,309L769,309L767,310L766,309L766,309L765,308L764,308L764,307L763,307L762,305L761,305L761,305L762,304L761,303L761,303L759,303L759,303L758,303L758,302L757,302L756,301L756,301L754,299L754,299L753,298L753,297L752,297L751,296L752,295L751,295L750,293L749,293L748,292L748,291L749,291L749,290L748,290L749,289L749,288L748,287Z"/>
+<path class="us-state" d="M600,257L601,257L600,256L601,254L600,254L601,252L602,252L603,252L604,251L604,250L605,249L605,247L605,247L606,246L607,245L607,243L607,241L606,240L605,240L604,239L604,237L605,236L605,235L606,234L607,234L608,234L610,234L611,233L612,232L612,232L614,232L615,231L616,230L616,229L616,228L616,227L617,226L618,225L618,225L618,223L618,222L618,221L618,220L618,219L617,218L614,217L614,215L614,214L613,213L611,213L611,212L610,212L610,211L612,211L625,210L628,210L639,209L641,209L650,208L655,208L655,210L654,212L655,214L656,216L657,217L657,218L658,220L659,222L660,223L660,224L660,224L661,229L663,251L663,256L664,261L663,261L664,269L664,269L665,275L664,276L664,276L664,277L664,278L663,279L664,281L665,282L665,283L666,284L665,286L666,288L667,288L666,290L665,290L665,291L664,292L664,294L663,294L663,295L663,297L662,297L661,299L661,298L661,299L660,299L660,300L659,300L660,301L661,302L659,303L660,303L660,304L659,304L659,304L659,306L659,307L660,307L658,307L659,309L658,309L659,309L659,309L659,311L658,311L658,313L658,314L659,316L659,317L656,317L656,317L655,318L654,318L653,319L653,320L652,321L652,322L653,323L654,324L653,326L653,326L652,326L651,325L648,324L647,324L646,323L644,323L644,323L643,324L642,326L642,327L641,328L642,329L642,329L641,328L640,327L639,327L640,328L640,329L638,328L638,327L637,326L636,324L636,323L635,322L636,321L637,321L637,320L635,317L635,316L636,316L635,315L635,314L634,313L633,313L632,313L632,312L631,311L630,310L630,310L629,309L628,310L627,310L627,309L627,309L627,308L626,308L625,307L625,307L624,306L622,306L621,304L620,303L620,302L620,301L620,300L621,298L621,296L622,294L622,294L622,292L622,291L623,290L623,289L621,288L620,288L618,287L617,287L617,289L616,289L615,289L614,288L614,287L613,285L613,285L613,283L613,282L611,280L608,278L607,277L606,275L605,275L605,274L604,274L603,273L601,271L602,270L601,270L600,269L600,268L600,267L600,267L599,265L599,262L599,260L599,258Z"/>
+<path class="us-state" d="M305,317L318,319L332,321L341,322L342,322L353,323L371,325L373,325L384,326L395,327L407,328L406,337L406,339L405,339L405,343L404,358L403,366L401,394L401,398L400,406L400,409L399,413L398,436L386,435L371,434L355,432L334,430L333,432L333,432L333,433L334,433L334,434L335,434L335,435L321,433L305,431L303,441L288,439L295,386L296,384L296,382L298,370L300,353L300,353L301,348Z"/>
+<path class="us-state" d="M549,343L562,343L576,342L584,342L604,341L626,340L626,341L626,342L627,342L627,345L627,345L626,346L625,347L625,348L625,348L623,349L622,351L633,350L634,351L635,352L635,353L633,353L633,353L634,354L634,355L633,355L632,356L631,356L631,356L630,357L630,358L631,358L632,358L632,358L630,359L630,360L631,360L631,361L629,360L629,360L629,362L629,362L629,364L628,362L627,363L627,364L627,364L627,364L628,364L628,365L628,366L627,366L627,367L628,367L629,368L628,368L629,369L628,370L628,370L627,370L627,372L625,372L625,373L626,374L626,375L625,375L623,376L623,375L622,375L622,376L623,377L622,377L623,378L622,379L621,378L622,377L621,378L621,378L621,379L621,379L622,379L623,380L622,381L621,381L621,380L620,380L620,381L621,382L621,383L621,384L621,385L620,387L620,388L619,388L619,387L618,387L618,387L618,388L618,389L617,389L616,390L615,390L615,390L616,391L617,391L617,391L616,392L615,391L615,392L615,393L616,393L616,393L616,394L614,395L615,395L614,396L614,395L613,395L612,396L614,397L613,398L613,399L614,399L614,400L613,400L612,400L612,401L612,401L613,401L614,402L613,402L612,402L611,401L610,402L610,402L612,403L612,404L610,405L611,406L610,407L612,407L611,406L612,406L612,408L611,408L611,408L612,409L613,408L613,407L614,407L612,409L612,410L613,412L613,411L614,410L614,411L613,412L613,413L613,414L612,414L612,414L611,414L613,416L612,417L598,417L588,418L578,418L573,418L561,418L560,407L560,407L560,407L559,406L559,407L559,406L558,406L557,407L556,406L556,407L555,406L555,407L554,407L554,406L554,406L553,406L553,405L553,405L553,393L553,385L553,382L553,378L553,373L553,367L552,360L552,358L551,352L550,349L550,345Z"/>
+<path class="us-state" d="M128,361L129,361L130,363L131,363L131,364L132,365L131,366L131,365L129,365L129,364L129,363L128,362ZM125,370L126,370L127,373L129,376L128,376L127,376L126,375L126,373L125,371ZM120,359L120,359L120,360L120,359ZM116,346L117,346L117,346L117,347L116,347L116,346ZM110,361L111,361L112,362L112,363L111,363L110,362ZM108,343L109,343L110,344L111,344L112,345L113,345L114,345L115,346L114,346L112,346L111,346L108,345L109,344ZM102,343L103,343L104,343L105,343L106,343L106,344L107,345L106,345L104,346L103,345ZM99,341L100,341L100,341L101,342L101,342L100,342ZM85,158L94,161L94,161L98,162L102,163L103,163L109,165L111,166L117,167L119,168L127,170L134,172L144,175L150,176L150,176L143,203L143,203L139,217L137,224L137,224L135,232L134,234L133,239L135,241L140,249L145,256L148,261L152,267L158,276L161,280L166,289L181,311L192,328L196,333L203,344L202,347L203,348L203,349L204,351L205,355L205,356L206,357L207,359L208,359L209,360L208,361L207,362L207,363L205,363L205,363L203,364L202,364L202,365L200,367L200,367L200,369L200,369L200,369L200,371L200,372L199,372L199,374L199,375L198,375L196,378L195,377L195,378L194,380L195,380L194,383L194,384L194,386L194,385L195,386L196,386L197,386L197,389L197,390L195,391L195,392L194,392L192,392L192,392L165,389L149,387L149,385L149,384L148,383L147,384L147,382L148,381L147,380L148,379L148,376L148,374L148,373L146,369L145,367L144,366L143,365L143,365L142,363L141,362L140,361L139,360L138,358L136,357L136,358L135,358L134,357L133,357L132,356L132,356L133,355L133,354L133,352L132,351L131,350L129,349L128,349L127,349L126,348L124,348L122,346L122,346L120,344L120,342L119,341L119,340L118,340L118,339L116,338L116,337L114,337L113,337L112,336L111,336L109,334L107,334L106,334L104,333L101,333L101,332L100,331L99,330L99,330L98,329L100,327L100,325L101,323L100,322L101,320L102,318L101,316L100,316L100,316L98,315L98,314L99,312L99,311L99,310L97,309L96,307L96,305L94,304L94,302L94,301L93,300L93,299L92,298L92,296L92,296L91,295L91,293L90,290L88,289L88,288L88,286L88,285L88,283L88,282L88,281L89,280L90,281L90,281L91,280L92,277L92,274L91,273L91,273L90,273L88,273L86,271L86,269L85,268L85,268L84,266L84,265L85,263L85,261L85,260L85,260L84,259L85,258L85,258L86,256L86,254L87,253L88,254L88,254L88,256L88,256L88,258L87,258L89,259L90,261L90,261L91,262L92,263L92,262L91,261L91,260L91,257L90,256L90,255L89,254L90,253L90,252L89,252L88,250L89,251L90,250L90,250L91,250L92,249L91,248L90,247L89,247L88,247L88,248L88,249L88,250L87,250L87,251L88,252L87,252L87,251L87,253L86,253L86,252L84,250L84,250L83,249L82,248L82,247L81,246L79,247L81,245L81,244L81,242L82,242L81,240L80,240L81,239L80,237L79,236L79,235L78,234L76,230L76,229L76,228L74,226L74,224L75,222L75,222L75,219L75,217L75,215L75,213L77,211L77,210L77,209L77,207L77,205L77,204L77,203L75,200L75,200L75,199L75,198L74,197L72,193L73,192L73,191L72,190L73,188L75,186L79,182L80,181L81,179L80,178L81,176L81,176L82,175L84,171L85,168L84,166L84,164L84,164L83,163L84,161L85,159Z"/>
+<path class="us-state" d="M858,240L858,240L858,240ZM854,238L855,237L855,236L857,235L858,235L859,235L859,236L859,237L858,238L858,238L857,240L857,241L858,241L858,242L858,242L858,243L859,244L860,245L861,246L862,247L863,248L862,249L863,251L864,252L865,252L865,254L868,256L869,256L869,255L870,256L870,258L872,263L866,264L861,265L861,263L854,240Z"/>
+<path class="us-state" d="M836,260L837,258L839,260L838,262L837,261Z"/>
+<path class="us-state" d="M519,192L530,192L547,192L557,191L570,191L576,191L588,190L600,190L600,191L600,192L600,193L602,194L603,195L602,196L601,197L601,198L601,200L602,201L602,203L602,203L603,206L605,207L608,208L609,208L610,210L610,211L610,212L611,212L611,213L613,213L614,214L614,215L614,217L617,218L618,219L618,220L618,221L618,222L618,223L618,225L618,225L617,226L616,227L616,228L616,229L616,230L615,231L614,232L612,232L612,232L611,233L610,234L608,234L607,234L606,234L605,235L605,236L604,237L604,239L605,240L606,240L607,241L607,243L607,245L606,246L605,247L605,247L605,249L604,250L604,251L603,252L602,252L601,252L600,254L601,254L600,256L601,257L600,257L599,257L598,257L598,256L597,256L597,255L597,254L595,254L595,253L595,253L589,253L580,254L569,254L565,254L557,255L548,255L539,255L530,255L530,254L529,253L528,253L528,252L528,251L528,250L528,249L529,248L528,247L528,246L528,246L528,245L528,244L528,244L528,242L528,242L527,241L527,241L527,240L528,239L526,238L527,238L527,236L526,235L526,234L525,234L525,235L524,234L524,233L524,232L524,232L524,231L524,231L524,230L524,229L525,228L524,228L524,227L523,226L523,226L524,225L523,225L523,224L522,224L522,223L521,223L521,221L520,220L520,220L521,219L520,217L519,217L519,215L520,214L519,214L519,213L518,213L518,212L518,210L517,209L516,209L516,207L516,207L517,206L517,206L517,204L518,203L518,203L518,202L518,201L519,201L519,200L518,199L518,198L517,198L517,197L517,196L517,196L518,194L516,193L517,192L516,192Z"/>
+<path class="us-state" d="M642,329L641,328L642,327L642,326L643,324L644,323L644,323L646,323L647,324L648,324L651,325L652,326L653,326L653,326L654,324L653,323L652,322L652,321L653,320L653,319L654,318L655,318L656,317L656,317L659,317L659,316L658,314L658,313L658,311L659,311L659,309L661,310L662,309L661,307L661,307L662,307L663,307L665,307L665,307L665,308L666,308L667,307L666,306L666,305L667,305L667,306L668,306L669,306L670,306L671,306L673,307L674,307L675,308L675,308L676,308L676,306L676,305L678,305L679,304L680,303L681,305L681,305L682,305L682,305L682,306L683,306L683,306L683,305L685,304L684,304L684,302L685,302L686,301L685,301L685,300L686,300L686,300L687,300L687,299L686,299L686,298L687,298L688,299L688,301L690,302L691,302L692,303L692,302L694,302L694,301L694,300L694,298L695,297L695,296L696,295L697,296L698,295L698,292L700,291L700,290L701,289L701,288L700,286L701,285L702,285L703,285L704,285L705,285L706,285L708,283L708,283L709,283L711,283L710,282L711,281L711,280L710,280L709,280L710,279L710,278L709,277L709,277L710,276L711,275L711,275L712,276L713,276L714,276L715,275L715,275L716,275L716,276L718,277L719,278L720,279L720,281L720,281L723,282L725,281L727,282L727,282L728,283L728,283L730,284L731,282L732,282L733,282L735,282L736,283L736,284L737,283L738,283L739,282L740,281L740,280L741,280L742,279L743,280L743,281L744,283L744,283L746,283L747,284L748,285L748,286L748,287L749,288L749,289L748,290L749,290L749,291L748,291L748,292L749,293L750,293L751,295L752,295L751,296L752,297L753,297L753,298L754,299L754,299L756,301L756,301L757,302L758,302L758,303L759,303L759,303L761,303L761,303L756,310L754,311L752,312L751,313L750,314L750,316L749,317L749,317L748,317L748,319L748,319L747,320L745,321L744,322L744,323L743,323L741,324L739,326L738,326L736,327L735,327L735,328L730,328L725,329L721,329L716,330L713,330L708,330L705,331L699,331L695,331L690,332L687,332L686,332L686,332L677,333L671,334L665,334L665,334L661,334L662,336L661,338L653,338L645,339L640,339L638,339L639,337L640,336L641,338L641,337L642,336L642,335L642,334L642,334L643,334L643,333L642,332L642,332L642,331L643,331L643,329ZM637,339L636,339L635,338L636,338L637,338L637,339Z"/>
+<path class="us-state" d="M859,277L858,277L857,275L858,275L859,275ZM856,273L856,272L857,271L857,272L858,274L857,274L857,273ZM848,261L849,260L849,261ZM795,250L812,247L826,244L835,242L841,241L854,238L854,240L861,263L861,265L866,264L872,263L872,263L872,265L871,266L871,270L871,272L864,274L864,275L864,275L863,275L862,275L861,277L860,277L860,276L860,274L861,274L860,274L860,273L860,272L859,272L859,273L858,273L858,271L860,271L859,270L859,270L858,270L859,267L858,268L858,269L858,270L858,270L857,269L857,269L857,268L857,268L856,269L856,269L857,270L856,271L856,270L855,271L854,271L853,270L853,270L853,269L851,266L852,266L852,265L851,265L851,264L851,264L852,263L852,263L853,263L853,263L854,263L855,264L855,264L854,263L853,263L852,262L852,262L851,261L851,261L850,261L850,262L850,262L849,260L850,258L851,259L851,259L851,257L850,256L849,257L849,258L849,258L848,259L848,257L849,255L849,256L851,256L851,255L851,254L851,253L850,253L850,254L850,255L850,255L850,253L849,252L849,252L849,250L850,249L849,248L850,248L850,247L852,247L851,246L852,245L851,245L852,242L850,243L850,244L850,245L851,245L850,245L849,248L848,247L848,246L848,246L848,247L847,248L848,248L848,249L847,247L846,247L847,249L846,249L846,250L847,250L846,251L846,252L845,252L845,251L843,251L844,252L844,252L844,252L846,253L847,254L846,255L847,255L846,257L847,257L847,258L846,258L846,259L846,260L846,261L846,262L847,263L847,264L847,266L848,267L850,268L850,269L850,270L849,270L850,271L850,270L851,271L851,271L851,272L852,274L852,274L853,276L852,276L851,275L851,275L850,274L850,274L850,275L849,274L849,275L849,274L848,273L846,273L844,273L843,271L843,271L843,271L843,273L843,273L842,273L842,272L841,272L840,270L839,271L837,272L836,272L835,270L836,268L836,267L837,266L837,266L837,265L837,265L838,264L838,262L839,260L837,258L836,260L835,259L834,259L834,259L833,258L832,258L830,258L829,257L829,257L828,256L829,255L829,254L828,254L827,253L826,253L825,253L825,253L824,253L824,252L824,251L823,251L823,250L822,250L821,249L822,248L822,248L821,248L820,248L819,248L818,248L817,247L816,247L814,249L813,248L813,249L812,249L813,250L812,250L812,251L812,251L810,252L810,251L809,252L807,251L807,251L806,250L807,250L806,250L805,253L804,254L802,254L802,254L801,256L800,257L799,258L799,259L797,261L796,261Z"/>
+<path class="us-state" d="M695,131L696,130L696,131L700,132L699,133L698,133L697,132ZM684,134L684,133L685,133ZM682,133L683,134L683,134L682,134ZM681,138L681,137L682,136L682,136L682,134L683,134L683,136L683,138L682,138ZM680,135L681,135L680,136L680,136ZM678,142L678,142L679,143ZM676,149L676,148L677,148L677,150L676,149ZM675,151L675,151L676,151ZM665,139L666,140L666,141L666,140L665,139ZM671,222L673,221L674,219L676,214L678,211L678,209L679,207L679,203L679,202L679,201L679,198L678,194L677,192L675,188L674,186L673,184L672,182L672,181L673,179L673,178L673,177L672,174L671,173L671,172L672,171L673,168L674,166L674,164L675,161L674,159L674,158L675,157L676,157L676,155L676,154L677,153L677,154L678,152L679,152L680,152L680,152L681,150L681,150L682,148L682,147L683,147L683,146L684,147L683,148L683,148L683,150L682,151L683,151L683,152L683,152L683,154L683,156L684,156L684,153L684,151L685,151L685,154L684,155L684,156L685,156L685,155L685,154L686,152L686,150L686,149L686,148L686,146L686,145L687,144L687,143L688,142L689,142L690,142L692,142L692,141L692,141L690,140L690,140L689,138L690,136L690,136L691,134L691,134L690,134L693,133L693,132L697,134L698,135L699,134L700,135L700,134L702,135L704,136L704,137L705,138L707,137L707,137L709,139L710,139L712,140L714,139L715,141L716,141L715,142L716,143L717,144L718,146L717,146L716,145L715,146L716,148L716,149L718,149L718,150L718,152L719,153L719,154L719,155L719,156L719,158L719,161L718,161L718,162L717,162L716,163L716,165L716,167L715,167L715,168L715,169L712,169L712,170L712,171L712,174L711,174L712,176L713,177L713,176L714,177L715,177L716,177L716,177L718,175L718,175L719,174L718,173L719,172L719,171L719,171L720,171L720,170L719,170L720,170L721,169L721,168L722,168L724,167L725,166L726,166L727,166L728,166L729,167L730,169L731,170L732,171L732,175L734,178L735,183L736,185L737,187L737,188L737,189L737,192L737,193L737,195L737,196L736,197L735,197L734,198L734,197L734,197L734,196L735,195L734,195L733,195L732,196L732,196L732,197L733,197L732,197L731,199L732,200L731,202L731,203L729,203L728,205L729,208L729,208L728,209L728,210L727,211L727,212L726,212L726,213L725,214L725,215L725,216L725,217L720,218L710,219L703,220L703,219L698,219L688,221L676,222ZM624,94L625,93L629,90L630,90L632,88L633,87L634,87L635,87L635,87L634,88L633,89L633,90L632,91L629,92L627,93L627,94L628,94L625,95L625,95ZM608,123L609,123L610,122L612,121L614,121L615,119L616,118L617,117L619,117L620,117L621,117L622,117L625,115L627,113L628,113L629,112L630,112L630,111L631,109L632,109L633,108L634,107L635,106L636,105L637,104L640,102L643,101L645,101L647,102L647,103L646,103L645,103L644,103L643,103L643,104L642,105L640,107L640,108L639,109L639,109L639,110L638,110L638,112L637,113L637,113L636,116L637,117L636,117L637,117L638,116L638,115L638,115L640,113L641,112L641,114L640,114L639,115L641,114L642,113L643,114L645,113L646,114L646,114L647,114L648,115L648,115L650,116L650,117L651,118L651,118L652,119L653,119L653,121L654,121L655,121L657,121L659,120L659,120L660,122L661,122L662,122L662,121L663,121L663,122L664,120L663,120L664,119L664,120L664,121L665,121L666,120L668,118L671,116L672,116L675,115L677,115L679,115L681,115L684,113L685,112L687,112L688,112L687,114L688,116L688,117L687,117L688,118L689,118L689,118L690,118L690,118L691,119L693,117L694,117L695,118L695,119L696,118L696,118L697,117L698,116L699,117L699,116L700,116L701,116L701,116L701,118L702,120L702,122L701,122L700,123L701,123L701,123L702,123L703,124L704,124L703,125L705,126L705,126L706,127L707,126L707,126L708,126L707,124L708,124L710,124L710,124L711,125L712,126L712,127L711,128L710,127L708,128L706,127L706,127L704,128L703,127L700,128L699,129L697,128L696,127L695,127L695,127L694,128L694,128L694,129L694,130L694,131L694,131L692,131L692,130L691,130L691,129L689,128L687,128L687,128L685,127L684,127L683,127L683,127L682,127L681,129L680,130L679,130L678,130L676,131L676,131L676,132L675,131L674,131L672,131L672,131L671,132L670,133L670,134L670,135L669,135L669,136L668,136L667,137L667,137L667,138L666,138L666,139L665,139L665,138L665,138L665,137L666,136L666,136L667,136L667,134L667,133L666,133L665,135L663,134L664,135L663,136L663,137L661,138L661,138L661,138L661,137L660,136L660,135L659,135L659,138L660,138L658,139L657,142L656,144L655,146L654,148L652,151L653,152L652,152L651,151L651,150L650,150L651,147L651,147L651,146L651,146L650,146L648,147L648,147L648,146L648,145L648,145L649,144L649,143L649,142L649,141L648,140L649,140L648,139L648,139L647,138L646,138L645,137L644,138L643,137L644,136L644,136L644,135L641,134L641,134L639,134L639,134L638,134L637,133L636,133L636,134L635,134L635,133L634,133L633,133L629,131L613,128L613,127L611,125L610,124L609,124L609,124L609,124Z"/>
+<path class="us-state" d="M664,473L666,474L665,474L665,474ZM659,473L660,473L662,473L663,474L661,474ZM655,474L656,474L657,473L657,474L656,474ZM652,474L654,474L654,474L654,474L653,475L652,474ZM612,417L613,416L611,414L612,414L612,414L613,414L613,413L613,412L614,411L614,410L613,411L613,412L612,410L612,409L614,407L613,407L613,408L612,409L611,408L611,408L612,408L612,406L611,406L612,407L610,407L611,406L610,405L612,404L612,403L610,402L610,402L611,401L612,402L613,402L614,402L613,401L612,401L612,401L612,400L613,400L614,400L614,399L613,399L613,398L614,397L612,396L613,395L614,395L614,396L615,395L614,395L616,394L616,393L616,393L615,393L615,392L615,391L616,392L617,391L617,391L616,391L615,390L615,390L616,390L617,389L618,389L618,388L618,387L618,387L619,387L619,388L620,388L620,387L621,385L621,384L621,383L621,382L620,381L620,380L621,380L621,381L622,381L623,380L622,379L621,379L621,379L621,378L621,378L622,377L621,378L622,379L623,378L622,377L623,377L622,376L622,375L623,375L623,376L625,375L626,375L626,374L625,373L639,372L649,371L662,370L662,372L664,372L663,379L663,391L663,394L663,415L663,419L662,432L662,437L664,452L665,459L666,466L666,470L666,471L665,470L665,471L664,471L663,471L662,471L661,471L660,471L658,470L658,471L657,470L655,470L653,471L652,472L650,473L650,472L649,471L648,472L649,472L649,473L647,474L647,475L646,475L646,476L645,476L644,475L643,474L643,472L642,471L642,470L642,469L641,469L640,468L640,468L639,466L639,466L639,464L639,463L640,463L640,461L640,460L640,459L641,459L640,458L629,459L621,460L606,460L607,460L607,459L606,458L606,457L606,456L606,456L605,455L605,455L607,455L608,454L608,453L607,453L607,452L606,452L607,451L607,452L608,452L608,452L608,452L607,450L607,449L609,448L609,448L609,447L608,448L607,447L608,446L608,447L609,447L609,445L610,444L612,444L612,444L610,443L610,442L611,441L611,442L612,443L612,442L612,442L613,440L613,439L613,439L615,438L614,437L613,437L614,437L614,437L615,437L615,436L616,435L615,434L615,436L613,435L613,434L615,433L615,433L616,433L617,433L616,432L617,432L618,430L618,430L617,431L616,431L616,429L616,429L616,428L615,429L614,428L614,427L614,427L615,428L616,428L616,427L614,426L615,426L616,425L615,424L615,425L613,426L613,425L613,424L613,424L614,423L614,423L612,422L612,421L613,420L614,419L614,418L613,417L613,417L613,418L612,419L611,419L612,418Z"/>
+<path class="us-state" d="M242,44L254,46L265,49L275,51L284,52L302,55L313,57L324,59L341,61L348,62L363,64L375,65L382,66L397,68L403,68L411,69L410,82L410,82L406,134L405,138L404,154L404,154L397,154L384,152L377,152L375,152L366,151L358,150L357,149L340,147L328,146L328,146L317,144L313,143L311,143L309,143L308,143L304,142L302,142L298,141L298,144L297,149L297,153L296,152L296,151L294,150L295,149L293,147L293,146L292,147L291,146L291,147L290,149L291,150L289,149L288,150L287,149L287,149L285,150L285,149L283,149L283,149L282,149L281,149L281,148L280,148L279,148L278,147L278,148L277,148L277,149L276,150L275,149L275,149L274,149L273,148L272,148L271,148L270,149L270,150L269,150L269,149L268,149L267,148L267,147L267,146L267,145L267,144L267,143L267,141L265,139L263,140L263,139L262,138L262,136L263,136L263,135L263,134L262,133L262,133L261,132L261,131L260,129L260,129L260,127L260,126L260,126L260,125L260,124L260,123L259,123L260,121L259,121L258,121L259,120L258,119L258,119L257,119L257,120L256,120L255,121L254,122L253,121L253,122L251,123L251,122L250,122L250,120L249,120L249,119L249,119L250,118L250,117L249,116L251,114L252,114L252,114L252,113L252,112L251,111L251,110L252,109L251,108L252,108L253,108L253,106L253,106L253,105L254,103L255,102L255,101L255,101L256,99L256,98L256,97L255,98L254,98L253,97L252,97L252,97L252,96L252,95L251,95L251,95L250,96L250,95L250,94L249,93L248,92L249,91L248,89L247,89L247,88L247,86L246,85L245,85L245,84L245,84L245,83L245,82L243,82L242,81L242,80L240,78L239,78L240,77L241,77L241,77L240,76L240,75L240,75L240,75L241,74L240,73L241,72L240,71L240,70L240,70L239,69L239,68L237,65L238,60L239,58Z"/>
+<path class="us-state" d="M893,111L893,110L893,109L893,109L893,107L893,107L893,106L894,106L894,105L896,106L897,105L897,104L902,117L907,132L907,134L909,139L909,140L909,141L910,142L910,143L910,144L913,146L913,147L913,148L916,149L915,153L915,153L915,154L914,153L912,154L912,156L911,156L910,157L910,158L909,158L909,159L902,161L891,163L890,162L890,162L889,161L889,159L889,158L889,158L890,157L889,156L889,155L889,154L888,152L889,150L888,149L888,147L888,146L888,145L888,144L888,142L888,141L889,140L889,139L889,138L890,137L889,135L890,134L890,133L890,132L889,131L889,130L889,129L889,128L891,127L891,127L892,126L892,125L893,125L894,124L894,123L895,122L894,121L895,121L894,120L894,119L893,118L893,116L893,115L894,114L892,112Z"/>
+<path class="us-state" d="M905,192L905,192L907,191L906,192ZM904,196L905,195L905,195L906,196L905,196ZM903,194L904,194L903,195ZM877,212L877,214L877,214L875,216L874,216L874,215L875,215L875,213ZM826,152L827,151L827,152ZM825,152L825,152L826,152ZM781,196L782,195L785,193L786,191L788,189L789,189L789,187L790,187L790,186L792,184L793,183L792,182L791,181L791,180L791,180L790,179L789,177L788,177L789,176L788,174L788,173L789,173L791,172L794,170L796,169L798,169L800,169L802,168L807,168L808,168L809,169L811,170L811,170L813,168L815,168L817,167L819,167L820,167L821,166L822,166L823,165L823,165L824,163L826,162L826,161L827,160L828,160L829,160L830,159L830,158L830,157L829,153L827,153L828,152L828,152L829,152L830,151L829,150L828,150L827,150L827,150L826,149L825,149L825,148L826,145L827,145L828,144L827,143L828,143L830,141L830,141L831,141L832,139L832,138L832,137L834,134L835,132L838,129L838,129L841,126L842,125L843,124L844,123L845,124L846,123L851,122L854,122L860,120L861,120L866,118L866,120L866,121L866,122L867,123L867,124L867,126L867,126L868,128L869,129L870,130L869,132L870,134L870,134L869,136L869,137L869,139L870,139L870,141L871,142L871,143L872,144L872,146L872,148L872,149L872,148L874,147L874,148L875,149L876,155L878,162L878,164L878,164L879,166L878,173L878,180L879,181L880,189L881,194L882,197L883,199L880,202L881,203L881,204L881,205L880,206L880,207L880,208L880,208L881,207L882,207L882,206L883,205L884,205L884,204L886,204L886,204L886,204L887,204L889,204L890,203L890,202L891,202L891,202L895,201L897,200L898,200L900,198L900,197L900,197L901,196L902,195L903,195L902,196L901,196L902,197L903,197L904,197L904,197L906,198L906,197L907,196L907,196L908,195L909,195L909,196L906,198L902,202L899,203L895,206L893,208L890,210L889,210L888,210L885,212L882,213L879,214L879,214L878,214L878,213L877,213L877,212L877,212L877,211L877,210L877,209L878,205L878,205L869,202L863,200L862,199L862,199L862,199L861,199L860,199L860,199L859,198L858,198L858,198L856,196L857,196L856,193L855,193L855,192L855,191L853,191L852,191L851,189L851,190L850,189L844,190L835,192L829,193L823,194L809,197L800,199L796,200L782,202L782,202Z"/>
+<path class="us-state" d="M736,218L737,217L737,218ZM734,217L735,216L735,216L735,217L735,218ZM703,220L710,219L720,218L725,217L725,217L726,218L727,217L729,218L730,219L731,219L732,220L733,220L734,220L734,219L735,218L736,219L737,219L737,220L739,221L740,222L741,222L743,221L744,220L745,220L748,218L750,219L751,218L752,218L754,217L755,215L756,215L756,213L759,211L759,211L763,208L764,208L766,207L769,205L770,205L775,233L774,234L773,234L772,235L773,236L774,237L774,238L774,240L774,241L774,242L774,243L773,244L773,245L773,246L773,248L773,248L773,249L773,249L773,250L772,251L773,252L772,253L773,254L772,254L772,256L771,256L770,258L769,259L769,260L768,261L768,262L767,262L766,263L765,263L765,262L764,262L762,264L762,265L761,265L761,266L760,267L760,268L760,269L759,270L759,271L760,271L760,273L759,273L759,273L759,274L758,274L758,274L758,273L757,272L757,272L756,271L755,272L755,273L754,275L754,276L753,277L754,279L755,281L754,281L753,281L753,282L753,284L753,285L751,285L749,286L748,286L748,285L747,284L746,283L744,283L744,283L743,281L743,280L742,279L741,280L740,280L740,281L739,282L738,283L737,283L736,284L736,283L735,282L733,282L732,282L731,282L730,284L728,283L728,283L727,282L727,282L725,281L723,282L720,281L720,281L720,279L719,278L718,277L716,276L716,275L715,275L715,275L714,276L713,276L712,276L711,275L711,275L710,276L709,271L709,266L708,258L707,250L704,225Z"/>
+<path class="us-state" d="M122,73L123,74L123,75L123,75L124,76L125,77L127,76L127,77L130,80L130,81L130,83L130,84L130,85L130,86L130,87L129,88L129,89L131,91L133,92L133,92L134,92L135,93L136,93L137,93L138,93L142,93L142,92L143,92L144,93L146,93L147,93L148,93L149,94L150,94L152,95L152,97L153,97L154,96L156,96L156,97L157,96L160,96L161,96L162,96L162,97L164,98L166,98L167,98L167,97L169,97L171,97L173,97L175,97L176,96L177,96L178,97L182,97L182,97L183,97L185,97L186,97L194,99L207,102L216,104L216,106L217,106L217,108L218,108L219,109L220,109L220,110L220,111L221,112L221,113L219,115L219,116L218,116L216,119L216,119L215,120L215,122L214,123L213,124L212,124L212,125L212,126L211,128L210,129L210,129L208,130L207,131L206,133L205,134L204,134L204,136L203,136L204,138L203,139L204,139L205,139L206,140L207,140L207,141L208,142L207,142L207,143L206,144L206,144L206,145L206,146L205,147L205,148L204,148L204,149L195,187L186,185L171,182L170,182L162,180L150,176L150,176L150,176L144,175L134,172L127,170L119,168L117,167L111,166L109,165L103,163L102,163L98,162L94,161L94,161L85,158L85,157L84,156L84,154L84,154L84,152L84,152L84,150L85,148L86,146L87,144L86,142L85,142L86,139L87,138L88,136L89,135L89,134L90,133L91,131L91,130L92,130L93,129L94,127L96,124L98,119L100,115L101,112L101,112L103,108L103,107L104,104L105,102L105,102L106,100L108,96L109,94L110,92L110,90L111,89L111,87L111,87L112,84L113,83L112,82L113,80L113,79L113,78L114,77L115,76L115,72L116,74L117,74L117,73L118,74L118,73L119,74L120,74L120,74Z"/>
+<path class="us-state" d="M633,350L634,350L634,349L636,348L635,347L634,345L634,345L636,345L637,345L636,344L635,344L635,343L637,343L637,342L636,341L636,340L636,339L637,339L637,340L638,340L638,339L640,339L645,339L653,338L661,338L662,336L661,334L665,334L665,334L671,334L677,333L686,332L686,332L687,332L690,332L695,331L699,331L705,331L708,330L713,330L716,330L721,329L725,329L730,328L735,328L735,327L738,327L742,327L743,327L752,325L756,325L765,323L765,323L770,322L769,323L769,324L769,326L769,326L769,327L770,328L769,328L768,328L767,328L766,330L765,334L764,334L763,334L763,333L762,333L761,334L760,334L759,335L759,335L758,337L756,339L755,338L755,337L755,336L753,338L752,340L751,339L750,340L751,341L749,344L748,343L747,344L746,345L745,345L745,346L744,347L744,347L743,347L742,348L742,349L737,350L736,351L735,351L735,352L734,352L733,354L733,355L733,355L733,356L732,357L730,358L730,357L729,358L729,363L717,365L709,366L707,366L703,366L693,367L691,368L685,368L675,369L671,369L661,370L662,370L649,371L639,372L625,373L625,372L627,372L627,370L628,370L628,370L629,369L628,368L629,368L628,367L627,367L627,366L628,366L628,365L628,364L627,364L627,364L627,364L627,363L628,362L629,364L629,362L629,362L629,360L629,360L631,361L631,360L630,360L630,359L632,358L632,358L631,358L630,358L630,357L631,356L631,356L632,356L633,355L634,355L634,354L633,353L633,353L635,353L635,352L634,351Z"/>
+<path class="us-state" d="M242,197L245,198L260,200L270,202L271,202L282,204L288,205L287,215L286,219L285,227L290,228L298,229L301,229L309,230L317,231L315,241L315,242L310,276L310,280L308,290L308,292L307,306L306,306L305,317L295,316L281,314L281,314L271,312L265,311L246,308L233,306L221,303L224,287L224,287L225,282L226,279L227,273L228,268L234,237L234,235L237,223L238,218Z"/>
+<path class="us-state" d="M859,279L859,279L859,280ZM864,275L864,275L864,274L871,272L870,274L869,276L869,277L869,276L868,277L867,278L867,280L866,282L867,283L866,286L866,286L866,288L865,289L865,290L865,291L865,293L864,294L863,294L863,295L863,295L862,293L862,292L861,291L861,290L861,289L861,287L861,285L861,284L862,282L863,280L862,279L863,279L864,277L864,277L863,277ZM859,277L858,277L858,277ZM761,303L762,304L761,305L761,305L762,305L763,307L764,307L764,308L765,308L766,309L766,309L767,310L769,309L770,309L770,308L771,308L772,306L772,306L773,307L775,308L776,307L779,306L780,306L781,304L780,304L780,303L782,303L782,304L784,302L785,301L786,301L787,302L789,300L789,299L789,299L789,298L790,298L790,297L789,296L789,296L789,295L789,294L790,292L791,290L792,289L793,287L793,286L793,286L793,285L793,284L794,282L795,282L794,281L795,279L796,278L796,277L796,275L798,275L799,277L802,277L804,275L804,273L804,272L805,271L805,270L805,269L806,267L808,269L809,266L810,264L810,265L811,265L811,263L812,264L812,262L812,262L813,260L813,260L814,259L813,258L814,257L813,257L814,255L814,254L814,254L814,253L814,252L818,255L824,258L824,254L825,253L825,253L826,253L827,253L828,254L829,254L829,255L828,256L829,257L829,257L830,258L832,258L833,258L834,259L834,259L835,259L836,260L837,261L838,262L838,264L837,265L837,265L837,266L836,267L835,266L835,267L835,270L835,271L835,272L836,273L838,272L838,272L839,271L839,271L840,271L840,272L841,273L842,274L844,275L845,275L846,275L846,275L848,275L848,275L849,276L850,277L851,277L852,278L853,278L855,279L855,280L854,281L854,283L855,283L854,284L855,284L854,285L852,284L851,285L851,285L851,284L850,282L848,282L848,282L847,282L845,280L845,280L844,279L844,279L844,279L845,281L847,282L848,283L848,283L849,283L850,285L851,286L853,285L853,286L855,286L855,287L855,287L855,287L856,287L856,287L857,289L857,291L856,290L854,290L854,291L855,291L855,292L856,292L855,293L853,293L854,294L855,293L855,295L856,294L857,295L857,295L858,296L858,298L857,298L857,298L856,299L855,298L853,297L852,296L852,295L851,294L850,295L849,295L849,295L847,295L847,294L846,295L847,296L847,295L849,295L850,296L850,296L850,295L851,297L852,298L853,298L855,299L855,301L857,300L857,300L857,300L858,300L858,299L858,298L859,299L862,299L863,298L863,298L864,301L865,303L866,304L867,306L859,308L851,309L849,309L850,310L843,311L827,314L823,315L806,318L796,320L793,320L786,321L784,321L778,322L774,322L769,323L770,322L765,323L765,323L756,325L752,325L743,327L742,327L738,327L735,327L736,327L738,326L739,326L741,324L743,323L744,323L744,322L745,321L747,320L748,319L748,319L748,317L749,317L749,317L750,316L750,314L751,313L752,312L754,311L756,310Z"/>
+<path class="us-state" d="M143,55L143,53L144,52L145,53L144,54L145,55L144,55L144,56L143,56ZM148,30L148,29L149,30L148,31ZM148,26L148,26L149,28L148,27ZM147,29L147,29L148,30L147,30ZM144,36L146,35L147,34L147,33L148,33L148,34L148,34L149,35L149,36L148,36L147,36L147,36L146,36L145,36L145,37L146,37L147,38L147,39L146,40L146,42L147,41L147,40L148,40L148,41L149,42L149,44L148,44L147,44L147,42L146,42L146,42L146,41L146,39L146,38L145,38L145,38ZM145,24L145,24L147,26L146,26L145,25ZM143,25L144,25L144,26ZM145,19L145,19L145,20L145,20ZM141,27L141,27L142,27L142,27L143,28L143,29L143,27L145,26L146,26L147,28L146,28L146,29L146,30L145,31L145,32L144,32L144,31L143,31L142,30L141,29L141,27ZM141,25L142,25L142,27L141,25ZM228,41L227,46L225,54L224,59L221,72L221,72L216,95L215,96L216,97L216,98L216,99L217,100L215,102L216,102L216,104L207,102L194,99L186,97L185,97L183,97L182,97L182,97L178,97L177,96L176,96L175,97L173,97L171,97L169,97L167,97L167,98L166,98L164,98L162,97L162,96L161,96L160,96L157,96L156,97L156,96L154,96L153,97L152,97L152,95L150,94L149,94L148,93L147,93L146,93L144,93L143,92L142,92L142,93L138,93L137,93L136,93L135,93L134,92L133,92L133,92L131,91L129,89L129,88L130,87L130,86L130,85L130,84L130,83L130,81L130,80L127,77L127,76L125,77L124,76L123,75L123,75L123,74L122,73L120,73L120,72L119,72L119,72L118,72L117,72L116,72L116,70L115,70L115,71L114,71L115,69L116,66L117,63L117,65L116,66L116,69L117,69L117,69L117,68L117,67L117,67L118,66L118,64L119,63L120,63L120,62L119,62L118,62L118,62L118,62L117,61L117,60L117,58L118,58L118,59L118,58L121,58L121,57L119,56L120,56L118,55L118,55L118,57L117,57L117,56L118,53L118,49L118,48L118,44L118,42L118,39L118,39L118,38L118,37L117,36L117,35L117,33L117,31L117,31L117,29L118,29L119,26L118,25L119,25L119,25L121,27L122,28L123,28L124,30L124,29L126,31L126,31L127,33L130,34L131,34L132,35L133,35L133,35L135,35L135,36L137,37L139,36L139,36L140,37L140,38L141,38L142,38L141,39L142,40L142,41L142,41L143,40L142,39L142,38L143,38L144,38L144,39L143,39L143,40L144,40L144,39L145,39L145,41L144,41L144,42L144,43L145,44L144,44L143,44L143,45L142,45L141,47L140,47L142,45L141,45L140,46L139,47L138,48L135,51L134,53L135,53L136,53L136,53L138,53L138,52L135,53L135,52L138,49L140,48L141,48L142,46L143,45L145,45L145,43L146,44L146,47L145,47L145,48L145,48L145,49L145,50L145,50L144,51L143,52L144,52L143,53L143,54L143,55L142,56L142,56L141,58L140,56L141,54L140,55L139,56L140,58L140,58L139,59L139,59L138,58L138,56L138,55L139,54L139,54L138,55L137,55L137,57L137,58L138,58L138,59L139,60L140,59L140,59L141,59L142,57L142,56L142,56L143,57L144,57L144,56L145,56L146,55L146,54L145,54L146,53L145,52L145,51L147,51L146,49L147,48L147,46L148,46L149,44L150,44L151,42L150,42L149,40L150,39L150,38L149,37L149,38L148,38L148,40L149,41L149,41L148,39L147,39L147,38L148,37L149,37L150,37L150,37L150,36L149,35L148,33L149,33L147,33L147,32L147,32L147,32L147,31L148,31L149,31L149,32L150,32L150,30L151,31L151,30L151,29L151,27L151,27L151,26L150,26L149,26L149,27L149,26L149,25L149,25L149,25L149,24L148,23L149,22L149,22L148,21L149,21L158,23L163,25L170,26L177,28L187,31L195,33L203,35L212,37Z"/>
+<path class="us-state" d="M662,145L662,144L664,144L663,146ZM656,149L656,149L657,150L656,150ZM607,114L607,113L608,112L608,114ZM606,117L607,116L607,117ZM604,116L605,115L606,115L606,115L606,116L605,116ZM603,118L603,117L604,116L604,117ZM603,115L604,116L603,116L603,116ZM602,114L604,113L605,114L606,113L606,114L605,114L604,115L603,115L603,114ZM602,119L603,119L605,117L606,117L604,118L605,119L604,119L603,120ZM599,115L600,114L600,115ZM585,122L586,122L587,122L590,121L591,120L592,120L594,119L596,118L596,118L597,118L597,117L599,117L600,116L600,116L601,115L602,115L603,117L602,118L601,120L602,121L601,122L600,123L601,123L603,122L603,121L606,123L607,123L607,123L608,123L609,124L609,124L609,124L610,124L611,125L613,127L613,128L629,131L633,133L634,133L635,133L635,134L636,134L636,133L637,133L638,134L639,134L639,134L641,134L641,134L644,135L644,136L644,136L643,137L644,138L645,137L646,138L647,138L648,139L648,139L649,140L648,140L649,141L649,142L649,143L649,144L648,145L648,145L648,146L648,147L648,147L650,146L651,146L651,146L651,147L651,147L650,150L651,150L651,151L652,152L653,152L652,153L652,154L650,155L649,156L650,156L649,158L649,158L648,159L648,160L647,162L648,163L647,164L648,164L649,164L649,163L650,162L651,162L652,160L652,160L653,157L654,156L655,157L656,156L656,156L656,156L656,154L658,152L658,150L659,150L660,149L660,148L660,147L662,147L662,148L661,148L661,151L660,152L660,152L660,153L659,154L659,155L659,155L659,156L658,157L658,158L657,159L657,161L656,162L656,163L655,168L656,170L656,171L655,172L654,173L654,174L653,175L653,178L653,179L654,180L654,182L653,184L653,187L652,189L651,192L652,193L652,194L652,196L652,197L653,198L653,199L653,201L654,202L654,203L654,205L655,208L650,208L641,209L639,209L628,210L625,210L612,211L610,211L610,210L609,208L608,208L605,207L603,206L602,203L602,203L602,201L601,200L601,198L601,197L602,196L603,195L602,194L600,193L600,192L600,191L600,190L599,189L599,188L599,187L599,186L599,184L598,183L597,180L596,179L594,179L592,177L591,177L590,176L589,175L589,174L588,173L588,172L587,172L586,171L583,170L582,169L582,168L581,168L578,168L578,167L577,167L577,166L575,165L575,164L574,164L575,162L575,161L575,160L575,159L575,158L574,157L575,156L575,155L575,154L575,152L575,151L575,151L576,150L576,149L575,147L575,147L574,146L574,147L572,146L572,145L573,143L574,142L575,139L576,138L577,138L578,137L578,137L579,136L580,137L580,135L581,135L580,123L582,123L582,122L582,122L583,121L583,121L583,121Z"/>
+<path class="us-state" d="M400,197L417,198L425,199L434,200L438,200L449,201L461,201L470,201L480,202L487,202L487,203L490,205L492,206L494,207L495,207L496,207L496,205L497,205L498,205L499,206L500,205L501,206L502,205L503,206L504,205L504,205L505,205L507,206L507,206L508,207L508,207L510,208L511,208L512,208L513,209L513,210L514,210L515,210L515,211L516,212L516,213L517,213L518,214L519,213L519,214L520,214L519,215L519,217L520,217L521,219L520,220L520,220L521,221L521,223L522,223L522,224L523,224L523,225L524,225L523,226L523,226L524,227L524,228L525,228L524,229L524,230L524,231L524,231L524,232L524,232L524,233L524,234L525,235L525,234L526,234L526,235L527,236L527,238L526,238L528,239L527,240L527,241L527,241L528,242L528,242L528,244L528,244L528,245L528,246L528,246L528,247L529,248L528,249L528,250L528,251L528,252L528,253L529,253L530,254L530,255L529,256L531,256L531,255L531,256L531,256L531,257L531,258L531,258L532,261L533,261L533,262L534,262L534,263L536,265L535,266L537,267L529,267L521,267L505,267L489,267L480,267L464,266L448,265L442,265L427,264L429,243L420,242L413,241L396,240Z"/>
+<path class="us-state" d="M750,360L755,358L756,358L757,357L759,356L759,356L760,355L761,355L762,354L762,355L763,354L775,353L781,352L785,352L785,353L785,354L785,354L787,353L790,356L790,358L801,357L806,356L810,355L816,360L818,362L826,367L833,372L832,373L830,374L829,375L827,378L826,380L826,381L825,382L824,384L824,387L824,388L824,389L823,390L822,391L822,393L821,393L820,393L819,393L818,393L818,395L818,395L818,395L818,396L818,396L817,397L816,398L814,400L813,399L813,399L813,400L814,400L814,401L812,403L812,403L811,403L810,404L809,405L809,405L807,407L806,407L805,407L805,407L804,407L804,408L805,409L805,411L803,412L802,413L802,412L800,411L800,412L800,412L800,413L802,414L801,415L799,416L799,416L798,418L798,418L798,418L796,417L795,417L794,417L793,416L794,415L793,414L793,413L793,412L792,412L791,410L791,410L790,409L790,408L788,408L787,407L787,406L787,405L786,405L787,404L786,404L786,402L785,402L785,401L784,400L784,399L783,398L782,397L781,398L779,397L779,396L779,395L778,396L777,395L777,394L775,393L775,392L775,392L775,391L775,390L774,390L773,389L771,388L771,388L770,388L770,387L769,386L769,385L766,384L764,383L763,382L763,382L762,380L761,379L760,378L759,378L758,377L758,376L758,375L757,374L756,373L756,372L755,371L755,371L753,372L752,371L750,369L749,369L747,368L746,367L747,366L747,365L748,363L750,362Z"/>
+<path class="us-state" d="M216,104L216,102L215,102L217,100L216,99L216,98L216,97L215,96L216,95L221,72L221,72L224,59L225,54L227,46L228,41L237,43L242,44L239,58L238,60L237,65L239,68L239,69L240,70L240,70L240,71L241,72L240,73L241,74L240,75L240,75L240,75L240,76L241,77L241,77L240,77L239,78L240,78L242,80L242,81L243,82L245,82L245,83L245,84L245,84L245,85L246,85L247,86L247,88L247,89L248,89L249,91L248,92L249,93L250,94L250,95L250,96L251,95L251,95L252,95L252,96L252,97L252,97L253,97L254,98L255,98L256,97L256,98L256,99L255,101L255,101L255,102L254,103L253,105L253,106L253,106L253,108L252,108L251,108L252,109L251,110L251,111L252,112L252,113L252,114L252,114L251,114L249,116L250,117L250,118L249,119L249,119L249,120L250,120L250,122L251,122L251,123L253,122L253,121L254,122L255,121L256,120L257,120L257,119L258,119L258,119L259,120L258,121L259,121L260,121L259,123L260,123L260,124L260,125L260,126L260,126L260,127L260,129L260,129L261,131L261,132L262,133L262,133L263,134L263,135L263,136L262,136L262,138L263,139L263,140L265,139L267,141L267,143L267,144L267,145L267,146L267,147L267,148L268,149L269,149L269,150L270,150L270,149L271,148L272,148L273,148L274,149L275,149L275,149L276,150L277,149L277,148L278,148L278,147L279,148L280,148L281,148L281,149L282,149L283,149L283,149L285,149L285,150L287,149L287,149L288,150L289,149L291,150L290,149L291,147L291,146L292,147L293,146L293,147L295,149L294,150L296,151L296,152L297,153L296,155L296,160L294,169L294,170L291,190L290,193L288,205L282,204L271,202L270,202L260,200L245,198L242,197L235,196L233,195L230,195L226,194L222,193L206,190L195,187L204,149L204,148L205,148L205,147L206,146L206,145L206,144L206,144L207,143L207,142L208,142L207,141L207,140L206,140L205,139L204,139L203,139L204,138L203,136L204,136L204,134L205,134L206,133L207,131L208,130L210,129L210,129L211,128L212,126L212,125L212,124L213,124L214,123L215,122L215,120L216,119L216,119L218,116L219,116L219,115L221,113L221,112L220,111L220,110L220,109L219,109L218,108L217,108L217,106L216,106Z"/>
+<path class="us-state" d="M150,176L150,176L162,180L170,182L171,182L186,185L195,187L206,190L222,193L226,194L230,195L233,195L235,196L242,197L238,218L237,223L234,235L234,237L228,268L227,273L226,279L225,282L224,287L224,287L221,303L220,311L219,316L218,321L217,321L215,324L214,324L213,323L213,322L212,321L211,320L210,320L210,320L209,320L208,320L208,320L207,320L205,320L206,322L205,323L206,325L206,325L205,326L205,327L205,328L205,329L205,329L205,330L205,331L205,333L204,333L204,334L205,335L205,337L205,340L205,341L203,342L204,342L203,344L196,333L192,328L181,311L166,289L161,280L158,276L152,267L148,261L145,256L140,249L135,241L133,239L134,234L135,232L137,224L137,224L139,217L143,203L143,203Z"/>
+<path class="us-state" d="M866,118L870,117L876,116L878,116L881,115L884,114L893,111L892,112L894,114L893,115L893,116L893,118L894,119L894,120L895,121L894,121L895,122L894,123L894,124L893,125L892,125L892,126L891,127L891,127L889,128L889,129L889,130L889,131L890,132L890,133L890,134L889,135L890,137L889,138L889,139L889,140L888,141L888,142L888,144L888,145L888,146L888,147L888,149L889,150L888,152L889,154L889,155L889,156L890,157L889,158L889,158L889,159L889,161L890,162L890,162L891,163L879,166L878,164L878,164L878,162L876,155L875,149L874,148L874,147L872,148L872,149L872,148L872,146L872,144L871,143L871,142L870,141L870,139L869,139L869,137L869,136L870,134L870,134L869,132L870,130L869,129L868,128L867,126L867,126L867,124L867,123L866,122L866,121L866,120Z"/>
+<path class="us-state" d="M658,478L659,479L659,480L659,482L659,484L658,484L659,482L659,480L659,479ZM649,478L650,477L652,476L652,476L651,477L651,478L652,478L651,479L651,478L650,478L649,478ZM645,490L646,489L645,490ZM631,500L632,499L633,500L632,501ZM628,500L630,501L629,501ZM624,501L626,501L626,501L624,501ZM600,491L601,490L601,490L602,490L603,490L605,491L605,491L606,491L605,492L605,493L604,493L600,491ZM561,418L573,418L578,418L588,418L598,417L612,417L612,418L611,419L612,419L613,418L613,417L613,417L614,418L614,419L613,420L612,421L612,422L614,423L614,423L613,424L613,424L613,425L613,426L615,425L615,424L616,425L615,426L614,426L616,427L616,428L615,428L614,427L614,427L614,428L615,429L616,428L616,429L616,429L616,431L617,431L618,430L618,430L617,432L616,432L617,433L616,433L615,433L615,433L613,434L613,435L615,436L615,434L616,435L615,436L615,437L614,437L614,437L613,437L614,437L615,438L613,439L613,439L613,440L612,442L612,442L612,443L611,442L611,441L610,442L610,443L612,444L612,444L610,444L609,445L609,447L608,447L608,446L607,447L608,448L609,447L609,448L609,448L607,449L607,450L608,452L608,452L608,452L607,452L607,451L606,452L607,452L607,453L608,453L608,454L607,455L605,455L605,455L606,456L606,456L606,457L606,458L607,459L607,460L606,460L621,460L629,459L640,458L641,459L640,459L640,460L640,461L640,463L639,463L639,464L639,466L639,466L640,468L640,468L641,469L642,469L642,470L642,471L643,472L643,474L644,475L645,476L646,476L644,476L644,476L643,477L643,478L642,478L642,479L640,479L640,480L640,481L641,481L642,481L642,482L643,482L644,483L644,482L645,482L645,480L645,480L646,479L647,478L648,478L649,478L649,479L648,479L648,480L649,480L649,481L650,481L650,479L652,480L651,481L651,481L650,482L651,482L651,482L649,483L650,484L651,483L650,484L650,484L649,484L648,485L648,487L647,487L647,485L646,485L646,487L647,488L646,487L645,487L645,487L644,487L645,488L645,489L643,488L643,488L644,489L644,489L644,490L644,490L646,490L646,491L647,491L647,492L647,493L648,492L648,492L649,492L651,493L651,492L652,494L653,493L655,495L655,496L655,496L656,496L657,496L655,497L655,497L656,497L656,498L655,498L654,500L655,501L653,500L653,499L652,499L650,501L649,502L650,501L650,500L651,500L651,499L651,498L652,498L652,497L651,496L651,497L650,498L649,498L648,496L645,496L645,495L641,494L640,495L637,498L634,500L634,500L634,499L633,499L633,498L633,498L632,496L632,496L631,496L631,496L631,497L631,496L630,495L629,496L628,496L628,496L627,495L627,496L628,497L627,497L626,498L626,499L626,499L625,500L625,499L623,500L623,501L622,501L622,501L621,500L620,499L619,499L618,499L617,498L615,498L614,498L613,497L614,496L614,495L615,495L616,496L616,496L616,497L617,497L617,495L615,494L615,494L614,493L614,494L613,495L613,494L612,494L613,493L613,493L612,492L611,493L610,492L609,492L609,490L607,490L607,489L607,487L605,487L604,487L603,488L602,487L603,486L603,486L603,486L602,485L601,486L601,486L601,486L599,487L598,488L598,487L596,487L596,488L597,489L598,489L598,489L598,490L600,490L600,490L599,491L600,491L597,491L596,492L594,492L589,491L586,491L583,489L581,488L578,488L576,488L575,488L573,488L569,488L568,489L566,490L565,488L564,488L564,487L565,486L566,485L567,483L568,483L568,482L568,481L569,480L568,479L568,478L568,477L567,476L567,475L568,474L568,472L567,472L568,471L568,470L569,469L569,468L570,467L570,466L571,465L570,464L571,463L571,463L570,462L570,461L571,461L571,460L571,459L571,458L570,458L569,456L569,456L568,455L568,454L568,453L568,453L568,452L567,451L567,451L567,450L566,450L565,450L565,449L565,448L565,447L566,447L565,446L565,445L564,444L564,442L562,442L562,441L561,440Z"/>
+<path class="us-state" d="M916,180L917,180L918,183L917,184L916,183L916,181L916,181L916,184L915,184L916,185L915,185L915,184L915,182L915,181ZM913,181L914,181L915,181L914,182ZM914,185L914,184L914,184L914,183L914,183L914,185ZM912,192L913,191L913,191L913,192ZM908,190L908,189L907,188L908,188L907,184L907,181L905,177L905,175L911,173L912,176L913,176L913,177L913,178L915,179L915,179L915,180L915,181L914,180L914,180L913,179L912,178L913,181L912,181L913,181L913,183L913,183L913,184L914,185L913,186L913,187L913,187L911,188L910,189L908,190Z"/>
+              </g>
+              <g class="pins">
+        <g class="pin live" transform="translate(843.5 169.5)"><circle class="pin-halo" r="10" stroke-width="1.4"/><circle class="pin-dot" r="5.5"/></g>
+        <g class="pin live" transform="translate(780.7 495.1)"><circle class="pin-halo" r="10" stroke-width="1.4"/><circle class="pin-dot" r="5.5"/></g>
+        <g class="pin live" transform="translate(636.4 262.5)"><circle class="pin-halo" r="10" stroke-width="1.4"/><circle class="pin-dot" r="5.5"/></g>
+        <g class="pin live" transform="translate(269 261.2)"><circle class="pin-halo" r="10" stroke-width="1.4"/><circle class="pin-dot" r="5.5"/></g>
+        <g class="pin live" transform="translate(251.3 368.7)"><circle class="pin-halo" r="10" stroke-width="1.4"/><circle class="pin-dot" r="5.5"/></g>
+        <g class="pin soon" transform="translate(465.2 450.9)"><circle class="pin-halo" r="10" stroke-width="1.4"/><circle class="pin-dot" r="5.5"/></g>
+        <g class="pin soon" transform="translate(750.9 411.8)"><circle class="pin-halo" r="10" stroke-width="1.4"/><circle class="pin-dot" r="5.5"/></g>
+        <g class="pin soon" transform="translate(812.3 338.6)"><circle class="pin-halo" r="10" stroke-width="1.4"/><circle class="pin-dot" r="5.5"/></g>
+        <g class="pin soon" transform="translate(791.8 378.2)"><circle class="pin-halo" r="10" stroke-width="1.4"/><circle class="pin-dot" r="5.5"/></g>
+        <g class="pin soon" transform="translate(691.8 348.7)"><circle class="pin-halo" r="10" stroke-width="1.4"/><circle class="pin-dot" r="5.5"/></g>
+        <g class="pin soon" transform="translate(368.2 281.2)"><circle class="pin-halo" r="10" stroke-width="1.4"/><circle class="pin-dot" r="5.5"/></g>
+        <g class="pin soon" transform="translate(151.6 133.8)"><circle class="pin-halo" r="10" stroke-width="1.4"/><circle class="pin-dot" r="5.5"/></g>
+              </g>
+              <g class="state-labels" aria-hidden="true">
+                <g class="state-label live" transform="translate(865 160)"><rect x="-13" y="-8" width="26" height="16" rx="8"/><text>NY</text></g>
+                <g class="state-label live" transform="translate(800 506)"><rect x="-13" y="-8" width="26" height="16" rx="8"/><text>FL</text></g>
+                <g class="state-label live" transform="translate(656 252)"><rect x="-12" y="-8" width="24" height="16" rx="8"/><text>IL</text></g>
+                <g class="state-label live" transform="translate(288 252)"><rect x="-13" y="-8" width="26" height="16" rx="8"/><text>UT</text></g>
+                <g class="state-label live" transform="translate(270 388)"><rect x="-13" y="-8" width="26" height="16" rx="8"/><text>AZ</text></g>
+                <g class="state-label soon" transform="translate(488 458)"><rect x="-13" y="-8" width="26" height="16" rx="8"/><text>TX</text></g>
+                <g class="state-label soon" transform="translate(735 430)"><rect x="-13" y="-8" width="26" height="16" rx="8"/><text>GA</text></g>
+                <g class="state-label soon" transform="translate(834 332)"><rect x="-13" y="-8" width="26" height="16" rx="8"/><text>NC</text></g>
+                <g class="state-label soon" transform="translate(812 392)"><rect x="-13" y="-8" width="26" height="16" rx="8"/><text>SC</text></g>
+                <g class="state-label soon" transform="translate(712 342)"><rect x="-13" y="-8" width="26" height="16" rx="8"/><text>TN</text></g>
+                <g class="state-label soon" transform="translate(390 274)"><rect x="-13" y="-8" width="26" height="16" rx="8"/><text>CO</text></g>
+                <g class="state-label soon" transform="translate(172 126)"><rect x="-13" y="-8" width="26" height="16" rx="8"/><text>OR</text></g>
+              </g>
+            </svg>
+          </div>
+          <div class="reach-lists">
+            <div class="rl-group">
+              <h4><i style="background:var(--navy)"></i>Live now</h4>
+              <ul><li>New York</li><li>Florida</li><li>Illinois</li><li>Utah</li><li>Arizona</li></ul>
+            </div>
+            <div class="rl-group">
+              <h4><i style="background:var(--beam-soon)"></i>Coming soon</h4>
+              <ul><li>Texas</li><li>Georgia</li><li>North Carolina</li><li>South Carolina</li><li>Tennessee</li><li>Colorado</li><li>Oregon</li></ul>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- the path's last gesture, then a hard stop -->
+      <div class="spine-end">
+        <span class="spine-arrowhead"><svg viewBox="0 0 24 24"><path d="M12 3v15"/><path d="M5 12l7 7 7-7"/></svg></span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- PRODUCT (clean start below the arrowhead) -->
+<section class="product" id="product">
+  <div class="wrap">
+    <div class="product-eye rv">Product</div>
+    <div class="product-grid">
+      <div class="pcard pcard-primary rv">
+        <div class="ptitle">Matching</div>
+        <div class="pone">The right firm for your exact situation.</div>
+        <p class="pbody">Answer a few questions and we match you to firms built for your exact situation, each with the reasons why. It takes less than 5 minutes and you save up to thousands of dollars on poor legal help and wasted time.</p>
+        <div class="pcard-actions">
+          <a href="#" class="btn btn-primary">Get matched</a>
+          <a href="#" class="btn-link product-more" aria-disabled="true">Learn more <span class="arw">→</span></a>
+        </div>
+      </div>
+      <div class="pcard rv">
+        <div class="ptitle">Consultations</div>
+        <div class="pone">Talk it through first.</div>
+        <p class="pbody">Not sure what kind of help you actually need? Book a free consultation and talk through your situation with someone who can point you in the right direction. No cost, no obligation.</p>
+        <div class="pcard-actions">
+          <a href="#" class="btn btn-primary">Book a call</a>
+          <a href="#" class="btn-link product-more" aria-disabled="true">Learn more <span class="arw">→</span></a>
+        </div>
+      </div>
+      <div class="pcard rv">
+        <span class="ptag ptag-soon">Coming soon</span>
+        <div class="ptitle">LWYRD Chatbot</div>
+        <p class="pbody">An assistant that helps you understand your situation and prepare for the right conversation, so you walk in already a step ahead.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- PARTNER -->
+<section class="partner" id="partner">
+  <div class="wrap">
+    <div class="sec-head center rv">
+      <h2>Partnerships</h2>
+    </div>
+    <div class="partner-stack">
+    <div class="partner-split rv">
+      <div class="partner-img partner-icon-panel law" role="img" aria-label="Scales of justice icon">
+        <img class="partner-asset" src="Illustrations/law-firm-scales.png" alt="">
+      </div>
+      <div class="partner-copy">
+        <div class="p-eye">For law firms</div>
+        <h3>Meet clients who are ready.</h3>
+        <p>Receive pre-qualified, structured matches in your practice areas. No cold leads, no wasted intake time.</p>
+        <ul class="partner-points">
+          <li>Matched around practice area, client type, and matter stage.</li>
+          <li>Structured intake details before the first conversation.</li>
+          <li>A cleaner front door for new client opportunities.</li>
+        </ul>
+        <div class="partner-actions">
+          <a href="#" class="btn btn-primary">Join our network</a>
+        </div>
+      </div>
+    </div>
+    <div class="partner-split flip rv">
+      <div class="partner-copy">
+        <div class="p-eye">For organizations</div>
+        <h3>Bring vetted legal help to your community.</h3>
+        <p>Give founders, members, or students a trusted front door to legal support, through a simple per-seat partnership.</p>
+        <ul class="partner-points">
+          <li>Useful for accelerators, campuses, member groups, and operators.</li>
+          <li>Clear routing across startup, business, and individual legal needs.</li>
+          <li>A trusted resource without building legal operations in-house.</li>
+        </ul>
+        <div class="partner-actions">
+          <a href="#" class="btn btn-primary">Explore partnerships</a>
+        </div>
+      </div>
+      <div class="partner-img partner-icon-panel org" role="img" aria-label="Partnership icon">
+        <img class="partner-asset" src="Illustrations/partnership-handshake.png" alt="">
+      </div>
+    </div>
+    </div>
+  </div>
+</section>
+
+<!-- BLOG -->
+<section class="blog" id="blog">
+  <div class="wrap">
+    <div class="sec-head center rv">
+      <h2>Resources</h2>
+    </div>
+    <div class="posts">
+      <a href="blog.html" class="post rv">
+        <div class="p-img"><img src="Photos/small_business.jpg" alt="Business owner reviewing documents at a counter"></div>
+        <div class="p-in">
+          <div class="p-meta"><span class="p-cat">Startups</span></div>
+          <h3>The documents investors expect before diligence starts</h3>
+          <p>A practical look at the legal basics that tend to matter when investors start reviewing the company.</p>
+        </div>
+      </a>
+      <a href="blog.html" class="post rv">
+        <div class="p-img"><img src="Photos/for_law_firms.jpg" alt="Law office desk with open legal materials"></div>
+        <div class="p-in">
+          <div class="p-meta"><span class="p-cat">Small business</span></div>
+          <h3>When a handshake deal needs to become a real contract</h3>
+          <p>A plain-English guide to the moments when informal arrangements need cleaner written terms.</p>
+        </div>
+      </a>
+      <a href="blog.html" class="post rv">
+        <div class="p-img"><img src="Photos/small_business.jpg" alt="Business owner reviewing documents at a counter"></div>
+        <div class="p-in">
+          <div class="p-meta"><span class="p-cat">Individuals</span></div>
+          <h3>A simple guide to preparing for an estate planning call</h3>
+          <p>What to gather before speaking with counsel so the first conversation is clearer and more useful.</p>
+        </div>
+      </a>
+    </div>
+    <div class="blog-foot rv">
+      <a href="blog.html" class="btn btn-ghost">Read the blog <span class="arw">→</span></a>
+    </div>
+  </div>
+</section>
+
+<!-- FAQ -->
+<section class="faq" id="faq">
+  <div class="wrap faq-narrow">
+    <div class="sec-head rv">
+      <h2>FAQ</h2>
+    </div>
+    <div class="faq-list rv">
+      <div class="qa">
+        <button aria-expanded="false"><span>Is LWYRD free to use?</span><span class="plus"></span></button>
+        <div class="ans"><p>Getting matched is free. You only ever pay a law firm directly if you choose to hire one, on terms you agree with them.</p></div>
+      </div>
+      <div class="qa">
+        <button aria-expanded="false"><span>How are law firms vetted?</span><span class="plus"></span></button>
+        <div class="ans"><p>Every partner firm is reviewed for practice-area fit, standing, and track record before they can receive a match through LWYRD.</p></div>
+      </div>
+      <div class="qa">
+        <button aria-expanded="false"><span>How does matching work?</span><span class="plus"></span></button>
+        <div class="ans"><p>Your intake answers are mapped to the practice areas and firm profiles that fit your situation, so you meet counsel built for your need.</p></div>
+      </div>
+      <div class="qa">
+        <button aria-expanded="false"><span>Does LWYRD give legal advice?</span><span class="plus"></span></button>
+        <div class="ans"><p>No. LWYRD is not a law firm and does not provide legal advice. We connect you with independent law firms who do.</p></div>
+      </div>
+    </div>
+    <div class="blog-foot rv">
+      <a href="faq.html" class="btn btn-ghost">See all FAQs <span class="arw">→</span></a>
+    </div>
+  </div>
+</section>
+
+<!-- FINAL CTA -->
+<section class="cta-band">
+  <div class="wrap">
+    <h2>Find your lawyer today.</h2>
+    <p>Tell us your situation, and we'll match you to vetted law firms built for your exact needs.</p>
+    <a href="#" class="btn btn-primary">Start your intake</a>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="wrap">
+    <div class="foot-grid">
+      <div class="foot-brand">
+        <a href="#" class="brand" aria-label="LWYRD home"><img src="Logos/LWYRD_White.png" alt="LWYRD" class="brand-logo"></a>
+        <p>The trusted front door to legal help, matching people and businesses to vetted law firms.</p>
+      </div>
+      <div class="foot-col">
+        <h4>Product</h4>
+        <a href="product/matching.html">Matching</a>
+        <a href="product/consultations.html">Consultations</a>
+        <a href="#" aria-disabled="true" class="soon-disabled" tabindex="-1">LWYRD Chatbot (Soon)</a>
+      </div>
+      <div class="foot-col">
+        <h4>Clients</h4>
+        <a href="#" aria-disabled="true">Startups</a>
+        <a href="#" aria-disabled="true">SMBs</a>
+        <a href="#" aria-disabled="true">Individuals</a>
+      </div>
+      <div class="foot-col">
+        <h4>Company</h4>
+        <a href="#" aria-disabled="true">Law Firms</a>
+        <a href="#" aria-disabled="true">About Us</a>
+        <a href="blog.html">Blog</a>
+      </div>
+      <div class="foot-col">
+        <h4>Help Center</h4>
+        <a href="faq.html">FAQ</a>
+        <a href="contact.html">Contact</a>
+      </div>
+    </div>
+    <div class="foot-legal">
+      <p class="foot-disclaimer">
+        LWYRD is not a law firm and does not provide legal advice, legal opinions, or representation. LWYRD provides a matching and referral service that connects users with independent law firms. Use of this site does not create an attorney-client relationship. LWYRD may receive a referral fee from partner law firms in connection with matched engagements, in accordance with applicable rules of professional conduct. This site may constitute attorney advertising. Prior results do not guarantee a similar outcome.
+      </p>
+      <div class="foot-bottom">
+        <span>© 2026 LWYRD. All rights reserved.</span>
+        <div class="fb-links">
+          <a href="#">Privacy</a>
+          <a href="#">Terms</a>
+          <a href="#">Disclosures</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script>
+  const nav=document.getElementById('nav');
+  const onScroll=()=>nav.classList.toggle('scrolled',window.scrollY>8);
+  onScroll();window.addEventListener('scroll',onScroll,{passive:true});
+
+  const header=document.querySelector('header.nav');
+  document.getElementById('navToggle').addEventListener('click',()=>header.classList.toggle('nav-menu-open'));
+  document.querySelectorAll('.nav-links a').forEach(a=>a.addEventListener('click',e=>{const h=a.getAttribute('href');if(h==='#'||a.getAttribute('aria-disabled')==='true'){e.preventDefault();}header.classList.remove('nav-menu-open');}));
+  document.querySelectorAll('a[href="#"],a[aria-disabled="true"]').forEach(a=>a.addEventListener('click',e=>e.preventDefault()));
+  let activeScrollFrame=0;
+  function smoothScrollTo(targetY,duration=650){
+    if(activeScrollFrame)cancelAnimationFrame(activeScrollFrame);
+    const reduce=matchMedia('(prefers-reduced-motion:reduce)').matches;
+    if(reduce){window.scrollTo({top:targetY,left:0,behavior:'auto'});return;}
+    const start=window.scrollY,dist=targetY-start,t0=performance.now();
+    function ease(t){return t<.5?4*t*t*t:1-Math.pow(-2*t+2,3)/2;}
+    function step(now){
+      const p=Math.min((now-t0)/duration,1);
+      window.scrollTo({top:start+dist*ease(p),left:0,behavior:'auto'});
+      if(p<1)activeScrollFrame=requestAnimationFrame(step);
+      else activeScrollFrame=0;
+    }
+    activeScrollFrame=requestAnimationFrame(step);
+  }
+  document.querySelectorAll('a[href^="#"]:not([href="#"])').forEach(a=>{
+    a.addEventListener('click',e=>{
+      const target=document.querySelector(a.getAttribute('href'));
+      if(!target)return;
+      e.preventDefault();
+      header.classList.remove('nav-menu-open');
+      const offset=(nav?.offsetHeight||0)+18;
+      const y=target.getBoundingClientRect().top+window.scrollY-offset;
+      smoothScrollTo(Math.max(0,y));
+    });
+  });
+
+  const segments=[...document.querySelectorAll('[data-seg]')];
+  const openSegment=seg=>{
+    segments.forEach(s=>{
+      const open=s===seg;
+      s.classList.toggle('is-open',open);
+      s.setAttribute('aria-expanded',open?'true':'false');
+    });
+  };
+  segments.forEach(seg=>{
+    seg.addEventListener('pointerenter',()=>openSegment(seg));
+    seg.addEventListener('mouseover',()=>openSegment(seg));
+    seg.addEventListener('focus',()=>openSegment(seg));
+    seg.addEventListener('click',()=>openSegment(seg));
+    seg.addEventListener('keydown',e=>{
+      if(e.key==='Enter'||e.key===' '){e.preventDefault();openSegment(seg);}
+    });
+  });
+
+  document.querySelectorAll('.qa button').forEach(btn=>{
+    btn.addEventListener('click',()=>{
+      const qa=btn.parentElement;
+      const open=qa.classList.contains('open');
+      document.querySelectorAll('.qa').forEach(q=>{q.classList.remove('open');q.querySelector('button').setAttribute('aria-expanded','false');});
+      if(!open){qa.classList.add('open');btn.setAttribute('aria-expanded','true');}
+    });
+  });
+
+  const io=new IntersectionObserver((entries)=>{
+    entries.forEach(e=>{if(e.isIntersecting){e.target.classList.add('in');io.unobserve(e.target);}});
+  },{threshold:.12,rootMargin:'0px 0px -40px 0px'});
+  document.querySelectorAll('.rv, .rv-seq').forEach(el=>io.observe(el));
+
+  /* ---------- full-bleed hero maze ---------- */
+  (function(){
+    const box=document.getElementById('heroMaze');
+    if(!box)return;
+    const NS='http://www.w3.org/2000/svg';
+    const REDUCE=matchMedia('(prefers-reduced-motion:reduce)').matches;
+    const NAVY='#002B55';
+    const el=(t,a)=>{const e=document.createElementNS(NS,t);for(const k in a)e.setAttribute(k,a[k]);return e;};
+
+    // small seeded PRNG so the maze (and therefore the path) is identical every load
+    function mulberry32(a){return function(){a|=0;a=a+0x6D2B79F5|0;let t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return ((t^t>>>14)>>>0)/4294967296;};}
+    function makeMaze(cols,rows,rng){
+      const c=[];
+      for(let r=0;r<rows;r++){const row=[];for(let x=0;x<cols;x++)row.push({n:1,e:1,s:1,w:1,v:0});c.push(row);}
+      const dirs=[['n',-1,0],['s',1,0],['e',0,1],['w',0,-1]],opp={n:'s',s:'n',e:'w',w:'e'};
+      let cur=[0,0];c[0][0].v=1;let cnt=1;const tot=cols*rows,st=[];
+      while(cnt<tot){
+        const [r,x]=cur;
+        const nb=dirs.filter(([d,dr,dx])=>{const nr=r+dr,nx=x+dx;return nr>=0&&nr<rows&&nx>=0&&nx<cols&&!c[nr][nx].v;});
+        if(nb.length){const [d,dr,dx]=nb[(rng()*nb.length)|0];const nr=r+dr,nx=x+dx;
+          c[r][x][d]=0;c[nr][nx][opp[d]]=0;c[nr][nx].v=1;cnt++;st.push(cur);cur=[nr,nx];}
+        else cur=st.pop();
+      }
+      return {cols,rows,c};
+    }
+    function solve(m,s,g){
+      const {cols,c}=m,key=(r,x)=>r*cols+x,prev=new Map();
+      const q=[s];prev.set(key(s[0],s[1]),null);
+      const dirs=[['n',-1,0],['s',1,0],['e',0,1],['w',0,-1]];
+      while(q.length){const [r,x]=q.shift();if(r===g[0]&&x===g[1])break;
+        for(const [d,dr,dx] of dirs){if(c[r][x][d])continue;const nr=r+dr,nx=x+dx,k=key(nr,nx);if(prev.has(k))continue;prev.set(k,[r,x]);q.push([nr,nx]);}}
+      const path=[];let cu=g;while(cu){path.push(cu);cu=prev.get(key(cu[0],cu[1]));}
+      return path.reverse();
+    }
+    function wallsD(m,s){
+      let d='';const {cols,rows,c}=m;
+      for(let r=0;r<rows;r++)for(let x=0;x<cols;x++){
+        const px=x*s,py=r*s;
+        if(c[r][x].n)d+=`M${px} ${py}h${s}`;
+        if(c[r][x].w)d+=`M${px} ${py}v${s}`;
+        if(x===cols-1&&c[r][x].e)d+=`M${px+s} ${py}v${s}`;
+        if(r===rows-1&&c[r][x].s)d+=`M${px} ${py+s}h${s}`;
+      }
+      return d;
+    }
+    const pts=(p,s)=>p.map(([r,x])=>[x*s+s/2,r*s+s/2]);
+    const dStr=p=>p.map((q,i)=>(i?'L':'M')+q[0].toFixed(1)+' '+q[1].toFixed(1)).join('');
+
+    function travel(pathEl,dotEl,trailEl,o){
+      o=o||{};const len=pathEl.getTotalLength();
+      const dur=o.dur||3400,delay=o.delay||0;
+      trailEl.style.strokeDasharray=`0 ${len}`;trailEl.style.strokeDashoffset=0;
+      if(REDUCE){trailEl.style.strokeDasharray=`${len} ${len}`;trailEl.style.strokeDashoffset=0;const p=pathEl.getPointAtLength(len);dotEl.setAttribute('cx',p.x);dotEl.setAttribute('cy',p.y);dotEl.style.opacity=1;o.onArrive&&o.onArrive();return;}
+      let s0=null;
+      function fr(ts){
+        if(s0===null)s0=ts+delay;
+        const e=ts-s0;
+        if(e<0)return requestAnimationFrame(fr);
+        const t=Math.min(e/dur,1);
+        const te=t<.5?2*t*t:1-Math.pow(-2*t+2,2)/2;   // easeInOut: gentle slow finish
+        const p=pathEl.getPointAtLength(len*te);
+        dotEl.setAttribute('cx',p.x);dotEl.setAttribute('cy',p.y);dotEl.style.opacity=1;
+        const head=len*te;
+        const maxLit=len*.52;
+        const tail=Math.max(0,head-maxLit);
+        trailEl.style.strokeDasharray=`${Math.max(0.1,head-tail)} ${len}`;
+        trailEl.style.strokeDashoffset=-tail;
+        if(t<1)requestAnimationFrame(fr);
+        else o.onArrive&&o.onArrive();
+      }
+      requestAnimationFrame(fr);
+    }
+
+    const cols=26,rows=12,s=54,W=cols*s,H=rows*s;
+    const m=makeMaze(cols,rows,mulberry32(4997));   // fixed seed: a long maze route that wraps once around the page into the button
+    const cta=document.getElementById('heroCta');
+
+    const arrow=document.getElementById('scrollArrow');
+    const spineTrack=document.getElementById('spineTrack');
+
+    // project between the sliced maze SVG space and the screen (xMidYMid slice crops on the wide axis)
+    function proj(){const bx=box.getBoundingClientRect();const scale=Math.max(bx.width/W,bx.height/H);
+      return {bx,scale,offX:(bx.width-W*scale)/2,offY:(bx.height-H*scale)/2};}
+    function svgToScreen(sx,sy){const {bx,scale,offX,offY}=proj();return [bx.left+offX+sx*scale,bx.top+offY+sy*scale];}
+    function screenXToCol(x){const {bx,scale,offX}=proj();const svgX=(x-bx.left-offX)/scale;
+      return Math.max(1,Math.min(cols-2,Math.round((svgX-s/2)/s)));}
+
+    // the whole point: the hero path exits straight DOWN the maze column that lines up with the spine,
+    // so the maze, the arrow, and the spine all share one vertical axis (no diagonals, nothing floating).
+    let railX;
+    {const r=spineTrack?spineTrack.getBoundingClientRect():null;const bx=box.getBoundingClientRect();
+     railX=(r&&(r.width||r.height))?(r.left+r.width/2):(bx.left+bx.width*0.12);}
+    const exitCol=screenXToCol(railX);
+    const exX=exitCol*s+s/2;               // svg x of the exit column (the shared axis)
+    const grow=rows-2;                     // land the arrow a little above the hero's bottom edge
+
+    function carve(a,b){const c=m.c;const [r,x]=a,[nr,nx]=b;
+      if(nr===r-1){c[r][x].n=0;c[nr][nx].s=0;}else if(nr===r+1){c[r][x].s=0;c[nr][nx].n=0;}
+      else if(nx===x-1){c[r][x].w=0;c[nr][nx].e=0;}else if(nx===x+1){c[r][x].e=0;c[nr][nx].w=0;}}
+    const wrng=mulberry32(97);
+    const startR=Math.max(1,grow-4);       // enter close to the arrow: keep the path short and on the left
+    const cur={r:startR,c:0};
+    let cells=[[cur.r,cur.c]];
+    const push=()=>cells.push([cur.r,cur.c]);
+    // advance `prim` toward target one cell at a time, throwing perpendicular teeth of random depth
+    function weaveEdge(prim,target,perp,base,perpDir,maxDepth){
+      const step=Math.sign(target-cur[prim]),startVal=cur[prim];
+      if(step===0){while(cur[perp]!==base){cur[perp]-=perpDir;push();}return;}
+      while(cur[prim]!==target){
+        const done=Math.abs(cur[prim]-startVal),rem=Math.abs(target-cur[prim]);
+        const depth=(done<2||rem<2)?0:(1+((wrng()*maxDepth)|0));
+        for(let k=0;k<depth;k++){cur[perp]+=perpDir;push();}
+        let adv=1+((wrng()*3)|0);
+        for(let k=0;k<adv&&cur[prim]!==target;k++){cur[prim]+=step;push();}
+        while(cur[perp]!==base){cur[perp]-=perpDir;push();}
+        let adv2=2+((wrng()*3)|0);
+        for(let k=0;k<adv2&&cur[prim]!==target;k++){cur[prim]+=step;push();}
+      }
+      while(cur[perp]!==base){cur[perp]-=perpDir;push();}
+    }
+    const jog=Math.min(cols-2,exitCol+4);      // a small excursion to the right, staying on the left side
+    weaveEdge('c',jog,'r',startR,+1,2);        // enter and weave a few cells right
+    weaveEdge('r',grow-1,'c',jog,+1,1);        // drop down a little, dipping right
+    weaveEdge('c',exitCol,'r',grow-1,-1,1);    // come back to the exit column
+    weaveEdge('r',grow,'c',exitCol,+1,1);      // final short drop straight into the arrow
+    for(let i=0;i<cells.length-1;i++)carve(cells[i],cells[i+1]);   // open the walls along the route
+    for(let r=grow;r<rows-1;r++)carve([r,exitCol],[r+1,exitCol]);   // continue the arrow column into a real maze exit
+    m.c[rows-1][exitCol].s=0;                  // open the outside wall so the arrow points through an actual exit
+    let P=pts(cells,s);
+    P.unshift([-s*0.7,P[0][1]]);          // enter from off the left edge
+    const gp=[exX,grow*s+s/2];            // the light lands here: the exit column, dead centre of the arrow
+    P.push(gp);                            // final leg is pure vertical (same x as the last cell), no diagonal
+
+    // pin the arrow, the connecting stub, and the spine's rail to the exact axis where the path lands
+    const stub=document.getElementById('exitStub');
+    (function alignAxis(){
+      const heroSec=document.querySelector('.hero'),spine=document.getElementById('spine');
+      const [ax,ay]=svgToScreen(exX,grow*s+s/2);   // ay = the landing point / arrow centre
+      if(heroSec){
+        const hr=heroSec.getBoundingClientRect(),localX=ax-hr.left;
+        if(arrow){arrow.style.left=localX+'px';arrow.style.bottom=((hr.bottom-ay)-27)+'px';}   // centre the 54px arrow on the landing
+        if(stub){                                   // a guide line from just below the arrow down to the hero's edge
+          const topFromHero=(ay-hr.top)+27;
+          stub.style.left=localX+'px';stub.style.top=topFromHero+'px';stub.style.height=Math.max(0,hr.height-topFromHero)+'px';
+        }
+      }
+      if(spine){const sr=spine.getBoundingClientRect();
+        spine.style.setProperty('--rail',Math.max(6,ax-sr.left)+'px');}   // spine line continues straight below the arrow
+    })();
+    const svg=el('svg',{viewBox:`0 0 ${W} ${H}`,preserveAspectRatio:'xMidYMid slice'});
+    const f=el('filter',{id:'heroGlow',x:'-90%',y:'-90%',width:'280%',height:'280%'});
+    f.innerHTML='<feGaussianBlur stdDeviation="2.6" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>';
+    svg.appendChild(f);
+    // vivid colored glow gradient for the destination
+    const grad=el('radialGradient',{id:'glowGrad'});
+    grad.innerHTML='<stop offset="0%" stop-color="#DCEEFF" stop-opacity="0.98"/><stop offset="24%" stop-color="#6BAAF0" stop-opacity="0.8"/><stop offset="55%" stop-color="#2E77D0" stop-opacity="0.4"/><stop offset="100%" stop-color="#2E77D0" stop-opacity="0"/>';
+    svg.appendChild(grad);
+    svg.appendChild(el('path',{class:'mz-walls',d:wallsD(m,s)}));
+    const trail=el('path',{class:'mz-sol',d:dStr(P)});svg.appendChild(trail);
+    // destination: colored glow halo (behind), ripple rings, hot core
+    const glow=el('circle',{cx:gp[0],cy:gp[1],r:6,fill:'url(#glowGrad)'});glow.style.opacity='0';svg.appendChild(glow);
+    const rings=[0,1,2].map(()=>{const r=el('circle',{cx:gp[0],cy:gp[1],fill:'none',stroke:'#4F94E0','stroke-width':1.6,r:4});r.style.opacity='0';svg.appendChild(r);return r;});
+    const dot=el('circle',{r:5,fill:NAVY,filter:'url(#heroGlow)'});dot.style.opacity=0;svg.appendChild(dot);
+    box.appendChild(svg);
+
+    // brief arrival flash where the light reaches the button, then the light dissolves
+    function arriveFlash(){
+      trail.style.stroke='#5D9BE8';trail.style.strokeWidth='3';   // the line brightens as it lands
+      if(REDUCE){glow.style.opacity='0';return;}
+      const t0=performance.now();
+      (function b(now){
+        const e=now-t0;
+        dot.style.opacity=String(Math.max(0,1-e/200));   // the arriving dot dissolves into the button
+        let gr,go;
+        if(e<260){const k=e/260;gr=6+40*(1-Math.pow(1-k,3));go=0.9*k;}
+        else{const k=Math.min((e-260)/420,1);gr=46*(1-k)+8;go=0.9*(1-k);}
+        glow.setAttribute('r',gr.toFixed(1));glow.style.opacity=go.toFixed(3);
+        if(e<700)requestAnimationFrame(b);
+        else{glow.style.opacity='0';}
+      })(performance.now());
+      rings.forEach(r=>r.style.opacity='0');
+    }
+
+    // keep the maze in place; only the solved blue route dissolves after arrival.
+    function revealArrow(){
+      trail.style.transition='opacity .9s ease,stroke .5s ease,stroke-width .5s ease';
+      trail.style.opacity='0';
+      if(arrow)arrow.classList.add('show');
+      if(stub)stub.classList.add('show');
+    }
+
+    function onArrive(){arriveFlash();revealArrow();}
+    travel(trail,dot,trail,{dur:4200,delay:450,onArrive:onArrive});
+  })();
+
+  /* ---------- the spine draws in on scroll; dots light in sequence ---------- */
+  (function(){
+    const spine=document.getElementById('spine');
+    const track=document.getElementById('spineTrack');
+    const beam=document.getElementById('spineBeam');
+    if(!spine||!track||!beam)return;
+    const REDUCE=matchMedia('(prefers-reduced-motion:reduce)').matches;
+    const nodes=[...spine.querySelectorAll('[data-node]')];
+    const stub=document.getElementById('exitStub'),stubBeam=document.getElementById('exitStubBeam');
+    function litArrow(){spine.classList.add('arr-lit');}
+    if(REDUCE){                                   // no scroll animation: draw the whole line, light everything
+      beam.style.height=track.getBoundingClientRect().height+'px';
+      if(stub&&stubBeam)stubBeam.style.height=stub.getBoundingClientRect().height+'px';
+      nodes.forEach(n=>n.classList.add('lit'));litArrow();return;
+    }
+    let ticking=false;
+    function update(){
+      ticking=false;
+      const anchor=window.innerHeight*0.62;       // the light reaches this line on screen as you scroll
+      // the connecting stub fills first (it sits above the spine), so the blue beam reads as one continuous line
+      if(stub&&stubBeam){const sr=stub.getBoundingClientRect();
+        stubBeam.style.height=Math.max(0,Math.min(sr.height,anchor-sr.top))+'px';}
+      const tr=track.getBoundingClientRect();
+      let h=Math.max(0,Math.min(tr.height,anchor-tr.top));
+      beam.style.height=h+'px';
+      nodes.forEach(n=>{                           // a dot lights once the beam passes it, and stays lit
+        const dr=n.querySelector('.node-dot').getBoundingClientRect();
+        if((dr.top+dr.height/2 - tr.top)<=h) n.classList.add('lit');
+      });
+      if(h>=tr.height-2) litArrow();
+    }
+    function onScroll(){if(!ticking){ticking=true;requestAnimationFrame(update);}}
+    update();
+    window.addEventListener('scroll',onScroll,{passive:true});
+    window.addEventListener('resize',onScroll,{passive:true});
+  })();
+
+  /* ---------- on-ramp: pre-route the intake to the chosen track ---------- */
+  (function(){
+    const btn=document.getElementById('getMatched'),sel=document.getElementById('trackSelect');
+    if(!btn||!sel)return;
+    btn.addEventListener('click',e=>{
+      e.preventDefault();
+      const t=sel.value;
+      window.location.href=t?('/intake?track='+t):'/intake';   // no selection -> generic intake
+    });
+  })();
+
+  /* ---------- stats count up when the proof node comes into view ---------- */
+  (function(){
+    const REDUCE=matchMedia('(prefers-reduced-motion:reduce)').matches;
+    const nums=[...document.querySelectorAll('.node-stats .n')];
+    if(!nums.length)return;
+    const parsed=nums.map(el=>{
+      const m=el.textContent.trim().match(/^(\D*)([\d.]+)(.*)$/);   // prefix, number, suffix (e.g. $ 10 M+)
+      return m?{el,pre:m[1],target:parseFloat(m[2]),suf:m[3]}:null;
+    });
+    if(REDUCE)return;   // leave the final values in place
+    nums.forEach(el=>{el.style.fontVariantNumeric='tabular-nums';});
+    parsed.forEach(p=>{if(p)p.el.textContent=p.pre+'0'+p.suf;});
+    let done=false;
+    function run(){
+      if(done)return;done=true;
+      const DUR=2400,t0=performance.now();
+      (function fr(now){
+        const k=Math.min((now-t0)/DUR,1),e=1-Math.pow(1-k,3);   // easeOutCubic
+        parsed.forEach(p=>{if(!p)return;
+          const v=Math.round(p.target*e);
+          p.el.textContent=p.pre+v+p.suf;
+        });
+        if(k<1)requestAnimationFrame(fr);
+      })(t0);
+    }
+    const target=document.querySelector('.node-stats');
+    const io=new IntersectionObserver((ents)=>{
+      ents.forEach(en=>{if(en.isIntersecting){run();io.disconnect();}});
+    },{threshold:.4});
+    io.observe(target);
+  })();
+</script>
+</body>
+</html>

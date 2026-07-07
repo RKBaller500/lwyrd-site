@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { forwardRef, memo, useEffect, useMemo, useRef, useState } from "react";
 import MarketingNav from "./MarketingNav";
 import { useAuth } from "@/context/AuthContext";
 import { useRouter } from "next/navigation";
@@ -23,6 +23,16 @@ function getMarketingScriptSrc(body: string) {
   if (body.includes('class="contact-form"')) return "/marketing-page-scripts/contact.js";
   return null;
 }
+
+const MarketingBodyMarkup = memo(
+  forwardRef<HTMLDivElement, { body: string }>(function MarketingBodyMarkup(
+    { body },
+    ref
+  ) {
+    const html = useMemo(() => ({ __html: body }), [body]);
+    return <div ref={ref} dangerouslySetInnerHTML={html} />;
+  })
+);
 
 /**
  * Renders a ported design page: injects the page's exact CSS, the shared
@@ -49,8 +59,16 @@ export default function MarketingPageClient({
 }) {
   const ref = useRef<HTMLDivElement>(null);
   const initedRef = useRef(false);
+  const initializedBodyRef = useRef<string | null>(null);
+  const [authReady, setAuthReady] = useState(false);
   const { isAuthenticated, isLoading, openModal } = useAuth();
   const router = useRouter();
+
+  useEffect(() => {
+    if (isLoading) return;
+    const timer = window.setTimeout(() => setAuthReady(true), 0);
+    return () => window.clearTimeout(timer);
+  }, [isLoading]);
 
   // Intercept ported-design CTAs so generated markup cannot strand users on
   // placeholder hashes or bypass the login-first intake flow.
@@ -107,16 +125,15 @@ export default function MarketingPageClient({
   useEffect(() => {
     const root = ref.current;
     if (!root) return;
-    // Wait until auth has settled before running the page's original JS.
-    // AuthProvider resolves the Supabase session asynchronously; every auth
-    // transition (initial hydrate, sign-in, sign-out) re-renders this tree.
-    // If the script runs while auth is still resolving, the follow-up
-    // re-render races with (and clobbers) its DOM mutations — the maze and
-    // the scroll reveals silently fail. So we only run once auth is settled,
-    // and we RE-run on each settled auth change (see deps) so a sign-in or
-    // sign-out that lands the user on a marketing page re-initialises the
-    // animations against the current DOM instead of leaving a blank page.
-    if (isLoading) return;
+    // Wait for the initial Supabase session check before running the ported
+    // scripts. Later auth UI changes should not restart the raw HTML subtree:
+    // the memoized MarketingBodyMarkup keeps React from wiping script-owned
+    // DOM mutations such as the maze SVG and reveal classes.
+    if (!authReady) return;
+    if (initializedBodyRef.current !== body) {
+      initializedBodyRef.current = body;
+      initedRef.current = false;
+    }
     let cleanup: void | (() => void);
 
     // Run the page's original JS (maze, reveals, accordions, smooth scroll).
@@ -132,13 +149,11 @@ export default function MarketingPageClient({
       if (ran || !js || !scriptSrc) return;
       if (!root.querySelector(".rv, .rv-seq, #heroMaze, [data-seg], .qa, form, input, select")) return;
       ran = true;
-      // On a RE-init (auth change landed the user back here), reset the body
-      // to pristine markup first. The original scripts append the maze <svg>
-      // and bind element-level listeners without cleanup, so re-running over a
-      // half-initialised DOM would stack mazes and double-bind handlers
-      // (accordions would toggle twice and appear stuck). Rebuilding the nodes
-      // detaches the old listeners with the old nodes and gives the script a
-      // clean slate. Skipped on first init since the hydrated DOM is pristine.
+      // On a RE-init, reset the body to pristine markup first. The original
+      // scripts append DOM and bind element-level listeners without cleanup, so
+      // re-running over a half-initialised DOM would stack mazes and double-bind
+      // handlers. Rebuilding the nodes detaches old listeners with old nodes.
+      // Skipped on first init since the hydrated DOM is pristine.
       if (initedRef.current) {
         root.innerHTML = body;
       }
@@ -173,9 +188,11 @@ export default function MarketingPageClient({
       if (typeof cleanup === "function") cleanup();
       if (scriptEl) scriptEl.remove();
     };
-    // Re-run when the page content changes or auth state settles/changes.
+    // Re-run only when the page content changes or the initial auth hydrate
+    // settles. Auth transitions re-render the nav, but the raw page markup and
+    // its animations should keep their current DOM state.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [body, js, isLoading, isAuthenticated]);
+  }, [body, js, authReady]);
 
   return (
     <>
@@ -190,7 +207,7 @@ export default function MarketingPageClient({
         }}
       />
       <MarketingNav current={current} currentItem={currentItem} />
-      <div ref={ref} dangerouslySetInnerHTML={{ __html: body }} />
+      <MarketingBodyMarkup ref={ref} body={body} />
     </>
   );
 }

@@ -400,8 +400,8 @@ export async function runMatchingV2(
 
   const allResults = matchFirmsV2(track, category, answers, allFirms, practiceAreaSlug);
 
-  // Save submission with full results for analytics (fire-and-forget)
-  void saveIntakeSubmissionV2(track, category, categoryLabel, answers, allResults, practiceAreaSlug);
+  // Save before returning so the dashboard and past-result links are immediately consistent.
+  await saveIntakeSubmissionV2(track, category, categoryLabel, answers, allResults, practiceAreaSlug);
 
   return publicResultsForAccess(allResults, accessLevel, categoryLabel);
 }
@@ -433,7 +433,7 @@ export async function runMatchingForSubmission(submissionId: string): Promise<{
   // Ownership enforced server-side, users can only load their own submissions
   const { data: submission, error: subError } = await supabase
     .from("intake_submissions")
-    .select("track, category_slug, practice_area_slug, category_label, answers, created_at")
+    .select("track, category_slug, legal_category, practice_area_slug, category_label, answers, created_at")
     .eq("id", submissionId)
     .eq("user_id", user.id)
     .single();
@@ -469,8 +469,15 @@ export async function runMatchingForSubmission(submissionId: string): Promise<{
     // matchFirms will fall back to practiceAreas array filter
   }
 
+  const track = (submission.track ?? "") as string;
+  const category =
+    (submission.legal_category as string | null | undefined) ??
+    ((submission.category_slug as string | null | undefined)?.includes("/")
+      ? (submission.category_slug as string).split("/").pop()
+      : submission.category_slug) ??
+    "";
   const answers = submission.answers as IntakeAnswers;
-  const allResults = matchFirmsV2(submission.track, submission.category_slug, answers, allFirms, practiceAreaSlug);
+  const allResults = matchFirmsV2(track, category, answers, allFirms, practiceAreaSlug);
   const publicResults = publicResultsForAccess(
     allResults,
     accessLevel,

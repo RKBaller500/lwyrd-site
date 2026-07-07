@@ -99,6 +99,7 @@ export default function MarketingNav({
             width={120}
             height={22}
             className="brand-logo"
+            style={{ width: 120, height: "auto" }}
             priority
           />
         </Link>

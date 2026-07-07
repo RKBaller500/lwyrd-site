@@ -19,6 +19,7 @@ export default function MarketingFooter() {
                 width={140}
                 height={26}
                 className="brand-logo"
+                style={{ width: 140, height: "auto" }}
               />
             </Link>
             <p>

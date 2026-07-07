@@ -45,12 +45,14 @@
   transition: opacity 0.16s ease, transform 0.16s ease, visibility 0.16s ease;
   z-index: 60;
 }
-.nav-avatar-wrap:hover .nav-avatar-menu,
-.nav-avatar-wrap:focus-within .nav-avatar-menu {
+.nav-avatar-wrap.is-open .nav-avatar-menu {
   opacity: 1;
   visibility: visible;
   pointer-events: auto;
   transform: translateY(0);
+}
+.nav-avatar-wrap.is-open .nav-avatar {
+  box-shadow: 0 0 0 3px rgba(0, 43, 85, 0.15);
 }
 .nav-avatar-head {
   padding: 8px 10px 10px;
@@ -103,20 +105,13 @@
   margin: 6px 0;
 }
 
-/* On mobile the dropdown is inside the collapsed menu; render it inline */
+/* On mobile the dropdown opens inline (anchored right, compact) rather than
+   full-width, and still only when toggled open. */
 @media (max-width: 760px) {
-  .nav-avatar-wrap {
-    width: 100%;
-  }
   .nav-avatar-menu {
-    position: static;
-    opacity: 1;
-    visibility: visible;
-    pointer-events: auto;
-    transform: none;
-    box-shadow: none;
-    min-width: 0;
-    width: 100%;
-    margin-top: 8px;
+    min-width: 200px;
+  }
+  .nav-avatar-wrap.is-open .nav-avatar-menu {
+    box-shadow: 0 10px 30px rgba(11, 11, 12, 0.14);
   }
 }

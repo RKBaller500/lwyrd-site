@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, type MouseEvent } from "react";
+import { useEffect, useRef, useState, type MouseEvent } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { LayoutDashboard, Settings, Shield, LogOut } from "lucide-react";
@@ -30,6 +30,8 @@ export default function MarketingNav({
   const pathname = usePathname();
   const [scrolled, setScrolled] = useState(false);
   const [open, setOpen] = useState(false);
+  const [avatarOpen, setAvatarOpen] = useState(false);
+  const avatarRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 8);
@@ -38,7 +40,27 @@ export default function MarketingNav({
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
+  // Close the avatar dropdown on outside click or Escape.
+  useEffect(() => {
+    if (!avatarOpen) return;
+    const onPointerDown = (e: PointerEvent) => {
+      if (avatarRef.current && !avatarRef.current.contains(e.target as Node)) {
+        setAvatarOpen(false);
+      }
+    };
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setAvatarOpen(false);
+    };
+    document.addEventListener("pointerdown", onPointerDown);
+    document.addEventListener("keydown", onKey);
+    return () => {
+      document.removeEventListener("pointerdown", onPointerDown);
+      document.removeEventListener("keydown", onKey);
+    };
+  }, [avatarOpen]);
+
   const closeMobile = () => setOpen(false);
+  const closeAvatar = () => setAvatarOpen(false);
 
   const getMatched = () => {
     closeMobile();
@@ -48,7 +70,8 @@ export default function MarketingNav({
 
   const signIn = () => {
     closeMobile();
-    openModal("login", "/intake/start");
+    // Plain sign-in — no intake redirect. Only "Get matched" routes to intake.
+    openModal("login");
   };
 
   const cur = (s: Section) => (current === s ? " is-current" : "");
@@ -155,13 +178,15 @@ export default function MarketingNav({
 
         <div className="nav-cta">
           {isAuthenticated && user ? (
-            <div className="nav-avatar-wrap">
+            <div className={`nav-avatar-wrap${avatarOpen ? " is-open" : ""}`} ref={avatarRef}>
               <button
                 type="button"
                 className="nav-avatar"
                 aria-label="Account menu"
-                aria-haspopup="true"
+                aria-haspopup="menu"
+                aria-expanded={avatarOpen}
                 title={user.name}
+                onClick={() => setAvatarOpen((o) => !o)}
               >
                 {(user.name || "?").trim().charAt(0).toUpperCase()}
               </button>
@@ -170,16 +195,16 @@ export default function MarketingNav({
                   <div className="nm">{user.name || "Your account"}</div>
                   {user.email && <div className="em">{user.email}</div>}
                 </div>
-                <Link href="/dashboard" onClick={closeMobile} role="menuitem">
+                <Link href="/dashboard" onClick={() => { closeAvatar(); closeMobile(); }} role="menuitem">
                   <LayoutDashboard size={15} strokeWidth={1.6} />
                   Dashboard
                 </Link>
-                <Link href="/account" onClick={closeMobile} role="menuitem">
+                <Link href="/account" onClick={() => { closeAvatar(); closeMobile(); }} role="menuitem">
                   <Settings size={15} strokeWidth={1.6} />
                   Account settings
                 </Link>
                 {user.isAdmin && (
-                  <Link href="/admin" onClick={closeMobile} role="menuitem">
+                  <Link href="/admin" onClick={() => { closeAvatar(); closeMobile(); }} role="menuitem">
                     <Shield size={15} strokeWidth={1.6} />
                     Admin panel
                   </Link>
@@ -190,6 +215,7 @@ export default function MarketingNav({
                   className="danger"
                   role="menuitem"
                   onClick={() => {
+                    closeAvatar();
                     closeMobile();
                     logout();
                   }}

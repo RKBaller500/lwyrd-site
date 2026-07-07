@@ -91,6 +91,11 @@ export default function MarketingPageClient({
         Terms: "/terms",
         Disclosures: "/disclosures",
       };
+      const clientRoutes: Record<string, string> = {
+        Startups: "/clients/startups",
+        SMBs: "/clients/smbs",
+        Individuals: "/clients/individuals",
+      };
 
       if (href === "#" && legalRoutes[label]) {
         e.preventDefault();
@@ -99,11 +104,10 @@ export default function MarketingPageClient({
         return;
       }
 
-      if (href === "#" && ["Startups", "SMBs", "Individuals"].includes(label)) {
+      if (href === "#" && clientRoutes[label]) {
         e.preventDefault();
         e.stopPropagation();
-        if (isAuthenticated) router.push("/intake/start");
-        else openModal("login", "/intake/start");
+        router.push(clientRoutes[label]);
         return;
       }
 

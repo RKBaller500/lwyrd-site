@@ -12,15 +12,17 @@ export default function AuthModal() {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [role, setRole] = useState<"client" | "firm">("client");
   const [error, setError] = useState("");
   const [forgotSent, setForgotSent] = useState(false);
   const [forgotLoading, setForgotLoading] = useState(false);
 
   useEffect(() => {
-    setActiveTab(modalMode);
-    setError("");
-    setForgotSent(false);
+    const timer = window.setTimeout(() => {
+      setActiveTab(modalMode);
+      setError("");
+      setForgotSent(false);
+    }, 0);
+    return () => window.clearTimeout(timer);
   }, [modalMode, isModalOpen]);
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -34,7 +36,7 @@ export default function AuthModal() {
           setError("Please enter your name.");
           return;
         }
-        await signup(name, email, password, role);
+        await signup(name, email, password, "client");
       }
     } catch (err) {
       setError(err instanceof Error ? err.message : "Something went wrong. Please try again.");
@@ -142,24 +144,6 @@ export default function AuthModal() {
                 autoComplete="name"
                 required
               />
-            </div>
-
-            <div className="field">
-              <label>I am</label>
-              <div className="role-grid">
-                <button
-                  type="button"
-                  className={`role-opt${role === "client" ? " is-active" : ""}`}
-                  onClick={() => setRole("client")}
-                >
-                  Looking for legal help
-                </button>
-                <div className="role-opt is-disabled">
-                  A law firm
-                  <span className="role-soon">Soon</span>
-                </div>
-              </div>
-              <p className="field-hint" style={{ cursor: "default" }}>Role cannot be changed after account creation.</p>
             </div>
           </>
         )}

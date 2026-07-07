@@ -364,6 +364,60 @@
 .app-seg button.is-active{background:#fff;color:var(--ink);box-shadow:var(--shadow-sm)}
 
 /* intake */
+.intake-orientation{
+  width:100%;
+  max-width:640px;
+  padding:clamp(26px,4vw,40px);
+}
+.intake-orientation .kicker{margin-bottom:10px}
+.intake-orientation h1{
+  color:var(--ink);
+  font-size:clamp(1.55rem,3vw,2.05rem);
+  line-height:1.12;
+  margin:0 0 20px;
+}
+.intake-orientation-list{
+  display:grid;
+  gap:12px;
+  margin-bottom:18px;
+}
+.intake-orientation-item{
+  display:flex;
+  align-items:flex-start;
+  gap:14px;
+  border:1px solid var(--line);
+  border-radius:14px;
+  background:var(--paper-alt);
+  padding:14px 15px;
+}
+.intake-orientation-item .icon-box{
+  flex-shrink:0;
+  margin-top:1px;
+}
+.intake-orientation-item h2{
+  color:var(--ink);
+  font-family:var(--body);
+  font-size:.9rem;
+  font-weight:700;
+  line-height:1.3;
+  margin:0 0 3px;
+}
+.intake-orientation-item p,
+.intake-orientation-result{
+  color:var(--muted);
+  font-size:.86rem;
+  line-height:1.5;
+}
+.intake-orientation-result{
+  border-top:1px solid var(--line);
+  margin:2px 0 20px;
+  padding-top:16px;
+}
+.intake-orientation .btn{
+  min-height:46px;
+  padding:.82em 1.35em;
+  font-size:.94rem;
+}
 .intake-shell{
   width:100%;
   max-width:860px;
@@ -645,6 +699,9 @@
 .intake-btn-outline:hover{background:var(--navy);color:#fff}
 
 @media(max-width:760px){
+  .intake-orientation{padding:22px}
+  .intake-orientation h1{margin-bottom:16px}
+  .intake-orientation-item{padding:13px;gap:12px}
   .intake-shell{padding-top:24px;padding-bottom:48px}
   .intake-head h1{max-width:none}
   .intake-card{border-radius:16px;padding:18px}

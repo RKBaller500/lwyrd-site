@@ -67,6 +67,7 @@ try{
   (function(){
     const box=document.getElementById('heroMaze');
     if(!box)return;
+    box.replaceChildren();
     const NS='http://www.w3.org/2000/svg';
     const REDUCE=matchMedia('(prefers-reduced-motion:reduce)').matches;
     const NAVY='#002B55';

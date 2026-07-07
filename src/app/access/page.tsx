@@ -1,7 +1,7 @@
 "use client";
 
 import "@/styles/lwyrd-ds.css";
-import { useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { motion } from "framer-motion";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -22,6 +22,7 @@ const included = [
 
 const tiers = [
   {
+    id: "single",
     name: "1 intake",
     label: "Single matter",
     description: "Unlock one completed matter.",
@@ -31,6 +32,7 @@ const tiers = [
     badge: "Pay once",
   },
   {
+    id: "bundle_3",
     name: "3-intake bundle",
     label: "Multiple needs",
     description: "For a few separate legal needs.",
@@ -41,6 +43,7 @@ const tiers = [
     badge: "Best value",
   },
   {
+    id: "bundle_5",
     name: "5-intake bundle",
     label: "Ongoing matching",
     description: "For recurring searches over time.",
@@ -51,37 +54,94 @@ const tiers = [
   },
 ];
 
+type Tier = (typeof tiers)[number];
+
 function AccessContent() {
   const router = useRouter();
-  const [selectedTier, setSelectedTier] = useState<(typeof tiers)[number] | null>(null);
+  const [selectedTier, setSelectedTier] = useState<Tier | null>(null);
   const [previewLoading, setPreviewLoading] = useState(false);
   const [previewError, setPreviewError] = useState("");
+  const [creditsAvailable, setCreditsAvailable] = useState(0);
+  const [currentIntakeUnlocked, setCurrentIntakeUnlocked] = useState(false);
 
   const closeCheckout = () => setSelectedTier(null);
 
-  const getPreviewDestination = () => {
+  const nextPath = useMemo(() => {
+    if (typeof window === "undefined") return "/results";
+    return new URLSearchParams(window.location.search).get("next") ?? "/results";
+  }, []);
+
+  const getActiveSubmissionId = () => {
     const next = new URLSearchParams(window.location.search).get("next");
-    const storedSubmissionId = window.sessionStorage.getItem("lwyrd_submission_id");
-    if (storedSubmissionId) return `/results/${storedSubmissionId}`;
-    if (next?.startsWith("/results")) return next;
-    return "/results";
+    const nextMatch = next?.match(/^\/results\/([^/?#]+)/);
+    if (nextMatch?.[1]) return nextMatch[1];
+    return window.sessionStorage.getItem("lwyrd_submission_id");
   };
 
-  const handlePreviewUnlock = async () => {
+  const getPreviewDestination = () => {
+    const submissionId = getActiveSubmissionId();
+    if (submissionId) return `/results/${submissionId}`;
+    return nextPath.startsWith("/results") ? nextPath : "/results";
+  };
+
+  const loadPaywallState = async () => {
+    const submissionId = getActiveSubmissionId();
+    const query = new URLSearchParams();
+    if (submissionId) query.set("submissionId", submissionId);
+    const response = await fetch(`/api/paywall/status?${query.toString()}`, { credentials: "same-origin" });
+    const body = await response.json().catch(() => ({}));
+    if (!response.ok) throw new Error(body.error ?? "Unable to load paywall state.");
+    return {
+      creditsAvailable: typeof body.creditsAvailable === "number" ? body.creditsAvailable : 0,
+      currentIntakeUnlocked: !!body.currentIntakeUnlocked,
+    };
+  };
+
+  useEffect(() => {
+    let cancelled = false;
+
+    async function load() {
+      try {
+        const state = await loadPaywallState();
+        if (cancelled) return;
+        setCreditsAvailable(state.creditsAvailable);
+        setCurrentIntakeUnlocked(state.currentIntakeUnlocked);
+      } catch {
+        if (cancelled) return;
+        setCreditsAvailable(0);
+        setCurrentIntakeUnlocked(false);
+      }
+    }
+
+    load();
+    return () => {
+      cancelled = true;
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  const handlePreviewUnlock = async (options?: { tier?: Tier; mode?: "purchase" | "credit" }) => {
     setPreviewLoading(true);
     setPreviewError("");
-    const submissionId = window.sessionStorage.getItem("lwyrd_submission_id");
+    const submissionId = getActiveSubmissionId();
     try {
       const response = await fetch("/api/paywall/preview-unlock", {
         method: "POST",
         credentials: "same-origin",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ submissionId }),
+        body: JSON.stringify({
+          submissionId,
+          next: nextPath,
+          tierId: options?.tier?.id ?? "single",
+          mode: options?.mode ?? "purchase",
+        }),
       });
       const body = await response.json().catch(() => ({}));
       if (!response.ok) {
         throw new Error(body.error ?? "Unable to enable preview unlock.");
       }
+      setCreditsAvailable(typeof body.creditsAvailable === "number" ? body.creditsAvailable : 0);
+      setCurrentIntakeUnlocked(!!body.currentIntakeUnlocked);
       router.push(typeof body.destination === "string" ? body.destination : getPreviewDestination());
       router.refresh();
     } catch (error) {
@@ -133,8 +193,8 @@ function AccessContent() {
               <button className="btn btn-primary" type="button" disabled>
                 Stripe checkout pending
               </button>
-              <button className="btn btn-ghost" type="button" onClick={handlePreviewUnlock} disabled={previewLoading}>
-                <Eye size={14} /> {previewLoading ? "Unlocking..." : "Preview unlock"}
+              <button className="btn btn-ghost" type="button" onClick={() => handlePreviewUnlock({ tier: selectedTier, mode: "purchase" })} disabled={previewLoading}>
+                <Eye size={14} /> {previewLoading ? "Unlocking..." : `Preview ${selectedTier.name}`}
               </button>
               <button className="btn btn-ghost" type="button" onClick={closeCheckout}>
                 <X size={14} /> Not now
@@ -153,6 +213,29 @@ function AccessContent() {
               <ArrowLeft size={14} /> Back to your matches
             </Link>
           </motion.div>
+
+          {(creditsAvailable > 0 || currentIntakeUnlocked) && (
+            <motion.div
+              initial={{ opacity: 0, y: 12 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, ease, delay: 0.08 }}
+              className="access-credit-panel"
+            >
+              <div>
+                <span className="app-section-label">Your account</span>
+                <p>
+                  {currentIntakeUnlocked
+                    ? "This intake is already unlocked for your account."
+                    : `${creditsAvailable} ${creditsAvailable === 1 ? "unlock credit" : "unlock credits"} available.`}
+                </p>
+              </div>
+              {!currentIntakeUnlocked && creditsAvailable > 0 && (
+                <button className="btn btn-primary" type="button" onClick={() => handlePreviewUnlock({ mode: "credit" })} disabled={previewLoading}>
+                  {previewLoading ? "Applying..." : "Use 1 unlock credit"}
+                </button>
+              )}
+            </motion.div>
+          )}
 
           {/* Header */}
           <motion.div
@@ -228,8 +311,8 @@ function AccessContent() {
                 </div>
               ))}
             </div>
-            <button className="access-preview-link" type="button" onClick={handlePreviewUnlock} disabled={previewLoading}>
-              <Eye size={15} /> {previewLoading ? "Opening preview..." : "Temporary preview unlock"}
+            <button className="access-preview-link" type="button" onClick={() => handlePreviewUnlock({ tier: tiers[0], mode: "purchase" })} disabled={previewLoading}>
+              <Eye size={15} /> {previewLoading ? "Opening preview..." : "Temporary preview 1-intake purchase"}
             </button>
             {previewError && <p className="access-preview-error">{previewError}</p>}
           </motion.div>

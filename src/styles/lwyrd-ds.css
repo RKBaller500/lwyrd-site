@@ -1002,6 +1002,20 @@
 .access-back{margin-bottom:clamp(18px,2.6vw,28px)}
 .access-hero{max-width:720px}
 .access-hero h1{max-width:15ch}
+.access-credit-panel{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:16px;
+  border:1px solid var(--navy-tint-2);
+  border-radius:16px;
+  background:#f8fbfe;
+  box-shadow:var(--shadow-sm);
+  margin-bottom:18px;
+  padding:16px 18px;
+}
+.access-credit-panel .app-section-label{display:block;margin-bottom:4px}
+.access-credit-panel p{color:var(--ink-2);font-size:.88rem;line-height:1.45}
 .access-includes{
   border:1px solid var(--line);
   border-radius:18px;
@@ -1204,6 +1218,8 @@
   .intake-btn{min-height:44px;padding:.72em 1.05em}
   .results-shell,.access-shell{padding-top:24px}
   .results-hero h1,.access-hero h1{max-width:none}
+  .access-credit-panel{align-items:stretch;flex-direction:column}
+  .access-credit-panel .btn{width:100%;justify-content:center}
   .results-unlock,.locked-card-cta{align-items:stretch;flex-direction:column}
   .results-unlock-btn,.locked-card-cta .btn{width:100%;justify-content:center}
   .match-card-head{flex-direction:column}

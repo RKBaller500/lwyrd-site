@@ -8,9 +8,9 @@ import MarketingNav from "@/components/marketing/MarketingNav";
 import MarketingFooter from "@/components/marketing/MarketingFooter";
 import AuthGuard from "@/components/auth/AuthGuard";
 import MatchCard from "@/components/results/MatchCard";
-import { MatchResult } from "@/types";
+import { PublicMatchResult } from "@/types";
 import Link from "next/link";
-import { Info } from "lucide-react";
+import { ArrowRight, Info, LockKeyhole } from "lucide-react";
 
 const ease = [0.25, 0.46, 0.45, 0.94] as const;
 
@@ -24,13 +24,21 @@ const item = {
   visible: { opacity: 1, y: 0, transition: { duration: 0.55, ease } },
 };
 
+function isLockedResult(result: PublicMatchResult): result is Extract<PublicMatchResult, { isLocked: true }> {
+  return "isLocked" in result && result.isLocked;
+}
+
+function isUnlockedResult(result: PublicMatchResult): result is Exclude<PublicMatchResult, { isLocked: true }> {
+  return !isLockedResult(result);
+}
+
 function getSizeGapNotice(
-  results: MatchResult[],
+  results: PublicMatchResult[],
   firmSizePref: string | null,
   categoryName: string,
 ): string | null {
   if (!firmSizePref || firmSizePref === "no_preference") return null;
-  const availableSizes = new Set(results.map((r) => r.firm.size));
+  const availableSizes = new Set(results.map((r) => (isLockedResult(r) ? r.firmSize : r.firm.size)));
   const practice = categoryName || "this practice area";
 
   if (firmSizePref === "solo") {
@@ -48,7 +56,7 @@ function getSizeGapNotice(
 
 function ResultsContent() {
   const router = useRouter();
-  const [results, setResults] = useState<MatchResult[] | null>(null);
+  const [results, setResults] = useState<PublicMatchResult[] | null>(null);
   const [categorySlug, setCategorySlug] = useState<string>("");
   const [categoryName, setCategoryName] = useState<string>("");
   const [firmSizePref, setFirmSizePref] = useState<string | null>(null);
@@ -62,23 +70,30 @@ function ResultsContent() {
       return;
     }
     try {
-      const parsed: MatchResult[] = JSON.parse(raw);
-      setResults(parsed);
-      setCategorySlug(slug);
-      setCategoryName(name);
-      const scoreMap = Object.fromEntries(parsed.map((r) => [r.firm.id, r.score]));
-      sessionStorage.setItem("lwyrd_match_scores", JSON.stringify(scoreMap));
+      const parsed: PublicMatchResult[] = JSON.parse(raw);
+      const unlockedResults = parsed.filter(isUnlockedResult);
+      const scoreMap = Object.fromEntries(unlockedResults.map((r) => [r.firm.id, r.score]));
+      if (unlockedResults.length) {
+        sessionStorage.setItem("lwyrd_match_scores", JSON.stringify(scoreMap));
+      } else {
+        sessionStorage.removeItem("lwyrd_match_scores");
+      }
 
       // Read firm size preference before clearing answers
       const rawAnswers = sessionStorage.getItem("lwyrd_answers_v2");
       if (rawAnswers) {
         const a = JSON.parse(rawAnswers) as Record<string, unknown>;
         const pref = (a.sf1 ?? a.if1 ?? a.bf1) as string | undefined;
-        setFirmSizePref(pref ?? null);
+        window.setTimeout(() => setFirmSizePref(pref ?? null), 0);
       }
 
       // Clear sensitive intake answers, scores are all the firm detail page needs
       sessionStorage.removeItem("lwyrd_answers_v2");
+      window.setTimeout(() => {
+        setResults(parsed);
+        setCategorySlug(slug);
+        setCategoryName(name);
+      }, 0);
     } catch {
       router.push("/intake/start");
     }
@@ -87,6 +102,7 @@ function ResultsContent() {
   if (!results) return null;
 
   const sizeGapNotice = getSizeGapNotice(results, firmSizePref, categoryName);
+  const hasLockedResults = results.some(isLockedResult);
 
   // When the size gap banner is showing, suppress the per-card "firm-size" miss
   // so the banner does the communicating rather than every card showing an X.
@@ -113,13 +129,38 @@ function ResultsContent() {
             <span className="sep">/</span>
             <span style={{ color: "var(--ink-2)" }}>Your matches</span>
           </nav>
-          <h1 style={{ fontSize: "clamp(2rem,4vw,3rem)", marginBottom: ".75rem" }}>Your matches</h1>
+          <h1 style={{ fontSize: "clamp(2rem,4vw,3rem)", marginBottom: ".75rem" }}>
+            {results.length} {results.length === 1 ? "firm" : "firms"} matched to your situation
+          </h1>
           <p className="text-[#6B6B70] text-base">
             {results.length > 0
-              ? `We found ${results.length} ${results.length === 1 ? "firm" : "firms"} that match your needs${categoryName ? ` in ${categoryName}` : ""}.`
+              ? `Ranked by fit${categoryName ? ` for ${categoryName}` : ""}. Identities stay hidden until you unlock this intake.`
               : "No firms matched your criteria, try adjusting your answers."}
           </p>
         </motion.div>
+
+        {hasLockedResults && results.length > 0 && (
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, ease, delay: 0.03 }}
+            className="mb-6 flex flex-col gap-4 rounded-[18px] border border-[#DDE6EF] bg-[#F7FAFC] p-5 sm:flex-row sm:items-center sm:justify-between"
+          >
+            <div className="flex items-start gap-3">
+              <span className="icon-box mt-0.5 h-10 w-10 rounded-xl">
+                <LockKeyhole size={16} strokeWidth={1.7} />
+              </span>
+              <p className="text-sm leading-relaxed text-[#2A2A2E]">
+                <strong>Your matches are ready.</strong> Unlock this intake to see who each firm is,
+                open full profiles, and get a prepared summary of your matter plus a ready-to-send
+                message for reaching out.
+              </p>
+            </div>
+            <Link href="/access" className="btn btn-primary shrink-0">
+              Unlock this intake <ArrowRight size={14} />
+            </Link>
+          </motion.div>
+        )}
 
         {/* Size gap notice */}
         {sizeGapNotice && (
@@ -157,7 +198,7 @@ function ResultsContent() {
         ) : (
           <motion.div className="space-y-5" variants={container} initial="hidden" animate="visible">
             {displayResults.map((result, i) => (
-              <motion.div key={result.firm.id} variants={item}>
+              <motion.div key={isLockedResult(result) ? `locked-${i}` : result.firm.id} variants={item}>
                 <MatchCard result={result} rank={i + 1} />
               </motion.div>
             ))}

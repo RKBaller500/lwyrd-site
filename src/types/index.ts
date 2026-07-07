@@ -162,6 +162,23 @@ export interface MatchResult {
   isBestMatch?: boolean;
 }
 
+export interface LockedMatchResult {
+  isLocked: true;
+  score: number;
+  rank: number;
+  firmSize: FirmSize;
+  practiceAreaMatch: string;
+  jurisdiction: string;
+  reasons: string[];
+  credibilitySignals: string[];
+  feeLevel?: "$" | "$$" | "$$$" | "$$$$";
+  matchedCriteria: string[];
+  missedCriteria: string[];
+  isBestMatch?: boolean;
+}
+
+export type PublicMatchResult = MatchResult | LockedMatchResult;
+
 // ── Auth ─────────────────────────────────────────────────
 export interface AuthUser {
   id: string;

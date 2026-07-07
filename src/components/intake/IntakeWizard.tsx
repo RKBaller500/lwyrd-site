@@ -1,8 +1,8 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { usePostHog } from "posthog-js/react";
 import { runMatchingV2 } from "@/lib/actions/intake";
 import {
@@ -432,7 +432,9 @@ function SummaryView({
 
 export default function IntakeWizard() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const ph = usePostHog();
+  const didApplyPrefill = useRef(false);
 
   const [currentStep, setCurrentStep] = useState(0);
   const [answers, setAnswers] = useState<V2Answers>({});
@@ -454,6 +456,27 @@ export default function IntakeWizard() {
     () => getQuestionSequence(track, category),
     [track, category]
   );
+
+  useEffect(() => {
+    if (didApplyPrefill.current) return;
+
+    const trackParam = searchParams.get("track") as V2Track | null;
+    if (!trackParam || !["startup", "individual", "small_business"].includes(trackParam)) return;
+
+    const categoryParam = searchParams.get("category");
+    const categoryIsValid = categoryParam
+      ? getQ2ForTrack(trackParam).options.some((option) => option.value === categoryParam)
+      : false;
+
+    didApplyPrefill.current = true;
+    window.setTimeout(() => {
+      setAnswers({
+        q1: trackParam,
+        ...(categoryIsValid && categoryParam ? { q2: categoryParam } : {}),
+      });
+      setCurrentStep(categoryIsValid ? 2 : 1);
+    }, 0);
+  }, [searchParams]);
 
   const currentQuestion = questions[currentStep] ?? questions[0];
   const totalQuestions = category ? questions.length : null;

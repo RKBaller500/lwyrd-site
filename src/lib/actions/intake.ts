@@ -1,12 +1,107 @@
 "use server";
 
 import { createClient } from "@/lib/supabase/server";
-import type { IntakeAnswers, MatchResult } from "@/types";
+import type { Firm, IntakeAnswers, LockedMatchResult, MatchResult, PublicMatchResult } from "@/types";
 import { matchFirmsV2 } from "@/lib/matching";
 import { mapDbFirmToFirm } from "@/lib/supabase/mappers";
 import type { DbFirm } from "@/lib/supabase/types";
 import { firms as localFirms } from "@/data/firms";
 import { CATEGORY_SLUG_MAP } from "@/data/intakeV2";
+
+function canViewUnlockedMatches(accessLevel?: string | null): boolean {
+  return accessLevel === "subscription" || accessLevel === "org";
+}
+
+async function getCurrentUserAccessLevel(supabase: Awaited<ReturnType<typeof createClient>>, userId: string) {
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("access_level")
+    .eq("id", userId)
+    .single();
+
+  return profile?.access_level as string | null | undefined;
+}
+
+function inferJurisdiction(firm: Firm): string {
+  const location = firm.location || "";
+  const stateLabels: Record<string, string> = {
+    NY: "New York",
+    CA: "California",
+    TX: "Texas",
+    FL: "Florida",
+    IL: "Illinois",
+    UT: "Utah",
+    AZ: "Arizona",
+    DE: "Delaware",
+    NJ: "New Jersey",
+    CT: "Connecticut",
+    MA: "Massachusetts",
+    CO: "Colorado",
+  };
+
+  for (const [abbr, label] of Object.entries(stateLabels)) {
+    if (location.includes(abbr) || location.includes(label)) return label;
+  }
+  return "United States";
+}
+
+function inferFeeLevel(firm: Firm): LockedMatchResult["feeLevel"] | undefined {
+  const min = firm.budgetRange?.min ?? 0;
+  const hourly = firm.hourlyRate ?? 0;
+  const basis = min > 0 ? min : hourly > 0 ? hourly * 10 : 0;
+
+  if (!basis) return undefined;
+  if (basis < 2500) return "$";
+  if (basis < 10000) return "$$";
+  if (basis < 25000) return "$$$";
+  return "$$$$";
+}
+
+function qualitySignals(firm: Firm, practiceAreaLabel: string): string[] {
+  const signals: string[] = [];
+  if (firm.verified) signals.push("Bar standing verified");
+  if (firm.founded) {
+    const years = Math.max(1, new Date().getFullYear() - firm.founded);
+    if (years >= 5) signals.push(`${years}+ years in practice`);
+  }
+  if (practiceAreaLabel) signals.push(`Specialist in ${practiceAreaLabel}`);
+  if (firm.assessment.some((item) => item.passed && /response|contact|billing|conflict|insurance/i.test(`${item.label} ${item.note ?? ""}`))) {
+    signals.push("Quality standards reviewed");
+  }
+  return signals.slice(0, 3);
+}
+
+function redactMatchResult(result: MatchResult, index: number, practiceAreaLabel: string): LockedMatchResult {
+  return {
+    isLocked: true,
+    score: result.score,
+    rank: index + 1,
+    firmSize: result.firm.size,
+    practiceAreaMatch: practiceAreaLabel,
+    jurisdiction: inferJurisdiction(result.firm),
+    reasons: result.reasons.slice(0, 3),
+    credibilitySignals: qualitySignals(result.firm, practiceAreaLabel),
+    feeLevel: inferFeeLevel(result.firm),
+    matchedCriteria: result.matchedCriteria,
+    missedCriteria: result.missedCriteria,
+    isBestMatch: result.isBestMatch,
+  };
+}
+
+function publicResultsForAccess(
+  results: MatchResult[],
+  accessLevel: string | null | undefined,
+  practiceAreaLabel: string
+): { results: PublicMatchResult[]; lockedCount: number; unlocked: boolean } {
+  const unlocked = canViewUnlockedMatches(accessLevel);
+  if (unlocked) return { results, lockedCount: 0, unlocked };
+
+  return {
+    results: results.map((result, index) => redactMatchResult(result, index, practiceAreaLabel)),
+    lockedCount: results.length,
+    unlocked,
+  };
+}
 
 // Legacy action, kept for backward compatibility
 export async function saveIntakeSubmission(
@@ -241,7 +336,7 @@ export async function runMatchingV2(
   category: string,
   categoryLabel: string,
   answers: IntakeAnswers
-): Promise<{ results: MatchResult[]; lockedCount: number; error?: string }> {
+): Promise<{ results: PublicMatchResult[]; lockedCount: number; unlocked?: boolean; error?: string }> {
   const VALID_TRACKS = ["startup", "individual", "small_business"] as const;
   if (
     typeof track !== "string" ||
@@ -250,14 +345,15 @@ export async function runMatchingV2(
     !category ||
     category.length > 64
   ) {
-    return { results: [], lockedCount: 0, error: "Invalid input" };
+    return { results: [], lockedCount: 0, unlocked: false, error: "Invalid input" };
   }
 
   const supabase = await createClient();
   const {
     data: { user },
   } = await supabase.auth.getUser();
-  if (!user) return { results: [], lockedCount: 0, error: "Not authenticated" };
+  if (!user) return { results: [], lockedCount: 0, unlocked: false, error: "Not authenticated" };
+  const accessLevel = await getCurrentUserAccessLevel(supabase, user.id);
 
   // Resolve practice area slug from DB; fall back to CATEGORY_SLUG_MAP if unavailable
   let practiceAreaSlug = CATEGORY_SLUG_MAP[track]?.[category] ?? "corporate-formation";
@@ -307,20 +403,21 @@ export async function runMatchingV2(
   // Save submission with full results for analytics (fire-and-forget)
   void saveIntakeSubmissionV2(track, category, categoryLabel, answers, allResults, practiceAreaSlug);
 
-  return { results: allResults, lockedCount: 0 };
+  return publicResultsForAccess(allResults, accessLevel, categoryLabel);
 }
 
 // Re-runs matching for a past submission server-side, enforcing the same
 // access-level truncation as runMatchingV2.
 export async function runMatchingForSubmission(submissionId: string): Promise<{
-  results: MatchResult[];
+  results: PublicMatchResult[];
   lockedCount: number;
+  unlocked?: boolean;
   categorySlug: string;
   categoryName: string;
   intakeDate: string;
   error?: string;
 }> {
-  const empty = { results: [] as MatchResult[], lockedCount: 0, categorySlug: "", categoryName: "", intakeDate: "" };
+  const empty = { results: [] as PublicMatchResult[], lockedCount: 0, unlocked: false, categorySlug: "", categoryName: "", intakeDate: "" };
 
   if (!submissionId || typeof submissionId !== "string") {
     return { ...empty, error: "Invalid submission ID" };
@@ -331,6 +428,7 @@ export async function runMatchingForSubmission(submissionId: string): Promise<{
     data: { user },
   } = await supabase.auth.getUser();
   if (!user) return { ...empty, error: "Not authenticated" };
+  const accessLevel = await getCurrentUserAccessLevel(supabase, user.id);
 
   // Ownership enforced server-side, users can only load their own submissions
   const { data: submission, error: subError } = await supabase
@@ -373,10 +471,14 @@ export async function runMatchingForSubmission(submissionId: string): Promise<{
 
   const answers = submission.answers as IntakeAnswers;
   const allResults = matchFirmsV2(submission.track, submission.category_slug, answers, allFirms, practiceAreaSlug);
+  const publicResults = publicResultsForAccess(
+    allResults,
+    accessLevel,
+    submission.category_label ?? submission.category_slug
+  );
 
   return {
-    results: allResults,
-    lockedCount: 0,
+    ...publicResults,
     categorySlug: submission.category_slug,
     categoryName: submission.category_label ?? submission.category_slug,
     intakeDate: submission.created_at,

@@ -10,7 +10,7 @@ import MarketingFooter from "@/components/marketing/MarketingFooter";
 import AuthGuard from "@/components/auth/AuthGuard";
 import MatchCard from "@/components/results/MatchCard";
 import { runMatchingForSubmission } from "@/lib/actions/intake";
-import { MatchResult } from "@/types";
+import { PublicMatchResult } from "@/types";
 
 const ease = [0.25, 0.46, 0.45, 0.94] as const;
 
@@ -24,12 +24,20 @@ const cardItem = {
   visible: { opacity: 1, y: 0, transition: { duration: 0.55, ease } },
 };
 
+function isLockedResult(result: PublicMatchResult): result is Extract<PublicMatchResult, { isLocked: true }> {
+  return "isLocked" in result && result.isLocked;
+}
+
+function isUnlockedResult(result: PublicMatchResult): result is Exclude<PublicMatchResult, { isLocked: true }> {
+  return !isLockedResult(result);
+}
+
 function PastResultsContent() {
   const router = useRouter();
   const params = useParams();
   const submissionId = params.id as string;
 
-  const [results, setResults] = useState<MatchResult[] | null>(null);
+  const [results, setResults] = useState<PublicMatchResult[] | null>(null);
   const [categoryName, setCategoryName] = useState("");
   const [categorySlug, setCategorySlug] = useState("");
   const [intakeDate, setIntakeDate] = useState("");
@@ -48,14 +56,21 @@ function PastResultsContent() {
       sessionStorage.setItem("lwyrd_results", JSON.stringify(r));
       sessionStorage.setItem("lwyrd_category", slug);
       sessionStorage.setItem("lwyrd_category_name", name);
-      const scoreMap = Object.fromEntries(r.map((res) => [res.firm.id, res.score]));
-      sessionStorage.setItem("lwyrd_match_scores", JSON.stringify(scoreMap));
+      const unlockedResults = r.filter(isUnlockedResult);
+      const scoreMap = Object.fromEntries(unlockedResults.map((res) => [res.firm.id, res.score]));
+      if (unlockedResults.length) {
+        sessionStorage.setItem("lwyrd_match_scores", JSON.stringify(scoreMap));
+      } else {
+        sessionStorage.removeItem("lwyrd_match_scores");
+      }
 
-      setResults(r);
-      setCategorySlug(slug);
-      setCategoryName(name);
-      setIntakeDate(date);
-      setLoading(false);
+      window.setTimeout(() => {
+        setResults(r);
+        setCategorySlug(slug);
+        setCategoryName(name);
+        setIntakeDate(date);
+        setLoading(false);
+      }, 0);
     }).catch(() => router.push("/dashboard"));
   }, [submissionId, router]);
 
@@ -136,7 +151,7 @@ function PastResultsContent() {
         ) : (
           <motion.div className="space-y-5" variants={container} initial="hidden" animate="visible">
             {results.map((result, i) => (
-              <motion.div key={result.firm.id} variants={cardItem}>
+              <motion.div key={isLockedResult(result) ? `locked-${i}` : result.firm.id} variants={cardItem}>
                 <MatchCard result={result} rank={i + 1} />
               </motion.div>
             ))}

@@ -9,9 +9,25 @@ interface ContactLwyrdModalProps {
   isOpen: boolean;
   onClose: () => void;
   categoryName?: string;
+  title?: string;
+  intro?: string;
+  formType?: string;
+  subjectPrefix?: string;
+  messagePlaceholder?: string;
+  submitLabel?: string;
 }
 
-export default function ContactLwyrdModal({ isOpen, onClose, categoryName }: ContactLwyrdModalProps) {
+export default function ContactLwyrdModal({
+  isOpen,
+  onClose,
+  categoryName,
+  title = "Book a Consultation",
+  intro,
+  formType = "Book a Consultation",
+  subjectPrefix = "Consultation Request",
+  messagePlaceholder = "Briefly describe what you need help with",
+  submitLabel = "Send Request",
+}: ContactLwyrdModalProps) {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [message, setMessage] = useState("");
@@ -32,10 +48,10 @@ export default function ContactLwyrdModal({ isOpen, onClose, categoryName }: Con
         name,
         email,
         message,
-        formType: "Book a Consultation",
+        formType,
         subject: categoryName
-          ? `Consultation Request, ${categoryName}`
-          : "Consultation Request",
+          ? `${subjectPrefix}, ${categoryName}`
+          : subjectPrefix,
         _replyto: email,
       });
       setStatus("success");
@@ -55,13 +71,13 @@ export default function ContactLwyrdModal({ isOpen, onClose, categoryName }: Con
           className="text-2xl text-[#002B55]"
           style={{ fontFamily: '"Libre Baskerville", Georgia, serif', fontWeight: 700 }}
         >
-          Book a Consultation
+          {title}
         </h2>
       </div>
       <p className="text-[#6B6B70] text-sm mb-6">
-        {categoryName
+        {intro ?? (categoryName
           ? `Tell us about your ${categoryName} needs and our team will follow up to match you with the right firm.`
-          : "Tell us about your needs and our team will follow up personally."}
+          : "Tell us about your needs and our team will follow up personally.")}
       </p>
 
       {status === "success" ? (
@@ -91,7 +107,7 @@ export default function ContactLwyrdModal({ isOpen, onClose, categoryName }: Con
             required
           />
           <textarea
-            placeholder="Briefly describe what you need help with"
+            placeholder={messagePlaceholder}
             value={message}
             onChange={(e) => setMessage(e.target.value)}
             rows={4}
@@ -108,7 +124,7 @@ export default function ContactLwyrdModal({ isOpen, onClose, categoryName }: Con
             disabled={status === "loading"}
             className="w-full py-3 rounded-2xl bg-[#002B55] text-white text-sm font-medium hover:opacity-90 transition-opacity disabled:opacity-50"
           >
-            {status === "loading" ? "Sending…" : "Send Request"}
+            {status === "loading" ? "Sending…" : submitLabel}
           </button>
         </form>
       )}

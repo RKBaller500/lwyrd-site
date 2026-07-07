@@ -1,6 +1,7 @@
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import ClientAudienceView, { type ClientAudience } from "@/components/marketing/ClientAudienceView";
+import StartupAudienceView from "@/components/marketing/StartupAudienceView";
 
 const AUDIENCES: Record<string, ClientAudience> = {
   startups: {
@@ -75,5 +76,6 @@ export default async function ClientAudiencePage({ params }: Props) {
   const { audience } = await params;
   const data = AUDIENCES[audience];
   if (!data) notFound();
+  if (audience === "startups") return <StartupAudienceView />;
   return <ClientAudienceView data={data} />;
 }

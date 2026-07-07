@@ -1,8 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import { Firm, MatchResult } from "@/types";
-import { Award, MapPin, Building2, CheckCircle2, XCircle, ArrowRight } from "lucide-react";
+import { Firm, PublicMatchResult } from "@/types";
+import { Award, MapPin, Building2, CheckCircle2, XCircle, ArrowRight, LockKeyhole, ShieldCheck } from "lucide-react";
 import SaveFirmButton from "@/components/firms/SaveFirmButton";
 
 const serif = { fontFamily: '"Libre Baskerville", Georgia, serif' } as const;
@@ -88,12 +88,129 @@ function ScoreRing({ score }: { score: number }) {
 }
 
 interface MatchCardProps {
-  result: MatchResult;
+  result: PublicMatchResult;
   rank: number;
   initialSaved?: boolean;
 }
 
+function isLockedResult(result: PublicMatchResult): result is Extract<PublicMatchResult, { isLocked: true }> {
+  return "isLocked" in result && result.isLocked;
+}
+
+function LockedIdentity({ rank, isBestMatch }: { rank: number; isBestMatch?: boolean }) {
+  return (
+    <div className="flex items-center gap-3">
+      <div className="relative h-12 w-12 shrink-0 overflow-hidden rounded-xl border border-[#DDE6EF] bg-[#EEF3F8]">
+        <div className="absolute inset-2 rounded-lg bg-[#002B55]/20 blur-[5px]" />
+        <div className="absolute inset-0 flex items-center justify-center text-xs font-semibold text-[#002B55]/45">
+          {rank}
+        </div>
+      </div>
+      <div className="min-w-0">
+        <div className="mb-2 flex flex-wrap items-center gap-2">
+          {isBestMatch && (
+            <span className="inline-flex items-center gap-1.5 rounded-full bg-[#002B55] px-2.5 py-1 text-[10px] font-semibold uppercase tracking-widest text-white">
+              <Award size={9} strokeWidth={2.5} />
+              Top Match
+            </span>
+          )}
+          <span className="inline-flex items-center gap-1.5 rounded-full border border-[#DDE6EF] bg-[#EEF3F8] px-2.5 py-1 text-[10px] font-semibold uppercase tracking-widest text-[#002B55]">
+            <LockKeyhole size={10} strokeWidth={2} />
+            Identity hidden
+          </span>
+        </div>
+        <div className="h-5 w-48 max-w-full rounded-md bg-[#DDE6EF] blur-[3px]" />
+        <p className="mt-2 text-xs text-[#6B6B70]">A real matched firm is here. Unlock to see its name and profile.</p>
+      </div>
+    </div>
+  );
+}
+
+function LockedMatchCard({ result, rank }: { result: Extract<PublicMatchResult, { isLocked: true }>; rank: number }) {
+  const roundedScore = Math.round(result.score);
+  const size = sizeLabels[result.firmSize] ?? result.firmSize;
+  const isTop = rank === 1;
+  const reasons = result.reasons.length > 0
+    ? result.reasons
+    : ["Matches the legal need described in your intake", "Aligned with your stated preferences"];
+
+  return (
+    <div
+      className="overflow-hidden rounded-[18px] bg-white transition-all hover:shadow-md"
+      style={{
+        border: isTop ? "1.5px solid var(--navy)" : "1px solid var(--line)",
+        boxShadow: isTop ? "0 8px 28px rgba(0,43,85,0.12)" : "var(--shadow-sm)",
+      }}
+    >
+      {isTop && <div style={{ height: 3, background: "var(--navy)" }} />}
+      <div className={isTop ? "p-7 sm:p-8" : "p-6 sm:p-7"}>
+        <div className="flex flex-col gap-5 sm:flex-row sm:items-start sm:justify-between">
+          <LockedIdentity rank={rank} isBestMatch={result.isBestMatch || isTop} />
+          <div className="shrink-0 rounded-2xl border border-[#DDE6EF] bg-[#EEF3F8] px-5 py-4 text-center">
+            <div className="flex items-baseline justify-center gap-0.5">
+              <span className="tabular-nums leading-none" style={{ ...serif, color: "var(--navy)", fontSize: isTop ? "2.15rem" : "1.85rem" }}>
+                {roundedScore}
+              </span>
+              <span className="text-sm font-medium text-[#6B6B70]">%</span>
+            </div>
+            <span className="mt-1 block text-[10px] font-semibold uppercase tracking-widest text-[#6B6B70]">Fit score</span>
+          </div>
+        </div>
+
+        <div className="mt-5 flex flex-wrap items-center gap-2 text-sm text-[#2A2A2E]">
+          <span className="chip">{size} firm</span>
+          <span className="chip">{result.practiceAreaMatch}</span>
+          <span className="chip">{result.jurisdiction}</span>
+          {result.feeLevel && <span className="chip">Fee level {result.feeLevel}</span>}
+        </div>
+
+        <div className={`mt-5 grid gap-5 ${isTop ? "sm:grid-cols-2" : ""}`}>
+          <div>
+            <p className="mb-2 text-[11px] font-semibold uppercase tracking-widest text-[#9A9AA0]">Why this fits</p>
+            <div className="space-y-2.5">
+              {reasons.slice(0, isTop ? 3 : 2).map((reason, i) => (
+                <div key={i} className="flex items-start gap-3 text-sm text-[#2A2A2E]">
+                  <CheckCircle2 size={16} className="mt-0.5 shrink-0 text-emerald-600" />
+                  {reason}
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <div>
+            <p className="mb-2 text-[11px] font-semibold uppercase tracking-widest text-[#9A9AA0]">Quality signals</p>
+            <div className="space-y-2.5">
+              {result.credibilitySignals.map((signal, i) => (
+                <div key={i} className="flex items-start gap-3 text-sm text-[#2A2A2E]">
+                  <ShieldCheck size={16} className="mt-0.5 shrink-0 text-[#002B55]" />
+                  {signal}
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+
+        {isTop && (
+          <div className="mt-6 rounded-2xl border border-[#DDE6EF] bg-[#F7FAFC] p-4">
+            <p className="text-sm leading-relaxed text-[#2A2A2E]">
+              Your matches are ready. Unlock this intake to see who each firm is, open full profiles,
+              and get a prepared summary of your matter plus a ready-to-send message for reaching out.
+            </p>
+            <Link href="/access" className="btn btn-primary mt-4">
+              Unlock this intake <ArrowRight size={14} strokeWidth={2} />
+            </Link>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
 export default function MatchCard({ result, rank, initialSaved = false }: MatchCardProps) {
+  if (isLockedResult(result)) {
+    return <LockedMatchCard result={result} rank={rank} />;
+  }
+
   const { firm, score, reasons, isBestMatch } = result;
   const roundedScore = Math.round(score);
   const hasCriteria = reasons.length > 0 || result.missedCriteria.length > 0;

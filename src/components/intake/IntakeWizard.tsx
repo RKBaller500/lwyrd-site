@@ -93,24 +93,24 @@ function QuestionCard({
     })();
 
     return (
-      <div className="bg-white border border-[#E7E7E3] rounded-3xl p-8">
-        <p className="text-xs text-[#6B6B70] uppercase tracking-widest font-medium mb-3">
+      <div className="intake-card">
+        <p className="intake-meta">
           Optional
         </p>
         <h2
-          className="text-xl sm:text-2xl text-[#0B0B0C] mb-2"
+          className="intake-question-title"
           style={{ fontFamily: "var(--display)", fontWeight: 500 }}
         >
           {question.text}
         </h2>
         {subtext && (
-          <p className="text-[#6B6B70] text-sm mb-6">{subtext}</p>
+          <p className="intake-question-subtext">{subtext}</p>
         )}
-        {!subtext && <div className="mb-5" />}
+        {!subtext && <div className="intake-spacer" />}
 
         {isNoFee ? (
-          <div className="rounded-2xl bg-[#F6F6F4] border border-[#E7E7E3] px-5 py-4">
-            <p className="text-[#6B6B70] text-sm">
+          <div className="intake-note-panel">
+            <p>
               {billingPreference === "contingency"
                 ? "No upfront budget required. Your attorney's fee comes from your settlement or award."
                 : "No cash budget required. Equity arrangements will be negotiated directly with the firm."}
@@ -119,7 +119,7 @@ function QuestionCard({
         ) : (
           <>
             <p
-              className="text-[#0B0B0C] text-3xl mb-5"
+              className="intake-budget-value"
               style={{ fontFamily: "var(--display)", fontWeight: 500 }}
             >
               {display}
@@ -131,9 +131,9 @@ function QuestionCard({
               step={effectiveStep}
               value={budgetVal}
               onChange={(e) => onChange(Number(e.target.value))}
-              className="w-full accent-[#002B55]"
+              className="intake-range"
             />
-            <div className="flex justify-between text-xs text-[#6B6B70] mt-2">
+            <div className="intake-range-labels">
               <span>Not specified</span>
               <span>{formatCap(effectiveMax)}</span>
             </div>
@@ -149,24 +149,24 @@ function QuestionCard({
     const isOutsideUS = selected === "outside_us";
 
     return (
-      <div className="bg-white border border-[#E7E7E3] rounded-3xl p-8">
-        <p className="text-xs text-[#6B6B70] uppercase tracking-widest font-medium mb-3">
+      <div className="intake-card">
+        <p className="intake-meta">
           {question.required ? "Required" : "Optional"}
         </p>
         <h2
-          className="text-xl sm:text-2xl text-[#0B0B0C] mb-2"
+          className="intake-question-title"
           style={{ fontFamily: "var(--display)", fontWeight: 500 }}
         >
           {question.text}
         </h2>
         {question.subtext && (
-          <p className="text-[#6B6B70] text-sm mb-6">{question.subtext}</p>
+          <p className="intake-question-subtext">{question.subtext}</p>
         )}
-        {!question.subtext && <div className="mb-5" />}
+        {!question.subtext && <div className="intake-spacer" />}
         <select
           value={selected}
           onChange={(e) => onChange(e.target.value)}
-          className="w-full px-4 py-3 rounded-2xl border border-[#E7E7E3] bg-[#F6F6F4] text-[#0B0B0C] focus:outline-none focus:border-[#002B55] focus:ring-2 focus:ring-[#002B55]/15 transition-all text-sm appearance-none cursor-pointer"
+          className="intake-select"
         >
           <option value="" disabled>Select a state…</option>
           {question.options.map((opt) => (
@@ -174,8 +174,8 @@ function QuestionCard({
           ))}
         </select>
         {isOutsideUS && (
-          <div className="mt-4">
-            <p className="text-[#6B6B70] text-xs mb-2">Which region(s) are involved? (optional)</p>
+          <div className="intake-followup">
+            <p>Which region(s) are involved? (optional)</p>
             <input
               type="text"
               placeholder="e.g., Europe, Canada, Southeast Asia"
@@ -184,7 +184,7 @@ function QuestionCard({
                 setOtherText(e.target.value);
                 onChange(`outside_us: ${e.target.value}`);
               }}
-              className="w-full px-4 py-3 rounded-2xl border border-[#E7E7E3] bg-[#F6F6F4] text-[#0B0B0C] placeholder-[#9A9AA0] focus:outline-none focus:border-[#002B55] transition-colors text-sm"
+              className="intake-input"
             />
           </div>
         )}
@@ -211,21 +211,21 @@ function QuestionCard({
     };
 
     return (
-      <div className="bg-white border border-[#E7E7E3] rounded-3xl p-8">
-        <p className="text-xs text-[#6B6B70] uppercase tracking-widest font-medium mb-3">
+      <div className="intake-card">
+        <p className="intake-meta">
           {question.required ? "Required" : "Optional"}
         </p>
         <h2
-          className="text-xl sm:text-2xl text-[#0B0B0C] mb-2"
+          className="intake-question-title"
           style={{ fontFamily: "var(--display)", fontWeight: 500 }}
         >
           {question.text}
         </h2>
         {question.subtext && (
-          <p className="text-[#6B6B70] text-sm mb-6">{question.subtext}</p>
+          <p className="intake-question-subtext">{question.subtext}</p>
         )}
-        {!question.subtext && <div className="mb-5" />}
-        <div className="space-y-2">
+        {!question.subtext && <div className="intake-spacer" />}
+        <div className="intake-options">
           {question.options.map((opt) => {
             const isSelected = opt.value === "other" ? isOtherSelected : selected === opt.value;
             const isDisabled = opt.disabled === true;
@@ -235,26 +235,22 @@ function QuestionCard({
                   type="button"
                   onClick={() => !isDisabled && handleSelect(opt.value)}
                   disabled={isDisabled}
-                  className={`w-full text-left px-5 py-3.5 rounded-2xl border text-sm transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#002B55] focus-visible:ring-offset-2 focus-visible:ring-offset-white ${
+                  className={`intake-option ${
                     isDisabled
-                      ? "bg-[#F6F6F4] border-[#E7E7E3] text-[#6B6B70]/40 cursor-not-allowed"
+                      ? "is-disabled"
                       : isSelected
-                      ? "bg-[#002B55] text-white border-[#002B55]"
-                      : "bg-[#F6F6F4] border-[#E7E7E3] text-[#2A2A2E] hover:border-[#002B55]"
+                      ? "is-selected"
+                      : ""
                   }`}
                 >
-                  <span className="font-medium">{opt.label}</span>
+                  <span className="intake-option-label">{opt.label}</span>
                   {isDisabled && (
-                    <span className="block text-xs mt-0.5 text-[#6B6B70]/40">
+                    <span className="intake-option-note">
                       Not typically available for this practice area
                     </span>
                   )}
                   {!isDisabled && opt.note && (
-                    <span
-                      className={`block text-xs mt-0.5 ${
-                        isSelected ? "text-white/70" : "text-[#6B6B70]"
-                      }`}
-                    >
+                    <span className="intake-option-note">
                       {opt.note}
                     </span>
                   )}
@@ -266,7 +262,7 @@ function QuestionCard({
                     placeholder="Please describe…"
                     value={otherText}
                     onChange={(e) => handleOtherText(e.target.value)}
-                    className="mt-2 w-full px-4 py-3 rounded-2xl border border-[#E7E7E3] bg-[#F6F6F4] text-[#0B0B0C] placeholder-[#9A9AA0] focus:outline-none focus:border-[#002B55] transition-colors text-sm"
+                    className="intake-input intake-input-nested"
                   />
                 )}
               </div>
@@ -304,21 +300,21 @@ function QuestionCard({
   };
 
   return (
-    <div className="bg-white border border-[#E7E7E3] rounded-3xl p-8">
-      <p className="text-xs text-[#6B6B70] uppercase tracking-widest font-medium mb-3">
+    <div className="intake-card">
+      <p className="intake-meta">
         {question.required ? "Required" : "Optional"} · Select all that apply
       </p>
       <h2
-        className="text-xl sm:text-2xl text-[#0B0B0C] mb-2"
+        className="intake-question-title"
         style={{ fontFamily: "var(--display)", fontWeight: 500 }}
       >
         {question.text}
       </h2>
       {question.subtext && (
-        <p className="text-[#6B6B70] text-sm mb-6">{question.subtext}</p>
+        <p className="intake-question-subtext">{question.subtext}</p>
       )}
-      {!question.subtext && <div className="mb-5" />}
-      <div className="space-y-2">
+      {!question.subtext && <div className="intake-spacer" />}
+      <div className="intake-options">
         {question.options.map((opt) => {
           const isSelected = opt.value === "other" ? isOtherSelectedMulti : selected.includes(opt.value);
           return (
@@ -326,19 +322,15 @@ function QuestionCard({
               <button
                 type="button"
                 onClick={() => handleMultiToggle(opt.value)}
-                className={`w-full text-left px-5 py-3.5 rounded-2xl border text-sm transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#002B55] focus-visible:ring-offset-2 focus-visible:ring-offset-white ${
+                className={`intake-option ${
                   isSelected
-                    ? "bg-[#002B55] text-white border-[#002B55]"
-                    : "bg-[#F6F6F4] border-[#E7E7E3] text-[#2A2A2E] hover:border-[#002B55]"
+                    ? "is-selected"
+                    : ""
                 }`}
               >
-                <span className="font-medium">{opt.label}</span>
+                <span className="intake-option-label">{opt.label}</span>
                 {opt.note && (
-                  <span
-                    className={`block text-xs mt-0.5 ${
-                      isSelected ? "text-white/70" : "text-[#6B6B70]"
-                    }`}
-                  >
+                  <span className="intake-option-note">
                     {opt.note}
                   </span>
                 )}
@@ -350,7 +342,7 @@ function QuestionCard({
                   placeholder="Please describe…"
                   value={otherText}
                   onChange={(e) => handleMultiOtherText(e.target.value)}
-                  className="mt-2 w-full px-4 py-3 rounded-2xl border border-[#E7E7E3] bg-[#F6F6F4] text-[#0B0B0C] placeholder-[#9A9AA0] focus:outline-none focus:border-[#002B55] transition-colors text-sm"
+                  className="intake-input intake-input-nested"
                 />
               )}
             </div>
@@ -399,8 +391,8 @@ function SummaryView({
   };
 
   return (
-    <div className="space-y-3">
-      <p className="text-[#6B6B70] text-sm mb-6">
+    <div className="intake-summary">
+      <p className="intake-summary-intro">
         Review your answers below. Click any row to change that answer, then proceed to find your matches.
       </p>
       {questions.map((q, index) => {
@@ -413,20 +405,20 @@ function SummaryView({
           <button
             key={q.id}
             onClick={() => onEdit(index)}
-            className={`w-full text-left bg-white border border-[#E7E7E3] rounded-2xl p-5 group hover:border-[#002B55] hover:bg-[#F6F6F4] transition-colors ${
-              !hasAnswer && !q.required ? "opacity-50" : ""
+            className={`intake-summary-row ${
+              !hasAnswer && !q.required ? "is-empty" : ""
             }`}
           >
-            <div className="flex items-start justify-between gap-3">
-              <div className="min-w-0">
-                <p className="text-xs text-[#6B6B70] font-medium mb-1">{q.text}</p>
-                <p className="text-[#0B0B0C] text-sm font-medium">
+            <div className="intake-summary-row-inner">
+              <div>
+                <p className="intake-summary-question">{q.text}</p>
+                <p className="intake-summary-answer">
                   {hasAnswer ? getDisplayValue(q, val) : "N/A"}
                 </p>
               </div>
               <Pencil
                 size={13}
-                className="shrink-0 mt-1 text-[#9A9AA0] group-hover:text-[#002B55] transition-colors"
+                className="intake-summary-icon"
               />
             </div>
           </button>
@@ -587,20 +579,19 @@ export default function IntakeWizard() {
   const pillLabel = categoryLabel ?? "Legal Intake";
 
   return (
-    <div className="max-w-2xl mx-auto px-6 py-12">
+    <div className="intake-shell">
       {/* Header */}
-      <div className="mb-8">
-        <span className="inline-block bg-[#002B55] text-white text-xs font-medium px-3 py-1.5 rounded-full tracking-wide mb-4">
+      <div className="intake-head">
+        <span className="kicker">
           {pillLabel}
         </span>
         <h1
-          className="text-3xl sm:text-4xl text-[#0B0B0C]"
           style={{ fontFamily: "var(--display)", fontWeight: 500 }}
         >
           {showSummary ? "Review your answers" : "Tell us about your needs"}
         </h1>
         {!showSummary && (
-          <p className="text-[#6B6B70] text-sm mt-2">
+          <p>
             Your answers help us find the most relevant firms for you. There are no right or wrong answers.
           </p>
         )}
@@ -612,7 +603,7 @@ export default function IntakeWizard() {
       )}
 
       {/* Content */}
-      <div className="mt-8 overflow-hidden">
+      <div className="intake-stage">
         <AnimatePresence mode="wait" initial={false}>
           <motion.div
             key={showSummary ? "summary" : currentStep}
@@ -645,11 +636,11 @@ export default function IntakeWizard() {
       </div>
 
       {/* Navigation */}
-      <div className="flex items-center justify-between mt-10">
+      <div className="intake-actions">
         <button
           onClick={handleBack}
           disabled={currentStep === 0 && !showSummary}
-          className="flex items-center gap-2 px-5 py-3 rounded-2xl border border-[#E7E7E3] text-[#6B6B70] text-sm font-medium hover:border-[#002B55] hover:text-[#0B0B0C] transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
+          className="intake-btn intake-btn-secondary"
         >
           <ArrowLeft size={15} />
           Back
@@ -662,7 +653,7 @@ export default function IntakeWizard() {
               setEditingFromSummary(false);
               setShowSummary(true);
             }}
-            className="flex items-center gap-2 px-5 py-3 rounded-2xl border border-[#002B55] text-[#002B55] text-sm font-medium hover:bg-[#002B55] hover:text-white transition-colors"
+            className="intake-btn intake-btn-outline"
           >
             Back to Review
           </button>
@@ -672,7 +663,7 @@ export default function IntakeWizard() {
           <button
             onClick={handleSubmit}
             disabled={isSubmitting}
-            className="flex items-center gap-2 px-8 py-3 rounded-2xl bg-[#002B55] hover:bg-[#01213f] text-white text-sm font-medium transition-colors disabled:opacity-50"
+            className="intake-btn intake-btn-primary"
           >
             {isSubmitting ? "Finding matches…" : "Find My Matches"}
             {!isSubmitting && <ArrowRight size={15} />}
@@ -681,7 +672,7 @@ export default function IntakeWizard() {
           <button
             onClick={handleNext}
             disabled={!canProceed()}
-            className="flex items-center gap-2 px-8 py-3 rounded-2xl bg-[#002B55] text-white text-sm font-medium hover:opacity-90 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed"
+            className="intake-btn intake-btn-primary"
           >
             {currentStep < questions.length - 1 ? "Next" : "Review"}
             <ArrowRight size={15} />

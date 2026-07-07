@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useRef } from "react";
-import Script from "next/script";
 import MarketingNav from "./MarketingNav";
 import { useAuth } from "@/context/AuthContext";
 import { useRouter } from "next/navigation";
@@ -13,6 +12,16 @@ type Section =
   | "about"
   | "blog"
   | "help";
+
+function getMarketingScriptSrc(body: string) {
+  if (body.includes('id="heroMaze"')) return "/marketing-page-scripts/home.js";
+  if (body.includes('id="trkSel"')) return "/marketing-page-scripts/matching.js";
+  if (body.includes('id="calGrid"')) return "/marketing-page-scripts/consultations.js";
+  if (body.includes('id="blogSearch"')) return "/marketing-page-scripts/blog.js";
+  if (body.includes('class="faq-list"')) return "/marketing-page-scripts/faq.js";
+  if (body.includes('class="contact-form"')) return "/marketing-page-scripts/contact.js";
+  return null;
+}
 
 /**
  * Renders a ported design page: injects the page's exact CSS, the shared
@@ -95,24 +104,46 @@ export default function MarketingPageClient({
     const root = ref.current;
     if (!root) return;
     let cleanup: void | (() => void);
-    const shouldRunOriginalJs =
-      js && !body.includes('id="heroMaze"') && !body.includes('class="faq');
 
     // Run the page's original JS (maze, reveals, accordions, smooth scroll).
-    // We inject it as a real inline <script> rather than eval/new Function so
-    // it runs under the production CSP's script-src 'unsafe-inline' (which does
-    // NOT permit eval). Wrapped in an IIFE so re-running on client navigation
-    // doesn't redeclare the design's top-level `const`/`let` globals.
+    // Load it as a first-party external script so direct URL loads and client
+    // transitions both run the exact generated animation code under CSP.
+    const timers: number[] = [];
+    const frames: number[] = [];
     let scriptEl: HTMLScriptElement | null = null;
-    if (shouldRunOriginalJs) {
+    const scriptSrc = getMarketingScriptSrc(body);
+
+    const runOriginalJs = () => {
+      if (!js || !scriptSrc || root.dataset.originalDesignJsRan === "true") return;
+      if (!root.querySelector(".rv, .rv-seq, #heroMaze, [data-seg], .qa, form, input, select")) return;
+      root.dataset.originalDesignJsRan = "true";
       scriptEl = document.createElement("script");
-      scriptEl.textContent = `;(function(){\ntry{\n${js}\n}catch(e){console.error("Marketing page script error:",e);}\n})();`;
+      scriptEl.src = scriptSrc;
+      scriptEl.async = false;
       document.body.appendChild(scriptEl);
+    };
+
+    frames.push(window.requestAnimationFrame(runOriginalJs));
+    timers.push(window.setTimeout(runOriginalJs, 50));
+    timers.push(window.setTimeout(runOriginalJs, 250));
+    if (document.readyState === "complete") runOriginalJs();
+    else window.addEventListener("load", runOriginalJs, { once: true });
+
+    let observer: MutationObserver | null = null;
+    if ("MutationObserver" in window) {
+      observer = new MutationObserver(() => {
+        frames.push(window.requestAnimationFrame(runOriginalJs));
+      });
+      observer.observe(root, { childList: true, subtree: true });
     }
 
     if (onReady) cleanup = onReady(root);
 
     return () => {
+      frames.forEach((frame) => window.cancelAnimationFrame(frame));
+      timers.forEach((timer) => window.clearTimeout(timer));
+      window.removeEventListener("load", runOriginalJs);
+      observer?.disconnect();
       if (typeof cleanup === "function") cleanup();
       if (scriptEl) scriptEl.remove();
     };
@@ -132,9 +163,8 @@ export default function MarketingPageClient({
             "\n#ambient-overlay{display:none !important;}\n",
         }}
       />
-      <Script src="/marketing-animations.js" strategy="afterInteractive" />
       <MarketingNav current={current} />
-      <div ref={ref} data-marketing-page-root dangerouslySetInnerHTML={{ __html: body }} />
+      <div ref={ref} dangerouslySetInnerHTML={{ __html: body }} />
     </>
   );
 }

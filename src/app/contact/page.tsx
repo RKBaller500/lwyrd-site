@@ -54,6 +54,7 @@ export default function ContactPage() {
       body={body}
       js={js}
       current="help"
+      currentItem="contact"
       onReady={wireForm}
     />
   );

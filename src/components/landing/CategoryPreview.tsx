@@ -93,7 +93,7 @@ export default function CategoryPreview() {
                 </div>
 
                 <Link
-                  href="/intake/start"
+                  href="/get-matched"
                   className="inline-flex items-center gap-1.5 text-sm text-[#3B82F6] font-medium hover:text-[#60A5FA] transition-colors"
                 >
                   Get matched

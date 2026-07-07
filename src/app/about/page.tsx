@@ -63,7 +63,7 @@ export default function AboutPage() {
               style={{ ...lora, fontWeight: 500 }}
             >
               Access to elite legal{" "}
-              <span style={{ color: "#C9962B" }}>shouldn't be a privilege.</span>
+              <span style={{ color: "#C9962B" }}>shouldn&apos;t be a privilege.</span>
             </motion.h1>
 
             <motion.p
@@ -107,12 +107,12 @@ export default function AboutPage() {
               className="space-y-6 text-[#8A93A6] text-sm leading-relaxed"
             >
               <p>
-                If you're a massive corporation, you have an entire legal operations department
+                If you&apos;re a massive corporation, you have an entire legal operations department
                 dedicated to finding and managing the right specialized counsel for every distinct
                 issue.
               </p>
               <p>
-                If you're a startup founder, a small business owner, or an individual, you're left
+                If you&apos;re a startup founder, a small business owner, or an individual, you&apos;re left
                 to rely on Google searches, scattered word-of-mouth referrals, and pure luck to find
                 a lawyer who actually knows how to handle your specific problem.
               </p>
@@ -120,9 +120,9 @@ export default function AboutPage() {
                 LWYRD was built to fix this.
               </p>
               <p>
-                We believe that you shouldn't have to be a lawyer to know how to hire a great one.
+                We believe that you shouldn&apos;t have to be a lawyer to know how to hire a great one.
                 We act as your intelligent guide, diagnosing your needs, filtering out the noise,
-                and curating introductions to attorneys who specialize deeply in what you're facing.
+                and curating introductions to attorneys who specialize deeply in what you&apos;re facing.
               </p>
             </motion.div>
           </div>
@@ -204,7 +204,7 @@ export default function AboutPage() {
                 Before any firm appears on the platform, it goes through the LWYRD Assessment, a
                 rigorous evaluation covering bar standing and disciplinary history, depth of
                 experience in core practice areas, client responsiveness commitments, written
-                engagement standards, and full fee transparency. A firm's assessment performance is
+                engagement standards, and full fee transparency. A firm&apos;s assessment performance is
                 factored into every match it appears in.
               </p>
             </motion.div>
@@ -256,7 +256,7 @@ export default function AboutPage() {
                 Start the intake, about five minutes, no legal jargon, no cost.
               </p>
               <div className="flex flex-col sm:flex-row gap-3 justify-center">
-                <Button href="/intake/start" variant="primary" size="lg">
+                <Button href="/get-matched" variant="primary" size="lg">
                   Get Matched →
                 </Button>
                 <Button href="/contact" variant="outline" size="lg">

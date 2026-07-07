@@ -19,7 +19,7 @@ function GetMatchedRedirect() {
       router.replace("/intake/start");
       return;
     }
-    const mode = searchParams.get("tab") === "login" ? "login" : "signup";
+    const mode = searchParams.get("tab") === "signup" ? "signup" : "login";
     router.replace("/");
     openModal(mode, "/intake/start");
   }, [isAuthenticated, isLoading, openModal, router, searchParams]);

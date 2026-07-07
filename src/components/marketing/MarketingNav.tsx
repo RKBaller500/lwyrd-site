@@ -34,7 +34,7 @@ export default function MarketingNav({ current }: { current?: Section }) {
   const getMatched = () => {
     closeMobile();
     if (isAuthenticated) router.push("/intake/start");
-    else openModal("signup", "/intake/start");
+    else openModal("login", "/intake/start");
   };
 
   const signIn = () => {
@@ -86,9 +86,9 @@ export default function MarketingNav({ current }: { current?: Section }) {
               Clients
             </button>
             <div className="nav-menu" aria-label="Clients menu">
-              <a href="#" aria-disabled="true">Startups</a>
-              <a href="#" aria-disabled="true">SMBs</a>
-              <a href="#" aria-disabled="true">Individuals</a>
+              <a href="/get-matched" onClick={(e) => { e.preventDefault(); getMatched(); }}>Startups</a>
+              <a href="/get-matched" onClick={(e) => { e.preventDefault(); getMatched(); }}>SMBs</a>
+              <a href="/get-matched" onClick={(e) => { e.preventDefault(); getMatched(); }}>Individuals</a>
             </div>
           </div>
 

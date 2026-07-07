@@ -1,16 +1,18 @@
 "use client";
 
 import { useEffect } from "react";
+import { usePathname } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
 
 export default function AuthGuard({ children }: { children: React.ReactNode }) {
   const { isAuthenticated, isLoading, openModal } = useAuth();
+  const pathname = usePathname();
 
   useEffect(() => {
     if (!isLoading && !isAuthenticated) {
-      openModal("login");
+      openModal("login", pathname);
     }
-  }, [isAuthenticated, isLoading, openModal]);
+  }, [isAuthenticated, isLoading, openModal, pathname]);
 
   if (isLoading) {
     return (

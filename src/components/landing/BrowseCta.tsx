@@ -13,9 +13,9 @@ export default function BrowseCta() {
 
   const handleBrowse = () => {
     if (isAuthenticated) {
-      router.push("/intake");
+      router.push("/intake/start");
     } else {
-      openModal("login", "/intake");
+      openModal("login", "/intake/start");
     }
   };
 

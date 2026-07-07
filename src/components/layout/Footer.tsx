@@ -77,7 +77,7 @@ export default function Footer() {
               Platform
             </p>
             <nav className="flex flex-col gap-3">
-              <Link href="/intake/start" className="text-white/60 text-sm hover:text-white transition-colors">
+              <Link href="/get-matched" className="text-white/60 text-sm hover:text-white transition-colors">
                 Get Matched
               </Link>
               <Link href="/for-law-firms" className="text-white/60 text-sm hover:text-white transition-colors">

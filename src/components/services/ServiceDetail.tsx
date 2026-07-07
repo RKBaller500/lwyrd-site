@@ -23,7 +23,7 @@ export default function ServiceDetail({ category }: ServiceDetailProps) {
       <div className="ds-shell">
         {/* Breadcrumb */}
         <nav className="ds-breadcrumb" style={{ marginBottom: "2rem" }}>
-          <Link href="/intake">Get matched</Link>
+          <Link href="/get-matched">Get matched</Link>
           <span className="sep">/</span>
           <span style={{ color: "var(--ink-2)" }}>{category.name}</span>
         </nav>
@@ -93,7 +93,7 @@ export default function ServiceDetail({ category }: ServiceDetailProps) {
                 Answer a short set of questions about your needs and we&apos;ll match you with the right firm.
               </p>
               <Link
-                href="/intake"
+                href="/get-matched"
                 className="btn"
                 style={{ width: "100%", justifyContent: "center", background: "#fff", color: "var(--navy)" }}
               >

@@ -38,23 +38,54 @@ export default function MarketingPageClient({
   const { isAuthenticated, openModal } = useAuth();
   const router = useRouter();
 
-  // Intercept the design's "Get matched" links (which point at /get-matched)
-  // so they open the auth modal in place instead of routing to a page.
+  // Intercept ported-design CTAs so generated markup cannot strand users on
+  // placeholder hashes or bypass the login-first intake flow.
   useEffect(() => {
     const root = ref.current;
     if (!root) return;
     const onClick = (e: MouseEvent) => {
-      const a = (e.target as HTMLElement)?.closest?.('a[href^="/get-matched"]');
+      if (!(e.target instanceof Element)) return;
+      const a = e.target.closest("a");
       if (!a) return;
+      const href = a.getAttribute("href") ?? "";
+      const label = (a.textContent ?? "").trim().replace(/\s+/g, " ");
+      const lowerLabel = label.toLowerCase();
+      const isGetMatched =
+        href.startsWith("/get-matched") ||
+        a.id === "heroCta" ||
+        lowerLabel.startsWith("get matched");
+      const legalRoutes: Record<string, string> = {
+        Privacy: "/privacy",
+        Terms: "/terms",
+        Disclosures: "/disclosures",
+      };
+
+      if (href === "#" && legalRoutes[label]) {
+        e.preventDefault();
+        e.stopPropagation();
+        router.push(legalRoutes[label]);
+        return;
+      }
+
+      if (href === "#" && ["Startups", "SMBs", "Individuals"].includes(label)) {
+        e.preventDefault();
+        e.stopPropagation();
+        if (isAuthenticated) router.push("/intake/start");
+        else openModal("login", "/intake/start");
+        return;
+      }
+
+      if (!isGetMatched) return;
       e.preventDefault();
+      e.stopPropagation();
       if (isAuthenticated) router.push("/intake/start");
       else {
-        const login = (a.getAttribute("href") || "").includes("tab=login");
-        openModal(login ? "login" : "signup", "/intake/start");
+        const signup = href.includes("tab=signup");
+        openModal(signup ? "signup" : "login", "/intake/start");
       }
     };
-    root.addEventListener("click", onClick);
-    return () => root.removeEventListener("click", onClick);
+    root.addEventListener("click", onClick, true);
+    return () => root.removeEventListener("click", onClick, true);
   }, [body, isAuthenticated, openModal, router]);
 
   useEffect(() => {

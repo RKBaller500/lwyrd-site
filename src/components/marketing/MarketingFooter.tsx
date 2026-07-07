@@ -38,9 +38,9 @@ export default function MarketingFooter() {
 
           <div className="foot-col">
             <h4>Clients</h4>
-            <a href="#" aria-disabled="true">Startups</a>
-            <a href="#" aria-disabled="true">SMBs</a>
-            <a href="#" aria-disabled="true">Individuals</a>
+            <Link href="/get-matched">Startups</Link>
+            <Link href="/get-matched">SMBs</Link>
+            <Link href="/get-matched">Individuals</Link>
           </div>
 
           <div className="foot-col">
@@ -71,9 +71,9 @@ export default function MarketingFooter() {
           <div className="foot-bottom">
             <span>© 2026 LWYRD. All rights reserved.</span>
             <div className="fb-links">
-              <a href="#">Privacy</a>
-              <a href="#">Terms</a>
-              <a href="#">Disclosures</a>
+              <Link href="/privacy">Privacy</Link>
+              <Link href="/terms">Terms</Link>
+              <Link href="/disclosures">Disclosures</Link>
             </div>
           </div>
         </div>

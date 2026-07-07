@@ -18,7 +18,6 @@ import {
   Briefcase,
   Plus,
   ArrowRight,
-  MapPin,
   Shield,
   BookmarkX,
   ChevronRight,
@@ -205,11 +204,6 @@ function OverviewTab({
                     <p style={{ fontFamily: "var(--display)", fontSize: ".9rem", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
                       {sf.firm?.name ?? "Unavailable firm"}
                     </p>
-                    {sf.firm?.location ? (
-                      <p style={{ color: "var(--muted)", fontSize: ".78rem", display: "flex", alignItems: "center", gap: 4, marginTop: 2 }}>
-                        <MapPin size={10} /> {sf.firm.location}
-                      </p>
-                    ) : null}
                   </div>
                 </>
               );
@@ -449,7 +443,6 @@ function SavedFirmsTab({
               </div>
 
               <div style={{ display: "flex", flexWrap: "wrap", gap: 10, color: "var(--muted)", fontSize: ".78rem" }}>
-                {firm?.location && <span style={{ display: "flex", alignItems: "center", gap: 4 }}><MapPin size={11} /> {firm.location}</span>}
                 {firm?.size && <span>{sizeLabels[firm.size] ?? firm.size} firm</span>}
               </div>
 

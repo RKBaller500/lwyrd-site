@@ -1,76 +1,50 @@
 "use client";
 
+import "@/styles/lwyrd-ds.css";
 import { useState } from "react";
 import { motion } from "framer-motion";
-import Link from "next/link";
-import Navbar from "@/components/layout/Navbar";
-import Footer from "@/components/layout/Footer";
-import { Send, CheckCircle2, ArrowRight } from "lucide-react";
+import { ArrowRight, CheckCircle2, ClipboardCheck, Target, Handshake, Send } from "lucide-react";
+import MarketingNav from "@/components/marketing/MarketingNav";
+import MarketingFooter from "@/components/marketing/MarketingFooter";
 import { submitForm } from "@/lib/formsubmit";
 
 const ease = [0.25, 0.46, 0.45, 0.94] as const;
-const lora = { fontFamily: '"Lora", Georgia, serif' } as const;
 
 const container = {
   hidden: {},
-  visible: { transition: { staggerChildren: 0.12, delayChildren: 0.05 } },
+  visible: { transition: { staggerChildren: 0.1, delayChildren: 0.04 } },
 };
 
 const item = {
-  hidden: { opacity: 0, y: 24 },
-  visible: { opacity: 1, y: 0, transition: { duration: 0.6, ease } },
+  hidden: { opacity: 0, y: 22 },
+  visible: { opacity: 1, y: 0, transition: { duration: 0.58, ease } },
 };
 
-const howDifferentCols = [
+const values = [
   {
-    title: "Clients qualify themselves before they reach you.",
-    body: "Every client who finds your firm through LWYRD has completed a structured intake covering their track (startup, small business, or individual), their legal category, matter specifics, timeline, budget, and firm type preference. By the time your firm appears in their results, you already know more about their situation than most first calls reveal.",
-    label: "Intake before introduction",
+    icon: ClipboardCheck,
+    title: "Qualified before the introduction.",
+    body: "Our intake captures matter type, budget, timeline, and jurisdiction up front, so you never spend intake time on a client you were never going to take.",
   },
   {
-    title: "You only appear when your practice area, jurisdiction, and parameters align.",
-    body: "LWYRD's matching algorithm compares a client's intake answers against your firm's profile, practice areas, operating states, billing structure, firm size. If the match isn't strong, your firm doesn't appear. This means the clients who see you are the clients whose needs you can actually meet.",
-    label: "Matched on fit, not proximity",
+    icon: Target,
+    title: "Matched to your actual practice.",
+    body: "You receive clients whose needs line up with what you specialize in, not whoever happened to search your practice area.",
   },
   {
-    title: "Getting listed on LWYRD costs nothing to start.",
-    body: "There is no listing fee. There is no pay-to-appear model. Firms are evaluated through the LWYRD Assessment and, once listed, appear in results based entirely on match quality. The relationship between LWYRD and its firm partners is built around the quality of matches, not the size of a payment.",
-    label: "No upfront cost",
-  },
-];
-
-const objections = [
-  {
-    q: "\"We get matched with clients who can't afford us.\"",
-    a: "LWYRD captures budget range and billing preference during intake, before a client ever sees your firm's name. If a client's budget doesn't align with your billing structure, your firm doesn't appear in their match. You set your billing parameters in your firm profile. The intake filters accordingly.",
-  },
-  {
-    q: "\"We end up with matters outside our practice area or jurisdiction.\"",
-    a: "Your firm profile specifies the practice areas you cover and the states you're licensed in. The matching algorithm only surfaces your firm when a client's practice area and state requirements align with your profile. If a client needs a California employment attorney and your firm doesn't cover California, they won't see you.",
-  },
-  {
-    q: "\"We don't know what we're getting before the first call.\"",
-    a: "When a client contacts your firm through LWYRD, you receive a summary of their intake, their track, legal category, matter specifics, timeline, budget, and what they told us they're looking for. The first call starts from a foundation of context, not from a blank intake that duplicates what the client already completed.",
+    icon: Handshake,
+    title: "You control the first move.",
+    body: "No client is handed your details until the match is made and they choose to reach out. No cold outreach on your end.",
   },
 ];
 
-const firmFaqs = [
-  {
-    q: "What does the LWYRD Assessment evaluate?",
-    a: "The Assessment covers bar standing and disciplinary history, years of experience in core practice areas, professional liability insurance, verified client references, written engagement agreements, conflicts of interest procedures, a dedicated client point of contact, a 48-hour response commitment, upfront fee disclosure, itemized billing, and secure document handling. Full assessment results are visible on your public firm profile.",
-  },
-  {
-    q: "Is there a cost to be listed on LWYRD?",
-    a: "No. There is no listing fee and no pay-to-appear model. Firms are listed based on their Assessment results and appear in match results based entirely on fit.",
-  },
-  {
-    q: "What happens after a client matches with my firm?",
-    a: "When a client unlocks their results and your firm appears, they see your full profile and assessment results. If they choose to contact you, LWYRD facilitates the introduction, sharing their intake summary so you have context before the first conversation. After that, the engagement is entirely between your firm and the client.",
-  },
+const dimensions = [
+  { label: "Practice-area depth", note: "Demonstrated experience in the areas you take on." },
+  { label: "Bar standing", note: "Active licensure and a clean disciplinary record." },
+  { label: "Responsiveness", note: "A commitment to reaching clients promptly." },
+  { label: "Fee transparency", note: "Clear, upfront terms before any engagement." },
+  { label: "Engagement standards", note: "Written agreements and defined client processes." },
 ];
-
-const inputClass =
-  "w-full px-4 py-3 rounded-2xl border border-[#1F2A3D] bg-[#141C2E] text-[#E6EAF2] placeholder-[#8A93A6] focus:outline-none focus:border-[#3B82F6] focus:ring-2 focus:ring-[#3B82F6]/15 transition-all text-sm";
 
 export default function ForLawFirmsPage() {
   const [form, setForm] = useState({
@@ -82,9 +56,10 @@ export default function ForLawFirmsPage() {
     why: "",
   });
   const [status, setStatus] = useState<"idle" | "loading" | "success" | "error">("idle");
-  const [openFaq, setOpenFaq] = useState<number | null>(null);
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+  const handleChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
+  ) => {
     setForm((prev) => ({ ...prev, [e.target.name]: e.target.value }));
   };
 
@@ -95,7 +70,7 @@ export default function ForLawFirmsPage() {
       await submitForm({
         ...form,
         formType: "Law Firm Application",
-        subject: `New Firm Application: ${form.firmName}`,
+        _subject: `New Firm Application: ${form.firmName}`,
         _replyto: form.email,
       });
       setStatus("success");
@@ -105,412 +80,307 @@ export default function ForLawFirmsPage() {
   };
 
   return (
-    <div className="flex flex-col min-h-screen bg-[#0A0F1C]">
-      <Navbar />
-
-      <main className="flex-1">
+    <div className="lwyrd-ds ds-page firms-page">
+      <MarketingNav current="law-firms" />
+      <main className="ds-main">
         {/* ── Hero ── */}
-        <section className="relative bg-[#0A0F1C] py-28 md:py-40 px-6 overflow-hidden">
-          <div className="max-w-4xl mx-auto relative">
-            <motion.span
-              initial={{ opacity: 0, y: 12 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5, ease }}
-              className="text-[#C9962B] text-xs font-semibold tracking-widest uppercase mb-6"
-            >
-              For Law Firms
-            </motion.span>
-
-            <motion.h1
-              initial={{ opacity: 0, y: 30 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.75, ease, delay: 0.08 }}
-              className="text-4xl sm:text-5xl lg:text-6xl text-[#E6EAF2] leading-tight mb-7"
-              style={{ ...lora, fontWeight: 500 }}
-            >
-              The clients who find you through LWYRD already know what they need.
-            </motion.h1>
-
-            <motion.p
-              initial={{ opacity: 0, y: 22 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.7, ease, delay: 0.18 }}
-              className="text-[#8A93A6] text-lg leading-relaxed max-w-2xl mb-10"
-            >
-              Most legal referrals arrive with vague situations, unclear budgets, and no idea whether your practice area actually matches their matter. LWYRD clients arrive differently. Before they ever see your firm&apos;s name, they&apos;ve answered a structured intake covering their legal issue, matter specifics, timeline, budget, and the type of firm relationship they&apos;re looking for. The match happened before the introduction.
-            </motion.p>
-
+        <section className="firms-beat firms-hero">
+          <div className="ds-shell firms-wrap">
             <motion.div
-              initial={{ opacity: 0, y: 16 }}
+              initial={{ opacity: 0, y: 18 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.65, ease, delay: 0.25 }}
-            >
-              <a
-                href="#apply"
-                className="inline-flex items-center justify-center gap-2 bg-[#002452] text-white px-8 py-4 rounded-2xl text-base font-medium hover:opacity-90 active:opacity-75 transition-opacity"
-              >
-                Join the Network
-                <ArrowRight size={16} />
-              </a>
-            </motion.div>
-          </div>
-        </section>
-
-        {/* ── The Problem with Referrals ── */}
-        <section className="bg-[#002452] py-20 px-6">
-          <div className="max-w-3xl mx-auto">
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true, margin: "-60px" }}
               transition={{ duration: 0.6, ease }}
+              className="firms-hero-inner"
             >
-              <p className="text-[#C9962B]/80 text-xs font-medium tracking-widest uppercase mb-3">
-                The Problem
+              <span className="marketing-eyebrow">For law firms</span>
+              <h1>Clients matched to your practice, before they ever reach you.</h1>
+              <p className="firms-lede">
+                LWYRD routes people to firms through a structured intake that qualifies every
+                match on practice area, matter, budget, and jurisdiction. By the time a client
+                reaches you, the fit is already there.
               </p>
-              <h2
-                className="text-white text-3xl sm:text-4xl leading-tight mb-8"
-                style={{ ...lora, fontWeight: 500 }}
-              >
-                Referrals are guesses. Most of them are bad ones.
-              </h2>
-              <div className="space-y-5 text-white/70 text-sm leading-relaxed">
-                <p>
-                  A referral from a friend or colleague is a name, not a match. It tells you nothing about whether the client&apos;s matter fits your practice area, whether their budget aligns with your billing structure, or whether they&apos;re in a jurisdiction you serve. You spend the first conversation figuring out whether there&apos;s even a fit, and often there isn&apos;t.
-                </p>
-                <p>
-                  Directories are worse. Pay-to-appear models put your firm next to every other firm in your zip code, regardless of specialty. The clients who find you through a directory listing didn&apos;t find you because you were right for their matter. They found you because you were close, or because you paid more than the firm below you.
-                </p>
-                <p className="text-white/90">
-                  LWYRD is built on the premise that a good referral only happens after a real intake. Not a name. Not a listing. A match.
-                </p>
+              <div className="firms-hero-cta">
+                <a href="#apply" className="btn btn-primary">
+                  Apply to join <ArrowRight size={15} />
+                </a>
               </div>
             </motion.div>
           </div>
         </section>
 
-        {/* ── How LWYRD Is Different ── */}
-        <section className="bg-[#0A0F1C] py-20 px-6">
-          <div className="max-w-5xl mx-auto">
-            <motion.div
-              initial={{ opacity: 0, y: 18 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true, margin: "-60px" }}
-              transition={{ duration: 0.6, ease }}
-              className="border-t border-[#1F2A3D] pt-14 mb-12"
-            >
-              <p className="text-[#8A93A6] text-xs font-medium tracking-widest uppercase mb-2">
-                How It Works for Firms
-              </p>
-              <h2
-                className="text-[#E6EAF2] text-3xl sm:text-4xl"
-                style={{ ...lora, fontWeight: 500 }}
-              >
-                Your firm appears when the match is real.
-              </h2>
-            </motion.div>
+        {/* ── Value: matched clients, not cold leads ── */}
+        <section className="firms-beat firms-value">
+          <div className="ds-shell firms-wrap">
+            <div className="firms-head">
+              <span className="marketing-eyebrow">Why firms join</span>
+              <h2>Every client who reaches you already fits.</h2>
+            </div>
 
             <motion.div
-              className="grid grid-cols-1 md:grid-cols-3 gap-6"
+              className="firms-value-grid"
               variants={container}
               initial="hidden"
               whileInView="visible"
-              viewport={{ once: true, margin: "-60px" }}
+              viewport={{ once: true, margin: "-70px" }}
             >
-              {howDifferentCols.map((col) => (
-                <motion.div
-                  key={col.label}
-                  variants={item}
-                  className="bg-[#141C2E] border border-[#1F2A3D] rounded-3xl p-7"
-                >
-                  <p className="text-[#8A93A6] text-xs font-medium tracking-widest uppercase mb-3">
-                    {col.label}
-                  </p>
-                  <h3
-                    className="text-[#E6EAF2] text-lg mb-3"
-                    style={{ ...lora, fontWeight: 500 }}
-                  >
-                    {col.title}
-                  </h3>
-                  <p className="text-[#8A93A6] text-sm leading-relaxed">{col.body}</p>
+              {values.map((v) => (
+                <motion.div key={v.title} variants={item} className="firms-value-card">
+                  <span className="icon-box">
+                    <v.icon size={20} strokeWidth={1.7} />
+                  </span>
+                  <h3>{v.title}</h3>
+                  <p>{v.body}</p>
                 </motion.div>
               ))}
             </motion.div>
           </div>
         </section>
 
-        {/* ── Objections Addressed ── */}
-        <section className="bg-[#0A0F1C] py-20 px-6">
-          <div className="max-w-3xl mx-auto">
-            <motion.div
-              initial={{ opacity: 0, y: 18 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true, margin: "-60px" }}
-              transition={{ duration: 0.6, ease }}
-              className="border-t border-[#1F2A3D] pt-14 mb-12"
-            >
-              <p className="text-[#8A93A6] text-xs font-medium tracking-widest uppercase mb-2">
-                Common Questions
-              </p>
-              <h2
-                className="text-[#E6EAF2] text-3xl sm:text-4xl"
-                style={{ ...lora, fontWeight: 500 }}
+        {/* ── Earned placement: the LWYRD Assessment ── */}
+        <section className="firms-beat firms-assessment">
+          <div className="ds-shell firms-wrap">
+            <div className="firms-assessment-grid">
+              <motion.div
+                initial={{ opacity: 0, y: 18 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true, margin: "-70px" }}
+                transition={{ duration: 0.6, ease }}
+                className="firms-assessment-copy"
               >
-                We&apos;ve heard the concerns. Here&apos;s how LWYRD addresses them.
-              </h2>
-            </motion.div>
+                <span className="marketing-eyebrow">How firms join</span>
+                <h2>Firms earn their place in the network. They don&apos;t buy it.</h2>
+                <p>
+                  Before a firm joins, it goes through the LWYRD Assessment, a review of the
+                  things that actually predict a good client experience. It is designed to be
+                  completed in a single call plus independent verification.
+                </p>
+                <p className="firms-assessment-close">
+                  Firms that pass carry the Assessment as a verified credential. Firms that
+                  don&apos;t, don&apos;t appear.
+                </p>
+              </motion.div>
 
-            <motion.div
-              initial={{ opacity: 0, y: 18 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true, margin: "-60px" }}
-              transition={{ duration: 0.6, ease, delay: 0.05 }}
-              className="space-y-5"
-            >
-              {objections.map((obj, i) => (
-                <div
-                  key={i}
-                  className="bg-[#141C2E] border border-[#1F2A3D] rounded-3xl p-7"
-                >
-                  <h3
-                    className="text-[#E6EAF2] text-lg mb-3"
-                    style={{ ...lora, fontWeight: 500 }}
-                  >
-                    {obj.q}
-                  </h3>
-                  <p className="text-[#8A93A6] text-sm leading-relaxed">{obj.a}</p>
-                </div>
-              ))}
-            </motion.div>
+              <motion.ul
+                className="firms-dimensions"
+                variants={container}
+                initial="hidden"
+                whileInView="visible"
+                viewport={{ once: true, margin: "-70px" }}
+              >
+                {dimensions.map((d) => (
+                  <motion.li key={d.label} variants={item} className="firms-dimension">
+                    <CheckCircle2 size={17} strokeWidth={1.8} />
+                    <div>
+                      <span className="firms-dimension-label">{d.label}</span>
+                      <span className="firms-dimension-note">{d.note}</span>
+                    </div>
+                  </motion.li>
+                ))}
+              </motion.ul>
+            </div>
           </div>
         </section>
 
-        {/* ── Application Form ── */}
-        <section id="apply" className="bg-[#002452] py-20 px-6">
-          <div className="max-w-3xl mx-auto">
+        {/* ── Apply (the form) ── */}
+        <section id="apply" className="firms-beat firms-apply">
+          <div className="ds-shell firms-wrap firms-apply-wrap">
             <motion.div
-              initial={{ opacity: 0, y: 20 }}
+              initial={{ opacity: 0, y: 18 }}
               whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true, margin: "-60px" }}
+              viewport={{ once: true, margin: "-70px" }}
               transition={{ duration: 0.6, ease }}
-              className="mb-10"
+              className="firms-apply-head"
             >
-              <p className="text-[#C9962B]/80 text-xs font-medium tracking-widest uppercase mb-3">
-                Join the Network
-              </p>
-              <h2
-                className="text-white text-3xl sm:text-4xl leading-tight mb-4"
-                style={{ ...lora, fontWeight: 500 }}
-              >
-                Start the conversation.
-              </h2>
-              <p className="text-white/70 text-sm leading-relaxed">
-                We evaluate each firm individually. If your firm is a fit for the LWYRD network, we&apos;ll walk you through the Assessment process and get your profile built. There&apos;s no cost to apply.
+              <span className="marketing-eyebrow">Join the network</span>
+              <h2>Start the conversation.</h2>
+              <p>
+                We evaluate each firm individually. If your firm is a fit for the LWYRD
+                network, we&apos;ll walk you through the Assessment and get your profile built.
               </p>
             </motion.div>
 
             <motion.div
               initial={{ opacity: 0, y: 18 }}
               whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true, margin: "-60px" }}
+              viewport={{ once: true, margin: "-70px" }}
               transition={{ duration: 0.6, ease, delay: 0.05 }}
-              className="bg-[#141C2E] border border-white/15 rounded-3xl p-8"
+              className="form-panel"
             >
               {status === "success" ? (
-                <div className="py-10 text-center">
-                  <CheckCircle2 size={36} className="text-emerald-500 mx-auto mb-4" strokeWidth={1.5} />
-                  <h3
-                    className="text-[#E6EAF2] text-2xl mb-2"
-                    style={{ ...lora, fontWeight: 500 }}
-                  >
-                    Application received.
-                  </h3>
-                  <p className="text-[#8A93A6] text-sm">
-                    Someone from the LWYRD team will be in touch within two business days.
-                  </p>
+                <div className="firms-success">
+                  <span className="icon-box">
+                    <CheckCircle2 size={22} strokeWidth={1.7} />
+                  </span>
+                  <h3>Application received.</h3>
+                  <p>Someone from the LWYRD team will be in touch within two business days.</p>
                 </div>
               ) : (
-                <form onSubmit={handleSubmit} className="space-y-4">
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <div>
-                      <label className="block text-xs font-medium text-[#8A93A6] mb-1.5 ml-1">
-                        Firm name <span className="text-red-400">*</span>
-                      </label>
+                <form onSubmit={handleSubmit} className="contact-form">
+                  <div className="field-grid">
+                    <div className="field">
+                      <label htmlFor="firmName">Firm name *</label>
                       <input
-                        type="text"
+                        id="firmName"
                         name="firmName"
+                        type="text"
                         placeholder="Your firm's full name"
                         value={form.firmName}
                         onChange={handleChange}
-                        className={inputClass}
                         required
                       />
                     </div>
-                    <div>
-                      <label className="block text-xs font-medium text-[#8A93A6] mb-1.5 ml-1">
-                        Primary contact name <span className="text-red-400">*</span>
-                      </label>
+                    <div className="field">
+                      <label htmlFor="contactName">Primary contact name *</label>
                       <input
-                        type="text"
+                        id="contactName"
                         name="contactName"
+                        type="text"
                         placeholder="Your name"
                         value={form.contactName}
                         onChange={handleChange}
-                        className={inputClass}
                         required
                       />
                     </div>
                   </div>
 
-                  <div>
-                    <label className="block text-xs font-medium text-[#8A93A6] mb-1.5 ml-1">
-                      Email address <span className="text-red-400">*</span>
-                    </label>
+                  <div className="field">
+                    <label htmlFor="email">Email address *</label>
                     <input
-                      type="email"
+                      id="email"
                       name="email"
+                      type="email"
                       placeholder="your@firm.com"
                       value={form.email}
                       onChange={handleChange}
-                      className={inputClass}
                       required
                     />
                   </div>
 
-                  <div>
-                    <label className="block text-xs font-medium text-[#8A93A6] mb-1.5 ml-1">
-                      Primary practice areas <span className="text-red-400">*</span>
-                    </label>
+                  <div className="field">
+                    <label htmlFor="practiceAreas">Primary practice areas *</label>
                     <input
-                      type="text"
+                      id="practiceAreas"
                       name="practiceAreas"
+                      type="text"
                       placeholder="e.g., Corporate, IP, Employment"
                       value={form.practiceAreas}
                       onChange={handleChange}
-                      className={inputClass}
                       required
                     />
                   </div>
 
-                  <div>
-                    <label className="block text-xs font-medium text-[#8A93A6] mb-1.5 ml-1">
-                      States where you&apos;re licensed <span className="text-red-400">*</span>
-                    </label>
+                  <div className="field">
+                    <label htmlFor="states">States where you&apos;re licensed *</label>
                     <input
-                      type="text"
+                      id="states"
                       name="states"
+                      type="text"
                       placeholder="e.g., NY, CA, TX"
                       value={form.states}
                       onChange={handleChange}
-                      className={inputClass}
                       required
                     />
                   </div>
 
-                  <div>
-                    <label className="block text-xs font-medium text-[#8A93A6] mb-1.5 ml-1">
-                      Why LWYRD? <span className="text-red-400">*</span>
-                    </label>
+                  <div className="field">
+                    <label htmlFor="why">Why LWYRD? *</label>
                     <textarea
+                      id="why"
                       name="why"
                       placeholder="Tell us briefly why your firm is a strong fit for the network"
                       value={form.why}
                       onChange={handleChange}
-                      rows={4}
-                      className={`${inputClass} resize-none`}
                       required
                     />
                   </div>
 
                   {status === "error" && (
-                    <p className="text-red-500 text-sm bg-red-50 border border-red-100 rounded-xl px-3 py-2">
-                      Something went wrong. Please try again.
+                    <p className="firms-form-error">
+                      Something went wrong. Please try again or email rahul@lwyrd.co.
                     </p>
                   )}
 
-                  <button
-                    type="submit"
-                    disabled={status === "loading"}
-                    className="w-full py-3.5 rounded-2xl bg-[#002452] text-white text-sm font-medium hover:opacity-90 transition-opacity disabled:opacity-50 flex items-center justify-center gap-2"
-                  >
-                    {status === "loading" ? (
-                      "Submitting…"
-                    ) : (
-                      <>
-                        Submit
-                        <Send size={14} />
-                      </>
-                    )}
-                  </button>
+                  <div className="form-actions">
+                    <button
+                      type="submit"
+                      className="btn btn-primary"
+                      disabled={status === "loading"}
+                    >
+                      {status === "loading" ? "Submitting…" : "Submit"}
+                      {status !== "loading" && <Send size={14} />}
+                    </button>
+                  </div>
                 </form>
               )}
             </motion.div>
           </div>
         </section>
-
-        {/* ── Brief FAQ ── */}
-        <section className="bg-[#0A0F1C] py-20 px-6">
-          <div className="max-w-3xl mx-auto">
-            <motion.div
-              initial={{ opacity: 0, y: 18 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true, margin: "-60px" }}
-              transition={{ duration: 0.6, ease }}
-              className="border-t border-[#1F2A3D] pt-14 mb-10"
-            >
-              <h2
-                className="text-[#E6EAF2] text-2xl sm:text-3xl"
-                style={{ ...lora, fontWeight: 500 }}
-              >
-                A few quick answers
-              </h2>
-            </motion.div>
-
-            <div className="space-y-5">
-              {firmFaqs.map((faq, i) => (
-                <motion.div
-                  key={i}
-                  initial={{ opacity: 0, y: 14 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true, margin: "-40px" }}
-                  transition={{ duration: 0.55, ease, delay: i * 0.06 }}
-                  className="bg-[#141C2E] border border-[#1F2A3D] rounded-3xl overflow-hidden"
-                >
-                  <button
-                    type="button"
-                    onClick={() => setOpenFaq(openFaq === i ? null : i)}
-                    className="w-full flex items-center justify-between gap-4 px-7 py-5 text-left hover:bg-white/5 transition-colors"
-                  >
-                    <span
-                      className="text-[#E6EAF2] text-base"
-                      style={{ ...lora, fontWeight: 500 }}
-                    >
-                      {faq.q}
-                    </span>
-                    <span className="text-[#8A93A6] shrink-0 text-lg">
-                      {openFaq === i ? "−" : "+"}
-                    </span>
-                  </button>
-                  {openFaq === i && (
-                    <div className="px-7 pb-5">
-                      <p className="text-[#8A93A6] text-sm leading-relaxed">{faq.a}</p>
-                    </div>
-                  )}
-                </motion.div>
-              ))}
-            </div>
-
-            <p className="text-[#8A93A6] text-sm mt-8">
-              More questions?{" "}
-              <Link href="/faq" className="text-[#E6EAF2] font-medium hover:underline">
-                See the full FAQ →
-              </Link>
-            </p>
-          </div>
-        </section>
       </main>
+      <MarketingFooter />
 
-      <Footer />
+      <style>{`
+        .firms-page{background:#fff}
+        .firms-beat{padding:var(--sec) 0}
+        .firms-hero{padding-top:clamp(76px,10vw,124px);padding-bottom:clamp(56px,7vw,88px)}
+        .firms-wrap{max-width:var(--maxw);padding-top:0;padding-bottom:0}
+        .firms-hero-inner{max-width:880px}
+        .firms-hero-inner h1{font-size:clamp(2.25rem,5vw,4rem);line-height:1.05;margin:.75rem 0 0;max-width:20ch}
+        .firms-lede{color:var(--muted);font-size:1.06rem;line-height:1.62;margin-top:1.35rem;max-width:60ch}
+        .firms-hero-cta{margin-top:2rem}
+        .firms-value{background:var(--paper-alt);border-top:1px solid var(--line);border-bottom:1px solid var(--line)}
+        .firms-head{max-width:820px;margin-bottom:clamp(34px,5vw,56px)}
+        .firms-head h2{margin-top:.55rem;max-width:20ch}
+        .firms-value-grid{display:grid;grid-template-columns:1fr;gap:16px}
+        .firms-value-card{
+          border:1px solid var(--line);
+          border-radius:var(--r);
+          background:#fff;
+          box-shadow:var(--shadow-sm);
+          padding:clamp(22px,3vw,30px);
+        }
+        .firms-value-card .icon-box{margin-bottom:18px}
+        .firms-value-card h3{font-size:1.18rem;line-height:1.25;margin-bottom:10px}
+        .firms-value-card p{color:var(--muted);font-size:.95rem;line-height:1.6}
+        .firms-assessment-grid{display:grid;grid-template-columns:1fr;gap:clamp(32px,5vw,64px);align-items:start}
+        .firms-assessment-copy h2{margin-top:.55rem;max-width:16ch}
+        .firms-assessment-copy p{color:var(--muted);font-size:1rem;line-height:1.62;margin-top:1.15rem;max-width:52ch}
+        .firms-assessment-close{color:var(--ink-2)!important;font-weight:500}
+        .firms-dimensions{list-style:none;display:grid;gap:10px}
+        .firms-dimension{
+          display:flex;
+          align-items:flex-start;
+          gap:13px;
+          border:1px solid var(--line);
+          border-radius:var(--r);
+          background:#fff;
+          box-shadow:var(--shadow-sm);
+          padding:16px 18px;
+        }
+        .firms-dimension svg{color:var(--navy);flex-shrink:0;margin-top:2px}
+        .firms-dimension-label{display:block;color:var(--ink);font-size:.98rem;font-weight:600;line-height:1.3}
+        .firms-dimension-note{display:block;color:var(--muted);font-size:.86rem;line-height:1.45;margin-top:2px}
+        .firms-apply{background:var(--paper-alt);border-top:1px solid var(--line)}
+        .firms-apply-wrap{max-width:680px}
+        .firms-apply-head{margin-bottom:clamp(24px,3vw,32px)}
+        .firms-apply-head h2{margin-top:.55rem;font-size:clamp(1.9rem,3.6vw,2.75rem)}
+        .firms-apply-head p{color:var(--muted);font-size:1rem;line-height:1.62;margin-top:1rem;max-width:56ch}
+        .firms-form-error{color:#b42318;font-size:.85rem;line-height:1.45}
+        .form-actions .btn{min-width:150px;justify-content:center}
+        .firms-success{text-align:center;padding:clamp(20px,4vw,36px) 8px}
+        .firms-success .icon-box{width:52px;height:52px;border-radius:14px;margin:0 auto 16px}
+        .firms-success h3{font-size:1.45rem;margin-bottom:8px}
+        .firms-success p{color:var(--muted);font-size:.95rem;line-height:1.6;max-width:44ch;margin:0 auto}
+        @media(min-width:760px){
+          .firms-value-grid{grid-template-columns:repeat(3,1fr)}
+          .firms-assessment-grid{grid-template-columns:1fr 1fr;gap:clamp(40px,5vw,80px)}
+        }
+        @media(max-width:640px){
+          .firms-beat{padding:64px 0}
+          .firms-hero{padding-top:54px}
+          .firms-hero-inner h1{font-size:clamp(2rem,11vw,2.8rem)}
+          .form-actions .btn{width:100%}
+        }
+      `}</style>
     </div>
   );
 }

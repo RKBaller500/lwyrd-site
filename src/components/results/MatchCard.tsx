@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { Firm, PublicMatchResult } from "@/types";
-import { Award, MapPin, Building2, CheckCircle2, XCircle, ArrowRight, LockKeyhole, ShieldCheck } from "lucide-react";
+import { Award, Building2, CheckCircle2, XCircle, ArrowRight, LockKeyhole, ShieldCheck } from "lucide-react";
 import SaveFirmButton from "@/components/firms/SaveFirmButton";
 
 const serif = { fontFamily: '"Libre Baskerville", Georgia, serif' } as const;
@@ -243,10 +243,6 @@ export default function MatchCard({ result, rank, initialSaved = false, intakeId
         </div>
 
         <div className="match-meta-row">
-          <span>
-            <MapPin size={13} strokeWidth={1.75} className="shrink-0" />
-            {firm.location}
-          </span>
           <span>
             <Building2 size={13} strokeWidth={1.75} className="shrink-0" />
             {sizeLabels[firm.size] ?? firm.size} firm

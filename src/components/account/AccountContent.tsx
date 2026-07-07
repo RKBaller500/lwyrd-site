@@ -80,7 +80,7 @@ export default function AccountContent({ profile }: AccountContentProps) {
     setIsResetPending(true);
     const supabase = createClient();
     const { error } = await supabase.auth.resetPasswordForEmail(profile.email, {
-      redirectTo: `${window.location.origin}/account`,
+      redirectTo: `${window.location.origin}/auth/callback?next=/auth/reset-password`,
     });
     setIsResetPending(false);
     setResetMessage(

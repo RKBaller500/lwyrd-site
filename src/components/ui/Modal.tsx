@@ -50,6 +50,7 @@ export default function Modal({
         aria-modal="true"
         aria-labelledby={titleId}
         className={`relative w-full ${maxWidth} ${panelClassName} rounded-3xl shadow-2xl`}
+        style={{ maxHeight: "calc(100vh - 32px)", overflowY: "auto" }}
         onClick={(e) => e.stopPropagation()}
       >
         <button

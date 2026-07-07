@@ -1,14 +1,14 @@
 "use client";
 
 import "@/styles/lwyrd-ds.css";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import Link from "next/link";
 
 export default function ResetPasswordPage() {
   const router = useRouter();
-  const supabase = createClient();
+  const supabase = useMemo(() => createClient(), []);
   const [password, setPassword] = useState("");
   const [confirm, setConfirm] = useState("");
   const [error, setError] = useState("");
@@ -17,11 +17,86 @@ export default function ResetPasswordPage() {
   const [sessionReady, setSessionReady] = useState<boolean | null>(null);
 
   useEffect(() => {
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setSessionReady(!!session);
+    let cancelled = false;
+
+    const finish = (ready: boolean) => {
+      if (!cancelled) setSessionReady(ready);
+    };
+
+    const cleanRecoveryUrl = () => {
+      window.history.replaceState(null, "", "/auth/reset-password");
+    };
+
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((event, session) => {
+      if (event === "PASSWORD_RECOVERY" || event === "SIGNED_IN" || event === "INITIAL_SESSION") {
+        if (session) {
+          cleanRecoveryUrl();
+          finish(true);
+        }
+      }
     });
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+
+    const establishRecoverySession = async () => {
+      const current = await supabase.auth.getSession();
+      if (current.data.session) {
+        cleanRecoveryUrl();
+        finish(true);
+        return;
+      }
+
+      const url = new URL(window.location.href);
+      const code = url.searchParams.get("code");
+      const tokenHash = url.searchParams.get("token_hash");
+
+      if (code) {
+        const { data, error: exchangeError } = await supabase.auth.exchangeCodeForSession(code);
+        if (!exchangeError && data.session) {
+          cleanRecoveryUrl();
+          finish(true);
+          return;
+        }
+      }
+
+      if (tokenHash) {
+        const { data, error: verifyError } = await supabase.auth.verifyOtp({
+          token_hash: tokenHash,
+          type: "recovery",
+        });
+        if (!verifyError && data.session) {
+          cleanRecoveryUrl();
+          finish(true);
+          return;
+        }
+      }
+
+      const hash = new URLSearchParams(window.location.hash.replace(/^#/, ""));
+      const accessToken = hash.get("access_token");
+      const refreshToken = hash.get("refresh_token");
+      const hashType = hash.get("type");
+      if (accessToken && refreshToken && (!hashType || hashType === "recovery")) {
+        const { data, error: sessionError } = await supabase.auth.setSession({
+          access_token: accessToken,
+          refresh_token: refreshToken,
+        });
+        if (!sessionError && data.session) {
+          cleanRecoveryUrl();
+          finish(true);
+          return;
+        }
+      }
+
+      finish(false);
+    };
+
+    establishRecoverySession();
+
+    return () => {
+      cancelled = true;
+      subscription.unsubscribe();
+    };
+  }, [supabase]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();

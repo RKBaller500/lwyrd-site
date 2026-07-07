@@ -21,8 +21,8 @@ export default function IntakeSummary({ questions, answers, onEditQuestion }: In
   };
 
   return (
-    <div className="space-y-3">
-      <p className="text-[#6B6B70] text-sm mb-6">
+    <div className="intake-summary">
+      <p className="intake-summary-intro">
         Review your answers below. Click any row to change that answer, then proceed to find your matches.
       </p>
       {questions.map((q, index) => {
@@ -32,16 +32,16 @@ export default function IntakeSummary({ questions, answers, onEditQuestion }: In
           <button
             key={q.id}
             onClick={() => onEditQuestion(index)}
-            className={`w-full text-left bg-white border border-[#E7E7E3] rounded-2xl p-5 group hover:border-[#002B55] hover:bg-white transition-colors ${!hasAnswer && !q.required ? "opacity-50" : ""}`}
+            className={`intake-summary-row ${!hasAnswer && !q.required ? "is-empty" : ""}`}
           >
-            <div className="flex items-start justify-between gap-3">
-              <div className="min-w-0">
-                <p className="text-xs text-[#6B6B70] font-medium mb-1">{q.question}</p>
-                <p className="text-[#2A2A2E] text-sm font-medium">
+            <div className="intake-summary-row-inner">
+              <div>
+                <p className="intake-summary-question">{q.question}</p>
+                <p className="intake-summary-answer">
                   {formatAnswer(q, val)}
                 </p>
               </div>
-              <Pencil size={13} className="shrink-0 mt-1 text-slate-300 group-hover:text-[#0B0B0C] transition-colors" />
+              <Pencil size={13} className="intake-summary-icon" />
             </div>
           </button>
         );

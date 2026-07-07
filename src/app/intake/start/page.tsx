@@ -46,7 +46,7 @@ function OrientationContent() {
           transition={{ duration: 0.65, ease }}
           className="intake-orientation ds-card"
         >
-          <span className="kicker">Before you begin</span>
+          <span className="intake-eyebrow">Before you begin</span>
 
           <h1>A few things to know.</h1>
 

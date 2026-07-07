@@ -363,14 +363,3 @@
 .app-seg button{padding:.4em 1.1em;border-radius:var(--r-pill);font-size:.85rem;font-weight:500;color:var(--muted);transition:all .15s ease}
 .app-seg button.is-active{background:#fff;color:var(--ink);box-shadow:var(--shadow-sm)}
 
-/* account avatar dropdown in nav */
-.nav-avatar-wrap{position:relative;height:100%;display:flex;align-items:center}
-.nav-avatar-menu{position:absolute;top:calc(100% + 6px);right:0;min-width:220px;padding:8px;background:#fff;border:1px solid var(--line);border-radius:12px;box-shadow:var(--shadow-md);opacity:0;visibility:hidden;pointer-events:none;transform:translateY(8px);transition:opacity .16s ease,transform .16s ease,visibility .16s ease;z-index:60}
-.nav-avatar-wrap:hover .nav-avatar-menu,.nav-avatar-wrap:focus-within .nav-avatar-menu{opacity:1;visibility:visible;pointer-events:auto;transform:translateY(0)}
-.nav-avatar-head{padding:8px 10px 10px;border-bottom:1px solid var(--line);margin-bottom:6px}
-.nav-avatar-head .nm{font-size:.9rem;font-weight:600;color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.nav-avatar-head .em{font-size:.78rem;color:var(--faint);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.nav-avatar-menu a,.nav-avatar-menu button{display:flex;align-items:center;gap:10px;width:100%;text-align:left;padding:9px 10px;border-radius:8px;font-size:.88rem;color:var(--ink-2);transition:background .15s ease,color .15s ease}
-.nav-avatar-menu a:hover,.nav-avatar-menu button:hover{background:var(--navy-tint);color:var(--ink)}
-.nav-avatar-menu .danger:hover{background:#fdecea;color:#b42318}
-.nav-avatar-sep{height:1px;background:var(--line);margin:6px 0}

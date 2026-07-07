@@ -12,7 +12,6 @@ import {
   Copy,
   ExternalLink,
   Mail,
-  MapPin,
   Phone,
   ShieldCheck,
   Sparkles,
@@ -166,7 +165,6 @@ export default function FirmProfile({ firm, initialSaved, matchContext }: FirmPr
           <h1>{firm.name}</h1>
           <p>{firm.tagline}</p>
           <div className="firm-profile-meta">
-            <span><MapPin size={14} />{firm.location}</span>
             <span><Building2 size={14} />{firm.practiceAreas.slice(0, 2).map(formatPractice).join(", ")}</span>
             {years && <span><Users size={14} />{years}+ years in practice</span>}
           </div>

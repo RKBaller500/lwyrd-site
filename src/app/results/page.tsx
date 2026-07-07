@@ -61,6 +61,9 @@ function ResultsContent() {
   const [categoryName, setCategoryName] = useState<string>("");
   const [firmSizePref, setFirmSizePref] = useState<string | null>(null);
   const [submissionId, setSubmissionId] = useState<string>("");
+  const [creditsAvailable, setCreditsAvailable] = useState<number>(0);
+  const [redeeming, setRedeeming] = useState<boolean>(false);
+  const [redeemError, setRedeemError] = useState<string>("");
 
   useEffect(() => {
     const raw = sessionStorage.getItem("lwyrd_results");
@@ -101,6 +104,49 @@ function ResultsContent() {
       router.push("/intake/start");
     }
   }, [router]);
+
+  // Load available unlock credits so we can offer a one-click redeem on the blurred page.
+  useEffect(() => {
+    if (!submissionId) return;
+    let cancelled = false;
+    async function loadCredits() {
+      try {
+        const res = await fetch(`/api/paywall/status?submissionId=${encodeURIComponent(submissionId)}`, {
+          credentials: "same-origin",
+        });
+        const body = await res.json().catch(() => ({}));
+        if (cancelled || !res.ok) return;
+        setCreditsAvailable(typeof body.creditsAvailable === "number" ? body.creditsAvailable : 0);
+      } catch {
+        if (!cancelled) setCreditsAvailable(0);
+      }
+    }
+    loadCredits();
+    return () => {
+      cancelled = true;
+    };
+  }, [submissionId]);
+
+  const handleUseCredit = async () => {
+    if (!submissionId) return;
+    setRedeeming(true);
+    setRedeemError("");
+    try {
+      const res = await fetch("/api/paywall/preview-unlock", {
+        method: "POST",
+        credentials: "same-origin",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ submissionId, mode: "credit" }),
+      });
+      const body = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(body.error ?? "Unable to unlock with a credit.");
+      router.push(typeof body.destination === "string" ? body.destination : `/results/${submissionId}`);
+      router.refresh();
+    } catch (error) {
+      setRedeemError(error instanceof Error ? error.message : "Unable to unlock with a credit.");
+      setRedeeming(false);
+    }
+  };
 
   if (!results) return null;
 
@@ -157,11 +203,36 @@ function ResultsContent() {
                 <strong>Your matches are ready.</strong> Unlock this intake to see who each firm is,
                 open full profiles, and get a prepared summary of your matter plus a ready-to-send
                 message for reaching out.
+                {creditsAvailable > 0 && (
+                  <>
+                    {" "}
+                    <span className="results-unlock-credit-note">
+                      You have {creditsAvailable} unlock {creditsAvailable === 1 ? "credit" : "credits"} —
+                      use one to unlock this intake for free.
+                    </span>
+                  </>
+                )}
               </p>
             </div>
-            <Link href="/access?next=/results" className="btn btn-primary results-unlock-btn">
-              Unlock with checkout <ArrowRight size={14} />
-            </Link>
+            <div className="results-unlock-actions">
+              {creditsAvailable > 0 && (
+                <button
+                  type="button"
+                  onClick={handleUseCredit}
+                  disabled={redeeming}
+                  className="btn btn-primary results-unlock-btn"
+                >
+                  {redeeming ? "Unlocking..." : "Use 1 unlock credit"} <ArrowRight size={14} />
+                </button>
+              )}
+              <Link
+                href="/access?next=/results"
+                className={`btn ${creditsAvailable > 0 ? "btn-ghost" : "btn-primary"} results-unlock-btn`}
+              >
+                {creditsAvailable > 0 ? "Buy more / checkout" : "Unlock with checkout"} <ArrowRight size={14} />
+              </Link>
+            </div>
+            {redeemError && <p className="paywall-modal-error">{redeemError}</p>}
           </motion.div>
         )}
 

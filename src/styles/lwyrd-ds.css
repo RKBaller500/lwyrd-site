@@ -766,6 +766,8 @@
 }
 .results-unlock-copy strong{color:var(--ink);font-weight:700}
 .results-unlock-btn{flex-shrink:0;white-space:nowrap}
+.results-unlock-actions{display:flex;align-items:center;gap:10px;flex-shrink:0}
+.results-unlock-credit-note{display:block;margin-top:6px;color:var(--navy);font-weight:600}
 .results-notice{
   display:flex;
   align-items:flex-start;
@@ -1221,6 +1223,7 @@
   .access-credit-panel{align-items:stretch;flex-direction:column}
   .access-credit-panel .btn{width:100%;justify-content:center}
   .results-unlock,.locked-card-cta{align-items:stretch;flex-direction:column}
+  .results-unlock-actions{flex-direction:column;width:100%}
   .results-unlock-btn,.locked-card-cta .btn{width:100%;justify-content:center}
   .match-card-head{flex-direction:column}
   .locked-score,.match-score-ring{align-self:flex-start}

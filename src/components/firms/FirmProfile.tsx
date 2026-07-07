@@ -242,23 +242,6 @@ export default function FirmProfile({ firm, initialSaved, matchContext }: FirmPr
             </div>
           </Section>
 
-          <Section eyebrow="The right contact" title={`Ask for the ${matchContext?.contactRole ?? "right practice contact"}`}>
-            <p className="firm-body-copy">
-              Based on this matter and the firm&apos;s listed practice coverage, start by asking for the{" "}
-              {matchContext?.contactRole ?? "attorney or practice group that handles this matter type"}. If the intake desk routes inquiries,
-              include the prepared summary below so they can direct it internally.
-            </p>
-          </Section>
-
-          <Section eyebrow="Credentials and standing" title="Signals we can show honestly">
-            <div className="firm-signal-grid">
-              <Signal label="Standing" value={firm.verified ? "Bar standing verified" : "Standing signal not available"} />
-              <Signal label="Practice history" value={years ? `${years}+ years in practice` : "Founded date not available"} />
-              <Signal label="Specialist focus" value={firm.practiceAreas.slice(0, 2).map(formatPractice).join(", ")} />
-              <Signal label="Assessment" value={firm.assessment.length ? `${firm.assessment.filter((item) => item.passed).length}/${firm.assessment.length} criteria met` : "Assessment details pending"} />
-            </div>
-          </Section>
-
           <p className="firm-pricing-disclaimer">
             Budget and pricing information for this firm is not publicly available through LWYRD.
             Any fee structure, retainer, or first-step cost should be confirmed directly with the firm before engagement.
@@ -316,10 +299,6 @@ export default function FirmProfile({ firm, initialSaved, matchContext }: FirmPr
         .firm-reason strong{display:block;color:var(--ink);font-size:.86rem;margin-bottom:3px}
         .firm-reason p{color:var(--muted);font-size:.78rem;line-height:1.42}
         .firm-chip-panel{display:flex;flex-wrap:wrap;gap:7px;margin-top:14px}
-        .firm-signal-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
-        .firm-signal{border:1px solid var(--line);border-radius:12px;background:var(--paper-alt);padding:12px}
-        .firm-signal span{display:block;color:var(--faint);font-size:.62rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;margin-bottom:5px}
-        .firm-signal strong{color:var(--ink);font-size:.84rem;line-height:1.32}
         .firm-go-forward{border:1px solid var(--navy-tint-2);border-radius:18px;background:#f8fbfe;box-shadow:var(--shadow-sm);padding:clamp(17px,2.5vw,24px)}
         .firm-go-forward-head p{color:var(--muted);font-size:.86rem;line-height:1.56;max-width:76ch;margin-bottom:16px}
         .firm-copy-block{border:1px solid var(--line);border-radius:14px;background:#fff;margin-top:12px;overflow:hidden}
@@ -338,7 +317,7 @@ export default function FirmProfile({ firm, initialSaved, matchContext }: FirmPr
         .firm-pricing-disclaimer{color:var(--muted);font-size:.78rem;line-height:1.5;text-align:center;margin:4px auto 0;max-width:70ch}
         .firm-empty-prep{display:flex;gap:12px;align-items:flex-start;border:1px solid var(--line);border-radius:14px;background:#fff;padding:16px;color:var(--ink-2)}
         @media(min-width:980px){.firm-profile-grid{grid-template-columns:minmax(0,2fr) minmax(240px,.52fr)}.firm-profile-side{position:sticky;top:96px;align-self:start}}
-        @media(max-width:760px){.firm-profile-hero{grid-template-columns:1fr}.firm-fit-score{justify-self:start}.firm-signal-grid{grid-template-columns:1fr}.firm-save-row{justify-content:flex-start}.firm-save-row button{width:100%}}
+        @media(max-width:760px){.firm-profile-hero{grid-template-columns:1fr}.firm-fit-score{justify-self:start}.firm-save-row{justify-content:flex-start}.firm-save-row button{width:100%}}
       `}</style>
     </div>
   );
@@ -351,15 +330,6 @@ function Section({ eyebrow, title, children }: { eyebrow: string; title: string;
       <h2>{title}</h2>
       {children}
     </section>
-  );
-}
-
-function Signal({ label, value }: { label: string; value: string }) {
-  return (
-    <div className="firm-signal">
-      <span>{label}</span>
-      <strong>{value}</strong>
-    </div>
   );
 }
 

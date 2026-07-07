@@ -41,21 +41,6 @@ html {
   opacity: 0;
 }
 
-/* Refined scrollbar */
-::-webkit-scrollbar {
-  width: 6px;
-}
-::-webkit-scrollbar-track {
-  background: transparent;
-}
-::-webkit-scrollbar-thumb {
-  background: #ddd7cc;
-  border-radius: 3px;
-}
-::-webkit-scrollbar-thumb:hover {
-  background: #002452;
-}
-
 /* Better text selection */
 ::selection {
   background: #002452;

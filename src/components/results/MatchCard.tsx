@@ -35,6 +35,10 @@ function formatK(n: number): string {
   return `$${n}`;
 }
 
+function formatPractice(slug: string): string {
+  return slug.replace(/-/g, " ").replace(/\b\w/g, (char) => char.toUpperCase());
+}
+
 function getMissedLabel(criterion: string, firm: Firm): string {
   if (criterion === "budget") {
     const { min, max } = firm.budgetRange;
@@ -54,9 +58,9 @@ function getMissedLabel(criterion: string, firm: Firm): string {
 }
 
 function ScoreRing({ score }: { score: number }) {
-  const size = 124;
-  const radius = 49;
-  const stroke = 6.5;
+  const size = 86;
+  const radius = 34;
+  const stroke = 5;
   const circumference = 2 * Math.PI * radius;
   const filled = (score / 100) * circumference;
 
@@ -222,28 +226,35 @@ export default function MatchCard({ result, rank, initialSaved = false, intakeId
   return (
     <div className={`match-card ${isBestMatch ? "is-top" : ""}`}>
       <div className="match-card-inner">
-        {/* Header */}
         <div className="match-card-head">
-          <div>
-            <div className="locked-badges">
-              {isBestMatch && (
-                <span className="match-badge is-primary">
-                  <Award size={9} strokeWidth={2.5} />
-                  Best match
-                </span>
-              )}
-              {!isBestMatch && rank > 0 && (
-                <span className="match-rank">#{rank}</span>
-              )}
+          <div className="match-firm-identity">
+            <div
+              className={`match-firm-logo ${firm.logoUrl ? "has-logo" : ""}`}
+              aria-hidden="true"
+              style={firm.logoUrl ? { backgroundImage: `url(${firm.logoUrl})` } : undefined}
+            >
+              {!firm.logoUrl && <span>{firm.name[0]}</span>}
             </div>
-            <h3>{firm.name}</h3>
-            <p>{firm.tagline}</p>
+            <div>
+              <div className="locked-badges">
+                {isBestMatch && (
+                  <span className="match-badge is-primary">
+                    <Award size={9} strokeWidth={2.5} />
+                    Best match
+                  </span>
+                )}
+                {!isBestMatch && rank > 0 && (
+                  <span className="match-rank">#{rank}</span>
+                )}
+              </div>
+              <h3>{firm.name}</h3>
+              <p>{firm.tagline}</p>
+            </div>
           </div>
 
           <ScoreRing score={roundedScore} />
         </div>
 
-        {/* Meta row */}
         <div className="match-meta-row">
           <span>
             <MapPin size={13} strokeWidth={1.75} className="shrink-0" />
@@ -256,12 +267,11 @@ export default function MatchCard({ result, rank, initialSaved = false, intakeId
           {firm.founded && (
             <span>Est. {firm.founded}</span>
           )}
-          {firm.billingModel && (
-            <span>{billingModelLabels[firm.billingModel] ?? firm.billingModel} billing</span>
+          {firm.practiceAreas[0] && (
+            <span>{formatPractice(firm.practiceAreas[0])}</span>
           )}
         </div>
 
-        {/* Criteria */}
         {hasCriteria && (
           <div className={`match-criteria ${hasBoth ? "has-both" : ""}`}>
             {hasBoth ? (
@@ -306,7 +316,6 @@ export default function MatchCard({ result, rank, initialSaved = false, intakeId
           </div>
         )}
 
-        {/* CTA */}
         <div className="match-actions">
           <SaveFirmButton firmId={firm.id} initialSaved={initialSaved} compact />
           <Link href={profileHref} className="btn btn-primary">

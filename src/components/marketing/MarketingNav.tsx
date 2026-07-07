@@ -178,53 +178,58 @@ export default function MarketingNav({
 
         <div className="nav-cta">
           {isAuthenticated && user ? (
-            <div className={`nav-avatar-wrap${avatarOpen ? " is-open" : ""}`} ref={avatarRef}>
-              <button
-                type="button"
-                className="nav-avatar"
-                aria-label="Account menu"
-                aria-haspopup="menu"
-                aria-expanded={avatarOpen}
-                title={user.name}
-                onClick={() => setAvatarOpen((o) => !o)}
-              >
-                {(user.name || "?").trim().charAt(0).toUpperCase()}
+            <>
+              <button type="button" className="btn btn-primary" onClick={getMatched}>
+                Get matched
               </button>
-              <div className="nav-avatar-menu" role="menu" aria-label="Account menu">
-                <div className="nav-avatar-head">
-                  <div className="nm">{user.name || "Your account"}</div>
-                  {user.email && <div className="em">{user.email}</div>}
-                </div>
-                <Link href="/dashboard" onClick={() => { closeAvatar(); closeMobile(); }} role="menuitem">
-                  <LayoutDashboard size={15} strokeWidth={1.6} />
-                  Dashboard
-                </Link>
-                <Link href="/account" onClick={() => { closeAvatar(); closeMobile(); }} role="menuitem">
-                  <Settings size={15} strokeWidth={1.6} />
-                  Account settings
-                </Link>
-                {user.isAdmin && (
-                  <Link href="/admin" onClick={() => { closeAvatar(); closeMobile(); }} role="menuitem">
-                    <Shield size={15} strokeWidth={1.6} />
-                    Admin panel
-                  </Link>
-                )}
-                <div className="nav-avatar-sep" />
+              <div className={`nav-avatar-wrap${avatarOpen ? " is-open" : ""}`} ref={avatarRef}>
                 <button
                   type="button"
-                  className="danger"
-                  role="menuitem"
-                  onClick={() => {
-                    closeAvatar();
-                    closeMobile();
-                    logout();
-                  }}
+                  className="nav-avatar"
+                  aria-label="Account menu"
+                  aria-haspopup="menu"
+                  aria-expanded={avatarOpen}
+                  title={user.name}
+                  onClick={() => setAvatarOpen((o) => !o)}
                 >
-                  <LogOut size={15} strokeWidth={1.6} />
-                  Sign out
+                  {(user.name || "?").trim().charAt(0).toUpperCase()}
                 </button>
+                <div className="nav-avatar-menu" role="menu" aria-label="Account menu">
+                  <div className="nav-avatar-head">
+                    <div className="nm">{user.name || "Your account"}</div>
+                    {user.email && <div className="em">{user.email}</div>}
+                  </div>
+                  <Link href="/dashboard" onClick={() => { closeAvatar(); closeMobile(); }} role="menuitem">
+                    <LayoutDashboard size={15} strokeWidth={1.6} />
+                    Dashboard
+                  </Link>
+                  <Link href="/account" onClick={() => { closeAvatar(); closeMobile(); }} role="menuitem">
+                    <Settings size={15} strokeWidth={1.6} />
+                    Account settings
+                  </Link>
+                  {user.isAdmin && (
+                    <Link href="/admin" onClick={() => { closeAvatar(); closeMobile(); }} role="menuitem">
+                      <Shield size={15} strokeWidth={1.6} />
+                      Admin panel
+                    </Link>
+                  )}
+                  <div className="nav-avatar-sep" />
+                  <button
+                    type="button"
+                    className="danger"
+                    role="menuitem"
+                    onClick={() => {
+                      closeAvatar();
+                      closeMobile();
+                      logout();
+                    }}
+                  >
+                    <LogOut size={15} strokeWidth={1.6} />
+                    Sign out
+                  </button>
+                </div>
               </div>
-            </div>
+            </>
           ) : (
             <>
               <button type="button" className="btn btn-ghost" onClick={signIn}>

@@ -1,13 +1,14 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, type MouseEvent } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { useAuth } from "@/context/AuthContext";
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import "./marketing-nav.css";
 
 type Section = "product" | "clients" | "law-firms" | "about" | "blog" | "help";
+type NavItem = "matching" | "consultations" | "faq" | "contact";
 
 /**
  * Marketing navigation — a faithful React reproduction of the new design's
@@ -16,9 +17,16 @@ type Section = "product" | "clients" | "law-firms" | "about" | "blog" | "help";
  * stripped by the generator). Auth-dependent CTAs are wired to the existing
  * auth/routing implementation.
  */
-export default function MarketingNav({ current }: { current?: Section }) {
+export default function MarketingNav({
+  current,
+  currentItem,
+}: {
+  current?: Section;
+  currentItem?: NavItem;
+}) {
   const { isAuthenticated, user, openModal } = useAuth();
   const router = useRouter();
+  const pathname = usePathname();
   const [scrolled, setScrolled] = useState(false);
   const [open, setOpen] = useState(false);
 
@@ -45,6 +53,14 @@ export default function MarketingNav({ current }: { current?: Section }) {
   const cur = (s: Section) => (current === s ? " is-current" : "");
   const aria = (s: Section) =>
     current === s ? ({ "aria-current": "page" } as const) : {};
+  const itemAria = (item: NavItem) =>
+    currentItem === item ? ({ "aria-current": "page" } as const) : {};
+  const logoClick = (event: MouseEvent<HTMLAnchorElement>) => {
+    closeMobile();
+    if (pathname !== "/") return;
+    event.preventDefault();
+    window.location.assign("/");
+  };
 
   return (
     <header
@@ -52,7 +68,7 @@ export default function MarketingNav({ current }: { current?: Section }) {
       id="nav"
     >
       <div className="wrap nav-inner">
-        <Link href="/" className="brand" aria-label="LWYRD home" onClick={closeMobile}>
+        <Link href="/" className="brand" aria-label="LWYRD home" onClick={logoClick}>
           <Image
             src="/marketing/Logos/LWYRD_Navy.png"
             alt="LWYRD"
@@ -69,10 +85,10 @@ export default function MarketingNav({ current }: { current?: Section }) {
               Product
             </button>
             <div className="nav-menu" aria-label="Product menu">
-              <Link href="/product/matching" onClick={closeMobile} {...aria("product")}>
+              <Link href="/product/matching" onClick={closeMobile} {...itemAria("matching")}>
                 Matching
               </Link>
-              <Link href="/product/consultations" onClick={closeMobile}>
+              <Link href="/product/consultations" onClick={closeMobile} {...itemAria("consultations")}>
                 Consultations
               </Link>
               <a href="#" aria-disabled="true" className="soon-disabled" tabIndex={-1}>
@@ -130,8 +146,8 @@ export default function MarketingNav({ current }: { current?: Section }) {
               Help Center
             </button>
             <div className="nav-menu" aria-label="Help Center menu">
-              <Link href="/faq" onClick={closeMobile}>FAQ</Link>
-              <Link href="/contact" onClick={closeMobile}>Contact</Link>
+              <Link href="/faq" onClick={closeMobile} {...itemAria("faq")}>FAQ</Link>
+              <Link href="/contact" onClick={closeMobile} {...itemAria("contact")}>Contact</Link>
             </div>
           </div>
         </nav>

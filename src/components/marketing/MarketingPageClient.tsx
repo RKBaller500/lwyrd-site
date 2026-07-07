@@ -12,6 +12,7 @@ type Section =
   | "about"
   | "blog"
   | "help";
+type NavItem = "matching" | "consultations" | "faq" | "contact";
 
 function getMarketingScriptSrc(body: string) {
   if (body.includes('id="heroMaze"')) return "/marketing-page-scripts/home.js";
@@ -36,12 +37,14 @@ export default function MarketingPageClient({
   body,
   js,
   current,
+  currentItem,
   onReady,
 }: {
   css: string;
   body: string;
   js: string;
   current?: Section;
+  currentItem?: NavItem;
   onReady?: (root: HTMLElement) => void | (() => void);
 }) {
   const ref = useRef<HTMLDivElement>(null);
@@ -163,7 +166,7 @@ export default function MarketingPageClient({
             "\n#ambient-overlay{display:none !important;}\n",
         }}
       />
-      <MarketingNav current={current} />
+      <MarketingNav current={current} currentItem={currentItem} />
       <div ref={ref} dangerouslySetInnerHTML={{ __html: body }} />
     </>
   );

@@ -48,6 +48,7 @@ export default function MarketingPageClient({
   onReady?: (root: HTMLElement) => void | (() => void);
 }) {
   const ref = useRef<HTMLDivElement>(null);
+  const initedRef = useRef(false);
   const { isAuthenticated, isLoading, openModal } = useAuth();
   const router = useRouter();
 
@@ -107,12 +108,14 @@ export default function MarketingPageClient({
     const root = ref.current;
     if (!root) return;
     // Wait until auth has settled before running the page's original JS.
-    // When a logged-in user opens a marketing URL directly, AuthProvider
-    // resolves the Supabase session asynchronously and re-renders this tree.
-    // Running the animation script before that settles lets the re-render
-    // race with (and clobber) the script's DOM mutations — the maze and the
-    // scroll reveals silently fail to initialise. Gating on !isLoading means
-    // the script runs exactly once, against the final, stable DOM.
+    // AuthProvider resolves the Supabase session asynchronously; every auth
+    // transition (initial hydrate, sign-in, sign-out) re-renders this tree.
+    // If the script runs while auth is still resolving, the follow-up
+    // re-render races with (and clobbers) its DOM mutations — the maze and
+    // the scroll reveals silently fail. So we only run once auth is settled,
+    // and we RE-run on each settled auth change (see deps) so a sign-in or
+    // sign-out that lands the user on a marketing page re-initialises the
+    // animations against the current DOM instead of leaving a blank page.
     if (isLoading) return;
     let cleanup: void | (() => void);
 
@@ -122,12 +125,24 @@ export default function MarketingPageClient({
     const timers: number[] = [];
     const frames: number[] = [];
     let scriptEl: HTMLScriptElement | null = null;
+    let ran = false; // once per effect invocation (not a persistent DOM flag)
     const scriptSrc = getMarketingScriptSrc(body);
 
     const runOriginalJs = () => {
-      if (!js || !scriptSrc || root.dataset.originalDesignJsRan === "true") return;
+      if (ran || !js || !scriptSrc) return;
       if (!root.querySelector(".rv, .rv-seq, #heroMaze, [data-seg], .qa, form, input, select")) return;
-      root.dataset.originalDesignJsRan = "true";
+      ran = true;
+      // On a RE-init (auth change landed the user back here), reset the body
+      // to pristine markup first. The original scripts append the maze <svg>
+      // and bind element-level listeners without cleanup, so re-running over a
+      // half-initialised DOM would stack mazes and double-bind handlers
+      // (accordions would toggle twice and appear stuck). Rebuilding the nodes
+      // detaches the old listeners with the old nodes and gives the script a
+      // clean slate. Skipped on first init since the hydrated DOM is pristine.
+      if (initedRef.current) {
+        root.innerHTML = body;
+      }
+      initedRef.current = true;
       scriptEl = document.createElement("script");
       scriptEl.src = scriptSrc;
       scriptEl.async = false;
@@ -158,9 +173,9 @@ export default function MarketingPageClient({
       if (typeof cleanup === "function") cleanup();
       if (scriptEl) scriptEl.remove();
     };
-    // Re-run only when the page content changes or auth finishes loading.
+    // Re-run when the page content changes or auth state settles/changes.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [body, js, isLoading]);
+  }, [body, js, isLoading, isAuthenticated]);
 
   return (
     <>

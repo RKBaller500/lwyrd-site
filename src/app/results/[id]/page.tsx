@@ -11,6 +11,7 @@ import AuthGuard from "@/components/auth/AuthGuard";
 import MatchCard from "@/components/results/MatchCard";
 import { runMatchingForSubmission } from "@/lib/actions/intake";
 import { PublicMatchResult } from "@/types";
+import { ArrowRight, LockKeyhole } from "lucide-react";
 
 const ease = [0.25, 0.46, 0.45, 0.94] as const;
 
@@ -79,11 +80,11 @@ function PastResultsContent() {
     return (
       <div className="lwyrd-ds ds-page">
         <MarketingNav />
-        <main className="ds-main mx-auto w-full" style={{ maxWidth: 880, padding: "clamp(28px,5vw,56px) var(--pad)" }}>
-          <div className="h-28 rounded-2xl bg-[#F6F6F4] border border-[#E7E7E3] animate-pulse mb-8" />
-          <div className="space-y-4">
+        <main className="results-shell ds-main">
+          <div className="app-skel" style={{ height: 132, marginBottom: 24 }} />
+          <div style={{ display: "grid", gap: 18 }}>
             {[1, 2, 3].map((i) => (
-              <div key={i} className="h-44 rounded-[18px] bg-[#F6F6F4] border border-[#E7E7E3] animate-pulse" />
+              <div key={i} className="app-skel" style={{ height: 220 }} />
             ))}
           </div>
         </main>
@@ -95,61 +96,85 @@ function PastResultsContent() {
   if (!results) return null;
 
   const total = results.length;
+  const hasLockedResults = results.some(isLockedResult);
 
   return (
     <div className="lwyrd-ds ds-page">
       <MarketingNav />
-      <main className="ds-main mx-auto w-full" style={{ maxWidth: 880, padding: "clamp(28px,5vw,56px) var(--pad)" }}>
+      <main className="results-shell ds-main">
         {/* Header */}
         <motion.div
           initial={{ opacity: 0, y: 18 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6, ease }}
-          className="mb-10"
+          className="results-hero"
         >
           <nav className="ds-breadcrumb mb-4">
             <Link href="/dashboard">My dashboard</Link>
             <span className="sep">/</span>
-            <span style={{ color: "var(--ink-2)" }}>{categoryName || "Results"}</span>
+            <span style={{ color: "var(--ink-2)" }}>Your matches</span>
           </nav>
 
-          <h1 style={{ fontSize: "clamp(2rem,4vw,3rem)", marginBottom: ".75rem" }}>Your matches</h1>
-          <p className="text-[#6B6B70] text-base">
+          <h1>
             {total > 0
-              ? `${total} ${total === 1 ? "firm" : "firms"} matched${categoryName ? ` for ${categoryName}` : ""}`
+              ? `${total} ${total === 1 ? "firm" : "firms"} matched to your situation`
               : "No firms matched your criteria."}
-            {intakeDate && (
-              <span>
-                {" · "}Intake from{" "}
-                {new Date(intakeDate).toLocaleDateString("en-US", {
+          </h1>
+          <p>
+            {total > 0
+              ? `Ranked by fit${categoryName ? ` for ${categoryName}` : ""}.${hasLockedResults ? " Identities stay hidden until you unlock this intake." : ""}`
+              : "Try adjusting your answers to surface more firms."}
+            {intakeDate
+              ? ` Intake from ${new Date(intakeDate).toLocaleDateString("en-US", {
                   month: "long",
                   day: "numeric",
                   year: "numeric",
-                })}
-              </span>
-            )}
+                })}.`
+              : ""}
           </p>
         </motion.div>
+
+        {hasLockedResults && total > 0 && (
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, ease, delay: 0.03 }}
+            className="results-unlock"
+          >
+            <div className="results-unlock-copy">
+              <span className="icon-box">
+                <LockKeyhole size={16} strokeWidth={1.7} />
+              </span>
+              <p>
+                <strong>Your matches are ready.</strong> Unlock this intake to see who each firm is,
+                open full profiles, and get a prepared summary of your matter plus a ready-to-send
+                message for reaching out.
+              </p>
+            </div>
+            <Link href="/access" className="btn btn-primary results-unlock-btn">
+              Unlock with checkout <ArrowRight size={14} />
+            </Link>
+          </motion.div>
+        )}
 
         {total === 0 ? (
           <motion.div
             initial={{ opacity: 0, y: 14 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.55, ease, delay: 0.1 }}
-            className="ds-card text-center"
-            style={{ padding: "3rem" }}
+            className="ds-card results-empty"
           >
-            <h3 style={{ fontSize: "1.25rem", marginBottom: ".75rem" }}>No matches found.</h3>
-            <p className="text-[#6B6B70] text-sm mb-6">
+            <h3>No matches found.</h3>
+            <p>
               Try a new intake with adjusted preferences, a different budget range, timeline, or firm
               size may surface more results.
             </p>
-            <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
+            <div className="results-empty-actions">
               <Link href="/intake/start" className="btn btn-primary">Start a new intake</Link>
             </div>
           </motion.div>
         ) : (
-          <motion.div className="space-y-5" variants={container} initial="hidden" animate="visible">
+          <motion.div className="results-list" variants={container} initial="hidden" animate="visible">
             {results.map((result, i) => (
               <motion.div key={isLockedResult(result) ? `locked-${i}` : result.firm.id} variants={cardItem}>
                 <MatchCard result={result} rank={i + 1} />
@@ -159,8 +184,8 @@ function PastResultsContent() {
         )}
 
         {total > 0 && categorySlug && (
-          <div className="mt-10 text-center">
-            <p className="text-[#6B6B70] text-sm">
+          <div className="results-footnote">
+            <p>
               Looking for something different?{" "}
               <Link href="/intake/start" style={{ color: "var(--navy)", fontWeight: 600 }}>
                 Start a new intake →

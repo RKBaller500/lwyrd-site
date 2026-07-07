@@ -9,8 +9,8 @@ import MarketingNav from "@/components/marketing/MarketingNav";
 import MarketingFooter from "@/components/marketing/MarketingFooter";
 import AuthGuard from "@/components/auth/AuthGuard";
 import { useAuth } from "@/context/AuthContext";
-import { createClient } from "@/lib/supabase/client";
 import { unsaveFirm } from "@/lib/actions/savedFirms";
+import { getDashboardData, type DashboardIntake, type DashboardSavedFirm } from "@/lib/actions/dashboard";
 import {
   LayoutDashboard,
   Scale,
@@ -20,7 +20,6 @@ import {
   ArrowRight,
   MapPin,
   Shield,
-  Clock,
   BookmarkX,
   ChevronRight,
   Settings,
@@ -36,29 +35,6 @@ const NAV_ITEMS: { id: TabId; label: string; icon: React.ElementType }[] = [
   { id: "saved", label: "Saved Firms", icon: Bookmark },
   { id: "engagements", label: "Engagements", icon: Briefcase },
 ];
-
-interface IntakeRecord {
-  id: string;
-  category_slug: string;
-  category_label?: string;
-  created_at: string;
-  track?: string;
-  matches?: { match_rank: number }[];
-}
-
-interface SavedFirmRecord {
-  firm_id: string;
-  saved_at: string;
-  firms?: {
-    id: string;
-    name: string;
-    tagline: string;
-    location: string;
-    size: string;
-    overall_score: number;
-    verified: boolean;
-  };
-}
 
 const sizeLabels: Record<string, string> = {
   boutique: "Boutique",
@@ -100,17 +76,18 @@ function fmtDate(iso: string) {
 function OverviewTab({
   intakes,
   savedFirms,
-  currentResults,
   loading,
+  error,
   setActiveTab,
 }: {
-  intakes: IntakeRecord[];
-  savedFirms: SavedFirmRecord[];
-  currentResults: { count: number; categoryName: string } | null;
+  intakes: DashboardIntake[];
+  savedFirms: DashboardSavedFirm[];
   loading: boolean;
+  error: string | null;
   setActiveTab: (t: TabId) => void;
 }) {
   const router = useRouter();
+  const latestIntake = intakes[0] ?? null;
 
   if (loading) {
     return (
@@ -122,23 +99,39 @@ function OverviewTab({
     );
   }
 
+  if (error) {
+    return (
+      <EmptyState
+        icon={Scale}
+        title="We couldn't load your dashboard"
+        body={error}
+        cta={
+          <button onClick={() => window.location.reload()} className="btn btn-primary" style={{ marginTop: 8 }}>
+            Try again
+          </button>
+        }
+      />
+    );
+  }
+
   return (
     <div style={{ display: "grid", gap: 32 }}>
       <div className="app-stats">
         <StatCard value={intakes.length} label="Intakes" />
         <StatCard value={savedFirms.length} label="Saved Firms" />
-        <StatCard value={0} label="Engagements" />
+        <StatCard value={intakes.reduce((sum, intake) => sum + intake.matchCount, 0)} label="Total Matches" />
       </div>
 
-      {currentResults && (
+      {latestIntake && (
         <div className="navy-panel" style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 16, flexWrap: "wrap" }}>
           <div>
-            <p style={{ fontWeight: 600, fontFamily: "var(--display)" }}>{currentResults.categoryName || "Latest intake"}</p>
+            <p style={{ fontWeight: 600, fontFamily: "var(--display)" }}>{latestIntake.categoryLabel || "Latest intake"}</p>
             <p style={{ color: "rgba(255,255,255,.75)", fontSize: ".85rem", marginTop: 2 }}>
-              {currentResults.count} matched {currentResults.count === 1 ? "firm" : "firms"} ready to review
+              {latestIntake.matchCount} matched {latestIntake.matchCount === 1 ? "firm" : "firms"} ready to review
+              {latestIntake.topScore !== null ? ` · Top score ${latestIntake.topScore}%` : ""}
             </p>
           </div>
-          <Link href="/results" className="btn" style={{ background: "#fff", color: "var(--navy)" }}>
+          <Link href={`/results/${latestIntake.id}`} className="btn" style={{ background: "#fff", color: "var(--navy)" }}>
             View Results <ArrowRight size={14} />
           </Link>
         </div>
@@ -161,11 +154,12 @@ function OverviewTab({
                   </span>
                   <div style={{ minWidth: 0 }}>
                     <p style={{ fontFamily: "var(--display)", fontSize: ".92rem" }}>
-                      {intake.category_label ?? intake.category_slug}
+                      {intake.categoryLabel}
                     </p>
                     <p style={{ color: "var(--muted)", fontSize: ".78rem", marginTop: 2 }}>
                       {intake.track ? <span style={{ textTransform: "capitalize" }}>{intake.track.replace(/_/g, " ")} · </span> : null}
-                      {fmtDate(intake.created_at)}
+                      {fmtDate(intake.createdAt)}
+                      {intake.matchCount > 0 ? ` · ${intake.matchCount} ${intake.matchCount === 1 ? "match" : "matches"}` : ""}
                     </p>
                   </div>
                 </div>
@@ -187,28 +181,40 @@ function OverviewTab({
             </button>
           </div>
           <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill,minmax(240px,1fr))", gap: 12 }}>
-            {savedFirms.slice(0, 4).map((sf) => (
-              <Link key={sf.firm_id} href={`/firms/${sf.firm_id}`} className="ds-card ds-card-hover" style={{ padding: 16, display: "flex", alignItems: "center", gap: 12 }}>
-                <span className="icon-box" style={{ width: 36, height: 36 }}>
-                  <Bookmark size={15} strokeWidth={1.6} />
-                </span>
-                <div style={{ minWidth: 0 }}>
-                  <p style={{ fontFamily: "var(--display)", fontSize: ".9rem", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
-                    {sf.firms?.name ?? "Law Firm"}
-                  </p>
-                  {sf.firms?.location && (
-                    <p style={{ color: "var(--muted)", fontSize: ".78rem", display: "flex", alignItems: "center", gap: 4, marginTop: 2 }}>
-                      <MapPin size={10} /> {sf.firms.location}
+            {savedFirms.slice(0, 4).map((sf) => {
+              const content = (
+                <>
+                  <span className="icon-box" style={{ width: 36, height: 36 }}>
+                    <Bookmark size={15} strokeWidth={1.6} />
+                  </span>
+                  <div style={{ minWidth: 0 }}>
+                    <p style={{ fontFamily: "var(--display)", fontSize: ".9rem", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
+                      {sf.firm?.name ?? "Unavailable firm"}
                     </p>
-                  )}
+                    {sf.firm?.location ? (
+                      <p style={{ color: "var(--muted)", fontSize: ".78rem", display: "flex", alignItems: "center", gap: 4, marginTop: 2 }}>
+                        <MapPin size={10} /> {sf.firm.location}
+                      </p>
+                    ) : null}
+                  </div>
+                </>
+              );
+
+              return sf.firm ? (
+                <Link key={sf.firmId} href={`/firms/${sf.firmId}`} className="ds-card ds-card-hover" style={{ padding: 16, display: "flex", alignItems: "center", gap: 12 }}>
+                  {content}
+                </Link>
+              ) : (
+                <div key={sf.firmId} className="ds-card" style={{ padding: 16, display: "flex", alignItems: "center", gap: 12 }}>
+                  {content}
                 </div>
-              </Link>
-            ))}
+              );
+            })}
           </div>
         </div>
       )}
 
-      {intakes.length === 0 && savedFirms.length === 0 && !currentResults && (
+      {intakes.length === 0 && savedFirms.length === 0 && (
         <EmptyState
           icon={Scale}
           title="Your dashboard is empty"
@@ -228,29 +234,45 @@ function OverviewTab({
 
 function MatchesTab({
   intakes,
-  currentResults,
   loading,
+  error,
 }: {
-  intakes: IntakeRecord[];
-  currentResults: { count: number; categoryName: string } | null;
+  intakes: DashboardIntake[];
   loading: boolean;
+  error: string | null;
 }) {
   const router = useRouter();
+  const latestIntake = intakes[0] ?? null;
 
   if (loading) return <div className="app-skel" style={{ height: 160 }} />;
+  if (error) {
+    return (
+      <EmptyState
+        icon={Scale}
+        title="We couldn't load your matches"
+        body={error}
+        cta={
+          <button onClick={() => window.location.reload()} className="btn btn-primary" style={{ marginTop: 8 }}>
+            Try again
+          </button>
+        }
+      />
+    );
+  }
 
   return (
     <div style={{ display: "grid", gap: 24 }}>
-      {currentResults && (
+      {latestIntake && (
         <div className="navy-panel" style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 16, flexWrap: "wrap" }}>
           <div>
-            <p style={{ color: "rgba(255,255,255,.65)", fontSize: ".72rem", letterSpacing: ".06em", textTransform: "uppercase", fontWeight: 600, marginBottom: 4 }}>Active Session</p>
-            <p style={{ fontWeight: 600, fontFamily: "var(--display)" }}>{currentResults.categoryName || "Latest intake"}</p>
+            <p style={{ color: "rgba(255,255,255,.65)", fontSize: ".72rem", letterSpacing: ".06em", textTransform: "uppercase", fontWeight: 600, marginBottom: 4 }}>Latest Intake</p>
+            <p style={{ fontWeight: 600, fontFamily: "var(--display)" }}>{latestIntake.categoryLabel || "Latest intake"}</p>
             <p style={{ color: "rgba(255,255,255,.75)", fontSize: ".82rem", marginTop: 4 }}>
-              {currentResults.count} matched {currentResults.count === 1 ? "firm" : "firms"}
+              {latestIntake.matchCount} matched {latestIntake.matchCount === 1 ? "firm" : "firms"}
+              {latestIntake.topScore !== null ? ` · Top score ${latestIntake.topScore}%` : ""}
             </p>
           </div>
-          <Link href="/results" className="btn" style={{ background: "#fff", color: "var(--navy)" }}>
+          <Link href={`/results/${latestIntake.id}`} className="btn" style={{ background: "#fff", color: "var(--navy)" }}>
             View Results <ArrowRight size={14} />
           </Link>
         </div>
@@ -278,16 +300,19 @@ function MatchesTab({
                     <Scale size={16} strokeWidth={1.6} />
                   </span>
                   <div>
-                    <p style={{ fontFamily: "var(--display)", fontSize: ".92rem" }}>{intake.category_label ?? intake.category_slug}</p>
+                    <p style={{ fontFamily: "var(--display)", fontSize: ".92rem" }}>{intake.categoryLabel}</p>
                     <p style={{ color: "var(--muted)", fontSize: ".78rem", marginTop: 2 }}>
                       {intake.track ? <span style={{ textTransform: "capitalize" }}>{intake.track.replace(/_/g, " ")} · </span> : null}
-                      {fmtDate(intake.created_at)}
+                      {fmtDate(intake.createdAt)}
                     </p>
                   </div>
                 </div>
                 <div style={{ display: "flex", alignItems: "center", gap: 14, flexShrink: 0 }}>
-                  {intake.matches && intake.matches.length > 0 && (
-                    <span style={{ color: "var(--muted)", fontSize: ".78rem" }} className="hide-sm">{intake.matches.length} matches</span>
+                  {intake.matchCount > 0 && (
+                    <span style={{ color: "var(--muted)", fontSize: ".78rem" }} className="hide-sm">
+                      {intake.matchCount} {intake.matchCount === 1 ? "match" : "matches"}
+                      {intake.topScore !== null ? ` · ${intake.topScore}% top score` : ""}
+                    </span>
                   )}
                   <Link href={`/results/${intake.id}`} className="app-link">
                     Results <ChevronRight size={12} />
@@ -308,16 +333,18 @@ function SavedFirmsTab({
   savedFirms,
   setSavedFirms,
   loading,
+  error,
 }: {
-  savedFirms: SavedFirmRecord[];
-  setSavedFirms: React.Dispatch<React.SetStateAction<SavedFirmRecord[]>>;
+  savedFirms: DashboardSavedFirm[];
+  setSavedFirms: React.Dispatch<React.SetStateAction<DashboardSavedFirm[]>>;
   loading: boolean;
+  error: string | null;
 }) {
   const [, startTransition] = useTransition();
   const router = useRouter();
 
   const handleUnsave = (firmId: string) => {
-    setSavedFirms((prev) => prev.filter((f) => f.firm_id !== firmId));
+    setSavedFirms((prev) => prev.filter((f) => f.firmId !== firmId));
     startTransition(async () => {
       await unsaveFirm(firmId);
     });
@@ -330,6 +357,21 @@ function SavedFirmsTab({
           <div key={i} className="app-skel" style={{ height: 150 }} />
         ))}
       </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <EmptyState
+        icon={Bookmark}
+        title="We couldn't load your saved firms"
+        body={error}
+        cta={
+          <button onClick={() => window.location.reload()} className="btn btn-primary" style={{ marginTop: 8 }}>
+            Try again
+          </button>
+        }
+      />
     );
   }
 
@@ -354,44 +396,47 @@ function SavedFirmsTab({
         {savedFirms.length} saved {savedFirms.length === 1 ? "firm" : "firms"}
       </p>
       <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill,minmax(280px,1fr))", gap: 16 }}>
-        {savedFirms.map(({ firm_id, firms }) => {
-          const firm = firms;
-          if (!firm) return null;
+        {savedFirms.map(({ firmId, firm }) => {
           return (
-            <div key={firm_id} className="ds-card" style={{ padding: 20, display: "flex", flexDirection: "column", gap: 16 }}>
+            <div key={firmId} className="ds-card" style={{ padding: 20, display: "flex", flexDirection: "column", gap: 16 }}>
               <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: 12 }}>
                 <div style={{ flex: 1, minWidth: 0 }}>
-                  {firm.verified && (
+                  {firm?.verified && (
                     <div className="chip" style={{ color: "var(--navy)", background: "var(--navy-tint)", borderColor: "var(--navy-tint-2)", marginBottom: 8 }}>
                       <Shield size={11} /> LWYRD Verified
                     </div>
                   )}
-                  <h3 style={{ fontSize: "1.02rem", lineHeight: 1.3, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{firm.name}</h3>
-                  {firm.tagline && <p style={{ color: "var(--muted)", fontSize: ".8rem", marginTop: 4 }}>{firm.tagline}</p>}
+                  <h3 style={{ fontSize: "1.02rem", lineHeight: 1.3, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
+                    {firm?.name ?? "Unavailable firm"}
+                  </h3>
+                  {firm?.tagline && <p style={{ color: "var(--muted)", fontSize: ".8rem", marginTop: 4 }}>{firm.tagline}</p>}
+                  {!firm && <p style={{ color: "var(--muted)", fontSize: ".8rem", marginTop: 4 }}>This saved firm is no longer available.</p>}
                 </div>
-                <div style={{ textAlign: "right", flexShrink: 0 }}>
-                  <div style={{ fontFamily: "var(--display)", fontSize: "1.5rem", color: "var(--navy)" }}>{firm.overall_score}</div>
-                  <div style={{ color: "var(--faint)", fontSize: ".72rem" }}>score</div>
-                </div>
+                {firm?.overallScore !== null && firm?.overallScore !== undefined && (
+                  <div style={{ textAlign: "right", flexShrink: 0 }}>
+                    <div style={{ fontFamily: "var(--display)", fontSize: "1.5rem", color: "var(--navy)" }}>{firm.overallScore}</div>
+                    <div style={{ color: "var(--faint)", fontSize: ".72rem" }}>score</div>
+                  </div>
+                )}
               </div>
 
               <div style={{ display: "flex", flexWrap: "wrap", gap: 10, color: "var(--muted)", fontSize: ".78rem" }}>
-                {firm.location && <span style={{ display: "flex", alignItems: "center", gap: 4 }}><MapPin size={11} /> {firm.location}</span>}
-                {firm.size && <span>{sizeLabels[firm.size] ?? firm.size} firm</span>}
+                {firm?.location && <span style={{ display: "flex", alignItems: "center", gap: 4 }}><MapPin size={11} /> {firm.location}</span>}
+                {firm?.size && <span>{sizeLabels[firm.size] ?? firm.size} firm</span>}
               </div>
 
               <div style={{ display: "flex", gap: 8, marginTop: "auto" }}>
                 <button
-                  onClick={() => handleUnsave(firm_id)}
+                  onClick={() => handleUnsave(firmId)}
                   title="Remove from saved"
                   className="btn btn-ghost"
                   style={{ padding: 0, width: 42, height: 42, justifyContent: "center", flexShrink: 0 }}
                 >
                   <BookmarkX size={16} strokeWidth={1.6} />
                 </button>
-                <Link href={`/firms/${firm_id}`} className="btn btn-primary" style={{ flex: 1, justifyContent: "center" }}>
+                {firm ? <Link href={`/firms/${firmId}`} className="btn btn-primary" style={{ flex: 1, justifyContent: "center" }}>
                   View Profile <ArrowRight size={13} />
-                </Link>
+                </Link> : null}
               </div>
             </div>
           );
@@ -404,38 +449,19 @@ function SavedFirmsTab({
 // ─── Tab: Engagements ─────────────────────────────────────────────────────────
 
 function EngagementsTab() {
-  const [subTab, setSubTab] = useState<"active" | "past">("active");
   const router = useRouter();
 
   return (
-    <div style={{ display: "grid", gap: 20 }}>
-      <div className="app-seg">
-        {(["active", "past"] as const).map((t) => (
-          <button key={t} onClick={() => setSubTab(t)} className={subTab === t ? "is-active" : ""} style={{ textTransform: "capitalize" }}>
-            {t === "active" ? "Active" : "Past"}
-          </button>
-        ))}
-      </div>
-
-      {subTab === "active" ? (
-        <EmptyState
-          icon={Briefcase}
-          title="No active engagements"
-          body="Once you connect with a firm and begin working together, your active engagement details, communications, key documents, and milestones, will appear here."
-          cta={
-            <button onClick={() => router.push("/intake/start")} className="app-link" style={{ marginTop: 8 }}>
-              Start a new intake <ArrowRight size={13} />
-            </button>
-          }
-        />
-      ) : (
-        <EmptyState
-          icon={Clock}
-          title="No past engagements"
-          body="Completed engagements with their outcomes, key details, and correspondence will be archived here for your records."
-        />
-      )}
-    </div>
+    <EmptyState
+      icon={Briefcase}
+      title="Engagement tracking is coming later"
+      body="For now, your dashboard focuses on the parts that are live: completed intakes, match results, and saved firms."
+      cta={
+        <button onClick={() => router.push("/intake/start")} className="btn btn-primary" style={{ marginTop: 8 }}>
+          Start Intake <ArrowRight size={14} />
+        </button>
+      }
+    />
   );
 }
 
@@ -445,67 +471,46 @@ const HEADINGS: Record<TabId, { title: string; sub: string }> = {
   overview: { title: "", sub: "Here's an overview of your LWYRD activity." },
   matches: { title: "My Matches", sub: "Your intake submissions and matched law firms." },
   saved: { title: "Saved Firms", sub: "Firms you've bookmarked from your match results." },
-  engagements: { title: "Engagements", sub: "Your active and past legal engagements." },
+  engagements: { title: "Engagements", sub: "Engagement tracking is not live yet, but your intakes and saved firms are ready here." },
 };
 
 function DashboardContent() {
   const { user } = useAuth();
   const router = useRouter();
-  const supabase = createClient();
 
   const [activeTab, setActiveTab] = useState<TabId>("overview");
-  const [intakes, setIntakes] = useState<IntakeRecord[]>([]);
-  const [savedFirms, setSavedFirms] = useState<SavedFirmRecord[]>([]);
-  const [currentResults, setCurrentResults] = useState<{ count: number; categoryName: string } | null>(null);
+  const [intakes, setIntakes] = useState<DashboardIntake[]>([]);
+  const [savedFirms, setSavedFirms] = useState<DashboardSavedFirm[]>([]);
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState<string | null>(null);
 
   const firstName = user?.name?.split(" ")[0] ?? "there";
 
   useEffect(() => {
     if (!user) return;
-
-    const raw = sessionStorage.getItem("lwyrd_results");
-    const name = sessionStorage.getItem("lwyrd_category_name") ?? "";
-    if (raw) {
-      try {
-        const parsed = JSON.parse(raw);
-        setCurrentResults({ count: parsed.length, categoryName: name });
-      } catch {
-        // ignore
-      }
-    }
+    let cancelled = false;
 
     async function load() {
-      const [intakesRes, savedRes] = await Promise.all([
-        supabase
-          .from("intake_submissions")
-          .select("id, category_slug, category_label, created_at, track, matches(match_rank)")
-          .eq("user_id", user!.id)
-          .order("created_at", { ascending: false }),
-        supabase
-          .from("saved_firms")
-          .select("firm_id, saved_at, firms(id, name, tagline, location, size, overall_score, verified)")
-          .eq("user_id", user!.id)
-          .order("saved_at", { ascending: false }),
-      ]);
-
-      const fetchedIntakes = (intakesRes.data ?? []) as IntakeRecord[];
-      setIntakes(fetchedIntakes);
-
-      if (fetchedIntakes.length === 0) {
-        sessionStorage.removeItem("lwyrd_results");
-        sessionStorage.removeItem("lwyrd_category");
-        sessionStorage.removeItem("lwyrd_category_name");
-        sessionStorage.removeItem("lwyrd_match_scores");
-        setCurrentResults(null);
+      setLoading(true);
+      setLoadError(null);
+      const result = await getDashboardData();
+      if (cancelled) return;
+      if (result.error || !result.data) {
+        setLoadError(result.error ?? "Something went wrong while loading your dashboard.");
+        setIntakes([]);
+        setSavedFirms([]);
+      } else {
+        setIntakes(result.data.intakes);
+        setSavedFirms(result.data.savedFirms);
       }
-
-      if (savedRes.data) setSavedFirms(savedRes.data as unknown as SavedFirmRecord[]);
       setLoading(false);
     }
 
     load();
-  }, [user]); // eslint-disable-line react-hooks/exhaustive-deps
+    return () => {
+      cancelled = true;
+    };
+  }, [user]);
 
   const heading = HEADINGS[activeTab];
 
@@ -562,10 +567,10 @@ function DashboardContent() {
             <AnimatePresence mode="wait">
               <motion.div key={activeTab} initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -8 }} transition={{ duration: 0.25, ease }}>
                 {activeTab === "overview" && (
-                  <OverviewTab intakes={intakes} savedFirms={savedFirms} currentResults={currentResults} loading={loading} setActiveTab={setActiveTab} />
+                  <OverviewTab intakes={intakes} savedFirms={savedFirms} loading={loading} error={loadError} setActiveTab={setActiveTab} />
                 )}
-                {activeTab === "matches" && <MatchesTab intakes={intakes} currentResults={currentResults} loading={loading} />}
-                {activeTab === "saved" && <SavedFirmsTab savedFirms={savedFirms} setSavedFirms={setSavedFirms} loading={loading} />}
+                {activeTab === "matches" && <MatchesTab intakes={intakes} loading={loading} error={loadError} />}
+                {activeTab === "saved" && <SavedFirmsTab savedFirms={savedFirms} setSavedFirms={setSavedFirms} loading={loading} error={loadError} />}
                 {activeTab === "engagements" && <EngagementsTab />}
               </motion.div>
             </AnimatePresence>

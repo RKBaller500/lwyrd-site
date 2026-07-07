@@ -30,7 +30,7 @@ function SortHeader({
   return (
     <th
       onClick={() => onSort(col)}
-      className={`text-left px-5 py-3.5 text-xs font-medium uppercase tracking-wider cursor-pointer select-none group transition-colors ${active ? "text-[#002452]" : "text-slate-400 hover:text-slate-600"} ${className ?? ""}`}
+      className={`text-left px-5 py-3.5 text-xs font-medium uppercase tracking-wider cursor-pointer select-none group transition-colors ${active ? "text-[#002B55]" : "text-slate-400 hover:text-slate-600"} ${className ?? ""}`}
     >
       <div className="flex items-center gap-1">
         {label}
@@ -80,13 +80,13 @@ export default function QuestionsTable({
   const hasFilters = categoryFilter || typeFilter || requiredFilter;
 
   return (
-    <div className="bg-[#fbfaf6] border border-[#ddd7cc] rounded-3xl overflow-hidden">
+    <div className="bg-[#FFFFFF] border border-[#E7E7E3] rounded-3xl overflow-hidden">
       {/* Toolbar */}
-      <div className="px-5 py-4 border-b border-[#ddd7cc] flex flex-wrap items-center gap-3">
+      <div className="px-5 py-4 border-b border-[#E7E7E3] flex flex-wrap items-center gap-3">
         <select
           value={categoryFilter}
           onChange={(e) => setCategoryFilter(e.target.value)}
-          className="text-sm border border-[#ddd7cc] rounded-xl px-3 py-2 bg-white text-slate-600 focus:outline-none focus:border-[#002452]"
+          className="text-sm border border-[#E7E7E3] rounded-xl px-3 py-2 bg-white text-slate-600 focus:outline-none focus:border-[#002B55]"
         >
           <option value="">All categories</option>
           <option value="global">Global</option>
@@ -97,7 +97,7 @@ export default function QuestionsTable({
         <select
           value={typeFilter}
           onChange={(e) => setTypeFilter(e.target.value)}
-          className="text-sm border border-[#ddd7cc] rounded-xl px-3 py-2 bg-white text-slate-600 focus:outline-none focus:border-[#002452]"
+          className="text-sm border border-[#E7E7E3] rounded-xl px-3 py-2 bg-white text-slate-600 focus:outline-none focus:border-[#002B55]"
         >
           <option value="">All types</option>
           {QUESTION_TYPES.map((t) => (
@@ -107,7 +107,7 @@ export default function QuestionsTable({
         <select
           value={requiredFilter}
           onChange={(e) => setRequiredFilter(e.target.value)}
-          className="text-sm border border-[#ddd7cc] rounded-xl px-3 py-2 bg-white text-slate-600 focus:outline-none focus:border-[#002452]"
+          className="text-sm border border-[#E7E7E3] rounded-xl px-3 py-2 bg-white text-slate-600 focus:outline-none focus:border-[#002B55]"
         >
           <option value="">Required: all</option>
           <option value="true">Required only</option>
@@ -122,7 +122,7 @@ export default function QuestionsTable({
       {/* Table */}
       <table className="w-full text-sm">
         <thead>
-          <tr className="border-b border-[#ddd7cc]">
+          <tr className="border-b border-[#E7E7E3]">
             <SortHeader col="display_order" label="#" sort={sort} dir={dir} onSort={handleSort} className="w-8" />
             <SortHeader col="question" label="Question" sort={sort} dir={dir} onSort={handleSort} />
             <SortHeader col="categoryName" label="Category" sort={sort} dir={dir} onSort={handleSort} />
@@ -133,7 +133,7 @@ export default function QuestionsTable({
         </thead>
         <tbody>
           {filtered.map((q, i) => (
-            <tr key={q.id} className={`border-b border-[#ddd7cc] last:border-0 ${i % 2 === 0 ? "" : "bg-white/40"}`}>
+            <tr key={q.id} className={`border-b border-[#E7E7E3] last:border-0 ${i % 2 === 0 ? "" : "bg-white/40"}`}>
               <td className="px-5 py-3.5 text-slate-400 text-xs">{q.display_order}</td>
               <td className="px-5 py-3.5">
                 <div className="font-medium text-slate-700 max-w-sm truncate">{q.question}</div>
@@ -145,12 +145,12 @@ export default function QuestionsTable({
                   : q.categoryName}
               </td>
               <td className="px-5 py-3.5">
-                <span className="px-2 py-0.5 bg-[#002452]/8 text-[#002452] rounded-full text-xs">{q.type}</span>
+                <span className="px-2 py-0.5 bg-[#002B55]/8 text-[#002B55] rounded-full text-xs">{q.type}</span>
               </td>
               <td className="px-5 py-3.5 text-slate-500">{q.required ? "Yes" : "No"}</td>
               <td className="px-5 py-3.5">
                 <div className="flex items-center gap-3 justify-end">
-                  <Link href={`/admin/questions/${q.id}`} className="text-xs text-[#002452] hover:opacity-70 transition-opacity font-medium">Edit</Link>
+                  <Link href={`/admin/questions/${q.id}`} className="text-xs text-[#002B55] hover:opacity-70 transition-opacity font-medium">Edit</Link>
                   <DeleteQuestionButton id={q.id} question={q.question} />
                 </div>
               </td>

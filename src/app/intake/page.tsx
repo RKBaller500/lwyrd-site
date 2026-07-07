@@ -1,5 +1,6 @@
-import Navbar from "@/components/layout/Navbar";
-import Footer from "@/components/layout/Footer";
+import "@/styles/lwyrd-ds.css";
+import MarketingNav from "@/components/marketing/MarketingNav";
+import MarketingFooter from "@/components/marketing/MarketingFooter";
 import AuthGuard from "@/components/auth/AuthGuard";
 import IntakeWizard from "@/components/intake/IntakeWizard";
 import type { Metadata } from "next";
@@ -12,12 +13,12 @@ export const metadata: Metadata = {
 export default function IntakePage() {
   return (
     <AuthGuard>
-      <div className="flex flex-col min-h-screen bg-[#0A0F1C]">
-        <Navbar />
-        <main className="flex-1">
+      <div className="lwyrd-ds ds-page">
+        <MarketingNav />
+        <main className="ds-main">
           <IntakeWizard />
         </main>
-        <Footer />
+        <MarketingFooter />
       </div>
     </AuthGuard>
   );

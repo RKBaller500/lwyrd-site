@@ -1,7 +1,8 @@
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
-import Navbar from "@/components/layout/Navbar";
-import Footer from "@/components/layout/Footer";
+import "@/styles/lwyrd-ds.css";
+import MarketingNav from "@/components/marketing/MarketingNav";
+import MarketingFooter from "@/components/marketing/MarketingFooter";
 import AccountContent from "@/components/account/AccountContent";
 import type { Metadata } from "next";
 
@@ -26,9 +27,9 @@ export default async function AccountPage() {
     .single();
 
   return (
-    <div className="flex flex-col min-h-screen bg-[#0A0F1C]">
-      <Navbar />
-      <main className="flex-1 max-w-4xl mx-auto w-full px-6 py-14">
+    <div className="lwyrd-ds ds-page">
+      <MarketingNav />
+      <main className="app-shell" style={{ maxWidth: 760 }}>
         <AccountContent
           profile={{
             id: user.id,
@@ -39,7 +40,7 @@ export default async function AccountPage() {
           }}
         />
       </main>
-      <Footer />
+      <MarketingFooter />
     </div>
   );
 }

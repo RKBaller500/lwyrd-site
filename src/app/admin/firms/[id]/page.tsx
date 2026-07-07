@@ -70,8 +70,8 @@ export default async function EditFirmPage({
   return (
     <div>
       <h1
-        className="text-4xl text-[#002452] mb-2"
-        style={{ fontFamily: '"Lora", Georgia, serif', fontWeight: 500 }}
+        className="text-4xl text-[#002B55] mb-2"
+        style={{ fontFamily: "var(--display)", fontWeight: 500 }}
       >
         Edit Firm
       </h1>

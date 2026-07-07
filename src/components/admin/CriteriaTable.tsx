@@ -26,7 +26,7 @@ function SortHeader({
   return (
     <th
       onClick={() => onSort(col)}
-      className={`text-left px-5 py-3.5 text-xs font-medium uppercase tracking-wider cursor-pointer select-none group transition-colors ${active ? "text-[#002452]" : "text-slate-400 hover:text-slate-600"} ${className ?? ""}`}
+      className={`text-left px-5 py-3.5 text-xs font-medium uppercase tracking-wider cursor-pointer select-none group transition-colors ${active ? "text-[#002B55]" : "text-slate-400 hover:text-slate-600"} ${className ?? ""}`}
     >
       <div className="flex items-center gap-1">
         {label}
@@ -65,13 +65,13 @@ export default function CriteriaTable({ criteria }: { criteria: CriterionRow[] }
   }, [criteria, statusFilter, sort, dir]);
 
   return (
-    <div className="bg-[#fbfaf6] border border-[#ddd7cc] rounded-3xl overflow-hidden">
+    <div className="bg-[#FFFFFF] border border-[#E7E7E3] rounded-3xl overflow-hidden">
       {/* Toolbar */}
-      <div className="px-5 py-4 border-b border-[#ddd7cc] flex flex-wrap items-center gap-3">
+      <div className="px-5 py-4 border-b border-[#E7E7E3] flex flex-wrap items-center gap-3">
         <select
           value={statusFilter}
           onChange={(e) => setStatusFilter(e.target.value)}
-          className="text-sm border border-[#ddd7cc] rounded-xl px-3 py-2 bg-white text-slate-600 focus:outline-none focus:border-[#002452]"
+          className="text-sm border border-[#E7E7E3] rounded-xl px-3 py-2 bg-white text-slate-600 focus:outline-none focus:border-[#002B55]"
         >
           <option value="">All statuses</option>
           <option value="active">Active only</option>
@@ -86,7 +86,7 @@ export default function CriteriaTable({ criteria }: { criteria: CriterionRow[] }
       {/* Table */}
       <table className="w-full text-sm">
         <thead>
-          <tr className="border-b border-[#ddd7cc]">
+          <tr className="border-b border-[#E7E7E3]">
             <SortHeader col="display_order" label="#" sort={sort} dir={dir} onSort={handleSort} className="w-10" />
             <SortHeader col="label" label="Label" sort={sort} dir={dir} onSort={handleSort} />
             <th className="text-left px-5 py-3.5 text-xs font-medium text-slate-400 uppercase tracking-wider">Description</th>
@@ -96,7 +96,7 @@ export default function CriteriaTable({ criteria }: { criteria: CriterionRow[] }
         </thead>
         <tbody>
           {filtered.map((c, i) => (
-            <tr key={c.id} className={`border-b border-[#ddd7cc] last:border-0 ${i % 2 === 0 ? "" : "bg-white/40"}`}>
+            <tr key={c.id} className={`border-b border-[#E7E7E3] last:border-0 ${i % 2 === 0 ? "" : "bg-white/40"}`}>
               <td className="px-5 py-3.5 text-slate-400 text-xs">{c.display_order}</td>
               <td className="px-5 py-3.5 font-medium text-slate-700">{c.label}</td>
               <td className="px-5 py-3.5 text-slate-500 text-xs max-w-sm truncate">{c.description}</td>
@@ -107,7 +107,7 @@ export default function CriteriaTable({ criteria }: { criteria: CriterionRow[] }
               </td>
               <td className="px-5 py-3.5">
                 <div className="flex items-center gap-3 justify-end">
-                  <Link href={`/admin/criteria/${c.id}`} className="text-xs text-[#002452] hover:opacity-70 transition-opacity font-medium">Edit</Link>
+                  <Link href={`/admin/criteria/${c.id}`} className="text-xs text-[#002B55] hover:opacity-70 transition-opacity font-medium">Edit</Link>
                   <DeleteAssessmentCriterionButton id={c.id} label={c.label} />
                 </div>
               </td>

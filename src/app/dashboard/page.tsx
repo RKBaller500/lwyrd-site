@@ -4,8 +4,9 @@ import { useEffect, useState, useTransition } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import Navbar from "@/components/layout/Navbar";
-import Footer from "@/components/layout/Footer";
+import "@/styles/lwyrd-ds.css";
+import MarketingNav from "@/components/marketing/MarketingNav";
+import MarketingFooter from "@/components/marketing/MarketingFooter";
 import AuthGuard from "@/components/auth/AuthGuard";
 import { useAuth } from "@/context/AuthContext";
 import { createClient } from "@/lib/supabase/client";
@@ -26,7 +27,6 @@ import {
 } from "lucide-react";
 
 const ease = [0.25, 0.46, 0.45, 0.94] as const;
-const lora = { fontFamily: '"Lora", Georgia, serif' } as const;
 
 type TabId = "overview" | "matches" | "saved" | "engagements";
 
@@ -68,11 +68,9 @@ const sizeLabels: Record<string, string> = {
 
 function StatCard({ value, label }: { value: number | string; label: string }) {
   return (
-    <div className="bg-[#141C2E] rounded-2xl border border-[#1F2A3D] p-5 flex flex-col gap-1">
-      <span className="text-3xl text-[#E6EAF2]" style={{ ...lora, fontWeight: 500 }}>
-        {value}
-      </span>
-      <span className="text-xs text-[#8A93A6] font-medium uppercase tracking-wide">{label}</span>
+    <div className="app-stat">
+      <span className="n">{value}</span>
+      <span className="l">{label}</span>
     </div>
   );
 }
@@ -84,13 +82,17 @@ function EmptyState({ icon: Icon, title, body, cta }: {
   cta?: React.ReactNode;
 }) {
   return (
-    <div className="bg-[#141C2E] border border-[#1F2A3D] rounded-3xl p-12 flex flex-col items-center text-center gap-3">
-      <Icon size={32} className="text-[#1F2A3D]" strokeWidth={1.2} />
-      <p className="text-[#C8CDD8] font-medium text-sm">{title}</p>
-      <p className="text-[#8A93A6] text-sm max-w-xs leading-relaxed">{body}</p>
+    <div className="app-empty">
+      <Icon size={30} className="ico" strokeWidth={1.3} />
+      <h3>{title}</h3>
+      <p>{body}</p>
       {cta}
     </div>
   );
+}
+
+function fmtDate(iso: string) {
+  return new Date(iso).toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" });
 }
 
 // ─── Tab: Overview ────────────────────────────────────────────────────────────
@@ -112,88 +114,62 @@ function OverviewTab({
 
   if (loading) {
     return (
-      <div className="space-y-6">
+      <div style={{ display: "grid", gap: 16 }}>
         {[1, 2, 3].map((i) => (
-          <div key={i} className="h-20 rounded-2xl bg-[#141C2E] border border-[#1F2A3D] animate-pulse" />
+          <div key={i} className="app-skel" style={{ height: 80 }} />
         ))}
       </div>
     );
   }
 
   return (
-    <div className="space-y-8">
-      {/* Stats row */}
-      <div className="grid grid-cols-3 gap-4">
+    <div style={{ display: "grid", gap: 32 }}>
+      <div className="app-stats">
         <StatCard value={intakes.length} label="Intakes" />
         <StatCard value={savedFirms.length} label="Saved Firms" />
         <StatCard value={0} label="Engagements" />
       </div>
 
-      {/* Active results banner */}
       {currentResults && (
-        <div className="bg-[#3B82F6]/10 border border-[#3B82F6]/20 rounded-2xl p-5 flex items-center justify-between gap-4">
+        <div className="navy-panel" style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 16, flexWrap: "wrap" }}>
           <div>
-            <p className="text-[#E6EAF2] text-sm font-medium" style={lora}>
-              {currentResults.categoryName || "Latest intake"}
-            </p>
-            <p className="text-[#8A93A6] text-xs mt-0.5">
+            <p style={{ fontWeight: 600, fontFamily: "var(--display)" }}>{currentResults.categoryName || "Latest intake"}</p>
+            <p style={{ color: "rgba(255,255,255,.75)", fontSize: ".85rem", marginTop: 2 }}>
               {currentResults.count} matched {currentResults.count === 1 ? "firm" : "firms"} ready to review
             </p>
           </div>
-          <Link
-            href="/results"
-            className="shrink-0 inline-flex items-center gap-1.5 bg-[#3B82F6] text-white text-xs font-semibold px-4 py-2 rounded-xl hover:bg-[#2563EB] transition-colors"
-          >
-            View Results
-            <ArrowRight size={12} />
+          <Link href="/results" className="btn" style={{ background: "#fff", color: "var(--navy)" }}>
+            View Results <ArrowRight size={14} />
           </Link>
         </div>
       )}
 
-      {/* Recent intakes */}
       {intakes.length > 0 && (
         <div>
-          <div className="flex items-center justify-between mb-3">
-            <h3 className="text-sm font-semibold text-[#8A93A6] uppercase tracking-wide">Recent Intakes</h3>
-            <button
-              onClick={() => setActiveTab("matches")}
-              className="text-xs text-[#3B82F6] font-medium hover:opacity-70 transition-opacity flex items-center gap-1"
-            >
+          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 12 }}>
+            <span className="app-section-label">Recent Intakes</span>
+            <button onClick={() => setActiveTab("matches")} className="app-link">
               View all <ChevronRight size={12} />
             </button>
           </div>
-          <div className="bg-[#141C2E] border border-[#1F2A3D] rounded-2xl overflow-hidden">
-            {intakes.slice(0, 3).map((intake, i) => (
-              <div
-                key={intake.id}
-                className={`flex items-center justify-between gap-4 px-5 py-4 hover:bg-[#1F2A3D]/50 transition-colors ${
-                  i < Math.min(intakes.length, 3) - 1 ? "border-b border-[#1F2A3D]" : ""
-                }`}
-              >
-                <div className="flex items-center gap-3">
-                  <div className="w-8 h-8 rounded-xl bg-[#3B82F6]/10 flex items-center justify-center shrink-0">
-                    <Scale size={14} className="text-[#3B82F6]" strokeWidth={1.5} />
-                  </div>
-                  <div>
-                    <p className="text-[#E6EAF2] text-sm font-medium leading-snug" style={lora}>
+          <div className="app-list">
+            {intakes.slice(0, 3).map((intake) => (
+              <div key={intake.id} className="app-row">
+                <div className="app-row-lead">
+                  <span className="icon-box" style={{ width: 34, height: 34 }}>
+                    <Scale size={15} strokeWidth={1.6} />
+                  </span>
+                  <div style={{ minWidth: 0 }}>
+                    <p style={{ fontFamily: "var(--display)", fontSize: ".92rem" }}>
                       {intake.category_label ?? intake.category_slug}
                     </p>
-                    <p className="text-[#8A93A6] text-xs mt-0.5">
-                      {intake.track ? (
-                        <span className="capitalize">{intake.track.replace(/_/g, " ")} · </span>
-                      ) : null}
-                      {new Date(intake.created_at).toLocaleDateString("en-US", {
-                        month: "long",
-                        day: "numeric",
-                        year: "numeric",
-                      })}
+                    <p style={{ color: "var(--muted)", fontSize: ".78rem", marginTop: 2 }}>
+                      {intake.track ? <span style={{ textTransform: "capitalize" }}>{intake.track.replace(/_/g, " ")} · </span> : null}
+                      {fmtDate(intake.created_at)}
                     </p>
                   </div>
                 </div>
-                <Link
-                  href={`/results/${intake.id}`}
-                  className="text-xs text-[#3B82F6] font-medium hover:opacity-70 transition-opacity shrink-0 flex items-center gap-1"
-                >
+                <Link href={`/results/${intake.id}`} className="app-link">
                   Results <ChevronRight size={12} />
                 </Link>
               </div>
@@ -202,36 +178,27 @@ function OverviewTab({
         </div>
       )}
 
-      {/* Recent saved firms */}
       {savedFirms.length > 0 && (
         <div>
-          <div className="flex items-center justify-between mb-3">
-            <h3 className="text-sm font-semibold text-[#8A93A6] uppercase tracking-wide">Saved Firms</h3>
-            <button
-              onClick={() => setActiveTab("saved")}
-              className="text-xs text-[#3B82F6] font-medium hover:opacity-70 transition-opacity flex items-center gap-1"
-            >
+          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 12 }}>
+            <span className="app-section-label">Saved Firms</span>
+            <button onClick={() => setActiveTab("saved")} className="app-link">
               View all <ChevronRight size={12} />
             </button>
           </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill,minmax(240px,1fr))", gap: 12 }}>
             {savedFirms.slice(0, 4).map((sf) => (
-              <Link
-                key={sf.firm_id}
-                href={`/firms/${sf.firm_id}`}
-                className="bg-[#141C2E] border border-[#1F2A3D] rounded-2xl p-4 hover:border-[#2A3850] hover:-translate-y-0.5 transition-all flex items-center gap-3"
-              >
-                <div className="w-9 h-9 rounded-xl bg-[#3B82F6]/10 flex items-center justify-center shrink-0">
-                  <Bookmark size={14} className="text-[#3B82F6]" strokeWidth={1.5} />
-                </div>
-                <div className="min-w-0">
-                  <p className="text-[#E6EAF2] text-sm font-medium truncate" style={lora}>
+              <Link key={sf.firm_id} href={`/firms/${sf.firm_id}`} className="ds-card ds-card-hover" style={{ padding: 16, display: "flex", alignItems: "center", gap: 12 }}>
+                <span className="icon-box" style={{ width: 36, height: 36 }}>
+                  <Bookmark size={15} strokeWidth={1.6} />
+                </span>
+                <div style={{ minWidth: 0 }}>
+                  <p style={{ fontFamily: "var(--display)", fontSize: ".9rem", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
                     {sf.firms?.name ?? "Law Firm"}
                   </p>
                   {sf.firms?.location && (
-                    <p className="text-[#8A93A6] text-xs flex items-center gap-1 mt-0.5">
-                      <MapPin size={10} />
-                      {sf.firms.location}
+                    <p style={{ color: "var(--muted)", fontSize: ".78rem", display: "flex", alignItems: "center", gap: 4, marginTop: 2 }}>
+                      <MapPin size={10} /> {sf.firms.location}
                     </p>
                   )}
                 </div>
@@ -241,19 +208,14 @@ function OverviewTab({
         </div>
       )}
 
-      {/* Empty state if nothing at all */}
       {intakes.length === 0 && savedFirms.length === 0 && !currentResults && (
         <EmptyState
           icon={Scale}
           title="Your dashboard is empty"
           body="Complete an intake to get matched with law firms that fit your needs."
           cta={
-            <button
-              onClick={() => router.push("/intake/start")}
-              className="mt-2 inline-flex items-center gap-2 bg-[#3B82F6] hover:bg-[#2563EB] text-white text-sm font-medium px-5 py-2.5 rounded-2xl transition-colors"
-            >
-              Start Intake
-              <ArrowRight size={14} />
+            <button onClick={() => router.push("/intake/start")} className="btn btn-primary" style={{ marginTop: 8 }}>
+              Start Intake <ArrowRight size={14} />
             </button>
           }
         />
@@ -275,29 +237,21 @@ function MatchesTab({
 }) {
   const router = useRouter();
 
-  if (loading) {
-    return <div className="h-40 rounded-2xl bg-[#141C2E] border border-[#1F2A3D] animate-pulse" />;
-  }
+  if (loading) return <div className="app-skel" style={{ height: 160 }} />;
 
   return (
-    <div className="space-y-6">
+    <div style={{ display: "grid", gap: 24 }}>
       {currentResults && (
-        <div className="bg-[#3B82F6]/10 border border-[#3B82F6]/20 rounded-2xl p-6 flex items-center justify-between gap-4">
+        <div className="navy-panel" style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 16, flexWrap: "wrap" }}>
           <div>
-            <p className="text-[#8A93A6] text-xs font-medium uppercase tracking-wide mb-1">Active Session</p>
-            <p className="text-[#E6EAF2] font-medium" style={lora}>
-              {currentResults.categoryName || "Latest intake"}
-            </p>
-            <p className="text-[#8A93A6] text-xs mt-1">
+            <p style={{ color: "rgba(255,255,255,.65)", fontSize: ".72rem", letterSpacing: ".06em", textTransform: "uppercase", fontWeight: 600, marginBottom: 4 }}>Active Session</p>
+            <p style={{ fontWeight: 600, fontFamily: "var(--display)" }}>{currentResults.categoryName || "Latest intake"}</p>
+            <p style={{ color: "rgba(255,255,255,.75)", fontSize: ".82rem", marginTop: 4 }}>
               {currentResults.count} matched {currentResults.count === 1 ? "firm" : "firms"}
             </p>
           </div>
-          <Link
-            href="/results"
-            className="shrink-0 inline-flex items-center gap-2 bg-[#3B82F6] hover:bg-[#2563EB] text-white text-sm font-semibold px-5 py-2.5 rounded-2xl transition-colors"
-          >
-            View Results
-            <ArrowRight size={14} />
+          <Link href="/results" className="btn" style={{ background: "#fff", color: "var(--navy)" }}>
+            View Results <ArrowRight size={14} />
           </Link>
         </div>
       )}
@@ -308,58 +262,34 @@ function MatchesTab({
           title="No intakes yet"
           body="Complete an intake to get matched with law firms tailored to your situation."
           cta={
-            <button
-              onClick={() => router.push("/intake/start")}
-              className="mt-2 inline-flex items-center gap-2 bg-[#3B82F6] hover:bg-[#2563EB] text-white text-sm font-medium px-5 py-2.5 rounded-2xl transition-colors"
-            >
-              Start Intake
-              <ArrowRight size={14} />
+            <button onClick={() => router.push("/intake/start")} className="btn btn-primary" style={{ marginTop: 8 }}>
+              Start Intake <ArrowRight size={14} />
             </button>
           }
         />
       ) : (
         <div>
-          <h3 className="text-sm font-semibold text-[#8A93A6] uppercase tracking-wide mb-3">
-            Intake History
-          </h3>
-          <div className="bg-[#141C2E] border border-[#1F2A3D] rounded-2xl overflow-hidden">
-            {intakes.map((intake, i) => (
-              <div
-                key={intake.id}
-                className={`flex items-center justify-between gap-4 px-5 py-4 hover:bg-[#1F2A3D]/50 transition-colors ${
-                  i < intakes.length - 1 ? "border-b border-[#1F2A3D]" : ""
-                }`}
-              >
-                <div className="flex items-center gap-3">
-                  <div className="w-9 h-9 rounded-xl bg-[#3B82F6]/10 flex items-center justify-center shrink-0">
-                    <Scale size={15} className="text-[#3B82F6]" strokeWidth={1.5} />
-                  </div>
+          <span className="app-section-label" style={{ display: "block", marginBottom: 12 }}>Intake History</span>
+          <div className="app-list">
+            {intakes.map((intake) => (
+              <div key={intake.id} className="app-row">
+                <div className="app-row-lead">
+                  <span className="icon-box" style={{ width: 36, height: 36 }}>
+                    <Scale size={16} strokeWidth={1.6} />
+                  </span>
                   <div>
-                    <p className="text-[#E6EAF2] text-sm font-medium" style={lora}>
-                      {intake.category_label ?? intake.category_slug}
-                    </p>
-                    <p className="text-[#8A93A6] text-xs mt-0.5">
-                      {intake.track ? (
-                        <span className="capitalize">{intake.track.replace(/_/g, " ")} · </span>
-                      ) : null}
-                      {new Date(intake.created_at).toLocaleDateString("en-US", {
-                        month: "long",
-                        day: "numeric",
-                        year: "numeric",
-                      })}
+                    <p style={{ fontFamily: "var(--display)", fontSize: ".92rem" }}>{intake.category_label ?? intake.category_slug}</p>
+                    <p style={{ color: "var(--muted)", fontSize: ".78rem", marginTop: 2 }}>
+                      {intake.track ? <span style={{ textTransform: "capitalize" }}>{intake.track.replace(/_/g, " ")} · </span> : null}
+                      {fmtDate(intake.created_at)}
                     </p>
                   </div>
                 </div>
-                <div className="flex items-center gap-3 shrink-0">
+                <div style={{ display: "flex", alignItems: "center", gap: 14, flexShrink: 0 }}>
                   {intake.matches && intake.matches.length > 0 && (
-                    <span className="hidden sm:inline text-xs text-[#8A93A6]">
-                      {intake.matches.length} matches
-                    </span>
+                    <span style={{ color: "var(--muted)", fontSize: ".78rem" }} className="hide-sm">{intake.matches.length} matches</span>
                   )}
-                  <Link
-                    href={`/results/${intake.id}`}
-                    className="text-xs text-[#3B82F6] font-medium hover:opacity-70 transition-opacity flex items-center gap-1"
-                  >
+                  <Link href={`/results/${intake.id}`} className="app-link">
                     Results <ChevronRight size={12} />
                   </Link>
                 </div>
@@ -395,9 +325,9 @@ function SavedFirmsTab({
 
   if (loading) {
     return (
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill,minmax(260px,1fr))", gap: 16 }}>
         {[1, 2, 3, 4].map((i) => (
-          <div key={i} className="h-36 rounded-2xl bg-[#141C2E] border border-[#1F2A3D] animate-pulse" />
+          <div key={i} className="app-skel" style={{ height: 150 }} />
         ))}
       </div>
     );
@@ -410,10 +340,7 @@ function SavedFirmsTab({
         title="No saved firms yet"
         body="When you find a firm you like in your match results, save it here for easy reference."
         cta={
-          <button
-            onClick={() => router.push("/intake/start")}
-            className="mt-2 inline-flex items-center gap-2 text-sm text-[#3B82F6] font-medium hover:opacity-70 transition-opacity"
-          >
+          <button onClick={() => router.push("/intake/start")} className="app-link" style={{ marginTop: 8 }}>
             Start a new intake <ArrowRight size={13} />
           </button>
         }
@@ -423,65 +350,47 @@ function SavedFirmsTab({
 
   return (
     <div>
-      <p className="text-xs text-[#8A93A6] mb-4">{savedFirms.length} saved {savedFirms.length === 1 ? "firm" : "firms"}</p>
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+      <p style={{ color: "var(--muted)", fontSize: ".82rem", marginBottom: 16 }}>
+        {savedFirms.length} saved {savedFirms.length === 1 ? "firm" : "firms"}
+      </p>
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill,minmax(280px,1fr))", gap: 16 }}>
         {savedFirms.map(({ firm_id, firms }) => {
           const firm = firms;
           if (!firm) return null;
           return (
-            <div
-              key={firm_id}
-              className="bg-[#141C2E] border border-[#1F2A3D] rounded-2xl p-5 flex flex-col gap-4"
-            >
-              <div className="flex items-start justify-between gap-3">
-                <div className="flex-1 min-w-0">
+            <div key={firm_id} className="ds-card" style={{ padding: 20, display: "flex", flexDirection: "column", gap: 16 }}>
+              <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: 12 }}>
+                <div style={{ flex: 1, minWidth: 0 }}>
                   {firm.verified && (
-                    <div className="inline-flex items-center gap-1 text-[#3B82F6] text-xs font-medium mb-1.5">
-                      <Shield size={10} />
-                      LWYRD Verified
+                    <div className="chip" style={{ color: "var(--navy)", background: "var(--navy-tint)", borderColor: "var(--navy-tint-2)", marginBottom: 8 }}>
+                      <Shield size={11} /> LWYRD Verified
                     </div>
                   )}
-                  <h3 className="text-[#E6EAF2] text-base font-medium leading-snug truncate" style={lora}>
-                    {firm.name}
-                  </h3>
-                  {firm.tagline && (
-                    <p className="text-[#8A93A6] text-xs mt-1 line-clamp-2">{firm.tagline}</p>
-                  )}
+                  <h3 style={{ fontSize: "1.02rem", lineHeight: 1.3, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{firm.name}</h3>
+                  {firm.tagline && <p style={{ color: "var(--muted)", fontSize: ".8rem", marginTop: 4 }}>{firm.tagline}</p>}
                 </div>
-                <div className="text-right shrink-0">
-                  <div className="text-2xl text-[#E6EAF2]" style={lora}>
-                    {firm.overall_score}
-                  </div>
-                  <div className="text-xs text-[#8A93A6]">score</div>
+                <div style={{ textAlign: "right", flexShrink: 0 }}>
+                  <div style={{ fontFamily: "var(--display)", fontSize: "1.5rem", color: "var(--navy)" }}>{firm.overall_score}</div>
+                  <div style={{ color: "var(--faint)", fontSize: ".72rem" }}>score</div>
                 </div>
               </div>
 
-              <div className="flex flex-wrap gap-2 text-xs text-[#8A93A6]">
-                {firm.location && (
-                  <span className="flex items-center gap-1">
-                    <MapPin size={10} />
-                    {firm.location}
-                  </span>
-                )}
-                {firm.size && (
-                  <span>{sizeLabels[firm.size] ?? firm.size} firm</span>
-                )}
+              <div style={{ display: "flex", flexWrap: "wrap", gap: 10, color: "var(--muted)", fontSize: ".78rem" }}>
+                {firm.location && <span style={{ display: "flex", alignItems: "center", gap: 4 }}><MapPin size={11} /> {firm.location}</span>}
+                {firm.size && <span>{sizeLabels[firm.size] ?? firm.size} firm</span>}
               </div>
 
-              <div className="flex gap-2 mt-auto">
+              <div style={{ display: "flex", gap: 8, marginTop: "auto" }}>
                 <button
                   onClick={() => handleUnsave(firm_id)}
                   title="Remove from saved"
-                  className="flex items-center justify-center w-10 h-10 rounded-xl border border-[#1F2A3D] text-[#8A93A6] hover:border-red-500/40 hover:text-red-400 transition-colors shrink-0"
+                  className="btn btn-ghost"
+                  style={{ padding: 0, width: 42, height: 42, justifyContent: "center", flexShrink: 0 }}
                 >
-                  <BookmarkX size={15} strokeWidth={1.5} />
+                  <BookmarkX size={16} strokeWidth={1.6} />
                 </button>
-                <Link
-                  href={`/firms/${firm_id}`}
-                  className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl bg-[#3B82F6] hover:bg-[#2563EB] text-white text-sm font-medium transition-colors"
-                >
-                  View Profile
-                  <ArrowRight size={13} />
+                <Link href={`/firms/${firm_id}`} className="btn btn-primary" style={{ flex: 1, justifyContent: "center" }}>
+                  View Profile <ArrowRight size={13} />
                 </Link>
               </div>
             </div>
@@ -499,19 +408,10 @@ function EngagementsTab() {
   const router = useRouter();
 
   return (
-    <div className="space-y-5">
-      {/* Sub-tab toggle */}
-      <div className="flex gap-1 bg-[#141C2E] border border-[#1F2A3D] rounded-xl p-1 w-fit">
+    <div style={{ display: "grid", gap: 20 }}>
+      <div className="app-seg">
         {(["active", "past"] as const).map((t) => (
-          <button
-            key={t}
-            onClick={() => setSubTab(t)}
-            className={`px-4 py-1.5 rounded-lg text-sm font-medium transition-colors capitalize ${
-              subTab === t
-                ? "bg-[#3B82F6] text-white"
-                : "text-[#8A93A6] hover:text-[#E6EAF2]"
-            }`}
-          >
+          <button key={t} onClick={() => setSubTab(t)} className={subTab === t ? "is-active" : ""} style={{ textTransform: "capitalize" }}>
             {t === "active" ? "Active" : "Past"}
           </button>
         ))}
@@ -523,10 +423,7 @@ function EngagementsTab() {
           title="No active engagements"
           body="Once you connect with a firm and begin working together, your active engagement details, communications, key documents, and milestones, will appear here."
           cta={
-            <button
-              onClick={() => router.push("/intake/start")}
-              className="mt-2 inline-flex items-center gap-2 text-sm text-[#3B82F6] font-medium hover:opacity-70 transition-opacity"
-            >
+            <button onClick={() => router.push("/intake/start")} className="app-link" style={{ marginTop: 8 }}>
               Start a new intake <ArrowRight size={13} />
             </button>
           }
@@ -543,6 +440,13 @@ function EngagementsTab() {
 }
 
 // ─── Main Dashboard ───────────────────────────────────────────────────────────
+
+const HEADINGS: Record<TabId, { title: string; sub: string }> = {
+  overview: { title: "", sub: "Here's an overview of your LWYRD activity." },
+  matches: { title: "My Matches", sub: "Your intake submissions and matched law firms." },
+  saved: { title: "Saved Firms", sub: "Firms you've bookmarked from your match results." },
+  engagements: { title: "Engagements", sub: "Your active and past legal engagements." },
+};
 
 function DashboardContent() {
   const { user } = useAuth();
@@ -603,175 +507,65 @@ function DashboardContent() {
     load();
   }, [user]); // eslint-disable-line react-hooks/exhaustive-deps
 
+  const heading = HEADINGS[activeTab];
+
   return (
-    <div className="flex flex-col min-h-screen bg-[#0A0F1C]">
-      <Navbar />
+    <div className="lwyrd-ds ds-page">
+      <MarketingNav />
 
-      <main className="flex-1 max-w-6xl mx-auto w-full px-4 sm:px-6 py-8">
-        <div className="flex flex-col lg:flex-row gap-6">
-
+      <main className="app-shell">
+        <div className="app-layout">
           {/* ── Sidebar ──────────────────────────────────────── */}
-          <aside className="lg:w-56 shrink-0">
-            {/* Mobile: horizontal scroll tabs */}
-            <div className="flex lg:hidden gap-1 overflow-x-auto pb-1 mb-4 scrollbar-hide">
+          <aside className="app-side">
+            {/* Mobile tab strip */}
+            <div className="app-tabs">
               {NAV_ITEMS.map(({ id, label, icon: Icon }) => (
-                <button
-                  key={id}
-                  onClick={() => setActiveTab(id)}
-                  className={`flex items-center gap-1.5 px-3 py-2 rounded-xl text-sm font-medium whitespace-nowrap transition-colors shrink-0 ${
-                    activeTab === id
-                      ? "bg-[#3B82F6] text-white"
-                      : "bg-[#141C2E] border border-[#1F2A3D] text-[#8A93A6] hover:text-[#E6EAF2]"
-                  }`}
-                >
-                  <Icon size={14} strokeWidth={1.5} />
+                <button key={id} onClick={() => setActiveTab(id)} className={`app-tab${activeTab === id ? " is-active" : ""}`}>
+                  <Icon size={14} strokeWidth={1.6} />
                   {label}
                 </button>
               ))}
             </div>
 
-            {/* Desktop: vertical sidebar */}
-            <div className="hidden lg:flex flex-col bg-[#141C2E] border border-[#1F2A3D] rounded-2xl p-3 sticky top-6">
-              {/* User greeting */}
-              <div className="px-3 py-3 mb-2 border-b border-[#1F2A3D]">
-                <p className="text-xs text-[#8A93A6] font-medium">Signed in as</p>
-                <p className="text-sm text-[#E6EAF2] font-semibold mt-0.5 truncate" style={lora}>
-                  {firstName}
-                </p>
+            {/* Desktop sidebar */}
+            <div className="app-side-card">
+              <div className="app-side-id">
+                <div className="lbl">Signed in as</div>
+                <div className="val">{firstName}</div>
               </div>
-
-              {/* Nav items */}
-              <nav className="space-y-0.5">
+              <nav className="app-side-nav">
                 {NAV_ITEMS.map(({ id, label, icon: Icon }) => (
-                  <button
-                    key={id}
-                    onClick={() => setActiveTab(id)}
-                    className={`w-full flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-sm font-medium transition-colors text-left ${
-                      activeTab === id
-                        ? "bg-[#3B82F6] text-white"
-                        : "text-[#8A93A6] hover:bg-[#1F2A3D] hover:text-[#E6EAF2]"
-                    }`}
-                  >
-                    <Icon size={15} strokeWidth={1.5} />
+                  <button key={id} onClick={() => setActiveTab(id)} className={`app-side-link${activeTab === id ? " is-active" : ""}`}>
+                    <Icon size={16} strokeWidth={1.6} />
                     {label}
-                    {id === "saved" && savedFirms.length > 0 && (
-                      <span className={`ml-auto text-xs px-1.5 py-0.5 rounded-full ${
-                        activeTab === id ? "bg-white/20 text-white" : "bg-[#3B82F6]/10 text-[#3B82F6]"
-                      }`}>
-                        {savedFirms.length}
-                      </span>
-                    )}
+                    {id === "saved" && savedFirms.length > 0 && <span className="count">{savedFirms.length}</span>}
                   </button>
                 ))}
               </nav>
-
-              {/* Divider */}
-              <div className="my-3 border-t border-[#1F2A3D]" />
-
-              {/* Start new intake CTA */}
-              <button
-                onClick={() => router.push("/intake/start")}
-                className="w-full flex items-center gap-2 px-3 py-2.5 rounded-xl bg-[#3B82F6] hover:bg-[#2563EB] text-white text-sm font-medium transition-colors"
-              >
-                <Plus size={14} strokeWidth={2} />
-                New Intake
+              <div className="app-side-sep" />
+              <button onClick={() => router.push("/intake/start")} className="app-side-cta">
+                <Plus size={15} strokeWidth={2} /> New Intake
               </button>
-
-              {/* Account settings link */}
-              <Link
-                href="/account"
-                className="mt-1 w-full flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-sm font-medium text-[#8A93A6] hover:text-[#E6EAF2] hover:bg-[#1F2A3D] transition-colors"
-              >
-                <Settings size={14} strokeWidth={1.5} />
-                Account Settings
+              <Link href="/account" className="app-side-link" style={{ marginTop: 4 }}>
+                <Settings size={15} strokeWidth={1.6} /> Account Settings
               </Link>
             </div>
           </aside>
 
           {/* ── Main Content ─────────────────────────────────── */}
-          <div className="flex-1 min-w-0">
-            {/* Page header */}
-            <motion.div
-              key={activeTab}
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.35, ease }}
-              className="mb-6"
-            >
-              {activeTab === "overview" && (
-                <>
-                  <h1 className="text-3xl sm:text-4xl text-[#E6EAF2]" style={{ ...lora, fontWeight: 500 }}>
-                    Welcome back, {firstName}.
-                  </h1>
-                  <p className="text-[#8A93A6] text-sm mt-1">
-                    Here&apos;s an overview of your LWYRD activity.
-                  </p>
-                </>
-              )}
-              {activeTab === "matches" && (
-                <>
-                  <h1 className="text-3xl sm:text-4xl text-[#E6EAF2]" style={{ ...lora, fontWeight: 500 }}>
-                    My Matches
-                  </h1>
-                  <p className="text-[#8A93A6] text-sm mt-1">
-                    Your intake submissions and matched law firms.
-                  </p>
-                </>
-              )}
-              {activeTab === "saved" && (
-                <>
-                  <h1 className="text-3xl sm:text-4xl text-[#E6EAF2]" style={{ ...lora, fontWeight: 500 }}>
-                    Saved Firms
-                  </h1>
-                  <p className="text-[#8A93A6] text-sm mt-1">
-                    Firms you&apos;ve bookmarked from your match results.
-                  </p>
-                </>
-              )}
-              {activeTab === "engagements" && (
-                <>
-                  <h1 className="text-3xl sm:text-4xl text-[#E6EAF2]" style={{ ...lora, fontWeight: 500 }}>
-                    Engagements
-                  </h1>
-                  <p className="text-[#8A93A6] text-sm mt-1">
-                    Your active and past legal engagements.
-                  </p>
-                </>
-              )}
+          <div className="app-main">
+            <motion.div key={`h-${activeTab}`} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.35, ease }} className="app-head">
+              <h1>{activeTab === "overview" ? `Welcome back, ${firstName}.` : heading.title}</h1>
+              <p>{heading.sub}</p>
             </motion.div>
 
-            {/* Tab content */}
             <AnimatePresence mode="wait">
-              <motion.div
-                key={activeTab}
-                initial={{ opacity: 0, y: 8 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -8 }}
-                transition={{ duration: 0.25, ease }}
-              >
+              <motion.div key={activeTab} initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -8 }} transition={{ duration: 0.25, ease }}>
                 {activeTab === "overview" && (
-                  <OverviewTab
-                    intakes={intakes}
-                    savedFirms={savedFirms}
-                    currentResults={currentResults}
-                    loading={loading}
-                    setActiveTab={setActiveTab}
-                  />
+                  <OverviewTab intakes={intakes} savedFirms={savedFirms} currentResults={currentResults} loading={loading} setActiveTab={setActiveTab} />
                 )}
-                {activeTab === "matches" && (
-                  <MatchesTab
-                    intakes={intakes}
-                    currentResults={currentResults}
-                    loading={loading}
-                  />
-                )}
-                {activeTab === "saved" && (
-                  <SavedFirmsTab
-                    savedFirms={savedFirms}
-                    setSavedFirms={setSavedFirms}
-                    loading={loading}
-                  />
-                )}
+                {activeTab === "matches" && <MatchesTab intakes={intakes} currentResults={currentResults} loading={loading} />}
+                {activeTab === "saved" && <SavedFirmsTab savedFirms={savedFirms} setSavedFirms={setSavedFirms} loading={loading} />}
                 {activeTab === "engagements" && <EngagementsTab />}
               </motion.div>
             </AnimatePresence>
@@ -779,7 +573,7 @@ function DashboardContent() {
         </div>
       </main>
 
-      <Footer />
+      <MarketingFooter />
     </div>
   );
 }

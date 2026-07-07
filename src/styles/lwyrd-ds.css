@@ -1,3 +1,5 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;450;500;600&family=Libre+Baskerville:wght@400;700&display=swap');
+
 /* ============================================================
    LWYRD design system — shared tokens + primitives for the new
    light-theme site. Extracted from the new_designs system so
@@ -287,3 +289,88 @@
 .btn-outline{color:var(--navy);border:1px solid var(--navy);background:#fff}
 .btn-outline:hover{background:var(--navy);color:#fff;transform:translateY(-1px)}
 .chip{display:inline-flex;align-items:center;gap:.4em;border:1px solid var(--line);background:var(--paper-alt);color:var(--ink-2);font-size:.78rem;font-weight:500;border-radius:var(--r-pill);padding:.3em .75em}
+
+/* ============================================================
+   Authenticated app surfaces (dashboard / portal / account / intake)
+   A light-theme app shell: sidebar + content, stat cards, empties.
+   ============================================================ */
+.app-shell{flex:1;width:100%;max-width:1160px;margin:0 auto;padding:clamp(24px,4vw,40px) var(--pad)}
+.app-layout{display:flex;flex-direction:column;gap:24px}
+@media(min-width:1000px){.app-layout{flex-direction:row;gap:32px}}
+
+/* sidebar */
+.app-side{flex-shrink:0}
+@media(min-width:1000px){.app-side{width:236px}}
+.app-side-card{display:none}
+@media(min-width:1000px){.app-side-card{display:flex;flex-direction:column;position:sticky;top:88px;background:#fff;border:1px solid var(--line);border-radius:18px;box-shadow:var(--shadow-sm);padding:14px}}
+.app-side-id{padding:6px 10px 12px;margin-bottom:8px;border-bottom:1px solid var(--line)}
+.app-side-id .lbl{font-size:.7rem;letter-spacing:.06em;text-transform:uppercase;color:var(--faint);font-weight:600}
+.app-side-id .val{font-family:var(--display);font-size:.95rem;color:var(--ink);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.app-side-nav{display:flex;flex-direction:column;gap:2px}
+.app-side-link{display:flex;align-items:center;gap:10px;width:100%;text-align:left;padding:10px 12px;border-radius:10px;font-size:.9rem;font-weight:500;color:var(--muted);transition:background .15s ease,color .15s ease}
+.app-side-link:hover{background:var(--navy-tint);color:var(--ink)}
+.app-side-link.is-active{background:var(--navy);color:#fff}
+.app-side-link .count{margin-left:auto;font-size:.72rem;font-weight:600;padding:.1em .5em;border-radius:var(--r-pill);background:var(--navy-tint);color:var(--navy)}
+.app-side-link.is-active .count{background:rgba(255,255,255,.22);color:#fff}
+.app-side-sep{height:1px;background:var(--line);margin:12px 0}
+.app-side-cta{display:flex;align-items:center;gap:8px;width:100%;justify-content:center;padding:10px 12px;border-radius:10px;background:var(--navy-gradient);color:#fff;font-size:.9rem;font-weight:500;transition:transform .18s ease}
+.app-side-cta:hover{transform:translateY(-1px)}
+
+/* mobile tab strip */
+.app-tabs{display:flex;gap:8px;overflow-x:auto;padding-bottom:4px;margin-bottom:8px;-ms-overflow-style:none;scrollbar-width:none}
+.app-tabs::-webkit-scrollbar{display:none}
+@media(min-width:1000px){.app-tabs{display:none}}
+.app-tab{display:inline-flex;align-items:center;gap:6px;flex-shrink:0;white-space:nowrap;padding:8px 14px;border-radius:var(--r-pill);font-size:.85rem;font-weight:500;border:1px solid var(--line);background:#fff;color:var(--muted);transition:all .15s ease}
+.app-tab.is-active{background:var(--navy);color:#fff;border-color:var(--navy)}
+
+/* content */
+.app-main{flex:1;min-width:0}
+.app-head{margin-bottom:24px}
+.app-head h1{font-family:var(--display);font-weight:700;font-size:clamp(1.7rem,3.2vw,2.4rem);line-height:1.1}
+.app-head p{color:var(--muted);font-size:.95rem;margin-top:6px}
+.app-section-label{font-size:.72rem;letter-spacing:.08em;text-transform:uppercase;color:var(--faint);font-weight:600}
+
+/* stat cards */
+.app-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+.app-stat{background:#fff;border:1px solid var(--line);border-radius:16px;box-shadow:var(--shadow-sm);padding:18px 20px;display:flex;flex-direction:column;gap:2px}
+.app-stat .n{font-family:var(--display);font-size:1.9rem;line-height:1.1;color:var(--ink)}
+.app-stat .l{font-size:.72rem;letter-spacing:.04em;text-transform:uppercase;color:var(--faint);font-weight:600}
+.app-stat .s{font-size:.78rem;color:var(--muted)}
+
+/* list rows */
+.app-list{background:#fff;border:1px solid var(--line);border-radius:16px;box-shadow:var(--shadow-sm);overflow:hidden}
+.app-row{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:16px 20px}
+.app-row + .app-row{border-top:1px solid var(--line)}
+.app-row:hover{background:var(--paper-alt)}
+.app-row-lead{display:flex;align-items:center;gap:12px;min-width:0}
+.app-link{display:inline-flex;align-items:center;gap:4px;font-size:.82rem;font-weight:600;color:var(--navy);transition:opacity .15s ease}
+.app-link:hover{opacity:.7}
+
+/* empty state */
+.app-empty{background:#fff;border:1px solid var(--line);border-radius:18px;box-shadow:var(--shadow-sm);padding:clamp(36px,6vw,56px) 28px;display:flex;flex-direction:column;align-items:center;text-align:center;gap:10px}
+.app-empty .ico{color:var(--navy-tint-2)}
+.app-empty h3{font-family:var(--body);font-weight:600;font-size:.95rem;color:var(--ink)}
+.app-empty p{color:var(--muted);font-size:.9rem;max-width:40ch;line-height:1.6}
+
+/* skeletons + utilities */
+.app-skel{background:var(--paper-alt);border:1px solid var(--line);border-radius:16px;animation:appPulse 1.4s ease-in-out infinite}
+@keyframes appPulse{0%,100%{opacity:1}50%{opacity:.55}}
+.hide-sm{display:none}
+@media(min-width:640px){.hide-sm{display:inline}}
+
+/* segmented sub-tabs */
+.app-seg{display:inline-flex;gap:4px;padding:4px;background:var(--paper-alt);border:1px solid var(--line);border-radius:var(--r-pill)}
+.app-seg button{padding:.4em 1.1em;border-radius:var(--r-pill);font-size:.85rem;font-weight:500;color:var(--muted);transition:all .15s ease}
+.app-seg button.is-active{background:#fff;color:var(--ink);box-shadow:var(--shadow-sm)}
+
+/* account avatar dropdown in nav */
+.nav-avatar-wrap{position:relative;height:100%;display:flex;align-items:center}
+.nav-avatar-menu{position:absolute;top:calc(100% + 6px);right:0;min-width:220px;padding:8px;background:#fff;border:1px solid var(--line);border-radius:12px;box-shadow:var(--shadow-md);opacity:0;visibility:hidden;pointer-events:none;transform:translateY(8px);transition:opacity .16s ease,transform .16s ease,visibility .16s ease;z-index:60}
+.nav-avatar-wrap:hover .nav-avatar-menu,.nav-avatar-wrap:focus-within .nav-avatar-menu{opacity:1;visibility:visible;pointer-events:auto;transform:translateY(0)}
+.nav-avatar-head{padding:8px 10px 10px;border-bottom:1px solid var(--line);margin-bottom:6px}
+.nav-avatar-head .nm{font-size:.9rem;font-weight:600;color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.nav-avatar-head .em{font-size:.78rem;color:var(--faint);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.nav-avatar-menu a,.nav-avatar-menu button{display:flex;align-items:center;gap:10px;width:100%;text-align:left;padding:9px 10px;border-radius:8px;font-size:.88rem;color:var(--ink-2);transition:background .15s ease,color .15s ease}
+.nav-avatar-menu a:hover,.nav-avatar-menu button:hover{background:var(--navy-tint);color:var(--ink)}
+.nav-avatar-menu .danger:hover{background:#fdecea;color:#b42318}
+.nav-avatar-sep{height:1px;background:var(--line);margin:6px 0}

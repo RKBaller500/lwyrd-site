@@ -21,7 +21,7 @@ export default function AdminGuard({ children }: { children: React.ReactNode }) 
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-[#f5f4f0] flex items-center justify-center">
+      <div className="min-h-screen bg-[#F6F6F4] flex items-center justify-center">
         <p className="text-slate-400 text-sm">Loading...</p>
       </div>
     );
@@ -29,7 +29,7 @@ export default function AdminGuard({ children }: { children: React.ReactNode }) 
 
   if (!isAuthenticated || !user?.isAdmin) {
     return (
-      <div className="min-h-screen bg-[#f5f4f0] flex items-center justify-center">
+      <div className="min-h-screen bg-[#F6F6F4] flex items-center justify-center">
         <p className="text-slate-500 text-sm">Access restricted.</p>
       </div>
     );

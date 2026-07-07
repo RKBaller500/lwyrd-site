@@ -3,6 +3,7 @@
 import { useEffect, useState, type MouseEvent } from "react";
 import Link from "next/link";
 import Image from "next/image";
+import { LayoutDashboard, Settings, Shield, LogOut } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 import { usePathname, useRouter } from "next/navigation";
 import "./marketing-nav.css";
@@ -24,7 +25,7 @@ export default function MarketingNav({
   current?: Section;
   currentItem?: NavItem;
 }) {
-  const { isAuthenticated, user, openModal } = useAuth();
+  const { isAuthenticated, user, openModal, logout } = useAuth();
   const router = useRouter();
   const pathname = usePathname();
   const [scrolled, setScrolled] = useState(false);
@@ -154,24 +155,50 @@ export default function MarketingNav({
 
         <div className="nav-cta">
           {isAuthenticated && user ? (
-            <>
-              <Link
-                href="/dashboard"
-                className="btn btn-ghost"
-                onClick={closeMobile}
-              >
-                Dashboard
-              </Link>
-              <Link
-                href="/account"
+            <div className="nav-avatar-wrap">
+              <button
+                type="button"
                 className="nav-avatar"
-                aria-label="Your profile"
-                onClick={closeMobile}
+                aria-label="Account menu"
+                aria-haspopup="true"
                 title={user.name}
               >
                 {(user.name || "?").trim().charAt(0).toUpperCase()}
-              </Link>
-            </>
+              </button>
+              <div className="nav-avatar-menu" role="menu" aria-label="Account menu">
+                <div className="nav-avatar-head">
+                  <div className="nm">{user.name || "Your account"}</div>
+                  {user.email && <div className="em">{user.email}</div>}
+                </div>
+                <Link href="/dashboard" onClick={closeMobile} role="menuitem">
+                  <LayoutDashboard size={15} strokeWidth={1.6} />
+                  Dashboard
+                </Link>
+                <Link href="/account" onClick={closeMobile} role="menuitem">
+                  <Settings size={15} strokeWidth={1.6} />
+                  Account settings
+                </Link>
+                {user.isAdmin && (
+                  <Link href="/admin" onClick={closeMobile} role="menuitem">
+                    <Shield size={15} strokeWidth={1.6} />
+                    Admin panel
+                  </Link>
+                )}
+                <div className="nav-avatar-sep" />
+                <button
+                  type="button"
+                  className="danger"
+                  role="menuitem"
+                  onClick={() => {
+                    closeMobile();
+                    logout();
+                  }}
+                >
+                  <LogOut size={15} strokeWidth={1.6} />
+                  Sign out
+                </button>
+              </div>
+            </div>
           ) : (
             <>
               <button type="button" className="btn btn-ghost" onClick={signIn}>

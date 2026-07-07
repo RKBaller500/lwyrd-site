@@ -17,8 +17,8 @@ export default async function AdminCategoriesPage() {
       <div className="flex items-center justify-between mb-8">
         <div>
           <h1
-            className="text-4xl text-[#002452] mb-1"
-            style={{ fontFamily: '"Lora", Georgia, serif', fontWeight: 500 }}
+            className="text-4xl text-[#002B55] mb-1"
+            style={{ fontFamily: "var(--display)", fontWeight: 500 }}
           >
             Categories
           </h1>
@@ -26,7 +26,7 @@ export default async function AdminCategoriesPage() {
         </div>
         <Link
           href="/admin/categories/new"
-          className="flex items-center gap-2 px-5 py-2.5 rounded-2xl bg-[#002452] text-white text-sm font-medium hover:opacity-90 transition-opacity"
+          className="flex items-center gap-2 px-5 py-2.5 rounded-2xl bg-[#002B55] text-white text-sm font-medium hover:opacity-90 transition-opacity"
         >
           <Plus size={15} />
           Add Category

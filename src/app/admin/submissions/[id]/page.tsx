@@ -75,25 +75,25 @@ export default async function SubmissionDetailPage({
     <div className="max-w-3xl">
       <Link
         href="/admin/submissions"
-        className="inline-flex items-center gap-1.5 text-sm text-slate-500 hover:text-[#002452] transition-colors mb-8"
+        className="inline-flex items-center gap-1.5 text-sm text-slate-500 hover:text-[#002B55] transition-colors mb-8"
       >
         <ArrowLeft size={14} />
         Back to Submissions
       </Link>
 
       <h1
-        className="text-4xl text-[#002452] mb-2"
-        style={{ fontFamily: '"Lora", Georgia, serif', fontWeight: 500 }}
+        className="text-4xl text-[#002B55] mb-2"
+        style={{ fontFamily: "var(--display)", fontWeight: 500 }}
       >
         Submission Detail
       </h1>
       <p className="text-slate-500 text-sm mb-10">{formatDate(sub.created_at)}</p>
 
       {/* User + Track + Category */}
-      <div className="bg-[#fbfaf6] border border-[#ddd7cc] rounded-3xl p-6 mb-6">
+      <div className="bg-[#FFFFFF] border border-[#E7E7E3] rounded-3xl p-6 mb-6">
         <h2
-          className="text-[#002452] text-xl mb-4"
-          style={{ fontFamily: '"Lora", Georgia, serif', fontWeight: 500 }}
+          className="text-[#002B55] text-xl mb-4"
+          style={{ fontFamily: "var(--display)", fontWeight: 500 }}
         >
           Submitted by
         </h2>
@@ -128,16 +128,16 @@ export default async function SubmissionDetailPage({
       </div>
 
       {/* Answers */}
-      <div className="bg-[#fbfaf6] border border-[#ddd7cc] rounded-3xl p-6 mb-6">
+      <div className="bg-[#FFFFFF] border border-[#E7E7E3] rounded-3xl p-6 mb-6">
         <h2
-          className="text-[#002452] text-xl mb-5"
-          style={{ fontFamily: '"Lora", Georgia, serif', fontWeight: 500 }}
+          className="text-[#002B55] text-xl mb-5"
+          style={{ fontFamily: "var(--display)", fontWeight: 500 }}
         >
           Questionnaire Answers
         </h2>
         <div className="space-y-3">
           {answerEntries.map(([key, val]) => (
-            <div key={key} className="flex gap-4 border-b border-[#ddd7cc] pb-3 last:border-0 last:pb-0">
+            <div key={key} className="flex gap-4 border-b border-[#E7E7E3] pb-3 last:border-0 last:pb-0">
               <p className="text-xs text-slate-400 font-medium w-40 shrink-0 pt-0.5">
                 {humanizeKey(key)}
               </p>
@@ -149,10 +149,10 @@ export default async function SubmissionDetailPage({
 
       {/* Top Matches */}
       {matchRows && matchRows.length > 0 && (
-        <div className="bg-[#fbfaf6] border border-[#ddd7cc] rounded-3xl p-6">
+        <div className="bg-[#FFFFFF] border border-[#E7E7E3] rounded-3xl p-6">
           <h2
-            className="text-[#002452] text-xl mb-5"
-            style={{ fontFamily: '"Lora", Georgia, serif', fontWeight: 500 }}
+            className="text-[#002B55] text-xl mb-5"
+            style={{ fontFamily: "var(--display)", fontWeight: 500 }}
           >
             Top Matches
           </h2>
@@ -162,16 +162,16 @@ export default async function SubmissionDetailPage({
               return (
                 <div
                   key={m.firm_id}
-                  className="flex items-center justify-between bg-white border border-[#ddd7cc] rounded-2xl px-5 py-3"
+                  className="flex items-center justify-between bg-white border border-[#E7E7E3] rounded-2xl px-5 py-3"
                 >
                   <div className="flex items-center gap-3">
                     <span className="text-xs text-slate-400 w-5">{m.match_rank}.</span>
                     <span className="text-slate-700 text-sm font-medium">{firmName}</span>
                     {m.is_best_match && (
-                      <span className="text-xs text-[#002452] font-medium">Best Match</span>
+                      <span className="text-xs text-[#002B55] font-medium">Best Match</span>
                     )}
                   </div>
-                  <span className="text-[#002452] text-sm font-medium">{m.match_score} match</span>
+                  <span className="text-[#002B55] text-sm font-medium">{m.match_score} match</span>
                 </div>
               );
             })}

@@ -35,8 +35,8 @@ export default async function AdminDashboard() {
   return (
     <div>
       <h1
-        className="text-4xl text-[#002452] mb-2"
-        style={{ fontFamily: '"Lora", Georgia, serif', fontWeight: 500 }}
+        className="text-4xl text-[#002B55] mb-2"
+        style={{ fontFamily: "var(--display)", fontWeight: 500 }}
       >
         Dashboard
       </h1>
@@ -47,15 +47,15 @@ export default async function AdminDashboard() {
           <Link
             key={label}
             href={href}
-            className="bg-[#fbfaf6] border border-[#ddd7cc] rounded-3xl p-6 hover:border-[#002452]/30 transition-colors group"
+            className="bg-[#FFFFFF] border border-[#E7E7E3] rounded-3xl p-6 hover:border-[#002B55]/30 transition-colors group"
           >
             <div className="flex items-center justify-between mb-4">
-              <Icon size={18} className="text-[#002452]" strokeWidth={1.5} />
-              <ArrowRight size={14} className="text-slate-300 group-hover:text-[#002452] transition-colors" />
+              <Icon size={18} className="text-[#002B55]" strokeWidth={1.5} />
+              <ArrowRight size={14} className="text-slate-300 group-hover:text-[#002B55] transition-colors" />
             </div>
             <div
-              className="text-4xl text-[#002452] mb-1"
-              style={{ fontFamily: '"Lora", Georgia, serif' }}
+              className="text-4xl text-[#002B55] mb-1"
+              style={{ fontFamily: "var(--display)" }}
             >
               {count}
             </div>

@@ -10,8 +10,8 @@ export default async function AdminUsersPage() {
     <div>
       <div className="mb-8">
         <h1
-          className="text-4xl text-[#002452] mb-1"
-          style={{ fontFamily: '"Lora", Georgia, serif', fontWeight: 500 }}
+          className="text-4xl text-[#002B55] mb-1"
+          style={{ fontFamily: "var(--display)", fontWeight: 500 }}
         >
           Users
         </h1>

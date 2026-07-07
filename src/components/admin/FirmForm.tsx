@@ -14,9 +14,9 @@ interface FirmFormProps {
 
 const emptyAttorney = (): AttorneyInput => ({ name: "", title: "", bio: "", barAdmissions: [] });
 
-const inputClass = "w-full px-4 py-2.5 rounded-2xl border border-[#ddd7cc] bg-white text-slate-700 placeholder-slate-400 focus:outline-none focus:border-[#002452] transition-colors text-sm";
+const inputClass = "w-full px-4 py-2.5 rounded-2xl border border-[#E7E7E3] bg-white text-slate-700 placeholder-slate-400 focus:outline-none focus:border-[#002B55] transition-colors text-sm";
 const labelClass = "block text-xs text-slate-400 font-medium mb-1.5";
-const sectionClass = "bg-[#fbfaf6] border border-[#ddd7cc] rounded-3xl p-6 space-y-5";
+const sectionClass = "bg-[#FFFFFF] border border-[#E7E7E3] rounded-3xl p-6 space-y-5";
 
 function Field({ label, children }: { label: string; children: React.ReactNode }) {
   return (
@@ -109,7 +109,7 @@ export default function FirmForm({ initialData, mode, allCriteria, defaultAssess
     <div className="space-y-8 max-w-3xl">
       {/* Basic info */}
       <div className={sectionClass}>
-        <h2 className="text-lg text-[#002452]" style={{ fontFamily: '"Lora", Georgia, serif', fontWeight: 500 }}>Basic Info</h2>
+        <h2 className="text-lg text-[#002B55]" style={{ fontFamily: "var(--display)", fontWeight: 500 }}>Basic Info</h2>
         <div className="grid grid-cols-2 gap-4">
           <Field label="ID (URL slug, e.g. meridian-legal)">
             <input className={inputClass} value={id} onChange={(e) => setId(e.target.value)} placeholder="my-firm-name" disabled={mode === "edit"} />
@@ -174,14 +174,14 @@ export default function FirmForm({ initialData, mode, allCriteria, defaultAssess
           </Field>
         </div>
         <div className="flex items-center gap-3">
-          <input type="checkbox" id="verified" checked={verified} onChange={(e) => setVerified(e.target.checked)} className="w-4 h-4 accent-[#002452]" />
+          <input type="checkbox" id="verified" checked={verified} onChange={(e) => setVerified(e.target.checked)} className="w-4 h-4 accent-[#002B55]" />
           <label htmlFor="verified" className="text-sm text-slate-600">LWYRD Verified</label>
         </div>
       </div>
 
       {/* Arrays */}
       <div className={sectionClass}>
-        <h2 className="text-lg text-[#002452]" style={{ fontFamily: '"Lora", Georgia, serif', fontWeight: 500 }}>Categories & Tags</h2>
+        <h2 className="text-lg text-[#002B55]" style={{ fontFamily: "var(--display)", fontWeight: 500 }}>Categories & Tags</h2>
         <p className="text-xs text-slate-400">Separate values with commas.</p>
         <Field label="Practice Areas (category slugs, e.g. startup-law, contract-law)">
           <input className={inputClass} value={practiceAreas} onChange={(e) => setPracticeAreas(e.target.value)} placeholder="startup-law, contract-law" />
@@ -202,20 +202,20 @@ export default function FirmForm({ initialData, mode, allCriteria, defaultAssess
 
       {/* Description */}
       <div className={sectionClass}>
-        <h2 className="text-lg text-[#002452]" style={{ fontFamily: '"Lora", Georgia, serif', fontWeight: 500 }}>Description</h2>
+        <h2 className="text-lg text-[#002B55]" style={{ fontFamily: "var(--display)", fontWeight: 500 }}>Description</h2>
         <textarea rows={5} className={inputClass + " resize-none"} value={description} onChange={(e) => setDescription(e.target.value)} placeholder="Full description of the firm..." />
       </div>
 
       {/* Attorneys */}
       <div className={sectionClass}>
         <div className="flex items-center justify-between">
-          <h2 className="text-lg text-[#002452]" style={{ fontFamily: '"Lora", Georgia, serif', fontWeight: 500 }}>Attorneys</h2>
-          <button type="button" onClick={() => setAttorneys([...attorneys, emptyAttorney()])} className="flex items-center gap-1.5 text-sm text-[#002452] hover:opacity-70 transition-opacity">
+          <h2 className="text-lg text-[#002B55]" style={{ fontFamily: "var(--display)", fontWeight: 500 }}>Attorneys</h2>
+          <button type="button" onClick={() => setAttorneys([...attorneys, emptyAttorney()])} className="flex items-center gap-1.5 text-sm text-[#002B55] hover:opacity-70 transition-opacity">
             <Plus size={14} /> Add Attorney
           </button>
         </div>
         {attorneys.map((att, i) => (
-          <div key={i} className="border border-[#ddd7cc] rounded-2xl p-4 space-y-3 relative">
+          <div key={i} className="border border-[#E7E7E3] rounded-2xl p-4 space-y-3 relative">
             <button type="button" onClick={() => setAttorneys(attorneys.filter((_, j) => j !== i))} className="absolute top-3 right-3 text-slate-300 hover:text-red-400 transition-colors">
               <Trash2 size={14} />
             </button>
@@ -240,19 +240,19 @@ export default function FirmForm({ initialData, mode, allCriteria, defaultAssess
       {/* Assessment Items, standard checklist */}
       <div className={sectionClass}>
         <div>
-          <h2 className="text-lg text-[#002452]" style={{ fontFamily: '"Lora", Georgia, serif', fontWeight: 500 }}>LWYRD Assessment</h2>
+          <h2 className="text-lg text-[#002B55]" style={{ fontFamily: "var(--display)", fontWeight: 500 }}>LWYRD Assessment</h2>
           <p className="text-xs text-slate-400 mt-1">Toggle pass/fail for each standard criterion. Add an optional note per item.</p>
         </div>
         {assessmentItems.map((item, i) => {
           const criterion = allCriteria.find((c) => c.id === item.criterionId);
           return (
-            <div key={item.criterionId} className="border border-[#ddd7cc] rounded-2xl p-4 space-y-3">
+            <div key={item.criterionId} className="border border-[#E7E7E3] rounded-2xl p-4 space-y-3">
               <div className="flex items-start gap-3">
                 <input
                   type="checkbox"
                   checked={item.passed}
                   onChange={(e) => { const a = [...assessmentItems]; a[i] = { ...a[i], passed: e.target.checked }; setAssessmentItems(a); }}
-                  className="mt-0.5 w-4 h-4 accent-[#002452] shrink-0"
+                  className="mt-0.5 w-4 h-4 accent-[#002B55] shrink-0"
                 />
                 <div>
                   <p className="text-sm font-medium text-slate-700">{criterion?.label}</p>
@@ -275,10 +275,10 @@ export default function FirmForm({ initialData, mode, allCriteria, defaultAssess
       {error && <p className="text-red-500 text-sm">{error}</p>}
 
       <div className="flex gap-3 pb-10">
-        <button onClick={handleSave} disabled={isPending} className="px-8 py-3 rounded-2xl bg-[#002452] text-white text-sm font-medium hover:opacity-90 transition-opacity disabled:opacity-60">
+        <button onClick={handleSave} disabled={isPending} className="px-8 py-3 rounded-2xl bg-[#002B55] text-white text-sm font-medium hover:opacity-90 transition-opacity disabled:opacity-60">
           {isPending ? "Saving..." : mode === "create" ? "Create Firm" : "Save Changes"}
         </button>
-        <button onClick={() => router.push("/admin/firms")} className="px-6 py-3 rounded-2xl border border-[#ddd7cc] text-slate-600 text-sm hover:border-[#002452] transition-colors">
+        <button onClick={() => router.push("/admin/firms")} className="px-6 py-3 rounded-2xl border border-[#E7E7E3] text-slate-600 text-sm hover:border-[#002B55] transition-colors">
           Cancel
         </button>
       </div>

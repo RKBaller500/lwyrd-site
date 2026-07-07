@@ -14,10 +14,10 @@ interface AssessmentCriterionFormProps {
 }
 
 const inputClass =
-  "w-full px-4 py-2.5 rounded-2xl border border-[#ddd7cc] bg-white text-slate-700 placeholder-slate-400 focus:outline-none focus:border-[#002452] transition-colors text-sm";
+  "w-full px-4 py-2.5 rounded-2xl border border-[#E7E7E3] bg-white text-slate-700 placeholder-slate-400 focus:outline-none focus:border-[#002B55] transition-colors text-sm";
 const labelClass = "block text-xs text-slate-400 font-medium mb-1.5";
 const sectionClass =
-  "bg-[#fbfaf6] border border-[#ddd7cc] rounded-3xl p-6 space-y-5";
+  "bg-[#FFFFFF] border border-[#E7E7E3] rounded-3xl p-6 space-y-5";
 
 function Field({ label, children }: { label: string; children: React.ReactNode }) {
   return (
@@ -73,8 +73,8 @@ export default function AssessmentCriterionForm({
     <div className="space-y-8 max-w-3xl">
       <div className={sectionClass}>
         <h2
-          className="text-lg text-[#002452]"
-          style={{ fontFamily: '"Lora", Georgia, serif', fontWeight: 500 }}
+          className="text-lg text-[#002B55]"
+          style={{ fontFamily: "var(--display)", fontWeight: 500 }}
         >
           Criterion Details
         </h2>
@@ -112,7 +112,7 @@ export default function AssessmentCriterionForm({
                 id="active"
                 checked={active}
                 onChange={(e) => setActive(e.target.checked)}
-                className="w-4 h-4 accent-[#002452]"
+                className="w-4 h-4 accent-[#002B55]"
               />
               <label htmlFor="active" className="text-sm text-slate-600">
                 Active (shown in firm assessment forms)
@@ -128,13 +128,13 @@ export default function AssessmentCriterionForm({
         <button
           onClick={handleSave}
           disabled={isPending}
-          className="px-8 py-3 rounded-2xl bg-[#002452] text-white text-sm font-medium hover:opacity-90 transition-opacity disabled:opacity-60"
+          className="px-8 py-3 rounded-2xl bg-[#002B55] text-white text-sm font-medium hover:opacity-90 transition-opacity disabled:opacity-60"
         >
           {isPending ? "Saving..." : mode === "create" ? "Create Criterion" : "Save Changes"}
         </button>
         <button
           onClick={() => router.push("/admin/criteria")}
-          className="px-6 py-3 rounded-2xl border border-[#ddd7cc] text-slate-600 text-sm hover:border-[#002452] transition-colors"
+          className="px-6 py-3 rounded-2xl border border-[#E7E7E3] text-slate-600 text-sm hover:border-[#002B55] transition-colors"
         >
           Cancel
         </button>

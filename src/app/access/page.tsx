@@ -120,6 +120,28 @@ function AccessContent() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  const handleStripeCheckout = async (tier: Tier) => {
+    setPreviewLoading(true);
+    setPreviewError("");
+    const submissionId = getActiveSubmissionId();
+    try {
+      const response = await fetch("/api/paywall/checkout", {
+        method: "POST",
+        credentials: "same-origin",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ submissionId, next: nextPath, tierId: tier.id }),
+      });
+      const body = await response.json().catch(() => ({}));
+      if (!response.ok || typeof body.url !== "string") {
+        throw new Error(body.error ?? "Unable to start checkout.");
+      }
+      window.location.href = body.url;
+    } catch (error) {
+      setPreviewError(error instanceof Error ? error.message : "Unable to start checkout.");
+      setPreviewLoading(false);
+    }
+  };
+
   const handlePreviewUnlock = async (options?: { tier?: Tier; mode?: "purchase" | "credit" }) => {
     setPreviewLoading(true);
     setPreviewError("");
@@ -190,8 +212,8 @@ function AccessContent() {
               <p>No subscription. No firm is contacted for you. You decide who to reach out to.</p>
             </div>
             <div className="paywall-modal-actions">
-              <button className="btn btn-primary" type="button" disabled>
-                Stripe checkout pending
+              <button className="btn btn-primary" type="button" onClick={() => handleStripeCheckout(selectedTier)} disabled={previewLoading}>
+                <CreditCard size={14} /> {previewLoading ? "Redirecting..." : `Pay ${selectedTier.price}`}
               </button>
               <button className="btn btn-ghost" type="button" onClick={() => handlePreviewUnlock({ tier: selectedTier, mode: "purchase" })} disabled={previewLoading}>
                 <Eye size={14} /> {previewLoading ? "Unlocking..." : `Preview ${selectedTier.name}`}

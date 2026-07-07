@@ -248,6 +248,77 @@ export async function grantPreviewUnlockPurchase({
   return getPaywallAccountState(supabase, userId, submissionId);
 }
 
+async function stripeSessionAlreadyProcessed(
+  supabase: Client,
+  sessionId: string
+): Promise<boolean> {
+  const { data, error } = await supabase
+    .from("unlock_credit_ledger")
+    .select("id")
+    .eq("source", "stripe")
+    .eq("reason", "stripe_purchase")
+    .contains("metadata", { stripeSessionId: sessionId })
+    .maybeSingle();
+
+  return !error && !!data;
+}
+
+/**
+ * Grants credits (and unlocks the current intake, if any) after a confirmed Stripe payment.
+ * Mirrors grantPreviewUnlockPurchase but tags rows source:"stripe" and is idempotent on the
+ * Checkout Session id so webhook retries never double-credit. Must be called with a
+ * service-role client — the webhook has no user session.
+ */
+export async function grantStripeUnlock({
+  userId,
+  submissionId,
+  tierId,
+  stripeSessionId,
+  paymentIntentId,
+}: {
+  userId: string;
+  submissionId?: string | null;
+  tierId: UnlockTierId;
+  stripeSessionId: string;
+  paymentIntentId?: string | null;
+}): Promise<void> {
+  const tier = UNLOCK_TIERS[tierId];
+  if (!tier) throw new Error("Invalid unlock option.");
+
+  const writer = writeClient(null as unknown as Client);
+
+  // Idempotency: bail if we've already processed this Checkout Session.
+  if (await stripeSessionAlreadyProcessed(writer, stripeSessionId)) return;
+
+  const metadata = { stripeSessionId, paymentIntentId: paymentIntentId ?? null, priceCents: tier.priceCents };
+
+  await insertLedger(writer, {
+    user_id: userId,
+    intake_submission_id: submissionId ?? null,
+    delta: tier.credits,
+    reason: "stripe_purchase",
+    source: "stripe",
+    tier: tierId,
+    metadata,
+  });
+
+  if (submissionId) {
+    const alreadyUnlocked = await hasDurableIntakeUnlock(writer, userId, submissionId);
+    if (!alreadyUnlocked) {
+      await unlockIntake(writer, userId, submissionId, "stripe", tierId);
+      await insertLedger(writer, {
+        user_id: userId,
+        intake_submission_id: submissionId,
+        delta: -1,
+        reason: "intake_unlock",
+        source: "stripe",
+        tier: tierId,
+        metadata,
+      });
+    }
+  }
+}
+
 export async function unlockIntakeWithExistingCredit({
   supabase,
   userId,

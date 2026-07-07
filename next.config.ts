@@ -31,7 +31,7 @@ const cspDirectives = [
   `style-src 'self' 'unsafe-inline' https://fonts.googleapis.com`,
   `font-src 'self' https://fonts.gstatic.com`,
   `img-src 'self' data: blob: https:`,
-  `connect-src 'self' ${supabaseConnect} ${posthogHost} https://formsubmit.co`,
+  `connect-src 'self' ${supabaseConnect} ${posthogHost} https://formsubmit.co https://api.stripe.com`,
   `frame-src 'none'`,
   `frame-ancestors 'none'`,
   `object-src 'none'`,

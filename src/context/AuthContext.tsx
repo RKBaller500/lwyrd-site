@@ -20,7 +20,7 @@ interface AuthContextValue {
   modalMode: "login" | "signup";
   isLoading: boolean;
   login: (email: string, password: string) => Promise<void>;
-  signup: (name: string, email: string, password: string, role?: "client" | "firm") => Promise<void>;
+  signup: (name: string, email: string, password: string, role?: "client" | "firm") => Promise<{ requiresEmailConfirmation: boolean }>;
   logout: () => Promise<void>;
   forgotPassword: (email: string) => Promise<void>;
   openModal: (mode?: "login" | "signup", redirectTo?: string) => void;
@@ -139,20 +139,34 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const signup = useCallback(
     async (name: string, email: string, password: string, role: "client" | "firm" = "client") => {
       setIsLoading(true);
-      const { error } = await supabase.auth.signUp({
-        email,
-        password,
-        options: { data: { name, role } },
-      });
-      setIsLoading(false);
-      if (error) throw error;
-      setIsModalOpen(false);
-      if (pendingRedirect) {
-        router.push(pendingRedirect);
-        setPendingRedirect(null);
+      try {
+        const res = await fetch("/api/auth/signup", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          credentials: "same-origin",
+          body: JSON.stringify({ name, email, password, role }),
+        });
+        const body = await res.json().catch(() => ({}));
+        if (!res.ok) throw new Error(body.error ?? "Signup failed");
+
+        if (body.requiresEmailConfirmation) {
+          return { requiresEmailConfirmation: true };
+        }
+
+        const { data: { user: u } } = await supabase.auth.getUser();
+        await hydrateUser(u);
+        setIsModalOpen(false);
+        if (pendingRedirect) {
+          router.push(pendingRedirect);
+          setPendingRedirect(null);
+        }
+        router.refresh();
+        return { requiresEmailConfirmation: false };
+      } finally {
+        setIsLoading(false);
       }
     },
-    [supabase, pendingRedirect, router]
+    [supabase, hydrateUser, pendingRedirect, router]
   );
 
   const logout = useCallback(async () => {

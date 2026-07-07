@@ -15,12 +15,14 @@ export default function AuthModal() {
   const [error, setError] = useState("");
   const [forgotSent, setForgotSent] = useState(false);
   const [forgotLoading, setForgotLoading] = useState(false);
+  const [signupSent, setSignupSent] = useState(false);
 
   useEffect(() => {
     const timer = window.setTimeout(() => {
       setActiveTab(modalMode);
       setError("");
       setForgotSent(false);
+      setSignupSent(false);
     }, 0);
     return () => window.clearTimeout(timer);
   }, [modalMode, isModalOpen]);
@@ -36,7 +38,10 @@ export default function AuthModal() {
           setError("Please enter your name.");
           return;
         }
-        await signup(name, email, password, "client");
+        const result = await signup(name, email, password, "client");
+        if (result.requiresEmailConfirmation) {
+          setSignupSent(true);
+        }
       }
     } catch (err) {
       setError(err instanceof Error ? err.message : "Something went wrong. Please try again.");
@@ -123,13 +128,23 @@ export default function AuthModal() {
             role="tab"
             aria-selected={activeTab === tab}
             className={`auth-tab${activeTab === tab ? " is-active" : ""}`}
-            onClick={() => { setActiveTab(tab); setError(""); }}
+            onClick={() => { setActiveTab(tab); setError(""); setSignupSent(false); }}
           >
             {tab === "login" ? "Sign in" : "Sign up"}
           </button>
         ))}
       </div>
 
+      {signupSent && activeTab === "signup" ? (
+        <div className="am-form">
+          <p className="am-success">
+            Check your inbox to confirm your email. Once confirmed, you can sign in and continue.
+          </p>
+          <button type="button" className="am-btn" onClick={() => { setActiveTab("login"); setSignupSent(false); setPassword(""); }}>
+            Go to sign in
+          </button>
+        </div>
+      ) : (
       <form onSubmit={handleSubmit} className="am-form">
         {activeTab === "signup" && (
           <>
@@ -190,6 +205,7 @@ export default function AuthModal() {
             : activeTab === "login" ? "Sign in" : "Create account"}
         </button>
       </form>
+      )}
 
       <p className="am-note">Your information is secured and never shared.</p>
     </Modal>

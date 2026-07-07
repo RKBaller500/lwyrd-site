@@ -38,9 +38,9 @@ export default function MarketingFooter() {
 
           <div className="foot-col">
             <h4>Clients</h4>
-            <Link href="/get-matched">Startups</Link>
-            <Link href="/get-matched">SMBs</Link>
-            <Link href="/get-matched">Individuals</Link>
+            <Link href="/clients/startups">Startups</Link>
+            <Link href="/clients/smbs">SMBs</Link>
+            <Link href="/clients/individuals">Individuals</Link>
           </div>
 
           <div className="foot-col">

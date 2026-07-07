@@ -87,7 +87,7 @@ const TOP_STATES = [
 
 // PostHog: $os, $browser, $device_type
 const DEVICES = [
-  { label: "Desktop", pct: 62, color: "#002452" },
+  { label: "Desktop", pct: 62, color: "#002B55" },
   { label: "Mobile", pct: 32, color: "#3b5f8a" },
   { label: "Tablet", pct: 6, color: "#8fa8c8" },
 ];
@@ -277,7 +277,7 @@ function SectionHeader({
   return (
     <div id={id} className="flex items-start justify-between mb-5 pt-2">
       <div>
-        <h2 className="text-base font-semibold text-[#002452] mb-0.5">{title}</h2>
+        <h2 className="text-base font-semibold text-[#002B55] mb-0.5">{title}</h2>
         <p className="text-xs text-slate-400">{description}</p>
       </div>
       {tag && (
@@ -317,7 +317,7 @@ function Sparkline({ up }: { up: boolean }) {
 function HBar({ pct, opacity = 0.5 }: { pct: number; opacity?: number }) {
   return (
     <div className="flex-1 h-1.5 bg-[#edeae4] rounded-full overflow-hidden">
-      <div className="h-full rounded-full bg-[#002452]" style={{ width: `${pct}%`, opacity }} />
+      <div className="h-full rounded-full bg-[#002B55]" style={{ width: `${pct}%`, opacity }} />
     </div>
   );
 }
@@ -326,12 +326,12 @@ function KpiCard({
   label, value, change, icon: Icon, note,
 }: { label: string; value: string; change?: number; icon: React.ElementType; note?: string }) {
   return (
-    <div className="bg-[#fbfaf6] border border-[#ddd7cc] rounded-3xl p-5">
+    <div className="bg-[#FFFFFF] border border-[#E7E7E3] rounded-3xl p-5">
       <div className="flex items-center justify-between mb-3">
-        <Icon size={15} className="text-[#002452]" strokeWidth={1.5} />
+        <Icon size={15} className="text-[#002B55]" strokeWidth={1.5} />
         {change !== undefined && <Sparkline up={change >= 0} />}
       </div>
-      <div className="text-3xl text-[#002452] mb-0.5" style={{ fontFamily: '"Lora", Georgia, serif' }}>
+      <div className="text-3xl text-[#002B55] mb-0.5" style={{ fontFamily: "var(--display)" }}>
         {value}
       </div>
       <div className="text-xs text-slate-500 mb-1.5">{label}</div>
@@ -359,19 +359,19 @@ function LineChart({ points, height = 160 }: { points: number[]; height?: number
   const polyline = coords.join(" ");
   const area = `${pad},${h - pad} ${polyline} ${w - pad},${h - pad}`;
   return (
-    <div className="rounded-2xl overflow-hidden bg-[#f5f4f0]" style={{ height }}>
+    <div className="rounded-2xl overflow-hidden bg-[#F6F6F4]" style={{ height }}>
       <svg width="100%" height="100%" viewBox={`0 0 ${w} ${h}`} preserveAspectRatio="none">
         <defs>
           <linearGradient id="lineGrad" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0%" stopColor="#002452" stopOpacity="0.12" />
-            <stop offset="100%" stopColor="#002452" stopOpacity="0" />
+            <stop offset="0%" stopColor="#002B55" stopOpacity="0.12" />
+            <stop offset="100%" stopColor="#002B55" stopOpacity="0" />
           </linearGradient>
         </defs>
         {[0.25, 0.5, 0.75].map((r) => (
-          <line key={r} x1={pad} y1={pad + (1 - r) * (h - 2 * pad)} x2={w - pad} y2={pad + (1 - r) * (h - 2 * pad)} stroke="#ddd7cc" strokeWidth="1" />
+          <line key={r} x1={pad} y1={pad + (1 - r) * (h - 2 * pad)} x2={w - pad} y2={pad + (1 - r) * (h - 2 * pad)} stroke="#E7E7E3" strokeWidth="1" />
         ))}
         <polygon points={area} fill="url(#lineGrad)" />
-        <polyline points={polyline} fill="none" stroke="#002452" strokeWidth="2" strokeOpacity="0.4" strokeLinecap="round" strokeLinejoin="round" />
+        <polyline points={polyline} fill="none" stroke="#002B55" strokeWidth="2" strokeOpacity="0.4" strokeLinecap="round" strokeLinejoin="round" />
       </svg>
     </div>
   );
@@ -386,7 +386,7 @@ function Histogram({ buckets }: { buckets: { label: string; count: number }[] })
           <div key={i} className="flex-1 flex flex-col items-center gap-0.5">
             <span className="text-[10px] text-slate-400 tabular-nums">{count}</span>
             <div
-              className="w-full rounded-t-sm bg-[#002452]"
+              className="w-full rounded-t-sm bg-[#002B55]"
               style={{ height: `${(count / max) * 80}%`, opacity: 0.15 + (count / max) * 0.55 }}
             />
           </div>
@@ -403,7 +403,7 @@ function Histogram({ buckets }: { buckets: { label: string; count: number }[] })
 
 const EVENT_COLORS: Record<string, string> = {
   intake_completed: "bg-emerald-50 text-emerald-700",
-  intake_started: "bg-[#002452]/8 text-[#002452]",
+  intake_started: "bg-[#002B55]/8 text-[#002B55]",
   contact_requested: "bg-orange-50 text-orange-700",
   firm_saved: "bg-violet-50 text-violet-700",
   firm_profile_clicked: "bg-sky-50 text-sky-700",
@@ -428,8 +428,8 @@ export default function AnalyticsPage() {
     <div>
       {/* Page header */}
       <h1
-        className="text-4xl text-[#002452] mb-2"
-        style={{ fontFamily: '"Lora", Georgia, serif', fontWeight: 500 }}
+        className="text-4xl text-[#002B55] mb-2"
+        style={{ fontFamily: "var(--display)", fontWeight: 500 }}
       >
         Analytics
       </h1>
@@ -443,7 +443,7 @@ export default function AnalyticsPage() {
           <a
             key={href}
             href={href}
-            className="text-xs px-3 py-1.5 rounded-full border border-[#ddd7cc] text-slate-500 hover:border-[#002452] hover:text-[#002452] transition-colors bg-[#fbfaf6]"
+            className="text-xs px-3 py-1.5 rounded-full border border-[#E7E7E3] text-slate-500 hover:border-[#002B55] hover:text-[#002B55] transition-colors bg-[#FFFFFF]"
           >
             {label}
           </a>
@@ -481,7 +481,7 @@ export default function AnalyticsPage() {
       </div>
 
       {/* ── SECTION 2: TRAFFIC ─────────────────────────────────────────────── */}
-      <div className="border-t border-[#ddd7cc] pt-8 mb-6">
+      <div className="border-t border-[#E7E7E3] pt-8 mb-6">
         <SectionHeader
           id="traffic"
           title="Traffic & Acquisition"
@@ -491,7 +491,7 @@ export default function AnalyticsPage() {
 
         {/* Visitor trend + devices */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-5 mb-5">
-          <div className="lg:col-span-2 bg-[#fbfaf6] border border-[#ddd7cc] rounded-3xl p-6">
+          <div className="lg:col-span-2 bg-[#FFFFFF] border border-[#E7E7E3] rounded-3xl p-6">
             <p className="text-sm font-medium text-slate-700 mb-0.5">Daily Unique Visitors</p>
             <p className="text-xs text-slate-400 mb-5">Last 30 days</p>
             <LineChart points={VISITOR_TREND_POINTS} height={160} />
@@ -502,7 +502,7 @@ export default function AnalyticsPage() {
             </div>
           </div>
 
-          <div className="bg-[#fbfaf6] border border-[#ddd7cc] rounded-3xl p-6 flex flex-col">
+          <div className="bg-[#FFFFFF] border border-[#E7E7E3] rounded-3xl p-6 flex flex-col">
             <p className="text-sm font-medium text-slate-700 mb-0.5">Device Split</p>
             <p className="text-xs text-slate-400 mb-5">By session device type</p>
             {/* Stacked visual */}
@@ -522,7 +522,7 @@ export default function AnalyticsPage() {
                 </div>
               ))}
             </div>
-            <div className="border-t border-[#ddd7cc] mt-auto pt-4">
+            <div className="border-t border-[#E7E7E3] mt-auto pt-4">
               <p className="text-xs text-slate-400 mb-3">Traffic Sources</p>
               {[
                 { label: "Organic Search", pct: 35 },
@@ -542,12 +542,12 @@ export default function AnalyticsPage() {
 
         {/* Top pages + Geography */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-5 mb-5">
-          <div className="bg-[#fbfaf6] border border-[#ddd7cc] rounded-3xl p-6">
+          <div className="bg-[#FFFFFF] border border-[#E7E7E3] rounded-3xl p-6">
             <p className="text-sm font-medium text-slate-700 mb-0.5">Top Landing Pages</p>
             <p className="text-xs text-slate-400 mb-4">First page of each session</p>
             <table className="w-full text-xs">
               <thead>
-                <tr className="border-b border-[#ddd7cc]">
+                <tr className="border-b border-[#E7E7E3]">
                   <th className="text-left pb-2 font-medium text-slate-400">Page</th>
                   <th className="text-right pb-2 font-medium text-slate-400">Views</th>
                   <th className="text-right pb-2 font-medium text-slate-400">Bounce</th>
@@ -555,7 +555,7 @@ export default function AnalyticsPage() {
               </thead>
               <tbody>
                 {TOP_LANDING_PAGES.map(({ path, label, views, bounce }, i) => (
-                  <tr key={path} className={i < TOP_LANDING_PAGES.length - 1 ? "border-b border-[#ddd7cc]" : ""}>
+                  <tr key={path} className={i < TOP_LANDING_PAGES.length - 1 ? "border-b border-[#E7E7E3]" : ""}>
                     <td className="py-2">
                       <span className="text-slate-700">{label}</span>
                       <span className="text-slate-400 ml-1.5 font-mono text-[10px]">{path}</span>
@@ -570,7 +570,7 @@ export default function AnalyticsPage() {
             </table>
           </div>
 
-          <div className="bg-[#fbfaf6] border border-[#ddd7cc] rounded-3xl p-6">
+          <div className="bg-[#FFFFFF] border border-[#E7E7E3] rounded-3xl p-6">
             <p className="text-sm font-medium text-slate-700 mb-0.5">Geographic Demand</p>
             <p className="text-xs text-slate-400 mb-4">Intakes by user state · PostHog: $geoip_subdivision_1_name</p>
             <div className="space-y-2.5">
@@ -587,13 +587,13 @@ export default function AnalyticsPage() {
         </div>
 
         {/* Exit pages */}
-        <div className="bg-[#fbfaf6] border border-[#ddd7cc] rounded-3xl p-6">
+        <div className="bg-[#FFFFFF] border border-[#E7E7E3] rounded-3xl p-6">
           <p className="text-sm font-medium text-slate-700 mb-0.5">Top Exit Pages</p>
           <p className="text-xs text-slate-400 mb-4">Last page viewed before session ended, high exit rates on mid-intake pages indicate friction</p>
           <div className="grid grid-cols-2 sm:grid-cols-5 gap-3">
             {TOP_EXIT_PAGES.map(({ path, label, exits, exitRate }) => (
-              <div key={path} className="bg-[#f5f4f0] rounded-2xl p-4 text-center">
-                <div className="text-xl font-semibold text-[#002452] mb-0.5" style={{ fontFamily: '"Lora", Georgia, serif' }}>{exits}</div>
+              <div key={path} className="bg-[#F6F6F4] rounded-2xl p-4 text-center">
+                <div className="text-xl font-semibold text-[#002B55] mb-0.5" style={{ fontFamily: "var(--display)" }}>{exits}</div>
                 <div className={`text-xs font-medium mb-1 ${parseFloat(exitRate) > 60 ? "text-red-500" : "text-slate-500"}`}>{exitRate} exit rate</div>
                 <div className="text-xs text-slate-500">{label}</div>
               </div>
@@ -603,7 +603,7 @@ export default function AnalyticsPage() {
       </div>
 
       {/* ── SECTION 3: INTAKE FUNNEL ────────────────────────────────────────── */}
-      <div className="border-t border-[#ddd7cc] pt-8 mb-6">
+      <div className="border-t border-[#E7E7E3] pt-8 mb-6">
         <SectionHeader
           id="funnel"
           title="Intake Funnel"
@@ -612,7 +612,7 @@ export default function AnalyticsPage() {
         />
 
         {/* Macro funnel */}
-        <div className="bg-[#fbfaf6] border border-[#ddd7cc] rounded-3xl p-6 mb-5">
+        <div className="bg-[#FFFFFF] border border-[#E7E7E3] rounded-3xl p-6 mb-5">
           <p className="text-sm font-medium text-slate-700 mb-4">Macro Conversion Funnel</p>
           <div className="space-y-2">
             {MACRO_FUNNEL.map(({ label, count, pct, drop }, i) => (
@@ -623,9 +623,9 @@ export default function AnalyticsPage() {
                   <div className="flex-1 h-7 bg-[#f0ede8] rounded-lg overflow-hidden relative">
                     <div
                       className="h-full rounded-lg flex items-center pl-3"
-                      style={{ width: `${pct}%`, backgroundColor: "#002452", opacity: 0.12 + (pct / 100) * 0.4 }}
+                      style={{ width: `${pct}%`, backgroundColor: "#002B55", opacity: 0.12 + (pct / 100) * 0.4 }}
                     />
-                    <span className="absolute left-3 top-1/2 -translate-y-1/2 text-xs font-medium text-[#002452]">
+                    <span className="absolute left-3 top-1/2 -translate-y-1/2 text-xs font-medium text-[#002B55]">
                       {count.toLocaleString()}
                     </span>
                   </div>
@@ -642,12 +642,12 @@ export default function AnalyticsPage() {
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-5 mb-5">
           {/* Completion by category */}
-          <div className="bg-[#fbfaf6] border border-[#ddd7cc] rounded-3xl p-6">
+          <div className="bg-[#FFFFFF] border border-[#E7E7E3] rounded-3xl p-6">
             <p className="text-sm font-medium text-slate-700 mb-0.5">Completion Rate by Category</p>
             <p className="text-xs text-slate-400 mb-4">Identifies which categories have friction or strong fit</p>
             <table className="w-full text-xs">
               <thead>
-                <tr className="border-b border-[#ddd7cc]">
+                <tr className="border-b border-[#E7E7E3]">
                   <th className="text-left pb-2 font-medium text-slate-400">Category</th>
                   <th className="text-right pb-2 font-medium text-slate-400">Started</th>
                   <th className="text-right pb-2 font-medium text-slate-400">Completed</th>
@@ -656,7 +656,7 @@ export default function AnalyticsPage() {
               </thead>
               <tbody>
                 {COMPLETION_BY_CATEGORY.map(({ category, started, completed, rate }, i) => (
-                  <tr key={category} className={i < COMPLETION_BY_CATEGORY.length - 1 ? "border-b border-[#ddd7cc]" : ""}>
+                  <tr key={category} className={i < COMPLETION_BY_CATEGORY.length - 1 ? "border-b border-[#E7E7E3]" : ""}>
                     <td className="py-2 text-slate-700 truncate max-w-[140px]">{category}</td>
                     <td className="py-2 text-right text-slate-500 tabular-nums">{started}</td>
                     <td className="py-2 text-right text-slate-500 tabular-nums">{completed}</td>
@@ -673,13 +673,13 @@ export default function AnalyticsPage() {
 
           {/* Time to complete + Volume by hour */}
           <div className="space-y-5">
-            <div className="bg-[#fbfaf6] border border-[#ddd7cc] rounded-3xl p-6">
+            <div className="bg-[#FFFFFF] border border-[#E7E7E3] rounded-3xl p-6">
               <p className="text-sm font-medium text-slate-700 mb-0.5">Completion Time Distribution</p>
               <p className="text-xs text-slate-400 mb-4">How long users take to finish the intake · property: duration_seconds</p>
               <Histogram buckets={COMPLETION_TIME_BUCKETS} />
             </div>
 
-            <div className="bg-[#fbfaf6] border border-[#ddd7cc] rounded-3xl p-6">
+            <div className="bg-[#FFFFFF] border border-[#E7E7E3] rounded-3xl p-6">
               <p className="text-sm font-medium text-slate-700 mb-0.5">Intake Volume by Hour</p>
               <p className="text-xs text-slate-400 mb-3">UTC, when users are most active (intake_started)</p>
               <div className="flex items-end gap-0.5 h-14">
@@ -688,7 +688,7 @@ export default function AnalyticsPage() {
                   return (
                     <div
                       key={i}
-                      className="flex-1 rounded-t-sm bg-[#002452]"
+                      className="flex-1 rounded-t-sm bg-[#002B55]"
                       title={`${i}:00, ${v} intakes`}
                       style={{ height: `${(v / max) * 100}%`, opacity: 0.1 + (v / max) * 0.7 }}
                     />
@@ -705,7 +705,7 @@ export default function AnalyticsPage() {
         </div>
 
         {/* Question drop-off */}
-        <div className="bg-[#fbfaf6] border border-[#ddd7cc] rounded-3xl p-6">
+        <div className="bg-[#FFFFFF] border border-[#E7E7E3] rounded-3xl p-6">
           <p className="text-sm font-medium text-slate-700 mb-0.5">Question-Level Drop-off</p>
           <p className="text-xs text-slate-400 mb-4">
             Which intake step loses the most users, high drop-off on a question suggests it needs redesign or reordering.
@@ -718,7 +718,7 @@ export default function AnalyticsPage() {
                 <span className="text-xs text-slate-700 w-44 shrink-0 truncate">{label}</span>
                 <div className="flex-1 h-2 bg-[#edeae4] rounded-full overflow-hidden">
                   <div
-                    className="h-full rounded-full bg-[#002452]"
+                    className="h-full rounded-full bg-[#002B55]"
                     style={{ width: `${(completions / QUESTION_DROPOFF[0].completions) * 100}%`, opacity: 0.45 }}
                   />
                 </div>
@@ -733,7 +733,7 @@ export default function AnalyticsPage() {
       </div>
 
       {/* ── SECTION 4: MATCH QUALITY & DEMAND ──────────────────────────────── */}
-      <div className="border-t border-[#ddd7cc] pt-8 mb-6">
+      <div className="border-t border-[#E7E7E3] pt-8 mb-6">
         <SectionHeader
           id="quality"
           title="Match Quality & Demand Intelligence"
@@ -743,7 +743,7 @@ export default function AnalyticsPage() {
 
         {/* Score dist + by category */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-5 mb-5">
-          <div className="bg-[#fbfaf6] border border-[#ddd7cc] rounded-3xl p-6">
+          <div className="bg-[#FFFFFF] border border-[#E7E7E3] rounded-3xl p-6">
             <p className="text-sm font-medium text-slate-700 mb-0.5">Top Match Score Distribution</p>
             <p className="text-xs text-slate-400 mb-4">Histogram of best-match scores across all completed intakes</p>
             <div>
@@ -755,7 +755,7 @@ export default function AnalyticsPage() {
                     <div key={i} className="flex-1 flex flex-col items-center gap-0.5">
                       <span className="text-[10px] text-slate-400 tabular-nums">{h}</span>
                       <div
-                        className="w-full rounded-t-sm bg-[#002452]"
+                        className="w-full rounded-t-sm bg-[#002B55]"
                         style={{ height: `${(h / max) * 85}%`, opacity: 0.15 + (h / max) * 0.55 }}
                         title={`${rangeStart}–${rangeStart + 9}: ${h} searches`}
                       />
@@ -770,17 +770,17 @@ export default function AnalyticsPage() {
               </div>
               <p className="text-xs text-slate-400 text-center mt-1">Score range (top match per search)</p>
             </div>
-            <div className="mt-4 grid grid-cols-3 gap-3 pt-4 border-t border-[#ddd7cc]">
+            <div className="mt-4 grid grid-cols-3 gap-3 pt-4 border-t border-[#E7E7E3]">
               {[{ label: "Avg Score", value: "82" }, { label: "Median Score", value: "85" }, { label: "Zero Results", value: ZERO_RESULTS_RATE }].map(({ label, value }) => (
                 <div key={label} className="text-center">
-                  <div className="text-xl text-[#002452]" style={{ fontFamily: '"Lora", Georgia, serif' }}>{value}</div>
+                  <div className="text-xl text-[#002B55]" style={{ fontFamily: "var(--display)" }}>{value}</div>
                   <div className="text-xs text-slate-400">{label}</div>
                 </div>
               ))}
             </div>
           </div>
 
-          <div className="bg-[#fbfaf6] border border-[#ddd7cc] rounded-3xl p-6">
+          <div className="bg-[#FFFFFF] border border-[#E7E7E3] rounded-3xl p-6">
             <p className="text-sm font-medium text-slate-700 mb-0.5">Avg Score by Category</p>
             <p className="text-xs text-slate-400 mb-4">Low scores signal supply gaps, not enough qualified firms for that practice area</p>
             <div className="space-y-3">
@@ -788,16 +788,16 @@ export default function AnalyticsPage() {
                 <div key={category}>
                   <div className="flex items-center justify-between mb-1">
                     <span className="text-xs text-slate-700 truncate max-w-[180px]">{category}</span>
-                    <span className={`text-xs font-semibold tabular-nums ${avg >= 82 ? "text-emerald-600" : avg >= 75 ? "text-[#002452]" : "text-amber-600"}`}>{avg}</span>
+                    <span className={`text-xs font-semibold tabular-nums ${avg >= 82 ? "text-emerald-600" : avg >= 75 ? "text-[#002B55]" : "text-amber-600"}`}>{avg}</span>
                   </div>
                   {/* Score range bar */}
                   <div className="relative h-2 bg-[#edeae4] rounded-full">
                     <div
-                      className="absolute h-full rounded-full bg-[#002452] opacity-30"
+                      className="absolute h-full rounded-full bg-[#002B55] opacity-30"
                       style={{ left: `${low}%`, width: `${high - low}%` }}
                     />
                     <div
-                      className="absolute w-2 h-2 rounded-full bg-[#002452] -translate-x-1/2 top-0"
+                      className="absolute w-2 h-2 rounded-full bg-[#002B55] -translate-x-1/2 top-0"
                       style={{ left: `${avg}%` }}
                     />
                   </div>
@@ -818,7 +818,7 @@ export default function AnalyticsPage() {
             { title: "Company Stages", sub: "Where users are in their company journey", data: STAGE_DIST },
             { title: "Timeline Urgency", sub: "How quickly users need legal help", data: TIMELINE_DIST },
           ].map(({ title, sub, data }) => (
-            <div key={title} className="bg-[#fbfaf6] border border-[#ddd7cc] rounded-3xl p-6">
+            <div key={title} className="bg-[#FFFFFF] border border-[#E7E7E3] rounded-3xl p-6">
               <p className="text-sm font-medium text-slate-700 mb-0.5">{title}</p>
               <p className="text-xs text-slate-400 mb-4">{sub}</p>
               <div className="space-y-2.5">
@@ -838,7 +838,7 @@ export default function AnalyticsPage() {
       </div>
 
       {/* ── SECTION 5: POST-MATCH ENGAGEMENT ───────────────────────────────── */}
-      <div className="border-t border-[#ddd7cc] pt-8 mb-6">
+      <div className="border-t border-[#E7E7E3] pt-8 mb-6">
         <SectionHeader
           id="post-match"
           title="Post-Match Engagement"
@@ -849,8 +849,8 @@ export default function AnalyticsPage() {
         {/* Results KPIs */}
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4 mb-5">
           {RESULTS_KPIS.map(({ label, value, note }) => (
-            <div key={label} className="bg-[#fbfaf6] border border-[#ddd7cc] rounded-3xl p-5">
-              <div className="text-2xl text-[#002452] mb-1" style={{ fontFamily: '"Lora", Georgia, serif' }}>{value}</div>
+            <div key={label} className="bg-[#FFFFFF] border border-[#E7E7E3] rounded-3xl p-5">
+              <div className="text-2xl text-[#002B55] mb-1" style={{ fontFamily: "var(--display)" }}>{value}</div>
               <div className="text-xs text-slate-600 font-medium mb-0.5">{label}</div>
               <div className="text-xs text-slate-400">{note}</div>
             </div>
@@ -859,12 +859,12 @@ export default function AnalyticsPage() {
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
           {/* Top clicked firms */}
-          <div className="bg-[#fbfaf6] border border-[#ddd7cc] rounded-3xl p-6">
+          <div className="bg-[#FFFFFF] border border-[#E7E7E3] rounded-3xl p-6">
             <p className="text-sm font-medium text-slate-700 mb-0.5">Most-Clicked Firms from Results</p>
             <p className="text-xs text-slate-400 mb-4">Which firms earn the most profile visits, reflects perceived relevance</p>
             <table className="w-full text-xs">
               <thead>
-                <tr className="border-b border-[#ddd7cc]">
+                <tr className="border-b border-[#E7E7E3]">
                   <th className="text-left pb-2 font-medium text-slate-400">Firm</th>
                   <th className="text-right pb-2 font-medium text-slate-400">Profile Clicks</th>
                   <th className="text-right pb-2 font-medium text-slate-400">Click-Through</th>
@@ -872,10 +872,10 @@ export default function AnalyticsPage() {
               </thead>
               <tbody>
                 {TOP_CLICKED_FIRMS.map(({ name, clicks, ctr }, i) => (
-                  <tr key={name} className={i < TOP_CLICKED_FIRMS.length - 1 ? "border-b border-[#ddd7cc]" : ""}>
+                  <tr key={name} className={i < TOP_CLICKED_FIRMS.length - 1 ? "border-b border-[#E7E7E3]" : ""}>
                     <td className="py-2.5 text-slate-700">{name}</td>
                     <td className="py-2.5 text-right text-slate-500 tabular-nums">{clicks}</td>
-                    <td className="py-2.5 text-right font-medium text-[#002452] tabular-nums">{ctr}</td>
+                    <td className="py-2.5 text-right font-medium text-[#002B55] tabular-nums">{ctr}</td>
                   </tr>
                 ))}
               </tbody>
@@ -883,7 +883,7 @@ export default function AnalyticsPage() {
           </div>
 
           {/* Criteria miss rate */}
-          <div className="bg-[#fbfaf6] border border-[#ddd7cc] rounded-3xl p-6">
+          <div className="bg-[#FFFFFF] border border-[#E7E7E3] rounded-3xl p-6">
             <p className="text-sm font-medium text-slate-700 mb-0.5">Most Common Unmatched Criteria</p>
             <p className="text-xs text-slate-400 mb-4">
               Criteria frequently missed by firms, high rates indicate gaps in your firm roster that depress match scores.
@@ -907,7 +907,7 @@ export default function AnalyticsPage() {
       </div>
 
       {/* ── SECTION 6: RETENTION & LIFECYCLE ───────────────────────────────── */}
-      <div className="border-t border-[#ddd7cc] pt-8 mb-6">
+      <div className="border-t border-[#E7E7E3] pt-8 mb-6">
         <SectionHeader
           id="retention"
           title="User Retention & Lifecycle"
@@ -917,12 +917,12 @@ export default function AnalyticsPage() {
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-5 mb-5">
           {/* Cohort retention */}
-          <div className="lg:col-span-2 bg-[#fbfaf6] border border-[#ddd7cc] rounded-3xl p-6">
+          <div className="lg:col-span-2 bg-[#FFFFFF] border border-[#E7E7E3] rounded-3xl p-6">
             <p className="text-sm font-medium text-slate-700 mb-0.5">Cohort Retention</p>
             <p className="text-xs text-slate-400 mb-4">% of sign-up cohort returning in subsequent weeks</p>
             <table className="w-full text-xs">
               <thead>
-                <tr className="border-b border-[#ddd7cc]">
+                <tr className="border-b border-[#E7E7E3]">
                   <th className="text-left pb-2 font-medium text-slate-400">Cohort</th>
                   <th className="text-right pb-2 font-medium text-slate-400">Size</th>
                   <th className="text-right pb-2 font-medium text-slate-400">Week 1</th>
@@ -933,7 +933,7 @@ export default function AnalyticsPage() {
               </thead>
               <tbody>
                 {COHORT_RETENTION.map(({ cohort, size, w1, w2, w4, w8 }, i) => (
-                  <tr key={cohort} className={i < COHORT_RETENTION.length - 1 ? "border-b border-[#ddd7cc]" : ""}>
+                  <tr key={cohort} className={i < COHORT_RETENTION.length - 1 ? "border-b border-[#E7E7E3]" : ""}>
                     <td className="py-2.5 text-slate-700 font-medium">{cohort}</td>
                     <td className="py-2.5 text-right text-slate-500 tabular-nums">{size}</td>
                     {[w1, w2, w4, w8].map((v, j) => (
@@ -943,7 +943,7 @@ export default function AnalyticsPage() {
                             className="inline-block px-1.5 py-0.5 rounded text-xs font-medium"
                             style={{
                               backgroundColor: `rgba(0,36,82,${(v / 100) * 0.2})`,
-                              color: v > 25 ? "#002452" : "#64748b",
+                              color: v > 25 ? "#002B55" : "#64748b",
                             }}
                           >
                             {v}%
@@ -961,7 +961,7 @@ export default function AnalyticsPage() {
 
           {/* Repeat intakes */}
           <div className="space-y-5">
-            <div className="bg-[#fbfaf6] border border-[#ddd7cc] rounded-3xl p-6">
+            <div className="bg-[#FFFFFF] border border-[#E7E7E3] rounded-3xl p-6">
               <p className="text-sm font-medium text-slate-700 mb-0.5">Repeat Intake Rate</p>
               <p className="text-xs text-slate-400 mb-4">Users who complete more than one intake</p>
               <div className="space-y-2.5">
@@ -977,7 +977,7 @@ export default function AnalyticsPage() {
               </div>
             </div>
 
-            <div className="bg-[#fbfaf6] border border-[#ddd7cc] rounded-3xl p-6">
+            <div className="bg-[#FFFFFF] border border-[#E7E7E3] rounded-3xl p-6">
               <p className="text-sm font-medium text-slate-700 mb-0.5">Time to First Intake</p>
               <p className="text-xs text-slate-400 mb-4">From account creation to first intake_started</p>
               <div className="space-y-2.5">
@@ -997,7 +997,7 @@ export default function AnalyticsPage() {
       </div>
 
       {/* ── SECTION 7: RECENT ACTIVITY ──────────────────────────────────────── */}
-      <div className="border-t border-[#ddd7cc] pt-8">
+      <div className="border-t border-[#E7E7E3] pt-8">
         <SectionHeader
           id="activity"
           title="Live Event Feed"
@@ -1005,12 +1005,12 @@ export default function AnalyticsPage() {
           tag="PostHog: all events"
         />
 
-        <div className="bg-[#fbfaf6] border border-[#ddd7cc] rounded-3xl p-6">
+        <div className="bg-[#FFFFFF] border border-[#E7E7E3] rounded-3xl p-6">
           <div className="space-y-0">
             {RECENT_EVENTS.map(({ event, detail, time }, i) => (
               <div
                 key={i}
-                className={`flex items-start justify-between py-2.5 ${i < RECENT_EVENTS.length - 1 ? "border-b border-[#ddd7cc]" : ""}`}
+                className={`flex items-start justify-between py-2.5 ${i < RECENT_EVENTS.length - 1 ? "border-b border-[#E7E7E3]" : ""}`}
               >
                 <div className="flex items-start gap-3 min-w-0">
                   <span className={`inline-block text-xs font-mono px-1.5 py-0.5 rounded shrink-0 ${EVENT_COLORS[event] ?? "bg-slate-100 text-slate-600"}`}>
@@ -1024,7 +1024,7 @@ export default function AnalyticsPage() {
           </div>
 
           {/* Event legend */}
-          <div className="flex flex-wrap gap-2 mt-5 pt-4 border-t border-[#ddd7cc]">
+          <div className="flex flex-wrap gap-2 mt-5 pt-4 border-t border-[#E7E7E3]">
             {Object.entries(EVENT_COLORS).map(([event, cls]) => (
               <span key={event} className={`text-xs font-mono px-2 py-0.5 rounded ${cls}`}>{event}</span>
             ))}

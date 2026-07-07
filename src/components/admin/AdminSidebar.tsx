@@ -46,7 +46,7 @@ export default function AdminSidebar() {
     exact ? pathname === href : pathname.startsWith(href);
 
   return (
-    <aside className="w-52 shrink-0 border-r border-[#ddd7cc] bg-[#fbfaf6] min-h-full pt-6 pb-10">
+    <aside className="w-52 shrink-0 border-r border-[#E7E7E3] bg-[#FFFFFF] min-h-full pt-6 pb-10">
       <div className="px-4 mb-6">
         <span className="text-xs font-medium text-slate-400 uppercase tracking-widest">
           Admin Panel
@@ -67,8 +67,8 @@ export default function AdminSidebar() {
                     href={href}
                     className={`flex items-center gap-3 px-3 py-2.5 rounded-2xl text-sm transition-colors ${
                       active
-                        ? "bg-[#002452] text-white"
-                        : "text-slate-600 hover:bg-[#002452]/8 hover:text-[#002452]"
+                        ? "bg-[#002B55] text-white"
+                        : "text-slate-600 hover:bg-[#002B55]/8 hover:text-[#002B55]"
                     }`}
                   >
                     <Icon size={15} strokeWidth={1.5} />

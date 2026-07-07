@@ -46,7 +46,7 @@ export default function AdminUserActions({
         value={accessLevel}
         onChange={handleAccessChange}
         disabled={isPending}
-        className="text-xs border border-[#ddd7cc] rounded-xl px-2.5 py-1.5 text-slate-600 bg-white focus:outline-none focus:border-[#002452] transition-colors disabled:opacity-50 cursor-pointer"
+        className="text-xs border border-[#E7E7E3] rounded-xl px-2.5 py-1.5 text-slate-600 bg-white focus:outline-none focus:border-[#002B55] transition-colors disabled:opacity-50 cursor-pointer"
       >
         <option value="none">No access</option>
         <option value="subscription">Subscription</option>
@@ -55,7 +55,7 @@ export default function AdminUserActions({
       <button
         onClick={handleToggleAdmin}
         disabled={isPending}
-        className="text-xs text-[#002452] hover:opacity-70 transition-opacity font-medium disabled:opacity-50"
+        className="text-xs text-[#002B55] hover:opacity-70 transition-opacity font-medium disabled:opacity-50"
       >
         {isAdmin ? "Remove Admin" : "Make Admin"}
       </button>

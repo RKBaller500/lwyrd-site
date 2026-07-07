@@ -58,7 +58,7 @@ function SortHeader({
   return (
     <th
       onClick={() => onSort(col)}
-      className={`text-left px-5 py-4 text-xs font-medium uppercase tracking-wide cursor-pointer select-none group transition-colors ${active ? "text-[#002452]" : "text-slate-400 hover:text-slate-600"} ${className ?? ""}`}
+      className={`text-left px-5 py-4 text-xs font-medium uppercase tracking-wide cursor-pointer select-none group transition-colors ${active ? "text-[#002B55]" : "text-slate-400 hover:text-slate-600"} ${className ?? ""}`}
     >
       <div className="flex items-center gap-1">
         {label}
@@ -120,9 +120,9 @@ export default function SubmissionsTable({
   const hasFilters = search || trackFilter;
 
   return (
-    <div className="bg-[#fbfaf6] border border-[#ddd7cc] rounded-3xl overflow-hidden">
+    <div className="bg-[#FFFFFF] border border-[#E7E7E3] rounded-3xl overflow-hidden">
       {/* Toolbar */}
-      <div className="px-5 py-4 border-b border-[#ddd7cc] flex flex-wrap items-center gap-3">
+      <div className="px-5 py-4 border-b border-[#E7E7E3] flex flex-wrap items-center gap-3">
         <div className="relative flex-1 min-w-[180px]">
           <Search size={13} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
           <input
@@ -130,13 +130,13 @@ export default function SubmissionsTable({
             placeholder="Search by user or category…"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="w-full pl-8 pr-3 py-2 text-sm border border-[#ddd7cc] rounded-xl bg-white focus:outline-none focus:border-[#002452] placeholder:text-slate-400 text-slate-700"
+            className="w-full pl-8 pr-3 py-2 text-sm border border-[#E7E7E3] rounded-xl bg-white focus:outline-none focus:border-[#002B55] placeholder:text-slate-400 text-slate-700"
           />
         </div>
         <select
           value={trackFilter}
           onChange={(e) => setTrackFilter(e.target.value)}
-          className="text-sm border border-[#ddd7cc] rounded-xl px-3 py-2 bg-white text-slate-600 focus:outline-none focus:border-[#002452]"
+          className="text-sm border border-[#E7E7E3] rounded-xl px-3 py-2 bg-white text-slate-600 focus:outline-none focus:border-[#002B55]"
         >
           <option value="">All tracks</option>
           {tracks.map((t) => (
@@ -152,7 +152,7 @@ export default function SubmissionsTable({
       {/* Table */}
       <table className="w-full text-sm">
         <thead>
-          <tr className="border-b border-[#ddd7cc] text-left">
+          <tr className="border-b border-[#E7E7E3] text-left">
             <SortHeader col="created_at" label="Date" sort={sort} dir={dir} onSort={handleSort} />
             <th className="px-5 py-4 text-xs font-medium text-slate-400 uppercase tracking-wide">User</th>
             <SortHeader col="track" label="Track" sort={sort} dir={dir} onSort={handleSort} />
@@ -166,7 +166,7 @@ export default function SubmissionsTable({
             const topMatch = sub.top_matches?.[0];
             const displayCategory = sub.category_label ?? sub.legal_category ?? sub.category_slug.replace(/-/g, " ");
             return (
-              <tr key={sub.id} className={i < filtered.length - 1 ? "border-b border-[#ddd7cc]" : ""}>
+              <tr key={sub.id} className={i < filtered.length - 1 ? "border-b border-[#E7E7E3]" : ""}>
                 <td className="px-5 py-4 text-slate-500 whitespace-nowrap">{formatDate(sub.created_at)}</td>
                 <td className="px-5 py-4">
                   <p className="text-slate-700 font-medium">{sub.userName || " "}</p>
@@ -180,7 +180,7 @@ export default function SubmissionsTable({
                     : " "}
                 </td>
                 <td className="px-5 py-4 text-right">
-                  <Link href={`/admin/submissions/${sub.id}`} className="inline-flex items-center gap-1.5 text-xs text-[#002452] hover:underline">
+                  <Link href={`/admin/submissions/${sub.id}`} className="inline-flex items-center gap-1.5 text-xs text-[#002B55] hover:underline">
                     View <ArrowRight size={12} />
                   </Link>
                 </td>

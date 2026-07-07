@@ -48,7 +48,7 @@ export default function MarketingPageClient({
   onReady?: (root: HTMLElement) => void | (() => void);
 }) {
   const ref = useRef<HTMLDivElement>(null);
-  const { isAuthenticated, openModal } = useAuth();
+  const { isAuthenticated, isLoading, openModal } = useAuth();
   const router = useRouter();
 
   // Intercept ported-design CTAs so generated markup cannot strand users on
@@ -106,6 +106,14 @@ export default function MarketingPageClient({
   useEffect(() => {
     const root = ref.current;
     if (!root) return;
+    // Wait until auth has settled before running the page's original JS.
+    // When a logged-in user opens a marketing URL directly, AuthProvider
+    // resolves the Supabase session asynchronously and re-renders this tree.
+    // Running the animation script before that settles lets the re-render
+    // race with (and clobber) the script's DOM mutations — the maze and the
+    // scroll reveals silently fail to initialise. Gating on !isLoading means
+    // the script runs exactly once, against the final, stable DOM.
+    if (isLoading) return;
     let cleanup: void | (() => void);
 
     // Run the page's original JS (maze, reveals, accordions, smooth scroll).
@@ -150,9 +158,9 @@ export default function MarketingPageClient({
       if (typeof cleanup === "function") cleanup();
       if (scriptEl) scriptEl.remove();
     };
-    // Re-run only when the page content changes.
+    // Re-run only when the page content changes or auth finishes loading.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [body, js]);
+  }, [body, js, isLoading]);
 
   return (
     <>

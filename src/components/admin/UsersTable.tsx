@@ -18,7 +18,7 @@ function SortHeader({
   return (
     <th
       onClick={() => onSort(col)}
-      className={`text-left px-5 py-3.5 text-xs font-medium uppercase tracking-wider cursor-pointer select-none group transition-colors ${active ? "text-[#002452]" : "text-slate-400 hover:text-slate-600"} ${className ?? ""}`}
+      className={`text-left px-5 py-3.5 text-xs font-medium uppercase tracking-wider cursor-pointer select-none group transition-colors ${active ? "text-[#002B55]" : "text-slate-400 hover:text-slate-600"} ${className ?? ""}`}
     >
       <div className="flex items-center gap-1">
         {label}
@@ -69,9 +69,9 @@ export default function UsersTable({ users }: { users: AdminUserRow[] }) {
   const hasFilters = search || roleFilter || accessFilter;
 
   return (
-    <div className="bg-[#fbfaf6] border border-[#ddd7cc] rounded-3xl overflow-hidden">
+    <div className="bg-[#FFFFFF] border border-[#E7E7E3] rounded-3xl overflow-hidden">
       {/* Toolbar */}
-      <div className="px-5 py-4 border-b border-[#ddd7cc] flex flex-wrap items-center gap-3">
+      <div className="px-5 py-4 border-b border-[#E7E7E3] flex flex-wrap items-center gap-3">
         <div className="relative flex-1 min-w-[180px]">
           <Search size={13} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
           <input
@@ -79,13 +79,13 @@ export default function UsersTable({ users }: { users: AdminUserRow[] }) {
             placeholder="Search by name or email…"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="w-full pl-8 pr-3 py-2 text-sm border border-[#ddd7cc] rounded-xl bg-white focus:outline-none focus:border-[#002452] placeholder:text-slate-400 text-slate-700"
+            className="w-full pl-8 pr-3 py-2 text-sm border border-[#E7E7E3] rounded-xl bg-white focus:outline-none focus:border-[#002B55] placeholder:text-slate-400 text-slate-700"
           />
         </div>
         <select
           value={roleFilter}
           onChange={(e) => setRoleFilter(e.target.value)}
-          className="text-sm border border-[#ddd7cc] rounded-xl px-3 py-2 bg-white text-slate-600 focus:outline-none focus:border-[#002452]"
+          className="text-sm border border-[#E7E7E3] rounded-xl px-3 py-2 bg-white text-slate-600 focus:outline-none focus:border-[#002B55]"
         >
           <option value="">All roles</option>
           <option value="admin">Admin</option>
@@ -94,7 +94,7 @@ export default function UsersTable({ users }: { users: AdminUserRow[] }) {
         <select
           value={accessFilter}
           onChange={(e) => setAccessFilter(e.target.value)}
-          className="text-sm border border-[#ddd7cc] rounded-xl px-3 py-2 bg-white text-slate-600 focus:outline-none focus:border-[#002452]"
+          className="text-sm border border-[#E7E7E3] rounded-xl px-3 py-2 bg-white text-slate-600 focus:outline-none focus:border-[#002B55]"
         >
           <option value="">All access levels</option>
           <option value="subscription">Subscription</option>
@@ -110,7 +110,7 @@ export default function UsersTable({ users }: { users: AdminUserRow[] }) {
       {/* Table */}
       <table className="w-full text-sm">
         <thead>
-          <tr className="border-b border-[#ddd7cc]">
+          <tr className="border-b border-[#E7E7E3]">
             <SortHeader col="name" label="User" sort={sort} dir={dir} onSort={handleSort} />
             <SortHeader col="email" label="Email" sort={sort} dir={dir} onSort={handleSort} />
             <SortHeader col="created_at" label="Joined" sort={sort} dir={dir} onSort={handleSort} />
@@ -122,7 +122,7 @@ export default function UsersTable({ users }: { users: AdminUserRow[] }) {
         </thead>
         <tbody>
           {filtered.map((user, i) => (
-            <tr key={user.id} className={`border-b border-[#ddd7cc] last:border-0 ${i % 2 === 0 ? "" : "bg-white/40"}`}>
+            <tr key={user.id} className={`border-b border-[#E7E7E3] last:border-0 ${i % 2 === 0 ? "" : "bg-white/40"}`}>
               <td className="px-5 py-3.5">
                 <div className="font-medium text-slate-700">{user.name || " "}</div>
                 <div className="text-xs text-slate-400 font-mono">{user.id.slice(0, 8)}…</div>
@@ -134,14 +134,14 @@ export default function UsersTable({ users }: { users: AdminUserRow[] }) {
               <td className="px-5 py-3.5 text-slate-600">{user.saved_firms_count}</td>
               <td className="px-5 py-3.5">
                 {user.is_admin
-                  ? <span className="px-2 py-0.5 bg-[#002452]/10 text-[#002452] rounded-full text-xs font-medium">Admin</span>
+                  ? <span className="px-2 py-0.5 bg-[#002B55]/10 text-[#002B55] rounded-full text-xs font-medium">Admin</span>
                   : <span className="px-2 py-0.5 bg-slate-100 text-slate-500 rounded-full text-xs">User</span>}
               </td>
               <td className="px-5 py-3.5">
                 {user.access_level === "subscription"
                   ? <span className="px-2 py-0.5 bg-emerald-50 text-emerald-700 border border-emerald-200 rounded-full text-xs font-medium">Subscription</span>
                   : user.access_level === "org"
-                  ? <span className="px-2 py-0.5 bg-[#002452]/10 text-[#002452] rounded-full text-xs font-medium">Organization</span>
+                  ? <span className="px-2 py-0.5 bg-[#002B55]/10 text-[#002B55] rounded-full text-xs font-medium">Organization</span>
                   : <span className="px-2 py-0.5 bg-slate-100 text-slate-400 rounded-full text-xs">No access</span>}
               </td>
               <td className="px-5 py-3.5">

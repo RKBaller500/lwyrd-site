@@ -93,24 +93,24 @@ function QuestionCard({
     })();
 
     return (
-      <div className="bg-[#141C2E] border border-[#1F2A3D] rounded-3xl p-8">
-        <p className="text-xs text-[#8A93A6] uppercase tracking-widest font-medium mb-3">
+      <div className="bg-white border border-[#E7E7E3] rounded-3xl p-8">
+        <p className="text-xs text-[#6B6B70] uppercase tracking-widest font-medium mb-3">
           Optional
         </p>
         <h2
-          className="text-xl sm:text-2xl text-[#E6EAF2] mb-2"
-          style={{ fontFamily: '"Lora", Georgia, serif', fontWeight: 500 }}
+          className="text-xl sm:text-2xl text-[#0B0B0C] mb-2"
+          style={{ fontFamily: "var(--display)", fontWeight: 500 }}
         >
           {question.text}
         </h2>
         {subtext && (
-          <p className="text-[#8A93A6] text-sm mb-6">{subtext}</p>
+          <p className="text-[#6B6B70] text-sm mb-6">{subtext}</p>
         )}
         {!subtext && <div className="mb-5" />}
 
         {isNoFee ? (
-          <div className="rounded-2xl bg-[#0A0F1C] border border-[#1F2A3D] px-5 py-4">
-            <p className="text-[#8A93A6] text-sm">
+          <div className="rounded-2xl bg-[#F6F6F4] border border-[#E7E7E3] px-5 py-4">
+            <p className="text-[#6B6B70] text-sm">
               {billingPreference === "contingency"
                 ? "No upfront budget required. Your attorney's fee comes from your settlement or award."
                 : "No cash budget required. Equity arrangements will be negotiated directly with the firm."}
@@ -119,8 +119,8 @@ function QuestionCard({
         ) : (
           <>
             <p
-              className="text-[#E6EAF2] text-3xl mb-5"
-              style={{ fontFamily: '"Lora", Georgia, serif', fontWeight: 500 }}
+              className="text-[#0B0B0C] text-3xl mb-5"
+              style={{ fontFamily: "var(--display)", fontWeight: 500 }}
             >
               {display}
             </p>
@@ -131,9 +131,9 @@ function QuestionCard({
               step={effectiveStep}
               value={budgetVal}
               onChange={(e) => onChange(Number(e.target.value))}
-              className="w-full accent-[#3B82F6]"
+              className="w-full accent-[#002B55]"
             />
-            <div className="flex justify-between text-xs text-[#8A93A6] mt-2">
+            <div className="flex justify-between text-xs text-[#6B6B70] mt-2">
               <span>Not specified</span>
               <span>{formatCap(effectiveMax)}</span>
             </div>
@@ -149,24 +149,24 @@ function QuestionCard({
     const isOutsideUS = selected === "outside_us";
 
     return (
-      <div className="bg-[#141C2E] border border-[#1F2A3D] rounded-3xl p-8">
-        <p className="text-xs text-[#8A93A6] uppercase tracking-widest font-medium mb-3">
+      <div className="bg-white border border-[#E7E7E3] rounded-3xl p-8">
+        <p className="text-xs text-[#6B6B70] uppercase tracking-widest font-medium mb-3">
           {question.required ? "Required" : "Optional"}
         </p>
         <h2
-          className="text-xl sm:text-2xl text-[#E6EAF2] mb-2"
-          style={{ fontFamily: '"Lora", Georgia, serif', fontWeight: 500 }}
+          className="text-xl sm:text-2xl text-[#0B0B0C] mb-2"
+          style={{ fontFamily: "var(--display)", fontWeight: 500 }}
         >
           {question.text}
         </h2>
         {question.subtext && (
-          <p className="text-[#8A93A6] text-sm mb-6">{question.subtext}</p>
+          <p className="text-[#6B6B70] text-sm mb-6">{question.subtext}</p>
         )}
         {!question.subtext && <div className="mb-5" />}
         <select
           value={selected}
           onChange={(e) => onChange(e.target.value)}
-          className="w-full px-4 py-3 rounded-2xl border border-[#1F2A3D] bg-[#0A0F1C] text-[#E6EAF2] focus:outline-none focus:border-[#3B82F6] focus:ring-2 focus:ring-[#3B82F6]/15 transition-all text-sm appearance-none cursor-pointer"
+          className="w-full px-4 py-3 rounded-2xl border border-[#E7E7E3] bg-[#F6F6F4] text-[#0B0B0C] focus:outline-none focus:border-[#002B55] focus:ring-2 focus:ring-[#002B55]/15 transition-all text-sm appearance-none cursor-pointer"
         >
           <option value="" disabled>Select a state…</option>
           {question.options.map((opt) => (
@@ -175,7 +175,7 @@ function QuestionCard({
         </select>
         {isOutsideUS && (
           <div className="mt-4">
-            <p className="text-[#8A93A6] text-xs mb-2">Which region(s) are involved? (optional)</p>
+            <p className="text-[#6B6B70] text-xs mb-2">Which region(s) are involved? (optional)</p>
             <input
               type="text"
               placeholder="e.g., Europe, Canada, Southeast Asia"
@@ -184,7 +184,7 @@ function QuestionCard({
                 setOtherText(e.target.value);
                 onChange(`outside_us: ${e.target.value}`);
               }}
-              className="w-full px-4 py-3 rounded-2xl border border-[#1F2A3D] bg-[#0A0F1C] text-[#E6EAF2] placeholder-[#8A93A6] focus:outline-none focus:border-[#3B82F6] transition-colors text-sm"
+              className="w-full px-4 py-3 rounded-2xl border border-[#E7E7E3] bg-[#F6F6F4] text-[#0B0B0C] placeholder-[#9A9AA0] focus:outline-none focus:border-[#002B55] transition-colors text-sm"
             />
           </div>
         )}
@@ -211,18 +211,18 @@ function QuestionCard({
     };
 
     return (
-      <div className="bg-[#141C2E] border border-[#1F2A3D] rounded-3xl p-8">
-        <p className="text-xs text-[#8A93A6] uppercase tracking-widest font-medium mb-3">
+      <div className="bg-white border border-[#E7E7E3] rounded-3xl p-8">
+        <p className="text-xs text-[#6B6B70] uppercase tracking-widest font-medium mb-3">
           {question.required ? "Required" : "Optional"}
         </p>
         <h2
-          className="text-xl sm:text-2xl text-[#E6EAF2] mb-2"
-          style={{ fontFamily: '"Lora", Georgia, serif', fontWeight: 500 }}
+          className="text-xl sm:text-2xl text-[#0B0B0C] mb-2"
+          style={{ fontFamily: "var(--display)", fontWeight: 500 }}
         >
           {question.text}
         </h2>
         {question.subtext && (
-          <p className="text-[#8A93A6] text-sm mb-6">{question.subtext}</p>
+          <p className="text-[#6B6B70] text-sm mb-6">{question.subtext}</p>
         )}
         {!question.subtext && <div className="mb-5" />}
         <div className="space-y-2">
@@ -235,24 +235,24 @@ function QuestionCard({
                   type="button"
                   onClick={() => !isDisabled && handleSelect(opt.value)}
                   disabled={isDisabled}
-                  className={`w-full text-left px-5 py-3.5 rounded-2xl border text-sm transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#3B82F6] focus-visible:ring-offset-2 focus-visible:ring-offset-[#141C2E] ${
+                  className={`w-full text-left px-5 py-3.5 rounded-2xl border text-sm transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#002B55] focus-visible:ring-offset-2 focus-visible:ring-offset-white ${
                     isDisabled
-                      ? "bg-[#0A0F1C] border-[#1F2A3D] text-[#8A93A6]/40 cursor-not-allowed"
+                      ? "bg-[#F6F6F4] border-[#E7E7E3] text-[#6B6B70]/40 cursor-not-allowed"
                       : isSelected
-                      ? "bg-[#3B82F6] text-white border-[#3B82F6]"
-                      : "bg-[#0A0F1C] border-[#1F2A3D] text-[#C8CDD8] hover:border-[#3B82F6]"
+                      ? "bg-[#002B55] text-white border-[#002B55]"
+                      : "bg-[#F6F6F4] border-[#E7E7E3] text-[#2A2A2E] hover:border-[#002B55]"
                   }`}
                 >
                   <span className="font-medium">{opt.label}</span>
                   {isDisabled && (
-                    <span className="block text-xs mt-0.5 text-[#8A93A6]/40">
+                    <span className="block text-xs mt-0.5 text-[#6B6B70]/40">
                       Not typically available for this practice area
                     </span>
                   )}
                   {!isDisabled && opt.note && (
                     <span
                       className={`block text-xs mt-0.5 ${
-                        isSelected ? "text-white/70" : "text-[#8A93A6]"
+                        isSelected ? "text-white/70" : "text-[#6B6B70]"
                       }`}
                     >
                       {opt.note}
@@ -266,7 +266,7 @@ function QuestionCard({
                     placeholder="Please describe…"
                     value={otherText}
                     onChange={(e) => handleOtherText(e.target.value)}
-                    className="mt-2 w-full px-4 py-3 rounded-2xl border border-[#1F2A3D] bg-[#0A0F1C] text-[#E6EAF2] placeholder-[#8A93A6] focus:outline-none focus:border-[#3B82F6] transition-colors text-sm"
+                    className="mt-2 w-full px-4 py-3 rounded-2xl border border-[#E7E7E3] bg-[#F6F6F4] text-[#0B0B0C] placeholder-[#9A9AA0] focus:outline-none focus:border-[#002B55] transition-colors text-sm"
                   />
                 )}
               </div>
@@ -304,18 +304,18 @@ function QuestionCard({
   };
 
   return (
-    <div className="bg-[#141C2E] border border-[#1F2A3D] rounded-3xl p-8">
-      <p className="text-xs text-[#8A93A6] uppercase tracking-widest font-medium mb-3">
+    <div className="bg-white border border-[#E7E7E3] rounded-3xl p-8">
+      <p className="text-xs text-[#6B6B70] uppercase tracking-widest font-medium mb-3">
         {question.required ? "Required" : "Optional"} · Select all that apply
       </p>
       <h2
-        className="text-xl sm:text-2xl text-[#E6EAF2] mb-2"
-        style={{ fontFamily: '"Lora", Georgia, serif', fontWeight: 500 }}
+        className="text-xl sm:text-2xl text-[#0B0B0C] mb-2"
+        style={{ fontFamily: "var(--display)", fontWeight: 500 }}
       >
         {question.text}
       </h2>
       {question.subtext && (
-        <p className="text-[#8A93A6] text-sm mb-6">{question.subtext}</p>
+        <p className="text-[#6B6B70] text-sm mb-6">{question.subtext}</p>
       )}
       {!question.subtext && <div className="mb-5" />}
       <div className="space-y-2">
@@ -326,17 +326,17 @@ function QuestionCard({
               <button
                 type="button"
                 onClick={() => handleMultiToggle(opt.value)}
-                className={`w-full text-left px-5 py-3.5 rounded-2xl border text-sm transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#3B82F6] focus-visible:ring-offset-2 focus-visible:ring-offset-[#141C2E] ${
+                className={`w-full text-left px-5 py-3.5 rounded-2xl border text-sm transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#002B55] focus-visible:ring-offset-2 focus-visible:ring-offset-white ${
                   isSelected
-                    ? "bg-[#3B82F6] text-white border-[#3B82F6]"
-                    : "bg-[#0A0F1C] border-[#1F2A3D] text-[#C8CDD8] hover:border-[#3B82F6]"
+                    ? "bg-[#002B55] text-white border-[#002B55]"
+                    : "bg-[#F6F6F4] border-[#E7E7E3] text-[#2A2A2E] hover:border-[#002B55]"
                 }`}
               >
                 <span className="font-medium">{opt.label}</span>
                 {opt.note && (
                   <span
                     className={`block text-xs mt-0.5 ${
-                      isSelected ? "text-white/70" : "text-[#8A93A6]"
+                      isSelected ? "text-white/70" : "text-[#6B6B70]"
                     }`}
                   >
                     {opt.note}
@@ -350,7 +350,7 @@ function QuestionCard({
                   placeholder="Please describe…"
                   value={otherText}
                   onChange={(e) => handleMultiOtherText(e.target.value)}
-                  className="mt-2 w-full px-4 py-3 rounded-2xl border border-[#1F2A3D] bg-[#0A0F1C] text-[#E6EAF2] placeholder-[#8A93A6] focus:outline-none focus:border-[#3B82F6] transition-colors text-sm"
+                  className="mt-2 w-full px-4 py-3 rounded-2xl border border-[#E7E7E3] bg-[#F6F6F4] text-[#0B0B0C] placeholder-[#9A9AA0] focus:outline-none focus:border-[#002B55] transition-colors text-sm"
                 />
               )}
             </div>
@@ -400,7 +400,7 @@ function SummaryView({
 
   return (
     <div className="space-y-3">
-      <p className="text-[#8A93A6] text-sm mb-6">
+      <p className="text-[#6B6B70] text-sm mb-6">
         Review your answers below. Click any row to change that answer, then proceed to find your matches.
       </p>
       {questions.map((q, index) => {
@@ -413,20 +413,20 @@ function SummaryView({
           <button
             key={q.id}
             onClick={() => onEdit(index)}
-            className={`w-full text-left bg-[#141C2E] border border-[#1F2A3D] rounded-2xl p-5 group hover:border-[#3B82F6] hover:bg-[#1F2A3D] transition-colors ${
+            className={`w-full text-left bg-white border border-[#E7E7E3] rounded-2xl p-5 group hover:border-[#002B55] hover:bg-[#F6F6F4] transition-colors ${
               !hasAnswer && !q.required ? "opacity-50" : ""
             }`}
           >
             <div className="flex items-start justify-between gap-3">
               <div className="min-w-0">
-                <p className="text-xs text-[#8A93A6] font-medium mb-1">{q.text}</p>
-                <p className="text-[#E6EAF2] text-sm font-medium">
+                <p className="text-xs text-[#6B6B70] font-medium mb-1">{q.text}</p>
+                <p className="text-[#0B0B0C] text-sm font-medium">
                   {hasAnswer ? getDisplayValue(q, val) : "N/A"}
                 </p>
               </div>
               <Pencil
                 size={13}
-                className="shrink-0 mt-1 text-[#1F2A3D] group-hover:text-[#3B82F6] transition-colors"
+                className="shrink-0 mt-1 text-[#9A9AA0] group-hover:text-[#002B55] transition-colors"
               />
             </div>
           </button>
@@ -590,17 +590,17 @@ export default function IntakeWizard() {
     <div className="max-w-2xl mx-auto px-6 py-12">
       {/* Header */}
       <div className="mb-8">
-        <span className="inline-block bg-[#3B82F6] text-white text-xs font-medium px-3 py-1.5 rounded-full tracking-wide mb-4">
+        <span className="inline-block bg-[#002B55] text-white text-xs font-medium px-3 py-1.5 rounded-full tracking-wide mb-4">
           {pillLabel}
         </span>
         <h1
-          className="text-3xl sm:text-4xl text-[#E6EAF2]"
-          style={{ fontFamily: '"Lora", Georgia, serif', fontWeight: 500 }}
+          className="text-3xl sm:text-4xl text-[#0B0B0C]"
+          style={{ fontFamily: "var(--display)", fontWeight: 500 }}
         >
           {showSummary ? "Review your answers" : "Tell us about your needs"}
         </h1>
         {!showSummary && (
-          <p className="text-[#8A93A6] text-sm mt-2">
+          <p className="text-[#6B6B70] text-sm mt-2">
             Your answers help us find the most relevant firms for you. There are no right or wrong answers.
           </p>
         )}
@@ -649,7 +649,7 @@ export default function IntakeWizard() {
         <button
           onClick={handleBack}
           disabled={currentStep === 0 && !showSummary}
-          className="flex items-center gap-2 px-5 py-3 rounded-2xl border border-[#1F2A3D] text-[#8A93A6] text-sm font-medium hover:border-[#3B82F6] hover:text-[#E6EAF2] transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
+          className="flex items-center gap-2 px-5 py-3 rounded-2xl border border-[#E7E7E3] text-[#6B6B70] text-sm font-medium hover:border-[#002B55] hover:text-[#0B0B0C] transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
         >
           <ArrowLeft size={15} />
           Back
@@ -662,7 +662,7 @@ export default function IntakeWizard() {
               setEditingFromSummary(false);
               setShowSummary(true);
             }}
-            className="flex items-center gap-2 px-5 py-3 rounded-2xl border border-[#3B82F6] text-[#3B82F6] text-sm font-medium hover:bg-[#3B82F6] hover:text-white transition-colors"
+            className="flex items-center gap-2 px-5 py-3 rounded-2xl border border-[#002B55] text-[#002B55] text-sm font-medium hover:bg-[#002B55] hover:text-white transition-colors"
           >
             Back to Review
           </button>
@@ -672,7 +672,7 @@ export default function IntakeWizard() {
           <button
             onClick={handleSubmit}
             disabled={isSubmitting}
-            className="flex items-center gap-2 px-8 py-3 rounded-2xl bg-[#3B82F6] hover:bg-[#2563EB] text-white text-sm font-medium transition-colors disabled:opacity-50"
+            className="flex items-center gap-2 px-8 py-3 rounded-2xl bg-[#002B55] hover:bg-[#01213f] text-white text-sm font-medium transition-colors disabled:opacity-50"
           >
             {isSubmitting ? "Finding matches…" : "Find My Matches"}
             {!isSubmitting && <ArrowRight size={15} />}
@@ -681,7 +681,7 @@ export default function IntakeWizard() {
           <button
             onClick={handleNext}
             disabled={!canProceed()}
-            className="flex items-center gap-2 px-8 py-3 rounded-2xl bg-[#002452] text-white text-sm font-medium hover:opacity-90 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed"
+            className="flex items-center gap-2 px-8 py-3 rounded-2xl bg-[#002B55] text-white text-sm font-medium hover:opacity-90 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {currentStep < questions.length - 1 ? "Next" : "Review"}
             <ArrowRight size={15} />

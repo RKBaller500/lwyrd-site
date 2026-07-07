@@ -9,7 +9,6 @@ import { createClient } from "@/lib/supabase/client";
 import { useAuth } from "@/context/AuthContext";
 
 const ease = [0.25, 0.46, 0.45, 0.94] as const;
-const lora = { fontFamily: '"Lora", Georgia, serif' } as const;
 
 interface AccountContentProps {
   profile: {
@@ -43,9 +42,6 @@ function formatMemberSince(isoDate: string): string {
     year: "numeric",
   });
 }
-
-const inputClass =
-  "w-full px-4 py-3 rounded-2xl border border-[#1F2A3D] bg-[#141C2E] text-[#E6EAF2] placeholder-[#8A93A6] focus:outline-none focus:border-[#3B82F6] transition-colors text-sm";
 
 export default function AccountContent({ profile }: AccountContentProps) {
   const { logout } = useAuth();
@@ -102,83 +98,60 @@ export default function AccountContent({ profile }: AccountContentProps) {
         setDeleteMessage({ type: "error", text: result.error });
         return;
       }
-      // Clear local session then redirect to home
       const supabase = createClient();
       await supabase.auth.signOut().catch(() => {});
       router.push("/");
     });
   };
 
+  const msgColor = (t: "success" | "error") => (t === "success" ? "#0f7a3d" : "#b42318");
+
   return (
-    <motion.div className="space-y-12" variants={container} initial="hidden" animate="visible">
+    <motion.div style={{ display: "grid", gap: 48 }} variants={container} initial="hidden" animate="visible">
       {/* Page header */}
-      <motion.div variants={item}>
-        <h1 className="text-4xl sm:text-5xl text-[#E6EAF2]" style={{ ...lora, fontWeight: 500 }}>
-          My Account
-        </h1>
-        <p className="text-[#8A93A6] text-sm mt-2">
-          Manage your profile settings and account security.
-        </p>
+      <motion.div variants={item} className="app-head">
+        <h1>My Account</h1>
+        <p>Manage your profile settings and account security.</p>
       </motion.div>
 
       {/* ── Profile Settings ───────────────────────────────── */}
       <motion.section variants={item}>
-        <div className="flex items-center gap-2 mb-5">
-          <User size={18} className="text-[#E6EAF2]" strokeWidth={1.5} />
-          <h2 className="text-2xl text-[#E6EAF2]" style={{ ...lora, fontWeight: 500 }}>
-            Profile Settings
-          </h2>
+        <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 18 }}>
+          <User size={18} strokeWidth={1.6} style={{ color: "var(--navy)" }} />
+          <h2 style={{ fontSize: "1.4rem" }}>Profile Settings</h2>
         </div>
 
-        <div className="bg-[#141C2E] border border-[#1F2A3D] rounded-3xl p-8 max-w-md">
-          <form onSubmit={handleProfileSave} className="space-y-5">
-            <div>
-              <label className="block text-xs text-[#8A93A6] font-medium mb-1.5">Full name</label>
-              <input
-                type="text"
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                placeholder="Your name"
-                required
-                className={inputClass}
-              />
+        <div className="ds-card" style={{ maxWidth: 460 }}>
+          <form onSubmit={handleProfileSave} style={{ display: "grid", gap: 18 }}>
+            <div className="field">
+              <label>Full name</label>
+              <input type="text" value={name} onChange={(e) => setName(e.target.value)} placeholder="Your name" required />
             </div>
 
-            <div>
-              <label className="block text-xs text-[#8A93A6] font-medium mb-1.5">Email</label>
-              <input
-                type="email"
-                value={profile.email}
-                disabled
-                className="w-full px-4 py-3 rounded-2xl border border-[#1F2A3D] bg-[#0A0F1C] text-[#8A93A6] text-sm cursor-not-allowed"
-              />
-              <p className="text-xs text-[#8A93A6] mt-1">Email cannot be changed here.</p>
+            <div className="field">
+              <label>Email</label>
+              <input type="email" value={profile.email} disabled style={{ background: "var(--paper-alt)", color: "var(--muted)", cursor: "not-allowed" }} />
+              <p className="field-hint">Email cannot be changed here.</p>
             </div>
 
-            <div className="grid grid-cols-2 gap-4 pt-1">
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16, paddingTop: 2 }}>
               <div>
-                <p className="text-xs text-[#8A93A6] font-medium mb-1">Member since</p>
-                <p className="text-sm text-[#C8CDD8]">{formatMemberSince(profile.createdAt)}</p>
+                <p style={{ fontSize: ".78rem", color: "var(--faint)", fontWeight: 600, marginBottom: 4 }}>Member since</p>
+                <p style={{ fontSize: ".9rem", color: "var(--ink-2)" }}>{formatMemberSince(profile.createdAt)}</p>
               </div>
               <div>
-                <p className="text-xs text-[#8A93A6] font-medium mb-1">Plan</p>
-                <span className="inline-flex items-center text-xs font-medium px-2.5 py-1 rounded-full bg-white/10 text-[#E6EAF2]">
+                <p style={{ fontSize: ".78rem", color: "var(--faint)", fontWeight: 600, marginBottom: 4 }}>Plan</p>
+                <span className="chip" style={{ color: "var(--navy)", background: "var(--navy-tint)", borderColor: "var(--navy-tint-2)" }}>
                   {accessLevelLabels[profile.accessLevel]}
                 </span>
               </div>
             </div>
 
             {profileMessage && (
-              <p className={`text-sm ${profileMessage.type === "success" ? "text-emerald-600" : "text-red-500"}`}>
-                {profileMessage.text}
-              </p>
+              <p style={{ fontSize: ".9rem", color: msgColor(profileMessage.type) }}>{profileMessage.text}</p>
             )}
 
-            <button
-              type="submit"
-              disabled={isProfilePending}
-              className="w-full py-3 rounded-2xl bg-[#002452] text-white text-sm font-medium hover:opacity-90 transition-opacity disabled:opacity-50"
-            >
+            <button type="submit" disabled={isProfilePending} className="btn btn-primary" style={{ justifyContent: "center", opacity: isProfilePending ? 0.5 : 1 }}>
               {isProfilePending ? "Saving..." : "Save Changes"}
             </button>
           </form>
@@ -187,31 +160,28 @@ export default function AccountContent({ profile }: AccountContentProps) {
 
       {/* ── Security ───────────────────────────────── */}
       <motion.section variants={item}>
-        <div className="flex items-center gap-2 mb-5">
-          <Lock size={18} className="text-[#E6EAF2]" strokeWidth={1.5} />
-          <h2 className="text-2xl text-[#E6EAF2]" style={{ ...lora, fontWeight: 500 }}>
-            Security
-          </h2>
+        <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 18 }}>
+          <Lock size={18} strokeWidth={1.6} style={{ color: "var(--navy)" }} />
+          <h2 style={{ fontSize: "1.4rem" }}>Security</h2>
         </div>
 
-        <div className="bg-[#141C2E] border border-[#1F2A3D] rounded-3xl p-8 max-w-md space-y-4">
+        <div className="ds-card" style={{ maxWidth: 460, display: "grid", gap: 16 }}>
           <div>
-            <p className="text-sm text-[#C8CDD8] font-medium">Password</p>
-            <p className="text-xs text-[#8A93A6] mt-0.5">
-              We&apos;ll send a reset link to <span className="text-[#8A93A6]">{profile.email}</span>.
+            <p style={{ fontSize: ".92rem", color: "var(--ink)", fontWeight: 600 }}>Password</p>
+            <p style={{ fontSize: ".82rem", color: "var(--muted)", marginTop: 2 }}>
+              We&apos;ll send a reset link to {profile.email}.
             </p>
           </div>
 
           {resetMessage && (
-            <p className={`text-sm ${resetMessage.type === "success" ? "text-emerald-600" : "text-red-500"}`}>
-              {resetMessage.text}
-            </p>
+            <p style={{ fontSize: ".9rem", color: msgColor(resetMessage.type) }}>{resetMessage.text}</p>
           )}
 
           <button
             onClick={handlePasswordReset}
             disabled={isResetPending || resetMessage?.type === "success"}
-            className="w-full py-3 rounded-2xl border border-[#002452] text-[#E6EAF2] text-sm font-medium hover:bg-[#002452] hover:text-white transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            className="btn btn-outline"
+            style={{ justifyContent: "center", opacity: isResetPending || resetMessage?.type === "success" ? 0.5 : 1 }}
           >
             {isResetPending ? "Sending..." : "Send Password Reset Email"}
           </button>
@@ -220,69 +190,62 @@ export default function AccountContent({ profile }: AccountContentProps) {
 
       {/* ── Sign out ──────────────────────────────────────────── */}
       <motion.div variants={item}>
-        <button
-          onClick={() => logout()}
-          className="inline-flex items-center gap-2 text-sm text-[#8A93A6] hover:text-red-500 transition-colors"
-        >
-          <LogOut size={14} strokeWidth={1.5} />
-          Sign out
+        <button onClick={() => logout()} className="btn btn-ghost" style={{ color: "var(--muted)" }}>
+          <LogOut size={14} strokeWidth={1.6} /> Sign out
         </button>
       </motion.div>
 
       {/* ── Danger Zone ───────────────────────────────────────── */}
       <motion.section variants={item}>
-        <div className="flex items-center gap-2 mb-5">
-          <AlertTriangle size={18} className="text-red-500" strokeWidth={1.5} />
-          <h2 className="text-2xl text-red-600" style={{ ...lora, fontWeight: 500 }}>
-            Danger Zone
-          </h2>
+        <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 18 }}>
+          <AlertTriangle size={18} strokeWidth={1.6} style={{ color: "#b42318" }} />
+          <h2 style={{ fontSize: "1.4rem", color: "#b42318" }}>Danger Zone</h2>
         </div>
 
-        <div className="border border-red-200 rounded-3xl p-8 max-w-md bg-red-50/40">
+        <div style={{ maxWidth: 460, border: "1px solid #f6cfca", borderRadius: 18, padding: "clamp(22px,3vw,32px)", background: "#fdf4f3" }}>
           {!showDeleteConfirm ? (
             <div>
-              <p className="text-sm text-[#C8CDD8] font-medium mb-1">Delete Account</p>
-              <p className="text-xs text-[#8A93A6] mb-5 leading-relaxed">
+              <p style={{ fontSize: ".92rem", color: "var(--ink)", fontWeight: 600, marginBottom: 4 }}>Delete Account</p>
+              <p style={{ fontSize: ".82rem", color: "var(--muted)", marginBottom: 20, lineHeight: 1.6 }}>
                 Permanently delete your account and all associated data, including your intake history,
                 saved firms, and profile information. This action cannot be undone.
               </p>
               <button
                 onClick={() => setShowDeleteConfirm(true)}
-                className="inline-flex items-center gap-2 px-5 py-2.5 rounded-2xl border border-red-400 text-red-600 text-sm font-medium hover:bg-red-600 hover:text-white transition-colors"
+                className="btn"
+                style={{ border: "1px solid #e0a5a0", color: "#b42318", background: "#fff" }}
               >
-                <Trash2 size={14} strokeWidth={1.5} />
-                Delete Account
+                <Trash2 size={14} strokeWidth={1.6} /> Delete Account
               </button>
             </div>
           ) : (
-            <div className="space-y-4">
-              <div className="p-4 rounded-2xl bg-red-100/60 border border-red-200">
-                <p className="text-sm text-red-800 font-medium mb-1">This cannot be undone</p>
-                <p className="text-xs text-red-700 leading-relaxed">
+            <div style={{ display: "grid", gap: 16 }}>
+              <div style={{ padding: 16, borderRadius: 12, background: "#fbe9e7", border: "1px solid #f6cfca" }}>
+                <p style={{ fontSize: ".9rem", color: "#8a2018", fontWeight: 600, marginBottom: 4 }}>This cannot be undone</p>
+                <p style={{ fontSize: ".8rem", color: "#a5352c", lineHeight: 1.6 }}>
                   All of your data will be permanently removed: intake submissions, saved firms,
                   match history, and your account credentials. There is no recovery option.
                 </p>
               </div>
 
-              <div>
-                <label className="block text-xs text-[#8A93A6] font-medium mb-1.5">
-                  Type <span className="font-bold text-red-600">DELETE</span> to confirm
+              <div className="field">
+                <label>
+                  Type <span style={{ fontWeight: 700, color: "#b42318" }}>DELETE</span> to confirm
                 </label>
                 <input
                   type="text"
                   value={deleteConfirmText}
                   onChange={(e) => setDeleteConfirmText(e.target.value)}
                   placeholder="DELETE"
-                  className="w-full px-4 py-3 rounded-2xl border border-red-300 bg-[#141C2E] text-[#E6EAF2] placeholder-slate-300 focus:outline-none focus:border-red-500 transition-colors text-sm"
                   autoComplete="off"
                 />
               </div>
 
               {deleteMessage?.type === "error" && (
-                <p className="text-sm text-red-500">{deleteMessage.text}</p>
+                <p style={{ fontSize: ".9rem", color: "#b42318" }}>{deleteMessage.text}</p>
               )}
 
-              <div className="flex gap-3">
+              <div style={{ display: "flex", gap: 12 }}>
                 <button
                   onClick={() => {
                     setShowDeleteConfirm(false);
@@ -290,14 +253,22 @@ export default function AccountContent({ profile }: AccountContentProps) {
                     setDeleteMessage(null);
                   }}
                   disabled={isDeletePending}
-                  className="flex-1 py-2.5 rounded-2xl border border-[#1F2A3D] text-[#C8CDD8] text-sm font-medium hover:bg-slate-50 transition-colors disabled:opacity-50"
+                  className="btn btn-ghost"
+                  style={{ flex: 1, justifyContent: "center" }}
                 >
                   Cancel
                 </button>
                 <button
                   onClick={handleDeleteAccount}
                   disabled={deleteConfirmText !== "DELETE" || isDeletePending}
-                  className="flex-1 py-2.5 rounded-2xl bg-red-600 text-white text-sm font-medium hover:bg-red-700 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+                  className="btn"
+                  style={{
+                    flex: 1,
+                    justifyContent: "center",
+                    background: "#b42318",
+                    color: "#fff",
+                    opacity: deleteConfirmText !== "DELETE" || isDeletePending ? 0.5 : 1,
+                  }}
                 >
                   {isDeletePending ? "Deleting..." : "Permanently Delete"}
                 </button>

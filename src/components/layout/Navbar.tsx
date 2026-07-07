@@ -165,7 +165,6 @@ export default function Navbar() {
               </>
             ) : (
               <>
-                <NavLink href="/how-it-works">How It Works</NavLink>
                 <NavLink href="/blog">Blog</NavLink>
                 <NavLink href="/faq">FAQ</NavLink>
                 <NavLink href="/about">About</NavLink>
@@ -179,7 +178,6 @@ export default function Navbar() {
             )
           ) : (
             <>
-              <NavLink href="/how-it-works">How It Works</NavLink>
               <NavLink href="/for-law-firms">For Law Firms</NavLink>
               <NavLink href="/blog">Blog</NavLink>
               <NavLink href="/faq">FAQ</NavLink>
@@ -270,7 +268,6 @@ export default function Navbar() {
                   </>
                 ) : (
                   <>
-                    <MobileNavLink href="/how-it-works" onClick={close}>How It Works</MobileNavLink>
                     <MobileNavLink href="/blog" onClick={close}>Blog</MobileNavLink>
                     <MobileNavLink href="/faq" onClick={close}>FAQ</MobileNavLink>
                     <MobileNavLink href="/about" onClick={close}>About</MobileNavLink>
@@ -294,7 +291,6 @@ export default function Navbar() {
                 )
               ) : (
                 <>
-                  <MobileNavLink href="/how-it-works" onClick={close}>How It Works</MobileNavLink>
                   <MobileNavLink href="/for-law-firms" onClick={close}>For Law Firms</MobileNavLink>
                   <MobileNavLink href="/blog" onClick={close}>Blog</MobileNavLink>
                   <MobileNavLink href="/faq" onClick={close}>FAQ</MobileNavLink>

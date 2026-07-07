@@ -5,6 +5,8 @@ import { Firm, MatchResult } from "@/types";
 import { Award, MapPin, Building2, CheckCircle2, XCircle, ArrowRight } from "lucide-react";
 import SaveFirmButton from "@/components/firms/SaveFirmButton";
 
+const serif = { fontFamily: '"Libre Baskerville", Georgia, serif' } as const;
+
 const sizeLabels: Record<string, string> = {
   boutique: "Boutique",
   "mid-size": "Mid-size",
@@ -62,13 +64,10 @@ function ScoreRing({ score }: { score: number }) {
     <div className="flex flex-col items-center gap-2.5 shrink-0">
       <div className="relative" style={{ width: size, height: size }}>
         <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`} style={{ transform: "rotate(-90deg)" }}>
+          <circle cx={size / 2} cy={size / 2} r={radius} fill="none" stroke="#E7E7E3" strokeWidth={stroke} />
           <circle
             cx={size / 2} cy={size / 2} r={radius}
-            fill="none" stroke="#1F2A3D" strokeWidth={stroke}
-          />
-          <circle
-            cx={size / 2} cy={size / 2} r={radius}
-            fill="none" stroke="#3B82F6" strokeWidth={stroke}
+            fill="none" stroke="#002B55" strokeWidth={stroke}
             strokeDasharray={`${filled} ${circumference}`}
             strokeLinecap="round"
             style={{ transition: "stroke-dasharray 0.85s cubic-bezier(0.25,0.46,0.45,0.94) 0.3s" }}
@@ -76,17 +75,14 @@ function ScoreRing({ score }: { score: number }) {
         </svg>
         <div className="absolute inset-0 flex items-center justify-center">
           <div className="flex items-baseline gap-0.5">
-            <span
-              className="text-[#E6EAF2] leading-none tabular-nums"
-              style={{ fontFamily: '"Lora", Georgia, serif', fontWeight: 500, fontSize: "2rem" }}
-            >
+            <span className="leading-none tabular-nums" style={{ ...serif, color: "var(--navy)", fontSize: "2rem" }}>
               {score}
             </span>
-            <span className="text-sm text-[#8A93A6] font-medium">%</span>
+            <span className="text-sm text-[#6B6B70] font-medium">%</span>
           </div>
         </div>
       </div>
-      <span className="text-[11px] text-[#8A93A6] font-semibold tracking-widest uppercase">Match Score</span>
+      <span className="text-[11px] text-[#9A9AA0] font-semibold tracking-widest uppercase">Match Score</span>
     </div>
   );
 }
@@ -105,13 +101,13 @@ export default function MatchCard({ result, rank, initialSaved = false }: MatchC
 
   return (
     <div
-      className={`rounded-3xl bg-[#141C2E] overflow-hidden transition-all hover:shadow-lg ${
-        isBestMatch
-          ? "border-2 border-[#c9a227] shadow-[0_4px_28px_rgba(201,162,39,0.12)]"
-          : "border-2 border-[#1F2A3D] shadow-[0_4px_24px_rgba(0,0,0,0.2)]"
-      }`}
+      className="rounded-[18px] bg-white overflow-hidden transition-all hover:shadow-md"
+      style={{
+        border: isBestMatch ? "1.5px solid var(--navy)" : "1px solid var(--line)",
+        boxShadow: isBestMatch ? "0 8px 28px rgba(0,43,85,0.12)" : "var(--shadow-sm)",
+      }}
     >
-      {isBestMatch && <div className="h-[3px] bg-[#c9a227]" />}
+      {isBestMatch && <div style={{ height: 3, background: "var(--navy)" }} />}
 
       <div className="p-8 sm:p-10">
         {/* Header */}
@@ -119,47 +115,42 @@ export default function MatchCard({ result, rank, initialSaved = false }: MatchC
           <div className="flex-1 min-w-0">
             <div className="flex flex-wrap items-center gap-2 mb-3">
               {isBestMatch && (
-                <span className="inline-flex items-center gap-1.5 bg-[#c9a227] text-[#0A0F1C] text-[10px] font-semibold tracking-widest uppercase px-2.5 py-1 rounded-full">
+                <span className="inline-flex items-center gap-1.5 text-white text-[10px] font-semibold tracking-widest uppercase px-2.5 py-1 rounded-full" style={{ background: "var(--navy)" }}>
                   <Award size={9} strokeWidth={2.5} />
                   Best Match
                 </span>
               )}
               {!isBestMatch && rank > 0 && (
-                <span className="text-xs text-[#8A93A6] font-medium">#{rank}</span>
+                <span className="text-xs text-[#9A9AA0] font-medium">#{rank}</span>
               )}
             </div>
-            <h3
-              className="text-[#E6EAF2] text-3xl leading-snug mb-2"
-              style={{ fontFamily: '"Lora", Georgia, serif', fontWeight: 500 }}
-            >
-              {firm.name}
-            </h3>
-            <p className="text-[#8A93A6] text-base leading-relaxed">{firm.tagline}</p>
+            <h3 style={{ ...serif, fontSize: "1.85rem", lineHeight: 1.2, marginBottom: ".5rem" }}>{firm.name}</h3>
+            <p className="text-[#6B6B70] text-base leading-relaxed">{firm.tagline}</p>
           </div>
 
           <ScoreRing score={roundedScore} />
         </div>
 
         {/* Meta row */}
-        <div className="flex flex-wrap items-center gap-x-4 gap-y-1.5 text-sm text-[#8A93A6] pb-6 border-b border-[#1F2A3D]">
+        <div className="flex flex-wrap items-center gap-x-4 gap-y-1.5 text-sm text-[#6B6B70] pb-6" style={{ borderBottom: "1px solid var(--line)" }}>
           <span className="flex items-center gap-1.5">
             <MapPin size={13} strokeWidth={1.75} className="shrink-0" />
             {firm.location}
           </span>
-          <span className="text-[#1F2A3D]">·</span>
+          <span className="text-[#D8D8D2]">·</span>
           <span className="flex items-center gap-1.5">
             <Building2 size={13} strokeWidth={1.75} className="shrink-0" />
             {sizeLabels[firm.size] ?? firm.size} firm
           </span>
           {firm.founded && (
             <>
-              <span className="text-[#1F2A3D]">·</span>
+              <span className="text-[#D8D8D2]">·</span>
               <span>Est. {firm.founded}</span>
             </>
           )}
           {firm.billingModel && (
             <>
-              <span className="text-[#1F2A3D]">·</span>
+              <span className="text-[#D8D8D2]">·</span>
               <span>{billingModelLabels[firm.billingModel] ?? firm.billingModel} billing</span>
             </>
           )}
@@ -167,21 +158,21 @@ export default function MatchCard({ result, rank, initialSaved = false }: MatchC
 
         {/* Criteria */}
         {hasCriteria && (
-          <div className={`py-6 border-b border-[#1F2A3D] ${hasBoth ? "grid sm:grid-cols-2 gap-x-8 gap-y-2.5" : "space-y-2.5"}`}>
+          <div className={`py-6 ${hasBoth ? "grid sm:grid-cols-2 gap-x-8 gap-y-2.5" : "space-y-2.5"}`} style={{ borderBottom: "1px solid var(--line)" }}>
             {hasBoth ? (
               <>
                 <div className="space-y-2.5">
                   {reasons.map((r, i) => (
-                    <div key={i} className="flex items-start gap-3 text-sm text-[#C8CDD8]">
-                      <CheckCircle2 size={16} className="text-emerald-500 mt-0.5 shrink-0" />
+                    <div key={i} className="flex items-start gap-3 text-sm text-[#2A2A2E]">
+                      <CheckCircle2 size={16} className="text-emerald-600 mt-0.5 shrink-0" />
                       {r}
                     </div>
                   ))}
                 </div>
                 <div className="space-y-2.5">
                   {result.missedCriteria.map((c) => (
-                    <div key={c} className="flex items-start gap-3 text-sm text-[#8A93A6]">
-                      <XCircle size={16} className="text-rose-400/80 mt-0.5 shrink-0" />
+                    <div key={c} className="flex items-start gap-3 text-sm text-[#9A9AA0]">
+                      <XCircle size={16} className="text-rose-500/80 mt-0.5 shrink-0" />
                       {getMissedLabel(c, firm)}
                     </div>
                   ))}
@@ -190,14 +181,14 @@ export default function MatchCard({ result, rank, initialSaved = false }: MatchC
             ) : (
               <>
                 {reasons.map((r, i) => (
-                  <div key={i} className="flex items-start gap-3 text-sm text-slate-600">
-                    <CheckCircle2 size={16} className="text-emerald-500 mt-0.5 shrink-0" />
+                  <div key={i} className="flex items-start gap-3 text-sm text-[#2A2A2E]">
+                    <CheckCircle2 size={16} className="text-emerald-600 mt-0.5 shrink-0" />
                     {r}
                   </div>
                 ))}
                 {result.missedCriteria.map((c) => (
-                  <div key={c} className="flex items-start gap-3 text-sm text-slate-400">
-                    <XCircle size={16} className="text-rose-400/80 mt-0.5 shrink-0" />
+                  <div key={c} className="flex items-start gap-3 text-sm text-[#9A9AA0]">
+                    <XCircle size={16} className="text-rose-500/80 mt-0.5 shrink-0" />
                     {getMissedLabel(c, firm)}
                   </div>
                 ))}
@@ -209,11 +200,8 @@ export default function MatchCard({ result, rank, initialSaved = false }: MatchC
         {/* CTA */}
         <div className="flex items-center justify-between gap-4 pt-6">
           <SaveFirmButton firmId={firm.id} initialSaved={initialSaved} compact />
-          <Link
-            href={`/firms/${firm.id}`}
-            className="inline-flex items-center gap-2 px-6 py-3 rounded-2xl bg-[#3B82F6] hover:bg-[#2563EB] text-white text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#3B82F6] focus-visible:ring-offset-2 focus-visible:ring-offset-[#141C2E]"
-          >
-            View Full Profile
+          <Link href={`/firms/${firm.id}`} className="btn btn-primary">
+            View full profile
             <ArrowRight size={14} strokeWidth={2} />
           </Link>
         </div>

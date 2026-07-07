@@ -1,0 +1,198 @@
+/* Self-contained light styling for the auth modal. Scoped under .auth-modal
+   so it never leaks onto the (still-dark) pages the modal can open over. */
+.auth-modal {
+  --ink: #0b0b0c;
+  --ink-2: #2a2a2e;
+  --muted: #6b6b70;
+  --faint: #9a9aa0;
+  --navy: #002b55;
+  --navy-tint: #eef3f8;
+  --navy-tint-2: #e1eaf3;
+  --line: #e7e7e3;
+  --paper-alt: #f6f6f4;
+  --navy-gradient: radial-gradient(circle at 22% 18%, rgba(255, 255, 255, 0.22), transparent 42%),
+    radial-gradient(circle at 82% 12%, rgba(128, 170, 212, 0.42), transparent 46%),
+    linear-gradient(145deg, #001d3a 0%, #013a72 50%, #011a33 100%);
+  --shadow-sm: 0 1px 2px rgba(11, 11, 12, 0.04), 0 4px 16px rgba(11, 11, 12, 0.04);
+  color: var(--ink);
+  font-family: "Inter", system-ui, sans-serif;
+  padding: clamp(28px, 4vw, 36px);
+}
+.auth-modal h2 {
+  font-family: "Libre Baskerville", Georgia, serif;
+  font-weight: 700;
+  font-size: 1.55rem;
+  line-height: 1.12;
+  margin-bottom: 0.5rem;
+}
+.auth-modal .am-sub {
+  color: var(--muted);
+  font-size: 0.92rem;
+  margin-bottom: 1.4rem;
+}
+.auth-modal .kicker {
+  display: inline-flex;
+  align-items: center;
+  border: 1px solid var(--navy-tint-2);
+  background: var(--navy-tint);
+  color: var(--navy);
+  font-size: 0.72rem;
+  font-weight: 600;
+  border-radius: 999px;
+  padding: 0.28em 0.7em;
+  margin-bottom: 0.9rem;
+}
+.auth-modal .auth-tabs {
+  display: flex;
+  gap: 4px;
+  padding: 4px;
+  background: var(--paper-alt);
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  margin-bottom: 1.3rem;
+}
+.auth-modal .auth-tab {
+  flex: 1;
+  padding: 0.55em 1em;
+  border-radius: 999px;
+  font-weight: 500;
+  font-size: 0.9rem;
+  color: var(--muted);
+  cursor: pointer;
+  border: none;
+  background: none;
+  transition: background 0.15s ease, color 0.15s ease, box-shadow 0.15s ease;
+}
+.auth-modal .auth-tab.is-active {
+  background: #fff;
+  color: var(--ink);
+  box-shadow: var(--shadow-sm);
+}
+.auth-modal .am-form {
+  display: grid;
+  gap: 14px;
+}
+.auth-modal .field label {
+  display: block;
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--ink-2);
+  margin-bottom: 0.42rem;
+}
+.auth-modal .field input {
+  width: 100%;
+  height: 48px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: #fff;
+  color: var(--ink);
+  font-size: 0.95rem;
+  padding: 0.82em 0.95em;
+  outline: none;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+.auth-modal .field input:focus {
+  border-color: var(--navy-tint-2);
+  box-shadow: 0 0 0 4px rgba(111, 174, 236, 0.16);
+}
+.auth-modal .field-hint {
+  font-size: 0.78rem;
+  color: var(--faint);
+  margin-top: 0.4rem;
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  text-align: left;
+}
+.auth-modal .am-link {
+  color: var(--navy);
+  font-weight: 600;
+}
+.auth-modal .role-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+.auth-modal .role-opt {
+  position: relative;
+  padding: 0.7em 0.8em;
+  border-radius: 12px;
+  border: 1px solid var(--line);
+  background: #fff;
+  color: var(--ink-2);
+  font-size: 0.85rem;
+  cursor: pointer;
+  transition: border-color 0.15s ease, background 0.15s ease, color 0.15s ease;
+}
+.auth-modal .role-opt.is-active {
+  border-color: var(--navy);
+  background: var(--navy);
+  color: #fff;
+}
+.auth-modal .role-opt.is-disabled {
+  cursor: not-allowed;
+  opacity: 0.7;
+}
+.auth-modal .role-soon {
+  position: absolute;
+  top: -8px;
+  right: -4px;
+  font-size: 10px;
+  font-weight: 600;
+  background: var(--navy);
+  color: #fff;
+  padding: 0.1em 0.5em;
+  border-radius: 999px;
+  line-height: 1.3;
+}
+.auth-modal .am-btn {
+  width: 100%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5em;
+  font-weight: 500;
+  font-size: 0.95rem;
+  padding: 0.82em 1.35em;
+  border-radius: 999px;
+  border: none;
+  cursor: pointer;
+  background: var(--navy-gradient);
+  color: #fff;
+  transition: transform 0.18s ease;
+}
+.auth-modal .am-btn:hover {
+  transform: translateY(-1px);
+}
+.auth-modal .am-btn:disabled {
+  opacity: 0.5;
+  cursor: default;
+  transform: none;
+}
+.auth-modal .am-error {
+  color: #b42318;
+  background: #fdecea;
+  border: 1px solid #f6cfca;
+  border-radius: 10px;
+  padding: 0.7em 0.9em;
+  font-size: 0.85rem;
+  line-height: 1.4;
+}
+.auth-modal .am-note {
+  text-align: center;
+  color: var(--faint);
+  font-size: 0.78rem;
+  margin-top: 1.1rem;
+}
+.auth-modal .am-back {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4em;
+  color: var(--muted);
+  font-size: 0.82rem;
+  margin-bottom: 1.1rem;
+  background: none;
+  border: none;
+  cursor: pointer;
+}

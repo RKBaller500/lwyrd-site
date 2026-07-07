@@ -2,6 +2,8 @@
 
 import { useEffect, useRef } from "react";
 import MarketingNav from "./MarketingNav";
+import { useAuth } from "@/context/AuthContext";
+import { useRouter } from "next/navigation";
 
 type Section =
   | "product"
@@ -33,6 +35,58 @@ export default function MarketingPageClient({
   onReady?: (root: HTMLElement) => void | (() => void);
 }) {
   const ref = useRef<HTMLDivElement>(null);
+  const { isAuthenticated, openModal } = useAuth();
+  const router = useRouter();
+
+  // Intercept ported-design CTAs so generated markup cannot strand users on
+  // placeholder hashes or bypass the login-first intake flow.
+  useEffect(() => {
+    const root = ref.current;
+    if (!root) return;
+    const onClick = (e: MouseEvent) => {
+      if (!(e.target instanceof Element)) return;
+      const a = e.target.closest("a");
+      if (!a) return;
+      const href = a.getAttribute("href") ?? "";
+      const label = (a.textContent ?? "").trim().replace(/\s+/g, " ");
+      const lowerLabel = label.toLowerCase();
+      const isGetMatched =
+        href.startsWith("/get-matched") ||
+        a.id === "heroCta" ||
+        lowerLabel.startsWith("get matched");
+      const legalRoutes: Record<string, string> = {
+        Privacy: "/privacy",
+        Terms: "/terms",
+        Disclosures: "/disclosures",
+      };
+
+      if (href === "#" && legalRoutes[label]) {
+        e.preventDefault();
+        e.stopPropagation();
+        router.push(legalRoutes[label]);
+        return;
+      }
+
+      if (href === "#" && ["Startups", "SMBs", "Individuals"].includes(label)) {
+        e.preventDefault();
+        e.stopPropagation();
+        if (isAuthenticated) router.push("/intake/start");
+        else openModal("login", "/intake/start");
+        return;
+      }
+
+      if (!isGetMatched) return;
+      e.preventDefault();
+      e.stopPropagation();
+      if (isAuthenticated) router.push("/intake/start");
+      else {
+        const signup = href.includes("tab=signup");
+        openModal(signup ? "signup" : "login", "/intake/start");
+      }
+    };
+    root.addEventListener("click", onClick, true);
+    return () => root.removeEventListener("click", onClick, true);
+  }, [body, isAuthenticated, openModal, router]);
 
   useEffect(() => {
     const root = ref.current;
@@ -70,7 +124,7 @@ export default function MarketingPageClient({
             "@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;450;500;600&family=Libre+Baskerville:wght@400;700&display=swap');\n" +
             css +
             /* keep the dark root overlay off marketing pages */
-            '\nbody > div[aria-hidden="true"]{display:none !important;}\n',
+            "\n#ambient-overlay{display:none !important;}\n",
         }}
       />
       <MarketingNav current={current} />

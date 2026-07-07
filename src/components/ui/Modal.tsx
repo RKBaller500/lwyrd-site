@@ -8,9 +8,18 @@ interface ModalProps {
   onClose: () => void;
   children: React.ReactNode;
   maxWidth?: string;
+  panelClassName?: string;
+  closeIconClassName?: string;
 }
 
-export default function Modal({ isOpen, onClose, children, maxWidth = "max-w-md" }: ModalProps) {
+export default function Modal({
+  isOpen,
+  onClose,
+  children,
+  maxWidth = "max-w-md",
+  panelClassName = "bg-[#141C2E] p-8",
+  closeIconClassName = "text-[#8A93A6]",
+}: ModalProps) {
   const titleId = useId();
 
   useEffect(() => {
@@ -40,15 +49,15 @@ export default function Modal({ isOpen, onClose, children, maxWidth = "max-w-md"
         role="dialog"
         aria-modal="true"
         aria-labelledby={titleId}
-        className={`relative w-full ${maxWidth} bg-[#141C2E] rounded-3xl shadow-2xl p-8`}
+        className={`relative w-full ${maxWidth} ${panelClassName} rounded-3xl shadow-2xl`}
         onClick={(e) => e.stopPropagation()}
       >
         <button
           onClick={onClose}
-          className="absolute top-5 right-5 p-2 rounded-full hover:bg-[#1F2A3D] transition-colors"
+          className="absolute top-5 right-5 p-2 rounded-full hover:bg-black/5 transition-colors z-10"
           aria-label="Close dialog"
         >
-          <X size={16} className="text-[#8A93A6]" />
+          <X size={16} className={closeIconClassName} />
         </button>
         <div id={titleId}>
           {children}

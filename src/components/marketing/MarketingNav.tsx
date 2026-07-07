@@ -17,7 +17,7 @@ type Section = "product" | "clients" | "law-firms" | "about" | "blog" | "help";
  * auth/routing implementation.
  */
 export default function MarketingNav({ current }: { current?: Section }) {
-  const { isAuthenticated, user } = useAuth();
+  const { isAuthenticated, user, openModal } = useAuth();
   const router = useRouter();
   const [scrolled, setScrolled] = useState(false);
   const [open, setOpen] = useState(false);
@@ -33,7 +33,13 @@ export default function MarketingNav({ current }: { current?: Section }) {
 
   const getMatched = () => {
     closeMobile();
-    router.push(isAuthenticated ? "/intake/start" : "/get-matched");
+    if (isAuthenticated) router.push("/intake/start");
+    else openModal("login", "/intake/start");
+  };
+
+  const signIn = () => {
+    closeMobile();
+    openModal("login", "/intake/start");
   };
 
   const cur = (s: Section) => (current === s ? " is-current" : "");
@@ -80,9 +86,9 @@ export default function MarketingNav({ current }: { current?: Section }) {
               Clients
             </button>
             <div className="nav-menu" aria-label="Clients menu">
-              <a href="#" aria-disabled="true">Startups</a>
-              <a href="#" aria-disabled="true">SMBs</a>
-              <a href="#" aria-disabled="true">Individuals</a>
+              <a href="/get-matched" onClick={(e) => { e.preventDefault(); getMatched(); }}>Startups</a>
+              <a href="/get-matched" onClick={(e) => { e.preventDefault(); getMatched(); }}>SMBs</a>
+              <a href="/get-matched" onClick={(e) => { e.preventDefault(); getMatched(); }}>Individuals</a>
             </div>
           </div>
 
@@ -152,13 +158,9 @@ export default function MarketingNav({ current }: { current?: Section }) {
             </>
           ) : (
             <>
-              <Link
-                href="/get-matched?tab=login"
-                className="btn btn-ghost"
-                onClick={closeMobile}
-              >
+              <button type="button" className="btn btn-ghost" onClick={signIn}>
                 Sign in
-              </Link>
+              </button>
               <button type="button" className="btn btn-primary" onClick={getMatched}>
                 Get matched
               </button>

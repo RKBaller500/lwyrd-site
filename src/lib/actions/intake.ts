@@ -1,7 +1,6 @@
 "use server";
 
 import { createClient } from "@/lib/supabase/server";
-import { cookies } from "next/headers";
 import type { Firm, IntakeAnswers, LockedMatchResult, MatchResult, PublicMatchResult } from "@/types";
 import { matchFirmsV2 } from "@/lib/matching";
 import { mapDbFirmToFirm } from "@/lib/supabase/mappers";
@@ -10,37 +9,9 @@ import { firms as localFirms } from "@/data/firms";
 import { CATEGORY_SLUG_MAP } from "@/data/intakeV2";
 import { buildPreparedMaterials } from "@/lib/intakePreparedMaterials";
 import type { FirmProfileMatchContext } from "@/types";
+import { hasDurableIntakeUnlock, previewUnlockCookieValue } from "@/lib/paywallUnlocks";
 
-function canViewUnlockedMatches(accessLevel?: string | null, previewUnlocked = false): boolean {
-  return previewUnlocked || accessLevel === "subscription" || accessLevel === "org";
-}
-
-async function hasTemporaryPreviewUnlock(submissionId?: string | null): Promise<boolean> {
-  if (!submissionId) return false;
-  const cookieStore = await cookies();
-  const raw = cookieStore.get("lwyrd_preview_unlock")?.value ?? "";
-  return raw.split(",").map((id) => id.trim()).includes(submissionId);
-}
-
-export async function previewUnlockCookieValue(submissionId: string): Promise<string> {
-  const cookieStore = await cookies();
-  const current = cookieStore.get("lwyrd_preview_unlock")?.value ?? "";
-  const ids = current
-    .split(",")
-    .map((id) => id.trim())
-    .filter(Boolean);
-  return Array.from(new Set([...ids, submissionId])).join(",");
-}
-
-async function getCurrentUserAccessLevel(supabase: Awaited<ReturnType<typeof createClient>>, userId: string) {
-  const { data: profile } = await supabase
-    .from("profiles")
-    .select("access_level")
-    .eq("id", userId)
-    .single();
-
-  return profile?.access_level as string | null | undefined;
-}
+export { previewUnlockCookieValue };
 
 async function loadMatchableFirms(
   supabase: Awaited<ReturnType<typeof createClient>>,
@@ -169,17 +140,15 @@ function redactMatchResult(result: MatchResult, index: number, practiceAreaLabel
 
 function publicResultsForAccess(
   results: MatchResult[],
-  accessLevel: string | null | undefined,
   practiceAreaLabel: string,
-  previewUnlocked = false
+  intakeUnlocked = false
 ): { results: PublicMatchResult[]; lockedCount: number; unlocked: boolean } {
-  const unlocked = canViewUnlockedMatches(accessLevel, previewUnlocked);
-  if (unlocked) return { results, lockedCount: 0, unlocked };
+  if (intakeUnlocked) return { results, lockedCount: 0, unlocked: true };
 
   return {
     results: results.map((result, index) => redactMatchResult(result, index, practiceAreaLabel)),
     lockedCount: results.length,
-    unlocked,
+    unlocked: false,
   };
 }
 
@@ -435,8 +404,6 @@ export async function runMatchingV2(
     data: { user },
   } = await supabase.auth.getUser();
   if (!user) return { results: [], lockedCount: 0, unlocked: false, error: "Not authenticated" };
-  const accessLevel = await getCurrentUserAccessLevel(supabase, user.id);
-
   // Resolve practice area slug from DB; fall back to CATEGORY_SLUG_MAP if unavailable
   let practiceAreaSlug = CATEGORY_SLUG_MAP[track]?.[category] ?? "corporate-formation";
   try {
@@ -459,10 +426,10 @@ export async function runMatchingV2(
 
   // Save before returning so the dashboard and past-result links are immediately consistent.
   const submissionId = await saveIntakeSubmissionV2(track, category, categoryLabel, answers, allResults, practiceAreaSlug);
-  const previewUnlocked = await hasTemporaryPreviewUnlock(submissionId);
+  const intakeUnlocked = await hasDurableIntakeUnlock(supabase, user.id, submissionId);
 
   return {
-    ...publicResultsForAccess(allResults, accessLevel, categoryLabel, previewUnlocked),
+    ...publicResultsForAccess(allResults, categoryLabel, intakeUnlocked),
     submissionId,
   };
 }
@@ -489,11 +456,9 @@ export async function runMatchingForSubmission(submissionId: string): Promise<{
     data: { user },
   } = await supabase.auth.getUser();
   if (!user) return { ...empty, error: "Not authenticated" };
-  const accessLevel = await getCurrentUserAccessLevel(supabase, user.id);
-  const previewUnlocked = await hasTemporaryPreviewUnlock(submissionId);
-
   const submission = await loadOwnedSubmission(supabase, user.id, submissionId);
   if (!submission) return { ...empty, error: "Not found" };
+  const intakeUnlocked = await hasDurableIntakeUnlock(supabase, user.id, submissionId);
 
   // Use practice_area_slug from submission; fall back to category_slug for legacy rows
   const practiceAreaSlug = (submission.practice_area_slug ?? submission.category_slug) as string;
@@ -506,9 +471,8 @@ export async function runMatchingForSubmission(submissionId: string): Promise<{
   const allResults = matchFirmsV2(track, category, answers, allFirms, practiceAreaSlug);
   const publicResults = publicResultsForAccess(
     allResults,
-    accessLevel,
     submission.category_label ?? submission.category_slug,
-    previewUnlocked
+    intakeUnlocked
   );
 
   return {
@@ -558,9 +522,8 @@ export async function getFirmProfileMatchContext(
   } = await supabase.auth.getUser();
   if (!user) return null;
 
-  const accessLevel = await getCurrentUserAccessLevel(supabase, user.id);
-  const previewUnlocked = await hasTemporaryPreviewUnlock(submissionId);
-  if (!canViewUnlockedMatches(accessLevel, previewUnlocked)) return null;
+  const intakeUnlocked = await hasDurableIntakeUnlock(supabase, user.id, submissionId);
+  if (!intakeUnlocked) return null;
 
   const submission = await loadOwnedSubmission(supabase, user.id, submissionId);
   if (!submission) return null;

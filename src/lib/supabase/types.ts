@@ -82,6 +82,28 @@ export interface DbSavedFirm {
   saved_at: string;
 }
 
+export interface DbIntakeUnlock {
+  id: string;
+  user_id: string;
+  intake_submission_id: string;
+  source: "stripe" | "preview" | "credit";
+  purchase_tier: "single" | "bundle_3" | "bundle_5" | null;
+  metadata: Record<string, unknown>;
+  created_at: string;
+}
+
+export interface DbUnlockCreditLedger {
+  id: string;
+  user_id: string;
+  intake_submission_id: string | null;
+  delta: number;
+  reason: string;
+  source: "stripe" | "preview" | "credit";
+  tier: "single" | "bundle_3" | "bundle_5" | null;
+  metadata: Record<string, unknown>;
+  created_at: string;
+}
+
 export interface DbIntakeSubmission {
   id: string;
   user_id: string;

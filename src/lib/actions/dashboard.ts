@@ -11,6 +11,7 @@ export interface DashboardIntake {
   createdAt: string;
   matchCount: number;
   topScore: number | null;
+  unlocked: boolean;
 }
 
 export interface DashboardSavedFirm {
@@ -30,6 +31,7 @@ export interface DashboardSavedFirm {
 export interface DashboardData {
   intakes: DashboardIntake[];
   savedFirms: DashboardSavedFirm[];
+  unlockCreditsAvailable: number;
 }
 
 type IntakeRow = {
@@ -60,6 +62,14 @@ type SavedFirmRow = {
   firms?: FirmRow | FirmRow[] | null;
 };
 
+type UnlockRow = {
+  intake_submission_id: string | null;
+};
+
+type CreditLedgerRow = {
+  delta: number | null;
+};
+
 function titleize(value: string | null | undefined): string {
   if (!value) return "Legal intake";
   return value
@@ -73,7 +83,7 @@ function normalizeFirm(firms: SavedFirmRow["firms"]): FirmRow | null {
   return firms ?? null;
 }
 
-function normalizeIntake(row: IntakeRow): DashboardIntake {
+function normalizeIntake(row: IntakeRow, unlockedIds: Set<string>): DashboardIntake {
   const matches = row.matches ?? [];
   const topMatches = row.top_matches ?? [];
   const matchCount = matches.length || topMatches.length;
@@ -91,6 +101,7 @@ function normalizeIntake(row: IntakeRow): DashboardIntake {
     createdAt: row.created_at,
     matchCount,
     topScore: scores.length ? Math.round(Math.max(...scores)) : null,
+    unlocked: unlockedIds.has(row.id),
   };
 }
 
@@ -121,7 +132,7 @@ export async function getDashboardData(): Promise<{ data?: DashboardData; error?
 
   if (!user) return { error: "Not authenticated" };
 
-  const [intakesRes, savedRes] = await Promise.all([
+  const [intakesRes, savedRes, unlocksRes, creditsRes] = await Promise.all([
     supabase
       .from("intake_submissions")
       .select("id, category_slug, legal_category, category_label, created_at, track, top_matches, matches(match_rank, match_score)")
@@ -132,15 +143,35 @@ export async function getDashboardData(): Promise<{ data?: DashboardData; error?
       .select("firm_id, saved_at, firms(id, name, tagline, location, size, overall_score, verified, is_verified)")
       .eq("user_id", user.id)
       .order("saved_at", { ascending: false }),
+    supabase
+      .from("intake_unlocks")
+      .select("intake_submission_id")
+      .eq("user_id", user.id),
+    supabase
+      .from("unlock_credit_ledger")
+      .select("delta")
+      .eq("user_id", user.id),
   ]);
 
   if (intakesRes.error) return { error: intakesRes.error.message };
   if (savedRes.error) return { error: savedRes.error.message };
 
+  const unlockedIds = new Set(
+    (((unlocksRes.error ? [] : unlocksRes.data) ?? []) as UnlockRow[])
+      .map((row) => row.intake_submission_id)
+      .filter((id): id is string => !!id)
+  );
+  const unlockCreditsAvailable = Math.max(
+    0,
+    (((creditsRes.error ? [] : creditsRes.data) ?? []) as CreditLedgerRow[])
+      .reduce((sum, row) => sum + (row.delta ?? 0), 0)
+  );
+
   return {
     data: {
-      intakes: ((intakesRes.data ?? []) as IntakeRow[]).map(normalizeIntake),
+      intakes: ((intakesRes.data ?? []) as IntakeRow[]).map((row) => normalizeIntake(row, unlockedIds)),
       savedFirms: ((savedRes.data ?? []) as SavedFirmRow[]).map(normalizeSavedFirm),
+      unlockCreditsAvailable,
     },
   };
 }

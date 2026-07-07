@@ -102,9 +102,9 @@ export default function MarketingNav({
               Clients
             </button>
             <div className="nav-menu" aria-label="Clients menu">
-              <a href="/get-matched" onClick={(e) => { e.preventDefault(); getMatched(); }}>Startups</a>
-              <a href="/get-matched" onClick={(e) => { e.preventDefault(); getMatched(); }}>SMBs</a>
-              <a href="/get-matched" onClick={(e) => { e.preventDefault(); getMatched(); }}>Individuals</a>
+              <Link href="/clients/startups" onClick={closeMobile}>Startups</Link>
+              <Link href="/clients/smbs" onClick={closeMobile}>SMBs</Link>
+              <Link href="/clients/individuals" onClick={closeMobile}>Individuals</Link>
             </div>
           </div>
 

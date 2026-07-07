@@ -116,23 +116,23 @@ function ResultsContent() {
   return (
     <div className="lwyrd-ds ds-page">
       <MarketingNav />
-      <main className="ds-main mx-auto w-full" style={{ maxWidth: 880, padding: "clamp(28px,5vw,56px) var(--pad)" }}>
+      <main className="results-shell ds-main">
         {/* Header */}
         <motion.div
           initial={{ opacity: 0, y: 18 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6, ease }}
-          className="mb-10"
+          className="results-hero"
         >
           <nav className="ds-breadcrumb mb-4">
             <Link href="/dashboard">My dashboard</Link>
             <span className="sep">/</span>
             <span style={{ color: "var(--ink-2)" }}>Your matches</span>
           </nav>
-          <h1 style={{ fontSize: "clamp(2rem,4vw,3rem)", marginBottom: ".75rem" }}>
+          <h1>
             {results.length} {results.length === 1 ? "firm" : "firms"} matched to your situation
           </h1>
-          <p className="text-[#6B6B70] text-base">
+          <p>
             {results.length > 0
               ? `Ranked by fit${categoryName ? ` for ${categoryName}` : ""}. Identities stay hidden until you unlock this intake.`
               : "No firms matched your criteria, try adjusting your answers."}
@@ -144,20 +144,20 @@ function ResultsContent() {
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, ease, delay: 0.03 }}
-            className="mb-6 flex flex-col gap-4 rounded-[18px] border border-[#DDE6EF] bg-[#F7FAFC] p-5 sm:flex-row sm:items-center sm:justify-between"
+            className="results-unlock"
           >
-            <div className="flex items-start gap-3">
-              <span className="icon-box mt-0.5 h-10 w-10 rounded-xl">
+            <div className="results-unlock-copy">
+              <span className="icon-box">
                 <LockKeyhole size={16} strokeWidth={1.7} />
               </span>
-              <p className="text-sm leading-relaxed text-[#2A2A2E]">
+              <p>
                 <strong>Your matches are ready.</strong> Unlock this intake to see who each firm is,
                 open full profiles, and get a prepared summary of your matter plus a ready-to-send
                 message for reaching out.
               </p>
             </div>
-            <Link href="/access" className="btn btn-primary shrink-0">
-              Unlock this intake <ArrowRight size={14} />
+            <Link href="/access" className="btn btn-primary results-unlock-btn">
+              Unlock with checkout <ArrowRight size={14} />
             </Link>
           </motion.div>
         )}
@@ -168,11 +168,10 @@ function ResultsContent() {
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, ease, delay: 0.05 }}
-            className="flex items-start gap-3 rounded-2xl px-5 py-4 mb-6"
-            style={{ background: "var(--navy-tint)", border: "1px solid var(--navy-tint-2)" }}
+            className="results-notice"
           >
-            <Info size={16} style={{ color: "var(--navy)", marginTop: 2, flexShrink: 0 }} strokeWidth={2} />
-            <p className="text-sm text-[#2A2A2E] leading-relaxed">{sizeGapNotice}</p>
+            <Info size={16} strokeWidth={2} />
+            <p>{sizeGapNotice}</p>
           </motion.div>
         )}
 
@@ -181,22 +180,21 @@ function ResultsContent() {
             initial={{ opacity: 0, y: 14 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.55, ease, delay: 0.1 }}
-            className="ds-card text-center"
-            style={{ padding: "3rem" }}
+            className="ds-card results-empty"
           >
-            <h3 style={{ fontSize: "1.25rem", marginBottom: ".75rem" }}>No matches found.</h3>
-            <p className="text-[#6B6B70] text-sm mb-6">
+            <h3>No matches found.</h3>
+            <p>
               Try adjusting your preferences, a different budget range, timeline, or stage may surface more results.
             </p>
-            <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
+            <div className="results-empty-actions">
               <Link href="/intake/start" className="btn btn-primary">Refine my answers</Link>
-              <Link href="/intake/start" className="text-[#6B6B70] text-sm hover:text-[#0B0B0C] transition-colors">
+              <Link href="/intake/start" className="app-link">
                 Start a new intake →
               </Link>
             </div>
           </motion.div>
         ) : (
-          <motion.div className="space-y-5" variants={container} initial="hidden" animate="visible">
+          <motion.div className="results-list" variants={container} initial="hidden" animate="visible">
             {displayResults.map((result, i) => (
               <motion.div key={isLockedResult(result) ? `locked-${i}` : result.firm.id} variants={item}>
                 <MatchCard result={result} rank={i + 1} />
@@ -206,8 +204,8 @@ function ResultsContent() {
         )}
 
         {results.length > 0 && categorySlug && (
-          <div className="mt-10 text-center">
-            <p className="text-[#6B6B70] text-sm">
+          <div className="results-footnote">
+            <p>
               Didn&apos;t see what you needed?{" "}
               <Link href="/intake/start" style={{ color: "var(--navy)", fontWeight: 600 }}>
                 Refine your answers →

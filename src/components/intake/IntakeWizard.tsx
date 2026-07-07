@@ -605,7 +605,7 @@ export default function IntakeWizard() {
     <div className="intake-shell">
       {/* Header */}
       <div className="intake-head">
-        <span className="kicker">
+        <span className="intake-eyebrow">
           {pillLabel}
         </span>
         <h1

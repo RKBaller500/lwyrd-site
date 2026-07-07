@@ -92,24 +92,24 @@ export default function IntakeQuestionComponent({ question, value, onChange }: I
   };
 
   return (
-    <div className="bg-white border border-[#E7E7E3] rounded-3xl p-8">
-      <p className="text-xs text-[#6B6B70] uppercase tracking-widest font-medium mb-3">
+    <div className="intake-card">
+      <p className="intake-meta">
         {question.required ? "Required" : "Optional"}
       </p>
       <h2
-        className="text-xl sm:text-2xl text-[#0B0B0C] mb-2"
+        className="intake-question-title"
         style={{ fontFamily: "var(--display)", fontWeight: 500 }}
       >
         {question.question}
       </h2>
       {question.subtext && (
-        <p className="text-[#6B6B70] text-sm mb-6">{question.subtext}</p>
+        <p className="intake-question-subtext">{question.subtext}</p>
       )}
-      {!question.subtext && <div className="mb-5" />}
+      {!question.subtext && <div className="intake-spacer" />}
 
       {/* Render by type */}
       {question.type === "single-select" && (
-        <div className="space-y-2">
+        <div className="intake-options">
           {question.options?.map((opt) => {
             const isOther = isOtherOption(opt);
             const isSelected = isOther
@@ -120,13 +120,9 @@ export default function IntakeQuestionComponent({ question, value, onChange }: I
                 <button
                   type="button"
                   onClick={() => handleSingleSelect(opt)}
-                  className={`w-full text-left px-5 py-3.5 rounded-2xl border text-sm transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#002452] focus-visible:ring-offset-2 ${
-                    isSelected
-                      ? "bg-[#002B55] text-white border-[#002B55]"
-                      : "bg-white border-[#E7E7E3] text-[#2A2A2E] hover:border-[#002B55]"
-                  }`}
+                  className={`intake-option ${isSelected ? "is-selected" : ""}`}
                 >
-                  {opt}
+                  <span className="intake-option-label">{opt}</span>
                 </button>
                 {isOther && isSelected && (
                   <input
@@ -135,7 +131,7 @@ export default function IntakeQuestionComponent({ question, value, onChange }: I
                     placeholder="Please specify…"
                     value={otherText}
                     onChange={(e) => handleSingleOtherText(e.target.value)}
-                    className="mt-2 w-full px-4 py-3 rounded-2xl border border-[#E7E7E3] bg-white text-[#0B0B0C] placeholder-[#9A9AA0] focus:outline-none focus:border-[#002B55] transition-colors text-sm"
+                    className="intake-input intake-input-nested"
                   />
                 )}
               </div>
@@ -145,7 +141,7 @@ export default function IntakeQuestionComponent({ question, value, onChange }: I
       )}
 
       {question.type === "multi-select" && (
-        <div className="space-y-2">
+        <div className="intake-options">
           {question.options?.map((opt) => {
             const isOther = isOtherOption(opt);
             const isSelected = isOther
@@ -156,13 +152,9 @@ export default function IntakeQuestionComponent({ question, value, onChange }: I
                 <button
                   type="button"
                   onClick={() => handleMultiToggle(opt)}
-                  className={`w-full text-left px-5 py-3.5 rounded-2xl border text-sm transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#002452] focus-visible:ring-offset-2 ${
-                    isSelected
-                      ? "bg-[#002B55] text-white border-[#002B55]"
-                      : "bg-white border-[#E7E7E3] text-[#2A2A2E] hover:border-[#002B55]"
-                  }`}
+                  className={`intake-option ${isSelected ? "is-selected" : ""}`}
                 >
-                  {opt}
+                  <span className="intake-option-label">{opt}</span>
                 </button>
                 {isOther && isSelected && (
                   <input
@@ -171,7 +163,7 @@ export default function IntakeQuestionComponent({ question, value, onChange }: I
                     placeholder="Please specify…"
                     value={otherText}
                     onChange={(e) => handleMultiOtherText(e.target.value)}
-                    className="mt-2 w-full px-4 py-3 rounded-2xl border border-[#E7E7E3] bg-white text-[#0B0B0C] placeholder-[#9A9AA0] focus:outline-none focus:border-[#002B55] transition-colors text-sm"
+                    className="intake-input intake-input-nested"
                   />
                 )}
               </div>
@@ -183,10 +175,11 @@ export default function IntakeQuestionComponent({ question, value, onChange }: I
       {question.type === "text" && (
         <textarea
           rows={4}
-          className="w-full px-4 py-3 rounded-2xl border border-[#E7E7E3] bg-white text-[#0B0B0C] placeholder-[#9A9AA0] focus:outline-none focus:border-[#002B55] transition-colors text-sm resize-none"
+          className="intake-input"
           placeholder="Your answer..."
           value={(value as string) ?? ""}
           onChange={(e) => onChange(e.target.value)}
+          style={{ minHeight: 120, resize: "vertical" }}
         />
       )}
 
@@ -233,8 +226,8 @@ function BudgetRangeInput({
       : `$${value.toLocaleString()} / month`;
 
   return (
-    <div className="space-y-4">
-      <p className="text-[#0B0B0C] text-2xl font-medium" style={{ fontFamily: "var(--display)" }}>
+    <div>
+      <p className="intake-budget-value" style={{ fontFamily: "var(--display)", fontWeight: 500 }}>
         {display}
       </p>
       <input
@@ -244,9 +237,9 @@ function BudgetRangeInput({
         step={step}
         value={value}
         onChange={(e) => onChange(Number(e.target.value))}
-        className="w-full accent-[#002452]"
+        className="intake-range"
       />
-      <div className="flex justify-between text-xs text-[#6B6B70]">
+      <div className="intake-range-labels">
         <span>No budget set</span>
         <span>${(max / 1000).toFixed(0)}k+</span>
       </div>
@@ -266,8 +259,8 @@ function ScaleInput({
   onChange: (v: number) => void;
 }) {
   return (
-    <div className="space-y-4">
-      <p className="text-[#0B0B0C] text-3xl font-medium text-center" style={{ fontFamily: "var(--display)" }}>
+    <div>
+      <p className="intake-budget-value" style={{ fontFamily: "var(--display)", fontWeight: 500, textAlign: "center" }}>
         {value}
       </p>
       <input
@@ -276,9 +269,9 @@ function ScaleInput({
         max={max}
         value={value}
         onChange={(e) => onChange(Number(e.target.value))}
-        className="w-full accent-[#002452]"
+        className="intake-range"
       />
-      <div className="flex justify-between text-xs text-[#6B6B70]">
+      <div className="intake-range-labels">
         <span>{min}</span>
         <span>{max}</span>
       </div>

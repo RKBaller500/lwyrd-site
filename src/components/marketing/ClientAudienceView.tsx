@@ -32,7 +32,7 @@ export default function ClientAudienceView({ data }: { data: ClientAudience }) {
       <main className="ds-main">
         {/* Hero */}
         <section className="ds-shell" style={{ textAlign: "center", maxWidth: 820 }}>
-          <span className="kicker">{data.eyebrow}</span>
+          <span className="marketing-eyebrow">{data.eyebrow}</span>
           <h1 style={{ fontSize: "clamp(2.2rem,5vw,3.4rem)", margin: ".6rem auto 1.1rem", maxWidth: "18ch" }}>
             {data.title}
           </h1>

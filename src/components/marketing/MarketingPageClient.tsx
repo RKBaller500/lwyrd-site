@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef } from "react";
+import Script from "next/script";
 import MarketingNav from "./MarketingNav";
 import { useAuth } from "@/context/AuthContext";
 import { useRouter } from "next/navigation";
@@ -85,13 +86,17 @@ export default function MarketingPageClient({
       }
     };
     root.addEventListener("click", onClick, true);
-    return () => root.removeEventListener("click", onClick, true);
+    return () => {
+      root.removeEventListener("click", onClick, true);
+    };
   }, [body, isAuthenticated, openModal, router]);
 
   useEffect(() => {
     const root = ref.current;
     if (!root) return;
     let cleanup: void | (() => void);
+    const shouldRunOriginalJs =
+      js && !body.includes('id="heroMaze"') && !body.includes('class="faq');
 
     // Run the page's original JS (maze, reveals, accordions, smooth scroll).
     // We inject it as a real inline <script> rather than eval/new Function so
@@ -99,7 +104,7 @@ export default function MarketingPageClient({
     // NOT permit eval). Wrapped in an IIFE so re-running on client navigation
     // doesn't redeclare the design's top-level `const`/`let` globals.
     let scriptEl: HTMLScriptElement | null = null;
-    if (js) {
+    if (shouldRunOriginalJs) {
       scriptEl = document.createElement("script");
       scriptEl.textContent = `;(function(){\ntry{\n${js}\n}catch(e){console.error("Marketing page script error:",e);}\n})();`;
       document.body.appendChild(scriptEl);
@@ -127,8 +132,9 @@ export default function MarketingPageClient({
             "\n#ambient-overlay{display:none !important;}\n",
         }}
       />
+      <Script src="/marketing-animations.js" strategy="afterInteractive" />
       <MarketingNav current={current} />
-      <div ref={ref} dangerouslySetInnerHTML={{ __html: body }} />
+      <div ref={ref} data-marketing-page-root dangerouslySetInnerHTML={{ __html: body }} />
     </>
   );
 }

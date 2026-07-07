@@ -25,6 +25,10 @@ export interface DbFirm {
   overall_score: number;
   verified: boolean;
   is_verified?: boolean | null;
+  contact_type?: "form" | "email" | "phone" | null;
+  contact_url?: string | null;
+  contact_email?: string | null;
+  contact_phone?: string | null;
   created_at: string;
   // Joined relations
   attorneys?: DbAttorney[];

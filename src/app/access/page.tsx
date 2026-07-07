@@ -4,50 +4,91 @@ import "@/styles/lwyrd-ds.css";
 import { useState } from "react";
 import { motion } from "framer-motion";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import MarketingNav from "@/components/marketing/MarketingNav";
 import MarketingFooter from "@/components/marketing/MarketingFooter";
 import AuthGuard from "@/components/auth/AuthGuard";
 import Modal from "@/components/ui/Modal";
-import { CheckCircle2, ArrowLeft, FileText, Layers3, ShieldCheck, LockKeyhole, CreditCard, X } from "lucide-react";
+import { CheckCircle2, ArrowLeft, FileText, Layers3, ShieldCheck, LockKeyhole, CreditCard, X, Eye } from "lucide-react";
 
 const ease = [0.25, 0.46, 0.45, 0.94] as const;
 
 const included = [
-  "Full firm identities and profiles for your matched firms",
-  "A prepared summary of your matter, written from your answers",
-  "A ready-to-send outreach message for each firm, yours to copy and send",
-  "Guidance on what to ask and what to expect",
+  "Firm identities and full profiles",
+  "Prepared matter summary",
+  "Ready-to-send outreach drafts",
+  "Guidance for first conversations",
 ];
 
 const tiers = [
   {
     name: "1 intake",
     label: "Single matter",
-    description: "Best when you have one legal need and want to unlock the firms matched to that intake.",
+    description: "Unlock one completed matter.",
     icon: FileText,
-    priceLabel: "Pay once",
+    price: "$25",
+    priceNote: "$25 / unlock",
+    badge: "Pay once",
   },
   {
     name: "3-intake bundle",
     label: "Multiple needs",
-    description: "For founders, operators, or families comparing counsel across a few separate legal issues.",
+    description: "For a few separate legal needs.",
     icon: Layers3,
     featured: true,
-    priceLabel: "Bundle",
+    price: "$60",
+    priceNote: "$20 / unlock",
+    badge: "Best value",
   },
   {
     name: "5-intake bundle",
     label: "Ongoing matching",
-    description: "For people or teams who expect recurring legal needs and want room to run several searches.",
+    description: "For recurring searches over time.",
     icon: ShieldCheck,
-    priceLabel: "Bundle",
+    price: "$100",
+    priceNote: "$20 / unlock",
+    badge: "Bundle",
   },
 ];
 
 function AccessContent() {
+  const router = useRouter();
   const [selectedTier, setSelectedTier] = useState<(typeof tiers)[number] | null>(null);
+  const [previewLoading, setPreviewLoading] = useState(false);
+  const [previewError, setPreviewError] = useState("");
 
   const closeCheckout = () => setSelectedTier(null);
+
+  const getPreviewDestination = () => {
+    const next = new URLSearchParams(window.location.search).get("next");
+    const storedSubmissionId = window.sessionStorage.getItem("lwyrd_submission_id");
+    if (storedSubmissionId) return `/results/${storedSubmissionId}`;
+    if (next?.startsWith("/results")) return next;
+    return "/results";
+  };
+
+  const handlePreviewUnlock = async () => {
+    setPreviewLoading(true);
+    setPreviewError("");
+    const submissionId = window.sessionStorage.getItem("lwyrd_submission_id");
+    try {
+      const response = await fetch("/api/paywall/preview-unlock", {
+        method: "POST",
+        credentials: "same-origin",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ submissionId }),
+      });
+      const body = await response.json().catch(() => ({}));
+      if (!response.ok) {
+        throw new Error(body.error ?? "Unable to enable preview unlock.");
+      }
+      router.push(typeof body.destination === "string" ? body.destination : getPreviewDestination());
+      router.refresh();
+    } catch (error) {
+      setPreviewError(error instanceof Error ? error.message : "Unable to enable preview unlock.");
+      setPreviewLoading(false);
+    }
+  };
 
   return (
     <>
@@ -80,8 +121,8 @@ function AccessContent() {
                 <strong>{selectedTier.name}</strong>
               </div>
               <div>
-                <span>Billing</span>
-                <strong>One-time payment</strong>
+                <span>Price</span>
+                <strong>{selectedTier.price}</strong>
               </div>
             </div>
             <div className="paywall-modal-note">
@@ -92,10 +133,14 @@ function AccessContent() {
               <button className="btn btn-primary" type="button" disabled>
                 Stripe checkout pending
               </button>
+              <button className="btn btn-ghost" type="button" onClick={handlePreviewUnlock} disabled={previewLoading}>
+                <Eye size={14} /> {previewLoading ? "Unlocking..." : "Preview unlock"}
+              </button>
               <button className="btn btn-ghost" type="button" onClick={closeCheckout}>
                 <X size={14} /> Not now
               </button>
             </div>
+            {previewError && <p className="paywall-modal-error">{previewError}</p>}
           </div>
         )}
       </Modal>
@@ -119,34 +164,16 @@ function AccessContent() {
             <span className="marketing-eyebrow">Paywall</span>
             <h1>Unlock your matches</h1>
             <p>
-              See who each firm is, open their full profiles, and get a prepared summary of
-              your matter plus a ready-to-send message for each firm. You reach out on your
-              own terms, we just make sure you walk in prepared. One-time, no subscription.
+              See firm identities, open full profiles, and get your prepared summary plus
+              outreach drafts. You reach out on your own terms. One-time, no subscription.
             </p>
-          </motion.div>
-
-          <motion.div
-            initial={{ opacity: 0, y: 18 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.58, ease, delay: 0.1 }}
-            className="access-includes"
-          >
-            <p className="app-section-label">Every unlock includes</p>
-            <div>
-              {included.map((item, i) => (
-                <div key={i}>
-                  <CheckCircle2 size={15} />
-                  <span>{item}</span>
-                </div>
-              ))}
-            </div>
           </motion.div>
 
           {/* Pricing tiers */}
           <motion.div
             initial={{ opacity: 0, y: 22 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.65, ease, delay: 0.14 }}
+            transition={{ duration: 0.65, ease, delay: 0.1 }}
             className="access-tier-grid"
           >
             {tiers.map((tier) => {
@@ -156,15 +183,21 @@ function AccessContent() {
                   key={tier.name}
                   className={`access-tier ${tier.featured ? "is-featured" : ""}`}
                 >
-                  <div className="access-tier-icon">
-                    <Icon size={19} strokeWidth={1.5} />
+                  <div className="access-tier-top">
+                    <div className="access-tier-icon">
+                      <Icon size={19} strokeWidth={1.5} />
+                    </div>
+                    <span>{tier.badge}</span>
                   </div>
                   <p className="access-tier-label">
                     {tier.label}
                   </p>
                   <div className="access-tier-title">
                     <h2>{tier.name}</h2>
-                    <span>{tier.priceLabel}</span>
+                  </div>
+                  <div className="access-tier-price">
+                    <strong>{tier.price}</strong>
+                    <span>{tier.priceNote}</span>
                   </div>
                   <p className="access-tier-desc">
                     {tier.description}
@@ -178,6 +211,27 @@ function AccessContent() {
                 </div>
               );
             })}
+          </motion.div>
+
+          <motion.div
+            initial={{ opacity: 0, y: 18 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.58, ease, delay: 0.14 }}
+            className="access-includes"
+          >
+            <p className="app-section-label">Every unlock includes</p>
+            <div>
+              {included.map((item, i) => (
+                <div key={i}>
+                  <CheckCircle2 size={15} />
+                  <span>{item}</span>
+                </div>
+              ))}
+            </div>
+            <button className="access-preview-link" type="button" onClick={handlePreviewUnlock} disabled={previewLoading}>
+              <Eye size={15} /> {previewLoading ? "Opening preview..." : "Temporary preview unlock"}
+            </button>
+            {previewError && <p className="access-preview-error">{previewError}</p>}
           </motion.div>
 
           {/* Reassurance */}

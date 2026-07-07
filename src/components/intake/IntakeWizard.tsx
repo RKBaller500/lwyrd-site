@@ -565,7 +565,7 @@ export default function IntakeWizard() {
     if (!track || !category) return;
     setIsSubmitting(true);
 
-    const { results, lockedCount, error } = await runMatchingV2(
+    const { results, lockedCount, submissionId, error } = await runMatchingV2(
       track,
       category,
       categoryLabel ?? category,
@@ -586,6 +586,11 @@ export default function IntakeWizard() {
     sessionStorage.setItem("lwyrd_category_name", categoryLabel ?? category);
     sessionStorage.setItem("lwyrd_track", track);
     sessionStorage.setItem("lwyrd_answers_v2", JSON.stringify(answers));
+    if (submissionId) {
+      sessionStorage.setItem("lwyrd_submission_id", submissionId);
+    } else {
+      sessionStorage.removeItem("lwyrd_submission_id");
+    }
 
     ph?.capture("intake_completed_v2", {
       track,

@@ -60,11 +60,13 @@ function ResultsContent() {
   const [categorySlug, setCategorySlug] = useState<string>("");
   const [categoryName, setCategoryName] = useState<string>("");
   const [firmSizePref, setFirmSizePref] = useState<string | null>(null);
+  const [submissionId, setSubmissionId] = useState<string>("");
 
   useEffect(() => {
     const raw = sessionStorage.getItem("lwyrd_results");
     const slug = sessionStorage.getItem("lwyrd_category") ?? "";
     const name = sessionStorage.getItem("lwyrd_category_name") ?? "";
+    const storedSubmissionId = sessionStorage.getItem("lwyrd_submission_id") ?? "";
     if (!raw) {
       router.push("/intake/start");
       return;
@@ -93,6 +95,7 @@ function ResultsContent() {
         setResults(parsed);
         setCategorySlug(slug);
         setCategoryName(name);
+        setSubmissionId(storedSubmissionId);
       }, 0);
     } catch {
       router.push("/intake/start");
@@ -156,7 +159,7 @@ function ResultsContent() {
                 message for reaching out.
               </p>
             </div>
-            <Link href="/access" className="btn btn-primary results-unlock-btn">
+            <Link href="/access?next=/results" className="btn btn-primary results-unlock-btn">
               Unlock with checkout <ArrowRight size={14} />
             </Link>
           </motion.div>
@@ -197,7 +200,7 @@ function ResultsContent() {
           <motion.div className="results-list" variants={container} initial="hidden" animate="visible">
             {displayResults.map((result, i) => (
               <motion.div key={isLockedResult(result) ? `locked-${i}` : result.firm.id} variants={item}>
-                <MatchCard result={result} rank={i + 1} />
+                <MatchCard result={result} rank={i + 1} intakeId={submissionId || undefined} />
               </motion.div>
             ))}
           </motion.div>

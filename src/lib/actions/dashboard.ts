@@ -1,6 +1,7 @@
 "use server";
 
 import { createClient } from "@/lib/supabase/server";
+import { reconcilePreviewCookieUnlocks } from "@/lib/paywallUnlocks";
 
 export interface DashboardIntake {
   id: string;
@@ -161,6 +162,8 @@ export async function getDashboardData(): Promise<{ data?: DashboardData; error?
       .map((row) => row.intake_submission_id)
       .filter((id): id is string => !!id)
   );
+  const cookieUnlockedIds = await reconcilePreviewCookieUnlocks(supabase, user.id);
+  cookieUnlockedIds.forEach((id) => unlockedIds.add(id));
   const unlockCreditsAvailable = Math.max(
     0,
     (((creditsRes.error ? [] : creditsRes.data) ?? []) as CreditLedgerRow[])

@@ -6,6 +6,8 @@ import { Award, MapPin, Building2, CheckCircle2, XCircle, ArrowRight, LockKeyhol
 import SaveFirmButton from "@/components/firms/SaveFirmButton";
 
 const serif = { fontFamily: '"Libre Baskerville", Georgia, serif' } as const;
+const hiddenPricingCriteria = new Set(["budget", "billing"]);
+const pricingLanguage = /\b(budget|billing|fee|fees|cost|costs|price|pricing|retainer|hourly|flat[- ]?fee|\$)\b/i;
 
 const sizeLabels: Record<string, string> = {
   boutique: "Boutique",
@@ -13,48 +15,32 @@ const sizeLabels: Record<string, string> = {
   large: "Large",
 };
 
-const billingModelLabels: Record<string, string> = {
-  hourly: "Hourly",
-  "flat-fee": "Flat-fee",
-  retainer: "Retainer",
-  hybrid: "Hybrid",
-};
-
 const missedLabels: Record<string, string> = {
   "company-stage": "Stage: doesn't specialize in your company stage",
-  budget: "Budget: outside your budget range",
   industry: "Industry: doesn't serve your vertical",
   location: "Location: may not be licensed in your state",
   timeline: "Timeline: may not match your urgency",
   language: "Language: may not have attorneys who speak your language",
 };
 
-function formatK(n: number): string {
-  if (n === 0) return "$0";
-  if (n >= 1000) return `$${Math.round(n / 1000)}K`;
-  return `$${n}`;
-}
-
 function formatPractice(slug: string): string {
   return slug.replace(/-/g, " ").replace(/\b\w/g, (char) => char.toUpperCase());
 }
 
 function getMissedLabel(criterion: string, firm: Firm): string {
-  if (criterion === "budget") {
-    const { min, max } = firm.budgetRange;
-    if (min > 0 && max > 0) return `Budget: firm's typical range is ${formatK(min)}–${formatK(max)}`;
-    if (min > 0) return `Budget: firm typically starts at ${formatK(min)}`;
-    return "Budget: outside your budget range";
-  }
-  if (criterion === "billing") {
-    const model = billingModelLabels[firm.billingModel] ?? firm.billingModel;
-    return `Billing: this firm uses ${model.toLowerCase()} billing`;
-  }
   if (criterion === "firm-size") {
     const size = sizeLabels[firm.size]?.toLowerCase() ?? firm.size;
     return `Firm size: ${size} firm`;
   }
   return missedLabels[criterion] ?? criterion;
+}
+
+function visibleReasons(reasons: string[]) {
+  return reasons.filter((reason) => !pricingLanguage.test(reason));
+}
+
+function visibleCriteria(criteria: string[]) {
+  return criteria.filter((criterion) => !hiddenPricingCriteria.has(criterion));
 }
 
 function ScoreRing({ score }: { score: number }) {
@@ -143,8 +129,8 @@ function LockedMatchCard({
   const roundedScore = Math.round(result.score);
   const size = sizeLabels[result.firmSize] ?? result.firmSize;
   const isTop = rank === 1;
-  const reasons = result.reasons.length > 0
-    ? result.reasons
+  const reasons = visibleReasons(result.reasons).length > 0
+    ? visibleReasons(result.reasons)
     : ["Matches the legal need described in your intake", "Aligned with your stated preferences"];
 
   return (
@@ -167,7 +153,6 @@ function LockedMatchCard({
           <span className="chip">{size} firm</span>
           <span className="chip">{result.practiceAreaMatch}</span>
           <span className="chip">{result.jurisdiction}</span>
-          {result.feeLevel && <span className="chip">Fee level {result.feeLevel}</span>}
         </div>
 
         <div className="locked-proof-grid">
@@ -219,9 +204,11 @@ export default function MatchCard({ result, rank, initialSaved = false, intakeId
 
   const { firm, score, reasons, isBestMatch } = result;
   const profileHref = intakeId ? `/firms/${firm.id}?intake=${intakeId}` : `/firms/${firm.id}`;
+  const displayReasons = visibleReasons(reasons);
+  const displayMissedCriteria = visibleCriteria(result.missedCriteria);
   const roundedScore = Math.round(score);
-  const hasCriteria = reasons.length > 0 || result.missedCriteria.length > 0;
-  const hasBoth = reasons.length > 0 && result.missedCriteria.length > 0;
+  const hasCriteria = displayReasons.length > 0 || displayMissedCriteria.length > 0;
+  const hasBoth = displayReasons.length > 0 && displayMissedCriteria.length > 0;
 
   return (
     <div className={`match-card ${isBestMatch ? "is-top" : ""}`}>
@@ -277,7 +264,7 @@ export default function MatchCard({ result, rank, initialSaved = false, intakeId
             {hasBoth ? (
               <>
                 <div className="match-list">
-                  {reasons.map((r, i) => (
+                  {displayReasons.map((r, i) => (
                     <div key={i}>
                       <CheckCircle2 size={15} />
                       <span>{r}</span>
@@ -285,7 +272,7 @@ export default function MatchCard({ result, rank, initialSaved = false, intakeId
                   ))}
                 </div>
                 <div className="match-list is-muted">
-                  {result.missedCriteria.map((c) => (
+                  {displayMissedCriteria.map((c) => (
                     <div key={c}>
                       <XCircle size={15} />
                       <span>{getMissedLabel(c, firm)}</span>
@@ -295,7 +282,7 @@ export default function MatchCard({ result, rank, initialSaved = false, intakeId
               </>
             ) : (
               <>
-                {reasons.map((r, i) => (
+                {displayReasons.map((r, i) => (
                   <div key={i} className="match-list">
                     <div>
                       <CheckCircle2 size={15} />
@@ -303,7 +290,7 @@ export default function MatchCard({ result, rank, initialSaved = false, intakeId
                     </div>
                   </div>
                 ))}
-                {result.missedCriteria.map((c) => (
+                {displayMissedCriteria.map((c) => (
                   <div key={c} className="match-list is-muted">
                     <div>
                       <XCircle size={15} />

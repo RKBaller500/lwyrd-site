@@ -95,18 +95,6 @@ function inferJurisdiction(firm: Firm): string {
   return "United States";
 }
 
-function inferFeeLevel(firm: Firm): LockedMatchResult["feeLevel"] | undefined {
-  const min = firm.budgetRange?.min ?? 0;
-  const hourly = firm.hourlyRate ?? 0;
-  const basis = min > 0 ? min : hourly > 0 ? hourly * 10 : 0;
-
-  if (!basis) return undefined;
-  if (basis < 2500) return "$";
-  if (basis < 10000) return "$$";
-  if (basis < 25000) return "$$$";
-  return "$$$$";
-}
-
 function qualitySignals(firm: Firm, practiceAreaLabel: string): string[] {
   const signals: string[] = [];
   if (firm.verified) signals.push("Bar standing verified");
@@ -115,7 +103,7 @@ function qualitySignals(firm: Firm, practiceAreaLabel: string): string[] {
     if (years >= 5) signals.push(`${years}+ years in practice`);
   }
   if (practiceAreaLabel) signals.push(`Specialist in ${practiceAreaLabel}`);
-  if (firm.assessment.some((item) => item.passed && /response|contact|billing|conflict|insurance/i.test(`${item.label} ${item.note ?? ""}`))) {
+  if (firm.assessment.some((item) => item.passed && /response|contact|conflict|insurance/i.test(`${item.label} ${item.note ?? ""}`))) {
     signals.push("Quality standards reviewed");
   }
   return signals.slice(0, 3);
@@ -131,7 +119,6 @@ function redactMatchResult(result: MatchResult, index: number, practiceAreaLabel
     jurisdiction: inferJurisdiction(result.firm),
     reasons: result.reasons.slice(0, 3),
     credibilitySignals: qualitySignals(result.firm, practiceAreaLabel),
-    feeLevel: inferFeeLevel(result.firm),
     matchedCriteria: result.matchedCriteria,
     missedCriteria: result.missedCriteria,
     isBestMatch: result.isBestMatch,
@@ -499,15 +486,7 @@ export async function getPreviewUnlockDestination(submissionId?: string | null):
   const submission = await loadOwnedSubmission(supabase, user.id, submissionId);
   if (!submission) return { destination: "/results", error: "Not found" };
 
-  const practiceAreaSlug = (submission.practice_area_slug ?? submission.category_slug) as string;
-  const allFirms = await loadMatchableFirms(supabase, practiceAreaSlug);
-  const track = (submission.track ?? "") as string;
-  const category = submissionCategory(submission);
-  const results = matchFirmsV2(track, category, submission.answers as IntakeAnswers, allFirms, practiceAreaSlug);
-  const firmId = results[0]?.firm.id;
-
-  if (!firmId) return { destination: `/results/${submissionId}` };
-  return { firmId, destination: `/firms/${firmId}?intake=${submissionId}` };
+  return { destination: `/results/${submissionId}` };
 }
 
 export async function getFirmProfileMatchContext(

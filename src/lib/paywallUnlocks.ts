@@ -28,9 +28,19 @@ function writeClient(fallback: Client): Client {
 
 async function hasCookiePreviewUnlock(submissionId?: string | null): Promise<boolean> {
   if (!submissionId) return false;
+  const ids = await getPreviewUnlockCookieIds();
+  return ids.includes(submissionId);
+}
+
+export async function getPreviewUnlockCookieIds(): Promise<string[]> {
   const cookieStore = await cookies();
   const raw = cookieStore.get("lwyrd_preview_unlock")?.value ?? "";
-  return raw.split(",").map((id) => id.trim()).includes(submissionId);
+  return Array.from(new Set(
+    raw
+      .split(",")
+      .map((id) => id.trim())
+      .filter(Boolean)
+  ));
 }
 
 export async function previewUnlockCookieValue(submissionId: string): Promise<string> {
@@ -75,6 +85,45 @@ export async function hasDurableIntakeUnlock(
 
   if (!error && data) return true;
   return hasCookiePreviewUnlock(submissionId);
+}
+
+export async function reconcilePreviewCookieUnlocks(
+  supabase: Client,
+  userId: string
+): Promise<Set<string>> {
+  const cookieIds = await getPreviewUnlockCookieIds();
+  if (cookieIds.length === 0) return new Set();
+
+  const { data, error } = await supabase
+    .from("intake_submissions")
+    .select("id")
+    .eq("user_id", userId)
+    .in("id", cookieIds);
+
+  if (error || !data) return new Set();
+
+  const ownedIds = (data as { id: string }[]).map((row) => row.id);
+  const ownedSet = new Set(ownedIds);
+
+  if (process.env.SUPABASE_SERVICE_ROLE_KEY && ownedIds.length > 0) {
+    try {
+      const writer = createAdminClient() as Client;
+      await writer.from("intake_unlocks").upsert(
+        ownedIds.map((id) => ({
+          user_id: userId,
+          intake_submission_id: id,
+          source: "preview",
+          purchase_tier: "single",
+          metadata: { reconciledFromCookie: true },
+        })),
+        { onConflict: "user_id,intake_submission_id" }
+      );
+    } catch {
+      // Cookie unlocks still count for this session; durable backfill can retry later.
+    }
+  }
+
+  return ownedSet;
 }
 
 export async function getUnlockCreditBalance(supabase: Client, userId: string): Promise<number> {

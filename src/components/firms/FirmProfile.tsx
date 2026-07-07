@@ -22,6 +22,7 @@ import SaveFirmButton from "./SaveFirmButton";
 
 const ease = [0.25, 0.46, 0.45, 0.94] as const;
 const serif = { fontFamily: '"Libre Baskerville", Georgia, serif' } as const;
+const pricingLanguage = /\b(budget|billing|fee|fees|cost|costs|price|pricing|retainer|hourly|flat[- ]?fee|\$)\b/i;
 
 const sizeLabels: Record<string, string> = {
   boutique: "Boutique firm",
@@ -75,6 +76,10 @@ function buildFallbackReasons(firm: Firm): string[] {
   ].filter(Boolean);
 }
 
+function visibleReasons(reasons: string[]) {
+  return reasons.filter((reason) => !pricingLanguage.test(reason));
+}
+
 function mailtoHref(firm: Firm, message: string) {
   const contact = contactForFirm(firm);
   const subject = `Inquiry about ${firm.name} via LWYRD`;
@@ -88,7 +93,11 @@ export default function FirmProfile({ firm, initialSaved, matchContext }: FirmPr
   const ph = usePostHog();
   const score = matchContext?.score ?? firm.overallScore;
   const years = yearsInPractice(firm.founded);
-  const matchReasons = matchContext?.reasons?.length ? matchContext.reasons : buildFallbackReasons(firm);
+  const baseReasons = matchContext?.reasons?.length ? matchContext.reasons : buildFallbackReasons(firm);
+  const matchReasons = visibleReasons(baseReasons);
+  const displayedMatchReasons = matchReasons.length > 0
+    ? matchReasons
+    : ["This firm matches the legal category, jurisdiction, and matter details from your intake."];
   const prepared = matchContext?.prepared;
 
   useEffect(() => {
@@ -172,7 +181,7 @@ export default function FirmProfile({ firm, initialSaved, matchContext }: FirmPr
         <main className="firm-profile-main">
           <Section eyebrow="Why this firm fits you" title={matchContext ? `Matched for ${matchContext.categoryName}` : "Why this firm is relevant"}>
             <div className="firm-reason-list">
-              {matchReasons.map((reason, index) => (
+              {displayedMatchReasons.map((reason, index) => (
                 <div key={`${reason}-${index}`} className="firm-reason">
                   <CheckCircle2 size={17} />
                   <div>
@@ -244,7 +253,6 @@ export default function FirmProfile({ firm, initialSaved, matchContext }: FirmPr
 
           <p className="firm-pricing-disclaimer">
             Budget and pricing information for this firm is not publicly available through LWYRD.
-            Any fee structure, retainer, or first-step cost should be confirmed directly with the firm before engagement.
           </p>
         </main>
 

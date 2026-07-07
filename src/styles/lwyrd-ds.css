@@ -718,8 +718,10 @@
   margin:0 auto;
   padding:clamp(28px,5vw,56px) var(--pad) clamp(64px,8vw,96px);
 }
+.access-shell{padding-top:clamp(22px,3.4vw,38px)}
 .results-hero,
 .access-hero{margin-bottom:28px}
+.access-hero{margin-bottom:18px}
 .results-hero h1,
 .access-hero h1{
   color:var(--ink);
@@ -960,30 +962,30 @@
   padding-top:18px;
 }
 
-.access-back{margin-bottom:clamp(28px,4vw,44px)}
-.access-hero{max-width:780px}
+.access-back{margin-bottom:clamp(18px,2.6vw,28px)}
+.access-hero{max-width:720px}
 .access-hero h1{max-width:15ch}
 .access-includes{
   border:1px solid var(--line);
   border-radius:18px;
   background:#fff;
   box-shadow:var(--shadow-sm);
-  margin-bottom:20px;
-  padding:clamp(22px,3vw,28px);
+  margin-bottom:18px;
+  padding:18px;
 }
-.access-includes .app-section-label{margin-bottom:16px}
+.access-includes .app-section-label{margin-bottom:12px}
 .access-includes>div{
   display:grid;
-  grid-template-columns:repeat(2,minmax(0,1fr));
-  gap:14px 22px;
+  grid-template-columns:repeat(4,minmax(0,1fr));
+  gap:10px 14px;
 }
-.access-includes>div>div{display:flex;align-items:flex-start;gap:10px;color:var(--ink-2);font-size:.9rem;line-height:1.5}
+.access-includes>div>div{display:flex;align-items:flex-start;gap:8px;color:var(--ink-2);font-size:.82rem;line-height:1.35}
 .access-includes svg{color:#059669;flex:0 0 auto;margin-top:2px}
 .access-tier-grid{
   display:grid;
   grid-template-columns:repeat(3,minmax(0,1fr));
   gap:16px;
-  margin-bottom:20px;
+  margin-bottom:16px;
 }
 .access-tier{
   display:flex;
@@ -994,7 +996,7 @@
   border-radius:18px;
   background:#fff;
   box-shadow:var(--shadow-sm);
-  padding:clamp(22px,3vw,28px);
+  padding:clamp(18px,2.4vw,24px);
 }
 .access-tier.is-featured{
   border-color:transparent;
@@ -1002,6 +1004,24 @@
   color:#fff;
   box-shadow:var(--shadow-md);
 }
+.access-tier-top{
+  display:flex;
+  align-items:flex-start;
+  justify-content:space-between;
+  gap:12px;
+  margin-bottom:18px;
+}
+.access-tier-top>span{
+  border:1px solid var(--line);
+  border-radius:var(--r-pill);
+  color:var(--muted);
+  font-size:.68rem;
+  font-weight:700;
+  line-height:1;
+  padding:7px 10px;
+  white-space:nowrap;
+}
+.access-tier.is-featured .access-tier-top>span{border-color:rgba(255,255,255,.22);color:rgba(255,255,255,.82)}
 .access-tier-icon{
   display:inline-flex;
   align-items:center;
@@ -1012,7 +1032,6 @@
   border-radius:12px;
   background:var(--navy-tint);
   color:var(--navy);
-  margin-bottom:16px;
 }
 .access-tier.is-featured .access-tier-icon{
   border-color:rgba(255,255,255,.22);
@@ -1029,24 +1048,40 @@
   text-transform:uppercase;
 }
 .access-tier.is-featured .access-tier-label{color:rgba(255,255,255,.58)}
-.access-tier-title{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:12px}
+.access-tier-title{margin-bottom:12px}
 .access-tier-title h2{font-size:1.35rem;line-height:1.18}
-.access-tier-title span{
-  border:1px solid var(--line);
-  border-radius:var(--r-pill);
-  color:var(--muted);
-  font-size:.68rem;
-  font-weight:700;
-  line-height:1;
-  padding:6px 8px;
-  white-space:nowrap;
-}
-.access-tier.is-featured .access-tier-title span{border-color:rgba(255,255,255,.18);color:rgba(255,255,255,.78)}
-.access-tier-desc{color:var(--muted);font-size:.9rem;line-height:1.55;margin-bottom:22px;flex:1}
+.access-tier-price{display:flex;align-items:flex-end;gap:10px;margin-bottom:14px}
+.access-tier-price strong{color:var(--ink);font-size:clamp(2rem,4vw,2.55rem);line-height:1}
+.access-tier-price span{color:var(--muted);font-size:.82rem;font-weight:700;padding-bottom:4px}
+.access-tier.is-featured .access-tier-price strong{color:#fff}
+.access-tier.is-featured .access-tier-price span{color:rgba(255,255,255,.68)}
+.access-tier-desc{color:var(--muted);font-size:.88rem;line-height:1.45;margin-bottom:20px;flex:1}
 .access-tier.is-featured .access-tier-desc{color:rgba(255,255,255,.74)}
 .access-tier-cta{width:100%;justify-content:center}
 .access-tier-cta.is-light{background:#fff;color:var(--navy)}
 .access-tier-cta.is-light:hover{transform:translateY(-1px)}
+.access-preview-link{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  gap:8px;
+  border:0;
+  background:transparent;
+  color:var(--navy);
+  cursor:pointer;
+  font-size:.84rem;
+  font-weight:700;
+  margin-top:14px;
+  padding:0;
+}
+.access-preview-link:disabled{cursor:default;opacity:.62}
+.access-preview-error,
+.paywall-modal-error{
+  color:#b42318;
+  font-size:.82rem;
+  line-height:1.4;
+  margin-top:10px;
+}
 .access-note{
   border:1px solid var(--line);
   border-radius:18px;

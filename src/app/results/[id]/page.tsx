@@ -57,6 +57,7 @@ function PastResultsContent() {
       sessionStorage.setItem("lwyrd_results", JSON.stringify(r));
       sessionStorage.setItem("lwyrd_category", slug);
       sessionStorage.setItem("lwyrd_category_name", name);
+      sessionStorage.setItem("lwyrd_submission_id", submissionId);
       const unlockedResults = r.filter(isUnlockedResult);
       const scoreMap = Object.fromEntries(unlockedResults.map((res) => [res.firm.id, res.score]));
       if (unlockedResults.length) {
@@ -151,7 +152,7 @@ function PastResultsContent() {
                 message for reaching out.
               </p>
             </div>
-            <Link href="/access" className="btn btn-primary results-unlock-btn">
+            <Link href={`/access?next=/results/${submissionId}`} className="btn btn-primary results-unlock-btn">
               Unlock with checkout <ArrowRight size={14} />
             </Link>
           </motion.div>
@@ -177,7 +178,7 @@ function PastResultsContent() {
           <motion.div className="results-list" variants={container} initial="hidden" animate="visible">
             {results.map((result, i) => (
               <motion.div key={isLockedResult(result) ? `locked-${i}` : result.firm.id} variants={cardItem}>
-                <MatchCard result={result} rank={i + 1} />
+                <MatchCard result={result} rank={i + 1} intakeId={submissionId} />
               </motion.div>
             ))}
           </motion.div>

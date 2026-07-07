@@ -1,15 +1,35 @@
 "use server";
 
 import { createClient } from "@/lib/supabase/server";
+import { cookies } from "next/headers";
 import type { Firm, IntakeAnswers, LockedMatchResult, MatchResult, PublicMatchResult } from "@/types";
 import { matchFirmsV2 } from "@/lib/matching";
 import { mapDbFirmToFirm } from "@/lib/supabase/mappers";
 import type { DbFirm } from "@/lib/supabase/types";
 import { firms as localFirms } from "@/data/firms";
 import { CATEGORY_SLUG_MAP } from "@/data/intakeV2";
+import { buildPreparedMaterials } from "@/lib/intakePreparedMaterials";
+import type { FirmProfileMatchContext } from "@/types";
 
-function canViewUnlockedMatches(accessLevel?: string | null): boolean {
-  return accessLevel === "subscription" || accessLevel === "org";
+function canViewUnlockedMatches(accessLevel?: string | null, previewUnlocked = false): boolean {
+  return previewUnlocked || accessLevel === "subscription" || accessLevel === "org";
+}
+
+async function hasTemporaryPreviewUnlock(submissionId?: string | null): Promise<boolean> {
+  if (!submissionId) return false;
+  const cookieStore = await cookies();
+  const raw = cookieStore.get("lwyrd_preview_unlock")?.value ?? "";
+  return raw.split(",").map((id) => id.trim()).includes(submissionId);
+}
+
+export async function previewUnlockCookieValue(submissionId: string): Promise<string> {
+  const cookieStore = await cookies();
+  const current = cookieStore.get("lwyrd_preview_unlock")?.value ?? "";
+  const ids = current
+    .split(",")
+    .map((id) => id.trim())
+    .filter(Boolean);
+  return Array.from(new Set([...ids, submissionId])).join(",");
 }
 
 async function getCurrentUserAccessLevel(supabase: Awaited<ReturnType<typeof createClient>>, userId: string) {
@@ -20,6 +40,65 @@ async function getCurrentUserAccessLevel(supabase: Awaited<ReturnType<typeof cre
     .single();
 
   return profile?.access_level as string | null | undefined;
+}
+
+async function loadMatchableFirms(
+  supabase: Awaited<ReturnType<typeof createClient>>,
+  practiceAreaSlug: string
+): Promise<Firm[]> {
+  let allFirms = localFirms;
+  try {
+    const { data, error } = await supabase
+      .from("firms")
+      .select("*, attorneys(*), firm_assessment_items(*), firm_practice_areas(practice_area_slug)");
+    if (!error && data && data.length > 0) {
+      allFirms = (data as DbFirm[]).map(mapDbFirmToFirm);
+    }
+  } catch {
+    // proceed with local firms
+  }
+
+  try {
+    const { data: fpaRows } = await supabase
+      .from("firm_practice_areas")
+      .select("firm_id")
+      .eq("practice_area_slug", practiceAreaSlug);
+    if (fpaRows && fpaRows.length > 0) {
+      const eligibleIds = new Set(fpaRows.map((r: { firm_id: string }) => r.firm_id));
+      allFirms = allFirms.filter((f) => eligibleIds.has(f.id));
+    }
+  } catch {
+    // matchFirms will fall back to practiceAreas array filter
+  }
+
+  return allFirms;
+}
+
+async function loadOwnedSubmission(
+  supabase: Awaited<ReturnType<typeof createClient>>,
+  userId: string,
+  submissionId: string
+) {
+  const { data: submission, error } = await supabase
+    .from("intake_submissions")
+    .select("track, category_slug, legal_category, practice_area_slug, category_label, answers, created_at")
+    .eq("id", submissionId)
+    .eq("user_id", userId)
+    .single();
+
+  if (error || !submission) return null;
+  return submission;
+}
+
+function submissionCategory(submission: {
+  legal_category?: string | null;
+  category_slug?: string | null;
+}): string {
+  return (
+    submission.legal_category ??
+    (submission.category_slug?.includes("/") ? submission.category_slug.split("/").pop() : submission.category_slug) ??
+    ""
+  );
 }
 
 function inferJurisdiction(firm: Firm): string {
@@ -91,9 +170,10 @@ function redactMatchResult(result: MatchResult, index: number, practiceAreaLabel
 function publicResultsForAccess(
   results: MatchResult[],
   accessLevel: string | null | undefined,
-  practiceAreaLabel: string
+  practiceAreaLabel: string,
+  previewUnlocked = false
 ): { results: PublicMatchResult[]; lockedCount: number; unlocked: boolean } {
-  const unlocked = canViewUnlockedMatches(accessLevel);
+  const unlocked = canViewUnlockedMatches(accessLevel, previewUnlocked);
   if (unlocked) return { results, lockedCount: 0, unlocked };
 
   return {
@@ -137,12 +217,12 @@ export async function saveIntakeSubmissionV2(
   v2Answers: Record<string, string | string[] | number>,
   matchResults: MatchResult[],
   practiceAreaSlug: string
-): Promise<void> {
+): Promise<string | null> {
   const supabase = await createClient();
   const {
     data: { user },
   } = await supabase.auth.getUser();
-  if (!user) return;
+  if (!user) return null;
 
   const topMatches = matchResults.slice(0, 5).map((r) => ({
     firmId: r.firm.id,
@@ -168,7 +248,7 @@ export async function saveIntakeSubmissionV2(
 
   if (generalError) {
     // Swallow, never block UX
-    return;
+    return null;
   }
 
   const generalId = generalRow?.id ?? null;
@@ -273,6 +353,8 @@ export async function saveIntakeSubmissionV2(
     });
     await supabase.from("matches").insert(matchRows);
   }
+
+  return generalId;
 }
 
 // Collects category-specific sub-question answers into a JSON blob
@@ -329,14 +411,14 @@ function extractSubQuestionJson(
 }
 
 // Runs matching server-side and returns only the results the caller is entitled to.
-// Free users receive the top result only; paying users receive all results.
+// Free users receive redacted result cards; paying or preview-unlocked users receive full results.
 // This prevents full match data from ever reaching the client for unpaid sessions.
 export async function runMatchingV2(
   track: string,
   category: string,
   categoryLabel: string,
   answers: IntakeAnswers
-): Promise<{ results: PublicMatchResult[]; lockedCount: number; unlocked?: boolean; error?: string }> {
+): Promise<{ results: PublicMatchResult[]; lockedCount: number; unlocked?: boolean; submissionId?: string | null; error?: string }> {
   const VALID_TRACKS = ["startup", "individual", "small_business"] as const;
   if (
     typeof track !== "string" ||
@@ -371,39 +453,18 @@ export async function runMatchingV2(
     // proceed with CATEGORY_SLUG_MAP fallback
   }
 
-  // Fetch firms server-side; fall back to local data if unavailable
-  let allFirms = localFirms;
-  try {
-    const { data, error } = await supabase
-      .from("firms")
-      .select("*, attorneys(*), firm_assessment_items(*), firm_practice_areas(practice_area_slug)");
-    if (!error && data && data.length > 0) {
-      allFirms = (data as DbFirm[]).map(mapDbFirmToFirm);
-    }
-  } catch {
-    // proceed with local firms
-  }
-
-  // Filter to firms that serve this practice area via the normalized join table
-  try {
-    const { data: fpaRows } = await supabase
-      .from("firm_practice_areas")
-      .select("firm_id")
-      .eq("practice_area_slug", practiceAreaSlug);
-    if (fpaRows && fpaRows.length > 0) {
-      const eligibleIds = new Set(fpaRows.map((r: { firm_id: string }) => r.firm_id));
-      allFirms = allFirms.filter((f) => eligibleIds.has(f.id));
-    }
-  } catch {
-    // matchFirms will fall back to practiceAreas array filter
-  }
+  const allFirms = await loadMatchableFirms(supabase, practiceAreaSlug);
 
   const allResults = matchFirmsV2(track, category, answers, allFirms, practiceAreaSlug);
 
   // Save before returning so the dashboard and past-result links are immediately consistent.
-  await saveIntakeSubmissionV2(track, category, categoryLabel, answers, allResults, practiceAreaSlug);
+  const submissionId = await saveIntakeSubmissionV2(track, category, categoryLabel, answers, allResults, practiceAreaSlug);
+  const previewUnlocked = await hasTemporaryPreviewUnlock(submissionId);
 
-  return publicResultsForAccess(allResults, accessLevel, categoryLabel);
+  return {
+    ...publicResultsForAccess(allResults, accessLevel, categoryLabel, previewUnlocked),
+    submissionId,
+  };
 }
 
 // Re-runs matching for a past submission server-side, enforcing the same
@@ -429,59 +490,25 @@ export async function runMatchingForSubmission(submissionId: string): Promise<{
   } = await supabase.auth.getUser();
   if (!user) return { ...empty, error: "Not authenticated" };
   const accessLevel = await getCurrentUserAccessLevel(supabase, user.id);
+  const previewUnlocked = await hasTemporaryPreviewUnlock(submissionId);
 
-  // Ownership enforced server-side, users can only load their own submissions
-  const { data: submission, error: subError } = await supabase
-    .from("intake_submissions")
-    .select("track, category_slug, legal_category, practice_area_slug, category_label, answers, created_at")
-    .eq("id", submissionId)
-    .eq("user_id", user.id)
-    .single();
-
-  if (subError || !submission) return { ...empty, error: "Not found" };
+  const submission = await loadOwnedSubmission(supabase, user.id, submissionId);
+  if (!submission) return { ...empty, error: "Not found" };
 
   // Use practice_area_slug from submission; fall back to category_slug for legacy rows
   const practiceAreaSlug = (submission.practice_area_slug ?? submission.category_slug) as string;
 
-  let allFirms = localFirms;
-  try {
-    const { data, error } = await supabase
-      .from("firms")
-      .select("*, attorneys(*), firm_assessment_items(*), firm_practice_areas(practice_area_slug)");
-    if (!error && data && data.length > 0) {
-      allFirms = (data as DbFirm[]).map(mapDbFirmToFirm);
-    }
-  } catch {
-    // proceed with local firms
-  }
-
-  // Filter to firms that serve this practice area via the normalized join table
-  try {
-    const { data: fpaRows } = await supabase
-      .from("firm_practice_areas")
-      .select("firm_id")
-      .eq("practice_area_slug", practiceAreaSlug);
-    if (fpaRows && fpaRows.length > 0) {
-      const eligibleIds = new Set(fpaRows.map((r: { firm_id: string }) => r.firm_id));
-      allFirms = allFirms.filter((f) => eligibleIds.has(f.id));
-    }
-  } catch {
-    // matchFirms will fall back to practiceAreas array filter
-  }
+  const allFirms = await loadMatchableFirms(supabase, practiceAreaSlug);
 
   const track = (submission.track ?? "") as string;
-  const category =
-    (submission.legal_category as string | null | undefined) ??
-    ((submission.category_slug as string | null | undefined)?.includes("/")
-      ? (submission.category_slug as string).split("/").pop()
-      : submission.category_slug) ??
-    "";
+  const category = submissionCategory(submission);
   const answers = submission.answers as IntakeAnswers;
   const allResults = matchFirmsV2(track, category, answers, allFirms, practiceAreaSlug);
   const publicResults = publicResultsForAccess(
     allResults,
     accessLevel,
-    submission.category_label ?? submission.category_slug
+    submission.category_label ?? submission.category_slug,
+    previewUnlocked
   );
 
   return {
@@ -489,5 +516,80 @@ export async function runMatchingForSubmission(submissionId: string): Promise<{
     categorySlug: submission.category_slug,
     categoryName: submission.category_label ?? submission.category_slug,
     intakeDate: submission.created_at,
+  };
+}
+
+export async function getPreviewUnlockDestination(submissionId?: string | null): Promise<{
+  destination: string;
+  firmId?: string;
+  error?: string;
+}> {
+  if (!submissionId) return { destination: "/results" };
+
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return { destination: "/results", error: "Not authenticated" };
+
+  const submission = await loadOwnedSubmission(supabase, user.id, submissionId);
+  if (!submission) return { destination: "/results", error: "Not found" };
+
+  const practiceAreaSlug = (submission.practice_area_slug ?? submission.category_slug) as string;
+  const allFirms = await loadMatchableFirms(supabase, practiceAreaSlug);
+  const track = (submission.track ?? "") as string;
+  const category = submissionCategory(submission);
+  const results = matchFirmsV2(track, category, submission.answers as IntakeAnswers, allFirms, practiceAreaSlug);
+  const firmId = results[0]?.firm.id;
+
+  if (!firmId) return { destination: `/results/${submissionId}` };
+  return { firmId, destination: `/firms/${firmId}?intake=${submissionId}` };
+}
+
+export async function getFirmProfileMatchContext(
+  firmId: string,
+  submissionId?: string | null
+): Promise<FirmProfileMatchContext | null> {
+  if (!submissionId) return null;
+
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return null;
+
+  const accessLevel = await getCurrentUserAccessLevel(supabase, user.id);
+  const previewUnlocked = await hasTemporaryPreviewUnlock(submissionId);
+  if (!canViewUnlockedMatches(accessLevel, previewUnlocked)) return null;
+
+  const submission = await loadOwnedSubmission(supabase, user.id, submissionId);
+  if (!submission) return null;
+
+  const practiceAreaSlug = (submission.practice_area_slug ?? submission.category_slug) as string;
+  const allFirms = await loadMatchableFirms(supabase, practiceAreaSlug);
+  const track = (submission.track ?? "") as string;
+  const category = submissionCategory(submission);
+  const answers = submission.answers as IntakeAnswers;
+  const results = matchFirmsV2(track, category, answers, allFirms, practiceAreaSlug);
+  const match = results.find((result) => result.firm.id === firmId);
+  if (!match) return null;
+
+  const prepared = buildPreparedMaterials({
+    track,
+    category,
+    categoryName: submission.category_label ?? submission.category_slug,
+    firmName: match.firm.name,
+    answers,
+  });
+
+  return {
+    intakeId: submissionId,
+    categoryName: prepared.categoryName,
+    score: match.score,
+    reasons: match.reasons,
+    matchedCriteria: match.matchedCriteria,
+    missedCriteria: match.missedCriteria,
+    contactRole: prepared.contactRole,
+    prepared,
   };
 }

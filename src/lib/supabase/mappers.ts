@@ -1,7 +1,15 @@
 import { Firm } from "@/types";
 import { DbFirm } from "./types";
 
+function fallbackContactType(id: string): Firm["contactType"] {
+  const bucket = id.length % 3;
+  if (bucket === 0) return "form";
+  if (bucket === 1) return "email";
+  return "phone";
+}
+
 export function mapDbFirmToFirm(row: DbFirm): Firm {
+  const contactType = row.contact_type ?? fallbackContactType(row.id);
   return {
     id: row.id,
     name: row.name,
@@ -40,5 +48,9 @@ export function mapDbFirmToFirm(row: DbFirm): Firm {
       })),
     overallScore: row.overall_score,
     verified: row.is_verified ?? row.verified,
+    contactType,
+    contactUrl: row.contact_url ?? `https://www.google.com/search?q=${encodeURIComponent(`${row.name} contact`)}`,
+    contactEmail: row.contact_email ?? `intake@${row.id.replace(/[^a-z0-9-]/g, "")}.example`,
+    contactPhone: row.contact_phone ?? "(212) 555-0198",
   };
 }

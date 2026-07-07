@@ -91,6 +91,7 @@ interface MatchCardProps {
   result: PublicMatchResult;
   rank: number;
   initialSaved?: boolean;
+  intakeId?: string | null;
 }
 
 function isLockedResult(result: PublicMatchResult): result is Extract<PublicMatchResult, { isLocked: true }> {
@@ -126,7 +127,15 @@ function LockedIdentity({ rank, isBestMatch }: { rank: number; isBestMatch?: boo
   );
 }
 
-function LockedMatchCard({ result, rank }: { result: Extract<PublicMatchResult, { isLocked: true }>; rank: number }) {
+function LockedMatchCard({
+  result,
+  rank,
+  intakeId,
+}: {
+  result: Extract<PublicMatchResult, { isLocked: true }>;
+  rank: number;
+  intakeId?: string | null;
+}) {
   const roundedScore = Math.round(result.score);
   const size = sizeLabels[result.firmSize] ?? result.firmSize;
   const isTop = rank === 1;
@@ -189,7 +198,7 @@ function LockedMatchCard({ result, rank }: { result: Extract<PublicMatchResult, 
               Your matches are ready. Unlock this intake to see who each firm is, open full profiles,
               and get a prepared summary of your matter plus a ready-to-send message for reaching out.
             </p>
-            <Link href="/access" className="btn btn-primary">
+            <Link href={intakeId ? `/access?next=/results/${intakeId}` : "/access?next=/results"} className="btn btn-primary">
               Unlock with checkout <ArrowRight size={14} strokeWidth={2} />
             </Link>
           </div>
@@ -199,12 +208,13 @@ function LockedMatchCard({ result, rank }: { result: Extract<PublicMatchResult, 
   );
 }
 
-export default function MatchCard({ result, rank, initialSaved = false }: MatchCardProps) {
+export default function MatchCard({ result, rank, initialSaved = false, intakeId }: MatchCardProps) {
   if (isLockedResult(result)) {
-    return <LockedMatchCard result={result} rank={rank} />;
+    return <LockedMatchCard result={result} rank={rank} intakeId={intakeId} />;
   }
 
   const { firm, score, reasons, isBestMatch } = result;
+  const profileHref = intakeId ? `/firms/${firm.id}?intake=${intakeId}` : `/firms/${firm.id}`;
   const roundedScore = Math.round(score);
   const hasCriteria = reasons.length > 0 || result.missedCriteria.length > 0;
   const hasBoth = reasons.length > 0 && result.missedCriteria.length > 0;
@@ -299,7 +309,7 @@ export default function MatchCard({ result, rank, initialSaved = false }: MatchC
         {/* CTA */}
         <div className="match-actions">
           <SaveFirmButton firmId={firm.id} initialSaved={initialSaved} compact />
-          <Link href={`/firms/${firm.id}`} className="btn btn-primary">
+          <Link href={profileHref} className="btn btn-primary">
             View full profile
             <ArrowRight size={14} strokeWidth={2} />
           </Link>

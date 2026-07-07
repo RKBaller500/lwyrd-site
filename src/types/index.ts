@@ -36,6 +36,7 @@ export interface AssessmentItem {
 export type FirmSize = "boutique" | "mid-size" | "large";
 export type BillingModel = "hourly" | "retainer" | "flat-fee" | "hybrid";
 export type ResponseTime = "same-day" | "24h" | "48h" | "72h";
+export type FirmContactType = "form" | "email" | "phone";
 
 export interface Firm {
   id: string;
@@ -59,6 +60,10 @@ export interface Firm {
   assessment: AssessmentItem[];
   overallScore: number; // 0-100
   verified: boolean;
+  contactType?: FirmContactType;
+  contactUrl?: string;
+  contactEmail?: string;
+  contactPhone?: string;
 }
 
 // ── Intake Questions ─────────────────────────────────────
@@ -178,6 +183,24 @@ export interface LockedMatchResult {
 }
 
 export type PublicMatchResult = MatchResult | LockedMatchResult;
+
+export interface IntakePreparedMaterials {
+  summary: string;
+  outreachMessage: string;
+  talkingPoints: string[];
+  answeredItems: Array<{ question: string; answer: string }>;
+}
+
+export interface FirmProfileMatchContext {
+  intakeId: string;
+  categoryName: string;
+  score: number;
+  reasons: string[];
+  matchedCriteria: string[];
+  missedCriteria: string[];
+  contactRole: string;
+  prepared: IntakePreparedMaterials;
+}
 
 // ── Auth ─────────────────────────────────────────────────
 export interface AuthUser {

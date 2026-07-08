@@ -1,8 +1,7 @@
-import MarketingPageClient from "@/components/marketing/MarketingPageClient";
-import { css, body, js } from "@/components/marketing/pages/consultations.data";
+import ConsultationsClient from "./ConsultationsClient";
 
 export const metadata = { title: "Consultations | LWYRD" };
 
 export default function ConsultationsPage() {
-  return <MarketingPageClient css={css} body={body} js={js} current="product" currentItem="consultations" />;
+  return <ConsultationsClient bookingUrl={process.env.NEXT_PUBLIC_CONSULTATION_BOOKING_URL ?? ""} />;
 }

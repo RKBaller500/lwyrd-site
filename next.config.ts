@@ -32,7 +32,7 @@ const cspDirectives = [
   `font-src 'self' https://fonts.gstatic.com`,
   `img-src 'self' data: blob: https:`,
   `connect-src 'self' ${supabaseConnect} ${posthogHost} https://formsubmit.co https://api.stripe.com`,
-  `frame-src 'none'`,
+  `frame-src 'self' https://cal.com https://*.cal.com https://calendly.com https://*.calendly.com`,
   `frame-ancestors 'none'`,
   `object-src 'none'`,
   `base-uri 'self'`,

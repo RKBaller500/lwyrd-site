@@ -151,7 +151,7 @@ export default function MarketingPageClient({
 
     const runOriginalJs = () => {
       if (ran || !js || !scriptSrc) return;
-      if (!root.querySelector(".rv, .rv-seq, #heroMaze, [data-seg], .qa, form, input, select")) return;
+      if (!root.querySelector(".rv, .rv-seq, #heroMaze, #calGrid, #bkMain, [data-seg], .qa, form, input, select")) return;
       ran = true;
       // On a RE-init, reset the body to pristine markup first. The original
       // scripts append DOM and bind element-level listeners without cleanup, so

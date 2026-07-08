@@ -16,7 +16,7 @@ type NavItem = "matching" | "consultations" | "faq" | "contact";
 
 function getMarketingScriptSrc(body: string) {
   if (body.includes('id="heroMaze"')) return "/marketing-page-scripts/home.js";
-  if (body.includes('id="trkSel"')) return "/marketing-page-scripts/matching.js";
+  if (body.includes('class="mhero"')) return "/marketing-page-scripts/matching.js";
   if (body.includes('id="calGrid"')) return "/marketing-page-scripts/consultations.js";
   if (body.includes('id="blogSearch"')) return "/marketing-page-scripts/blog.js";
   if (body.includes('class="faq-list"')) return "/marketing-page-scripts/faq.js";

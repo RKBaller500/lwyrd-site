@@ -273,7 +273,7 @@ try{
     }
 
     function onArrive(){arriveFlash();revealArrow();}
-    travel(trail,dot,trail,{dur:4200,delay:450,onArrive:onArrive});
+    travel(trail,dot,trail,{dur:3780,delay:405,onArrive:onArrive});
   })();
 
   /* ---------- the spine draws in on scroll; dots light in sequence ---------- */

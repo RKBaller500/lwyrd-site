@@ -290,7 +290,7 @@ export default function ClientAudienceLanding({ data }: { data: ClientAudienceLa
           line-height:1.05;
           letter-spacing:0;
         }
-        .audience-stat-figure span{font-family:var(--body);font-size:.34em;font-weight:700;color:var(--muted)}
+        .audience-stat-figure span{font-family:var(--display);font-size:.56em;font-weight:700;color:var(--navy);letter-spacing:-.01em}
         .audience-stat-phrase{max-width:9ch}
         .audience-stat-card p{color:var(--muted);font-size:.94rem;line-height:1.58;max-width:34ch}
         .audience-mockups{display:grid;grid-template-columns:1fr;gap:clamp(24px,4vw,40px);align-items:start}

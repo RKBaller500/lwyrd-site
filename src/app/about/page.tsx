@@ -1,274 +1,300 @@
 "use client";
 
+import "@/styles/lwyrd-ds.css";
 import { motion } from "framer-motion";
-import Navbar from "@/components/layout/Navbar";
-import Footer from "@/components/layout/Footer";
-import Button from "@/components/ui/Button";
-import { Eye, Layers, Zap } from "lucide-react";
+import { ArrowRight } from "lucide-react";
+import MarketingNav from "@/components/marketing/MarketingNav";
+import MarketingFooter from "@/components/marketing/MarketingFooter";
 
 const ease = [0.25, 0.46, 0.45, 0.94] as const;
-const lora = { fontFamily: '"Lora", Georgia, serif' } as const;
 
 const container = {
   hidden: {},
-  visible: { transition: { staggerChildren: 0.12, delayChildren: 0.05 } },
+  visible: { transition: { staggerChildren: 0.12, delayChildren: 0.08 } },
 };
 
 const item = {
-  hidden: { opacity: 0, y: 24 },
+  hidden: { opacity: 0, y: 22 },
+  visible: { opacity: 1, y: 0, transition: { duration: 0.58, ease } },
+};
+
+const beat = {
+  hidden: { opacity: 0, y: 20 },
   visible: { opacity: 1, y: 0, transition: { duration: 0.6, ease } },
 };
 
-const values = [
-  {
-    icon: Eye,
-    label: "Clarity over Complexity",
-    body: "We speak in plain language. We translate legal nuance into actionable choices so you can make informed decisions.",
-  },
-  {
-    icon: Layers,
-    label: "Specialization over Generalization",
-    body: "The era of the 'do-it-all' lawyer is over. We believe complex problems require deep expertise, and we only match you with specialists.",
-  },
-  {
-    icon: Zap,
-    label: "Frictionless Access",
-    body: "Getting legal help shouldn't be as painful as the legal problem itself. We streamline the entire discovery and hiring process.",
-  },
+// Real headshots can drop in later at /marketing/Photos/<file> — set `photo`
+// on a founder and the monogram falls back automatically.
+const founders = [
+  { name: "Jai Malhotra", role: "Co-Founder", initials: "JM", photo: "" },
+  { name: "Aidan Berkeley", role: "Co-Founder", initials: "AB", photo: "" },
+  { name: "Rahul Kochar", role: "Co-Founder", initials: "RK", photo: "" },
 ];
 
 export default function AboutPage() {
   return (
-    <div className="flex flex-col min-h-screen bg-[#0A0F1C]">
-      <Navbar />
-
-      <main className="flex-1">
-        {/* ── Hero ── */}
-        <section className="bg-[#0A0F1C] py-28 md:py-40 px-6 text-center">
-          <div className="max-w-4xl mx-auto">
-            <motion.span
-              initial={{ opacity: 0, y: 12 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5, ease }}
-              className="text-[#C9962B] text-xs font-semibold tracking-widest uppercase mb-6 block"
-            >
-              Our Mission
-            </motion.span>
-
-            <motion.h1
-              initial={{ opacity: 0, y: 30 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.75, ease, delay: 0.08 }}
-              className="text-4xl sm:text-5xl lg:text-6xl text-[#E6EAF2] leading-tight mb-7"
-              style={{ ...lora, fontWeight: 500 }}
-            >
-              Access to elite legal{" "}
-              <span style={{ color: "#C9962B" }}>shouldn&apos;t be a privilege.</span>
-            </motion.h1>
-
-            <motion.p
-              initial={{ opacity: 0, y: 22 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.7, ease, delay: 0.18 }}
-              className="text-[#8A93A6] text-lg sm:text-xl leading-relaxed max-w-2xl mx-auto"
-            >
-              To democratize access to elite legal representation by removing the friction,
-              mystery, and gatekeeping of the traditional legal search.
-            </motion.p>
-          </div>
-        </section>
-
-        {/* ── The Problem ── */}
-        <section className="bg-[#0A0F1C] py-16 px-6">
-          <div className="max-w-3xl mx-auto">
+    <div className="lwyrd-ds ds-page about-page">
+      <MarketingNav current="about" />
+      <main className="ds-main">
+        {/* ── Hero: faces + thesis ── */}
+        <section className="about-beat about-hero">
+          <div className="ds-shell about-wrap">
             <motion.div
               initial={{ opacity: 0, y: 18 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true, margin: "-60px" }}
+              animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, ease }}
-              className="border-t border-[#1F2A3D] pt-14 mb-10"
+              className="about-hero-inner"
             >
-              <p className="text-[#8A93A6] text-xs font-medium tracking-widest uppercase mb-2">
-                The Problem
+              <span className="marketing-eyebrow">Our story</span>
+              <h1>
+                We built LWYRD because finding the right lawyer shouldn&apos;t be
+                this hard.
+              </h1>
+              <p className="about-lede">
+                Three of us, building together since high school, who kept
+                running into the same broken problem until we decided to fix it.
               </p>
-              <h2
-                className="text-[#E6EAF2] text-3xl sm:text-4xl"
-                style={{ ...lora, fontWeight: 500 }}
-              >
-                The legal industry has a discovery problem.
-              </h2>
             </motion.div>
 
             <motion.div
-              initial={{ opacity: 0, y: 18 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true, margin: "-60px" }}
-              transition={{ duration: 0.6, ease, delay: 0.05 }}
-              className="space-y-6 text-[#8A93A6] text-sm leading-relaxed"
-            >
-              <p>
-                If you&apos;re a massive corporation, you have an entire legal operations department
-                dedicated to finding and managing the right specialized counsel for every distinct
-                issue.
-              </p>
-              <p>
-                If you&apos;re a startup founder, a small business owner, or an individual, you&apos;re left
-                to rely on Google searches, scattered word-of-mouth referrals, and pure luck to find
-                a lawyer who actually knows how to handle your specific problem.
-              </p>
-              <p className="text-[#C8CDD8]">
-                LWYRD was built to fix this.
-              </p>
-              <p>
-                We believe that you shouldn&apos;t have to be a lawyer to know how to hire a great one.
-                We act as your intelligent guide, diagnosing your needs, filtering out the noise,
-                and curating introductions to attorneys who specialize deeply in what you&apos;re facing.
-              </p>
-            </motion.div>
-          </div>
-        </section>
-
-        {/* ── Values ── */}
-        <section className="bg-[#0A0F1C] py-16 px-6">
-          <div className="max-w-5xl mx-auto">
-            <motion.div
-              initial={{ opacity: 0, y: 18 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true, margin: "-60px" }}
-              transition={{ duration: 0.6, ease }}
-              className="border-t border-[#1F2A3D] pt-14 mb-10"
-            >
-              <p className="text-[#8A93A6] text-xs font-medium tracking-widest uppercase mb-2">
-                What We Stand For
-              </p>
-              <h2
-                className="text-[#E6EAF2] text-3xl sm:text-4xl"
-                style={{ ...lora, fontWeight: 500 }}
-              >
-                Our Values
-              </h2>
-            </motion.div>
-
-            <motion.div
-              className="grid grid-cols-1 md:grid-cols-3 gap-6"
+              className="about-founders"
               variants={container}
               initial="hidden"
               whileInView="visible"
               viewport={{ once: true, margin: "-60px" }}
             >
-              {values.map((card) => {
-                const Icon = card.icon;
-                return (
-                  <motion.div
-                    key={card.label}
-                    variants={item}
-                    className="bg-[#141C2E] border border-[#1F2A3D] rounded-3xl p-8"
-                  >
-                    <div className="inline-flex items-center justify-center w-11 h-11 rounded-2xl bg-[#1F2A3D] border border-[#1F2A3D] mb-5">
-                      <Icon size={20} className="text-[#C9962B]" strokeWidth={1.5} />
-                    </div>
-                    <h3
-                      className="text-[#E6EAF2] text-lg mb-3"
-                      style={{ ...lora, fontWeight: 500 }}
-                    >
-                      {card.label}
-                    </h3>
-                    <p className="text-[#8A93A6] text-sm leading-relaxed">{card.body}</p>
-                  </motion.div>
-                );
-              })}
-            </motion.div>
-          </div>
-        </section>
-
-        {/* ── LWYRD Standard ── */}
-        <section className="bg-[#002452] py-20 px-6">
-          <div className="max-w-5xl mx-auto">
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true, margin: "-60px" }}
-              transition={{ duration: 0.6, ease }}
-              className="mb-10 max-w-3xl"
-            >
-              <p className="text-[#C9962B]/80 text-xs font-medium tracking-widest uppercase mb-3">
-                Our Standard
-              </p>
-              <h2
-                className="text-white text-3xl sm:text-4xl leading-tight mb-6"
-                style={{ ...lora, fontWeight: 500 }}
-              >
-                The LWYRD Assessment
-              </h2>
-              <p className="text-white/60 text-sm leading-relaxed">
-                Before any firm appears on the platform, it goes through the LWYRD Assessment, a
-                rigorous evaluation covering bar standing and disciplinary history, depth of
-                experience in core practice areas, client responsiveness commitments, written
-                engagement standards, and full fee transparency. A firm&apos;s assessment performance is
-                factored into every match it appears in.
-              </p>
-            </motion.div>
-
-            <motion.div
-              className="grid grid-cols-1 md:grid-cols-3 gap-5"
-              variants={container}
-              initial="hidden"
-              whileInView="visible"
-              viewport={{ once: true, margin: "-60px" }}
-            >
-              {[
-                { value: "100%", label: "of firms assessed before listing" },
-                { value: "Zero", label: "pay-to-play rankings" },
-                { value: "No surprises", label: "written engagement agreements and upfront fee disclosure required" },
-              ].map((stat) => (
-                <motion.div
-                  key={stat.value}
-                  variants={item}
-                  className="bg-white/8 border border-white/15 rounded-3xl p-6"
-                >
-                  <p className="text-[#C9962B] text-3xl mb-2" style={{ ...lora, fontWeight: 500 }}>
-                    {stat.value}
-                  </p>
-                  <p className="text-white/60 text-sm leading-snug">{stat.label}</p>
+              {founders.map((f) => (
+                <motion.div key={f.name} variants={item} className="about-founder">
+                  <div className="about-founder-photo">
+                    {f.photo ? (
+                      // eslint-disable-next-line @next/next/no-img-element
+                      <img src={f.photo} alt={f.name} />
+                    ) : (
+                      <span aria-hidden="true">{f.initials}</span>
+                    )}
+                  </div>
+                  <p className="about-founder-name">{f.name}</p>
+                  <p className="about-founder-role">{f.role}</p>
                 </motion.div>
               ))}
             </motion.div>
           </div>
         </section>
 
-        {/* ── CTA ── */}
-        <section className="bg-[#0A0F1C] py-20 px-6">
-          <div className="max-w-5xl mx-auto">
+        {/* ── The note ── */}
+        <section className="about-beat about-note">
+          <div className="ds-shell about-wrap about-note-wrap">
+            <motion.div
+              variants={beat}
+              initial="hidden"
+              whileInView="visible"
+              viewport={{ once: true, margin: "-80px" }}
+              className="about-note-block"
+            >
+              <h2>This started with a squash club.</h2>
+              <p>
+                It was the place our high school team practiced, the kind of
+                neighborhood spot run by people who had poured everything into
+                it. We knew them. So when we found out that businesses like
+                theirs were owed money through a legal settlement, real money
+                that could change things for them, we brought it to them. They
+                had no idea it existed. Nobody had ever told them. People had
+                approached them before, claiming to want to help, but never in a
+                way that actually got them anywhere. We did it differently, and
+                it worked.
+              </p>
+              <p>
+                That cracked something open. We started seeing the same thing
+                everywhere. Small businesses, local operators, people who were
+                owed things or protected by things, with no clear path to the
+                legal help that would get them there. The problem was never a
+                shortage of lawyers. It was that the right lawyer and the person
+                who needed them almost never found each other. It was a matching
+                problem. And when the match happened, it changed everything.
+              </p>
+              <p>
+                So we spent the next stretch of our lives connecting people to
+                the right legal help, one situation at a time. It taught us the
+                shape of the problem from the inside. But it also showed us we
+                were only solving a narrow slice of something much bigger.
+              </p>
+            </motion.div>
+
+            <motion.div
+              variants={beat}
+              initial="hidden"
+              whileInView="visible"
+              viewport={{ once: true, margin: "-80px" }}
+              className="about-note-block"
+            >
+              <h2>Then we tried to start LWYRD, and we became the customer.</h2>
+              <p>
+                We needed a lawyer to form the company. It should have been
+                simple. It wasn&apos;t. We were referred to a lawyer in the wrong
+                state, then another one, also the wrong state. Then someone who
+                didn&apos;t practice the kind of law we needed at all. Then attorneys
+                quoting five hundred dollars an hour, then two thousand, for a
+                matter that needed neither. One wanted to bill by the hour for
+                something we wanted done at a fixed price. Every referral came
+                from someone who meant well. Not one of them was right, and
+                finding the one that was cost us weeks and real money.
+              </p>
+              <p>
+                We had just spent a long time helping other people find the legal
+                help they couldn&apos;t find on their own, and here we were, stuck in
+                the exact same maze. That was the moment it became undeniable. So
+                we built the thing we wished we&apos;d had.
+              </p>
+            </motion.div>
+
+            <motion.div
+              variants={beat}
+              initial="hidden"
+              whileInView="visible"
+              viewport={{ once: true, margin: "-80px" }}
+              className="about-note-block"
+            >
+              <h2>LWYRD is that thing.</h2>
+              <p>
+                You tell us your situation in plain terms, and we match you to
+                the firms actually built for it, with the reasons each one fits
+                and everything you need to reach out. No sorting through
+                directories. No guessing. No paying two thousand an hour for
+                something that needed two hundred. The right lawyer for what
+                you&apos;re actually facing, found the way it should have been all
+                along.
+              </p>
+              <p className="about-signoff">— Jai, Aidan, and Rahul</p>
+            </motion.div>
+          </div>
+        </section>
+
+        {/* ── Closing CTA ── */}
+        <section className="about-beat about-cta">
+          <div className="ds-shell about-wrap">
             <motion.div
               initial={{ opacity: 0, y: 18 }}
               whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true, margin: "-60px" }}
+              viewport={{ once: true, margin: "-70px" }}
               transition={{ duration: 0.6, ease }}
-              className="max-w-2xl mx-auto bg-[#141C2E] border border-[#1F2A3D] rounded-3xl p-10 text-center"
+              className="navy-panel about-cta-panel"
             >
-              <h2
-                className="text-[#E6EAF2] text-3xl mb-3"
-                style={{ ...lora, fontWeight: 500 }}
-              >
-                Ready to find the right firm?
-              </h2>
-              <p className="text-[#8A93A6] text-sm leading-relaxed mb-8">
-                Start the intake, about five minutes, no legal jargon, no cost.
-              </p>
-              <div className="flex flex-col sm:flex-row gap-3 justify-center">
-                <Button href="/get-matched" variant="primary" size="lg">
-                  Get Matched →
-                </Button>
-                <Button href="/contact" variant="outline" size="lg">
-                  Contact Us
-                </Button>
+              <div className="about-cta-copy">
+                <h2>Find the right lawyer for what you&apos;re facing.</h2>
+                <p>
+                  Tell us your situation in plain terms. About five minutes, no
+                  legal jargon, no cost.
+                </p>
               </div>
+              <a href="/get-matched" className="btn about-cta-btn">
+                Get matched <ArrowRight size={15} />
+              </a>
             </motion.div>
           </div>
         </section>
       </main>
+      <MarketingFooter />
 
-      <Footer />
+      <style>{`
+        .about-page{background:#fff}
+        .about-beat{padding:var(--sec) 0}
+        .about-wrap{max-width:var(--maxw);padding-top:0;padding-bottom:0}
+
+        /* hero */
+        .about-hero{padding-top:clamp(76px,10vw,124px);padding-bottom:clamp(52px,7vw,84px)}
+        .about-hero-inner{max-width:920px}
+        .about-hero-inner h1{font-size:clamp(2.15rem,4.6vw,3.7rem);line-height:1.06;margin:.75rem 0 0;max-width:20ch}
+        .about-lede{color:var(--muted);font-size:1.1rem;line-height:1.62;margin-top:1.35rem;max-width:60ch}
+
+        .about-founders{
+          display:grid;
+          grid-template-columns:1fr;
+          gap:20px;
+          margin-top:clamp(44px,6vw,72px);
+        }
+        .about-founder{display:flex;flex-direction:column;align-items:center;text-align:center}
+        .about-founder-photo{
+          width:clamp(128px,20vw,168px);
+          height:clamp(128px,20vw,168px);
+          border-radius:50%;
+          overflow:hidden;
+          display:flex;
+          align-items:center;
+          justify-content:center;
+          background:var(--navy-tint);
+          border:1px solid var(--navy-tint-2);
+          box-shadow:var(--shadow-sm);
+        }
+        .about-founder-photo img{width:100%;height:100%;object-fit:cover}
+        .about-founder-photo span{
+          font-family:var(--display);
+          font-size:clamp(2rem,3.4vw,2.7rem);
+          color:var(--navy);
+          letter-spacing:.02em;
+        }
+        .about-founder-name{
+          font-family:var(--display);
+          font-weight:700;
+          color:var(--ink);
+          font-size:1.12rem;
+          line-height:1.25;
+          margin-top:18px;
+        }
+        .about-founder-role{color:var(--muted);font-size:.9rem;margin-top:3px}
+
+        /* the note */
+        .about-note{background:var(--paper-alt);border-top:1px solid var(--line);border-bottom:1px solid var(--line)}
+        .about-note-wrap{max-width:720px}
+        .about-note-block + .about-note-block{margin-top:clamp(40px,6vw,64px)}
+        .about-note-block h2{
+          font-size:clamp(1.5rem,3vw,2.15rem);
+          line-height:1.16;
+          max-width:22ch;
+          margin-bottom:1.15rem;
+        }
+        .about-note-block p{
+          color:var(--ink-2);
+          font-size:1.075rem;
+          line-height:1.75;
+          max-width:66ch;
+        }
+        .about-note-block p + p{margin-top:1.25rem}
+        .about-signoff{
+          color:var(--muted)!important;
+          font-family:var(--display);
+          font-style:italic;
+          font-size:1.05rem!important;
+          margin-top:1.6rem!important;
+        }
+
+        /* cta */
+        .about-cta-panel{
+          display:flex;
+          align-items:center;
+          justify-content:space-between;
+          gap:28px;
+          padding:clamp(30px,4vw,48px);
+        }
+        .about-cta-copy h2{font-size:clamp(1.6rem,3vw,2.3rem);line-height:1.14;max-width:20ch}
+        .about-cta-copy p{color:rgba(255,255,255,.72);font-size:1rem;line-height:1.6;margin-top:.85rem;max-width:48ch}
+        .about-cta-btn{
+          flex-shrink:0;
+          background:#fff;
+          color:var(--navy);
+        }
+        .about-cta-btn:hover{transform:translateY(-1px)}
+
+        @media(min-width:760px){
+          .about-founders{grid-template-columns:repeat(3,1fr);gap:clamp(24px,3vw,44px)}
+        }
+        @media(max-width:640px){
+          .about-beat{padding:64px 0}
+          .about-hero{padding-top:54px}
+          .about-hero-inner h1{font-size:clamp(2rem,9vw,2.6rem)}
+          .about-cta-panel{flex-direction:column;align-items:flex-start;gap:22px}
+          .about-cta-btn{width:100%;justify-content:center}
+        }
+      `}</style>
     </div>
   );
 }

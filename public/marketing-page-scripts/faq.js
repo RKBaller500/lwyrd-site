@@ -32,9 +32,7 @@ try{
   document.querySelectorAll('.qa button').forEach(btn=>{
     btn.addEventListener('click',()=>{
       const qa=btn.parentElement;
-      const wasOpen=qa.classList.contains('open');
-      document.querySelectorAll('.qa.open').forEach(openItem=>closeQa(openItem));
-      if(!wasOpen)openQa(qa);
+      if(qa.classList.contains('open'))closeQa(qa);else openQa(qa);
     });
   });
 

@@ -40,3 +40,6 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 .env*
+
+# Local-only Stripe go-live notes (never commit)
+STRIPE_GOLIVE.md

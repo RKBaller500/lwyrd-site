@@ -13,9 +13,18 @@ const MAX_IMAGE_BYTES = 8 * 1024 * 1024;
 const IMAGE_EXTENSIONS: Record<string, string> = {
   "image/avif": "avif",
   "image/gif": "gif",
+  "image/jpg": "jpg",
   "image/jpeg": "jpg",
   "image/png": "png",
   "image/webp": "webp",
+};
+const EXTENSION_CONTENT_TYPES: Record<string, string> = {
+  avif: "image/avif",
+  gif: "image/gif",
+  jpg: "image/jpeg",
+  jpeg: "image/jpeg",
+  png: "image/png",
+  webp: "image/webp",
 };
 
 export interface BlogPostInput {
@@ -85,6 +94,25 @@ function sanitizePathPart(value: string, fallback: string) {
   return clean || fallback;
 }
 
+function getImageUploadType(file: File): { contentType: string; extension: string } | null {
+  const extensionFromType = IMAGE_EXTENSIONS[file.type.toLowerCase()];
+  if (extensionFromType) {
+    return {
+      contentType: EXTENSION_CONTENT_TYPES[extensionFromType] ?? file.type,
+      extension: extensionFromType,
+    };
+  }
+
+  const extensionFromName = file.name.split(".").pop()?.toLowerCase() ?? "";
+  const contentType = EXTENSION_CONTENT_TYPES[extensionFromName];
+  if (!contentType) return null;
+
+  return {
+    contentType,
+    extension: extensionFromName === "jpeg" ? "jpg" : extensionFromName,
+  };
+}
+
 export async function uploadBlogImage(
   formData: FormData
 ): Promise<{ error?: string; url?: string }> {
@@ -100,8 +128,8 @@ export async function uploadBlogImage(
     return { error: "Choose an image file to upload." };
   }
 
-  const extension = IMAGE_EXTENSIONS[file.type];
-  if (!extension) {
+  const uploadType = getImageUploadType(file);
+  if (!uploadType) {
     return {
       error: "Upload a JPEG, PNG, WebP, GIF, or AVIF image.",
     };
@@ -117,14 +145,14 @@ export async function uploadBlogImage(
     file.name.replace(/\.[^.]+$/, ""),
     "cover"
   );
-  const path = `${slug}/${Date.now()}-${crypto.randomUUID()}-${originalName}.${extension}`;
+  const path = `${slug}/${Date.now()}-${crypto.randomUUID()}-${originalName}.${uploadType.extension}`;
   const bytes = Buffer.from(await file.arrayBuffer());
 
   const { error } = await db.storage
     .from(BLOG_IMAGE_BUCKET)
     .upload(path, bytes, {
       cacheControl: "31536000",
-      contentType: file.type,
+      contentType: uploadType.contentType,
       upsert: false,
     });
 
@@ -138,7 +166,7 @@ export async function uploadBlogImage(
     action: "upload_blog_image",
     targetType: "blog_image",
     targetId: path,
-    after: { url, contentType: file.type, size: file.size },
+    after: { url, contentType: uploadType.contentType, size: file.size },
   });
 
   return { url };

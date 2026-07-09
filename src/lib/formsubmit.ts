@@ -1,11 +1,11 @@
-const FORMSUBMIT_ENDPOINT = "https://formsubmit.co/ajax/rahul@lwyrd.co";
+const FORMS_ENDPOINT = "/api/forms";
 
 interface FormPayload {
   [key: string]: string;
 }
 
 export async function submitForm(payload: FormPayload): Promise<void> {
-  const res = await fetch(FORMSUBMIT_ENDPOINT, {
+  const res = await fetch(FORMS_ENDPOINT, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -15,11 +15,18 @@ export async function submitForm(payload: FormPayload): Promise<void> {
   });
 
   if (!res.ok) {
-    throw new Error(`Form submission failed: ${res.status}`);
+    let message = `Form submission failed: ${res.status}`;
+    try {
+      const data = (await res.json()) as { error?: string };
+      if (data.error) message = data.error;
+    } catch {
+      // Keep the status-based fallback if the response was not JSON.
+    }
+    throw new Error(message);
   }
 
   const data = await res.json();
-  if (data.success !== "true" && data.success !== true) {
+  if (data.ok !== true) {
     throw new Error("Form submission not acknowledged");
   }
 }

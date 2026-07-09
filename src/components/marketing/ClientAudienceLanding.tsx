@@ -5,7 +5,7 @@ import { useEffect, useRef, useState } from "react";
 import { motion, useInView } from "framer-motion";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { ArrowRight, CheckCircle2, LockKeyhole, Sparkles } from "lucide-react";
+import { ArrowRight, Award, Building2, CheckCircle2, LockKeyhole, Sparkles } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 import MarketingFooter from "./MarketingFooter";
 import MarketingNav from "./MarketingNav";
@@ -54,6 +54,12 @@ export interface ClientAudienceLandingData {
   resultCaption: string;
   matters: { value: string; label: string }[];
   stats: StatBlock[];
+  intakeDemo: {
+    stepLabel: string;
+    pct: number;
+    question: string;
+    options: string[];
+  };
   result: {
     rankLabel: string;
     title: string;
@@ -118,6 +124,39 @@ function CountFigure({ block }: { block: StatBlock }) {
   );
 }
 
+function ScoreRing({ score }: { score: number }) {
+  const size = 72;
+  const radius = 29;
+  const stroke = 5;
+  const circumference = 2 * Math.PI * radius;
+  const filled = (score / 100) * circumference;
+
+  return (
+    <div className="mock-score-ring">
+      <div className="mock-score-ring-graphic" style={{ width: size, height: size }}>
+        <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`} style={{ transform: "rotate(-90deg)" }}>
+          <circle cx={size / 2} cy={size / 2} r={radius} fill="none" stroke="#E7E7E3" strokeWidth={stroke} />
+          <circle
+            cx={size / 2}
+            cy={size / 2}
+            r={radius}
+            fill="none"
+            stroke="#002B55"
+            strokeWidth={stroke}
+            strokeDasharray={`${filled} ${circumference}`}
+            strokeLinecap="round"
+          />
+        </svg>
+        <div className="mock-score-ring-value">
+          <span>{score}</span>
+          <small>%</small>
+        </div>
+      </div>
+      <span className="mock-score-ring-label">Match score</span>
+    </div>
+  );
+}
+
 export default function ClientAudienceLanding({ data }: { data: ClientAudienceLandingData }) {
   const router = useRouter();
   const { isAuthenticated, openModal } = useAuth();
@@ -170,21 +209,35 @@ export default function ClientAudienceLanding({ data }: { data: ClientAudienceLa
 
             <div className="audience-mockups">
               <div>
-                <div className="audience-mockup audience-intake-mockup">
+                <div className="audience-mockup">
                   <div className="mock-topbar">
                     <span />
                     <span />
                     <span />
                     <p>LWYRD intake</p>
                   </div>
-                  <div className="audience-track-pill">{data.trackLabel}</div>
-                  <h3>What area of law do you need help with?</h3>
-                  <div className="audience-matter-grid">
-                    {data.matters.map((matter) => (
-                      <button key={matter.value} type="button" onClick={() => startIntake(matter.value)}>
-                        {matter.label}
-                      </button>
-                    ))}
+                  <div className="mock-progress">
+                    <div className="mock-progress-meta">
+                      <span>{data.intakeDemo.stepLabel}</span>
+                      <span>{data.intakeDemo.pct}% complete</span>
+                    </div>
+                    <div className="mock-progress-track">
+                      <div className="mock-progress-fill" style={{ width: `${data.intakeDemo.pct}%` }} />
+                    </div>
+                  </div>
+                  <div className="mock-intake-card">
+                    <p className="mock-intake-meta">Required</p>
+                    <h3>{data.intakeDemo.question}</h3>
+                    <div className="mock-intake-options" aria-hidden="true">
+                      {data.intakeDemo.options.map((opt, i) => (
+                        <div
+                          key={opt}
+                          className={`mock-intake-option ${i === 0 ? "is-selected" : ""}`}
+                        >
+                          <span>{opt}</span>
+                        </div>
+                      ))}
+                    </div>
                   </div>
                 </div>
                 <p className="audience-caption">
@@ -197,26 +250,60 @@ export default function ClientAudienceLanding({ data }: { data: ClientAudienceLa
               </div>
 
               <div>
-                <div className="audience-mockup audience-result-mockup">
-                  <div className="audience-result-head">
-                    <div>
-                      <span className="audience-rank">{data.result.rankLabel}</span>
-                      <h3>{data.result.title}</h3>
-                      <p>{data.result.meta}</p>
-                    </div>
-                    <div className="audience-score">
-                      <strong>{data.result.score}</strong>
-                      <span>% fit</span>
-                    </div>
+                <div className="audience-mockup">
+                  <div className="mock-topbar">
+                    <span />
+                    <span />
+                    <span />
+                    <p>LWYRD matches</p>
                   </div>
-                  <div className="audience-result-reasons">
-                    {data.result.reasons.map((reason) => (
-                      <div key={reason}><CheckCircle2 size={16} /> {reason}</div>
-                    ))}
-                  </div>
-                  <div className="audience-result-locked">
-                    <LockKeyhole size={15} />
-                    {data.result.lockedText}
+                  <div className="mock-match-card is-top">
+                    <div className="mock-match-head">
+                      <div className="mock-match-identity">
+                        <div className="mock-match-logo" aria-hidden="true">
+                          <div />
+                          <span>1</span>
+                        </div>
+                        <div className="mock-match-idtext">
+                          <div className="mock-badges">
+                            <span className="mock-badge is-primary">
+                              <Award size={9} strokeWidth={2.5} /> {data.result.rankLabel}
+                            </span>
+                            <span className="mock-badge">
+                              <LockKeyhole size={10} strokeWidth={2} /> Identity hidden
+                            </span>
+                          </div>
+                          <div className="mock-locked-name" />
+                          <p>{data.result.title}</p>
+                        </div>
+                      </div>
+                      <ScoreRing score={data.result.score} />
+                    </div>
+
+                    <div className="mock-chip-row">
+                      {data.result.meta.split("·").map((chip, i) => (
+                        <span key={i} className="mock-chip">
+                          {i === 0 ? <Building2 size={12} strokeWidth={1.75} /> : null}
+                          {chip.trim()}
+                        </span>
+                      ))}
+                    </div>
+
+                    <div className="mock-match-why">
+                      <p className="mock-section-label">Why this fits</p>
+                      <div className="mock-match-list">
+                        {data.result.reasons.map((reason) => (
+                          <div key={reason}>
+                            <CheckCircle2 size={15} /> <span>{reason}</span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+
+                    <div className="mock-result-locked">
+                      <LockKeyhole size={14} />
+                      {data.result.lockedText}
+                    </div>
                   </div>
                 </div>
                 <p className="audience-caption audience-result-caption">{data.resultCaption}</p>
@@ -302,38 +389,66 @@ export default function ClientAudienceLanding({ data }: { data: ClientAudienceLa
           overflow:hidden;
           padding:clamp(20px,3vw,30px);
         }
-        .mock-topbar{display:flex;align-items:center;gap:7px;margin:-4px 0 22px;color:var(--faint);font-size:.74rem}
+        .mock-topbar{display:flex;align-items:center;gap:7px;margin:-4px 0 20px;color:var(--faint);font-size:.74rem}
         .mock-topbar span{width:8px;height:8px;border-radius:50%;background:#d9d9d5}
         .mock-topbar p{margin-left:6px}
-        .audience-track-pill{display:inline-flex;border:1px solid var(--navy-tint-2);background:var(--navy-tint);color:var(--navy);border-radius:var(--r-pill);padding:.32em .78em;font-size:.74rem;font-weight:700;margin-bottom:16px}
-        .audience-mockup h3{font-family:var(--display);font-size:clamp(1.25rem,2.2vw,1.72rem);line-height:1.16;margin-bottom:18px}
-        .audience-matter-grid{display:grid;grid-template-columns:1fr;gap:8px}
-        .audience-matter-grid button{
-          min-height:44px;
-          text-align:left;
-          border:1px solid var(--line);
-          border-radius:var(--r-sm);
-          background:var(--paper-alt);
-          color:var(--ink);
-          font-size:.88rem;
-          font-weight:600;
-          padding:11px 13px;
-          transition:background .16s ease,border-color .16s ease,transform .16s ease,box-shadow .16s ease;
-        }
-        .audience-matter-grid button:hover{background:#fff;border-color:var(--navy-tint-2);box-shadow:var(--shadow-sm);transform:translateY(-1px)}
         .audience-caption{color:var(--muted);font-size:.9rem;line-height:1.6;margin-top:14px;max-width:62ch}
         .audience-result-caption{font-weight:500;color:var(--ink-2)}
-        .audience-result-head{display:flex;align-items:flex-start;justify-content:space-between;gap:18px;padding-bottom:18px;border-bottom:1px solid var(--line)}
-        .audience-rank{display:inline-flex;background:var(--navy);color:#fff;border-radius:var(--r-pill);padding:.3em .7em;font-size:.66rem;font-weight:700;text-transform:uppercase;letter-spacing:.08em;margin-bottom:13px}
-        .audience-result-head h3{margin-bottom:5px}
-        .audience-result-head p{color:var(--muted);font-size:.86rem;line-height:1.4}
-        .audience-score{flex-shrink:0;text-align:center;border:1px solid var(--navy-tint-2);background:var(--navy-tint);border-radius:var(--r);padding:12px 14px;min-width:86px}
-        .audience-score strong{display:block;color:var(--navy);font-family:var(--display);font-size:2rem;line-height:1}
-        .audience-score span{display:block;color:var(--muted);font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.07em;margin-top:3px}
-        .audience-result-reasons{display:grid;gap:10px;margin-top:18px}
-        .audience-result-reasons div{display:flex;align-items:flex-start;gap:10px;color:var(--ink-2);font-size:.9rem;line-height:1.45}
-        .audience-result-reasons svg{color:#15803d;flex-shrink:0;margin-top:2px}
-        .audience-result-locked{display:flex;align-items:center;gap:9px;margin-top:20px;border:1px solid var(--line);border-radius:var(--r-sm);background:var(--paper-alt);padding:12px 13px;color:var(--muted);font-size:.82rem;font-weight:600}
+
+        /* intake mockup — mirrors the real intake screen */
+        .mock-progress{margin-bottom:20px}
+        .mock-progress-meta{display:flex;justify-content:space-between;color:var(--muted);font-size:.74rem;font-weight:600;margin-bottom:8px}
+        .mock-progress-track{height:6px;border-radius:var(--r-pill);background:var(--paper-alt);border:1px solid var(--line);overflow:hidden}
+        .mock-progress-fill{height:100%;border-radius:var(--r-pill);background:var(--navy-gradient)}
+        .mock-intake-card{border:1px solid var(--line);border-radius:14px;background:var(--paper-alt);box-shadow:var(--shadow-sm);padding:clamp(16px,2.4vw,22px)}
+        .mock-intake-meta{color:var(--faint);font-size:.6rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;margin-bottom:10px}
+        .mock-intake-card h3{font-family:var(--display);font-weight:500;font-size:clamp(1.15rem,2vw,1.5rem);line-height:1.18;color:var(--ink);margin-bottom:16px}
+        .mock-intake-options{display:grid;gap:9px}
+        .mock-intake-option{
+          width:100%;
+          text-align:left;
+          border:1px solid var(--line);
+          border-radius:11px;
+          background:#fff;
+          color:var(--ink-2);
+          font-size:.9rem;
+          font-weight:600;
+          padding:13px 15px;
+          pointer-events:none;
+        }
+        .mock-intake-option.is-selected{background:var(--navy-gradient);border-color:var(--navy);color:#fff;box-shadow:0 10px 24px rgba(0,43,85,.16)}
+
+        /* result mockup — mirrors the real locked match card */
+        .mock-match-card{position:relative;border:1px solid var(--line);border-radius:14px;background:#fff;box-shadow:var(--shadow-sm);padding:clamp(16px,2.4vw,22px);overflow:hidden}
+        .mock-match-card.is-top{border-color:var(--navy);box-shadow:0 8px 24px rgba(0,43,85,.1)}
+        .mock-match-card.is-top::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:var(--navy)}
+        .mock-match-head{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;padding-bottom:16px;border-bottom:1px solid var(--line)}
+        .mock-match-identity{display:flex;align-items:center;gap:12px;min-width:0}
+        .mock-match-logo{position:relative;width:46px;height:46px;flex:0 0 46px;border-radius:12px;overflow:hidden;display:flex;align-items:center;justify-content:center}
+        .mock-match-logo div{position:absolute;inset:0;background:var(--navy-tint);border:1px solid var(--navy-tint-2);border-radius:12px;filter:blur(1px)}
+        .mock-match-logo span{position:relative;font-family:var(--display);font-size:1.1rem;color:var(--navy)}
+        .mock-match-idtext{min-width:0}
+        .mock-badges{display:flex;align-items:center;flex-wrap:wrap;gap:6px;margin-bottom:8px}
+        .mock-badge{display:inline-flex;align-items:center;gap:4px;border:1px solid var(--line);border-radius:var(--r-pill);background:var(--paper-alt);color:var(--muted);font-size:.58rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;padding:5px 8px;line-height:1}
+        .mock-badge.is-primary{border-color:var(--navy);background:var(--navy);color:#fff}
+        .mock-locked-name{width:60%;max-width:150px;height:15px;border-radius:6px;background:linear-gradient(90deg,var(--navy-tint),#e9e6dd);margin-bottom:7px}
+        .mock-match-idtext p{color:var(--muted);font-size:.8rem;line-height:1.35}
+        .mock-score-ring{display:flex;flex-direction:column;align-items:center;gap:5px;flex-shrink:0}
+        .mock-score-ring-graphic{position:relative}
+        .mock-score-ring-value{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;gap:1px}
+        .mock-score-ring-value span{font-family:var(--display);color:var(--navy);font-size:1.15rem;line-height:1}
+        .mock-score-ring-value small{color:var(--muted);font-size:.62rem;font-weight:600}
+        .mock-score-ring-label{color:var(--faint);font-size:.56rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase}
+        .mock-chip-row{display:flex;flex-wrap:wrap;gap:7px;padding:14px 0;border-bottom:1px solid var(--line)}
+        .mock-chip{display:inline-flex;align-items:center;gap:5px;border:1px solid var(--line);border-radius:var(--r-pill);background:var(--paper-alt);color:var(--ink-2);font-size:.74rem;padding:5px 10px}
+        .mock-chip svg{color:var(--muted)}
+        .mock-match-why{padding-top:14px}
+        .mock-section-label{color:var(--faint);font-size:.6rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;margin-bottom:11px}
+        .mock-match-list{display:grid;gap:9px}
+        .mock-match-list div{display:flex;align-items:flex-start;gap:9px;color:var(--ink-2);font-size:.84rem;line-height:1.45}
+        .mock-match-list svg{color:#059669;flex-shrink:0;margin-top:2px}
+        .mock-result-locked{display:flex;align-items:center;gap:9px;margin-top:16px;border:1px solid var(--line);border-radius:var(--r-sm);background:var(--paper-alt);padding:11px 13px;color:var(--muted);font-size:.8rem;font-weight:600}
+        .mock-result-locked svg{flex-shrink:0}
         .audience-final{text-align:center}
         .audience-final-inner{max-width:840px;padding-top:0;padding-bottom:0}
         .audience-final h2{font-size:clamp(2rem,4vw,3rem);line-height:1.08;margin:.65rem auto 1rem;max-width:16ch}
@@ -342,16 +457,13 @@ export default function ClientAudienceLanding({ data }: { data: ClientAudienceLa
         @media(min-width:760px){
           .audience-stat-grid{grid-template-columns:repeat(3,1fr)}
           .audience-mockups{grid-template-columns:1fr 1fr}
-          .audience-matter-grid{grid-template-columns:1fr 1fr}
         }
         @media(max-width:640px){
           .audience-beat{padding:64px 0}
           .audience-problem{padding-top:54px}
           .audience-head h1,.audience-head h2{font-size:clamp(2rem,12vw,2.8rem)}
-          .audience-result-head{flex-direction:column}
-          .audience-score{width:100%;text-align:left}
-          .audience-score strong,.audience-score span{display:inline-block}
-          .audience-score span{margin-left:5px}
+          .mock-match-head{flex-direction:column-reverse;align-items:flex-start}
+          .mock-score-ring{flex-direction:row;align-items:center;gap:9px}
           .audience-actions .btn{width:100%;justify-content:center}
         }
       `}</style>

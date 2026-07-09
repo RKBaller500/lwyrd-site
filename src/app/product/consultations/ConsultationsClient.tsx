@@ -74,7 +74,6 @@ export default function ConsultationsClient({ bookingUrl }: { bookingUrl: string
         <div class="bk-main-head live">
           <div>
             <h2>Book a live consultation</h2>
-            <div class="bk-sub">Live availability is powered by Cal.com, so these dates and times match your booking calendar.</div>
           </div>
         </div>
         <div class="bk-live-frame">

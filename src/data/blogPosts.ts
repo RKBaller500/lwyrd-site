@@ -299,12 +299,14 @@ export const BUSINESS_FOCUS_LABELS: Record<string, string> = {
   saas: "SaaS",
   manufacturing: "Manufacturing",
   nonprofits: "Nonprofits",
+  other: "Other",
 };
 
 export const BUSINESS_TYPE_LABELS: Record<string, string> = {
   startup: "Startups",
   individual: "Individuals",
   small_business: "Small Business",
+  other: "General / Other",
 };
 
 export const EDITORS_PICKS_SLUGS: string[] = [

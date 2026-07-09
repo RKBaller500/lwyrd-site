@@ -6,7 +6,9 @@ import type { BlogPost } from "@/types/blog";
 
 function tagLabel(post: BlogPost): string {
   if (post.isWeeklyIntake) return "The Intake";
-  return post.category === "advice" ? "Advice" : "News";
+  if (post.category === "advice") return "Advice";
+  if (post.category === "general") return "General";
+  return "News";
 }
 
 /**

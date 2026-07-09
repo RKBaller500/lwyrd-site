@@ -18,7 +18,7 @@ export default function ContactSection() {
       await submitForm({
         email: updateEmail,
         formType: "Stay Updated",
-        subject: "New LWYRD Stay Updated Signup",
+        _subject: "New LWYRD Stay Updated Signup",
         _replyto: updateEmail,
       });
       setUpdateStatus("success");

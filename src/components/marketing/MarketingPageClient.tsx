@@ -114,10 +114,25 @@ export default function MarketingPageClient({
       if (!isGetMatched) return;
       e.preventDefault();
       e.stopPropagation();
-      if (isAuthenticated) router.push("/intake/start");
+      // If the hero track selector has a choice, deep-link straight into that
+      // track's intake (the wizard reads ?track= and skips to the next
+      // question). Otherwise fall back to the orientation step.
+      let dest = "/intake/start";
+      const trackSelect = root.querySelector<HTMLSelectElement>("#trackSelect");
+      const selectedTrack = trackSelect?.value.trim();
+      if (selectedTrack) {
+        const trackMap: Record<string, string> = {
+          startup: "startup",
+          "small-business": "small_business",
+          individual: "individual",
+        };
+        const mapped = trackMap[selectedTrack];
+        if (mapped) dest = `/intake?track=${mapped}`;
+      }
+      if (isAuthenticated) router.push(dest);
       else {
         const signup = href.includes("tab=signup");
-        openModal(signup ? "signup" : "login", "/intake/start");
+        openModal(signup ? "signup" : "login", dest);
       }
     };
     root.addEventListener("click", onClick, true);

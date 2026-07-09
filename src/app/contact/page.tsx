@@ -29,6 +29,7 @@ export default function ContactPage() {
       const payload: Record<string, string> = {};
       data.forEach((v, k) => (payload[k] = String(v)));
       payload._subject = "New LWYRD contact form message";
+      if (payload.email) payload._replyto = payload.email;
 
       if (submitBtn) submitBtn.disabled = true;
       setStatus("Sending…", true);

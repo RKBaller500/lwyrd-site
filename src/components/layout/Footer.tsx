@@ -17,7 +17,7 @@ export default function Footer() {
       await submitForm({
         email,
         formType: "Newsletter",
-        subject: "New LWYRD Newsletter Signup",
+        _subject: "New LWYRD Newsletter Signup",
         _replyto: email,
       });
       setStatus("success");

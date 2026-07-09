@@ -61,6 +61,29 @@ async function postJson(url: string, payload: Record<string, string>) {
   }
 }
 
+async function postUrlEncoded(url: string, payload: Record<string, string>) {
+  const response = await fetch(url, {
+    method: "POST",
+    headers: {
+      Accept: "application/json",
+      "Content-Type": "application/x-www-form-urlencoded",
+    },
+    body: new URLSearchParams(payload),
+  });
+
+  if (!response.ok) {
+    throw new Error(`Request failed with ${response.status}`);
+  }
+}
+
+async function postForm(url: string, payload: Record<string, string>) {
+  try {
+    await postJson(url, payload);
+  } catch {
+    await postUrlEncoded(url, payload);
+  }
+}
+
 export async function POST(request: Request) {
   let body: ConsultationRequest;
   try {
@@ -121,7 +144,7 @@ export async function POST(request: Request) {
   const webhookUrl = process.env.CONSULTATION_WEBHOOK_URL;
 
   try {
-    await postJson(formEndpoint, payload);
+    await postForm(formEndpoint, payload);
     if (webhookUrl) {
       await postJson(webhookUrl, payload);
     }

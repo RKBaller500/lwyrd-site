@@ -44,14 +44,9 @@ export default function BlogListing({ posts }: { posts: BlogPost[] }) {
     [posts]
   );
 
-  const rest = useMemo(
-    () => posts.filter((p) => p.slug !== featured?.slug),
-    [posts, featured]
-  );
-
   const visible = useMemo(() => {
     const q = query.trim().toLowerCase();
-    return rest.filter((p) => {
+    return posts.filter((p) => {
       const matchesFilter = filter === "all" || p.category === filter;
       const matchesQuery =
         !q ||
@@ -59,7 +54,7 @@ export default function BlogListing({ posts }: { posts: BlogPost[] }) {
         p.description.toLowerCase().includes(q);
       return matchesFilter && matchesQuery;
     });
-  }, [rest, query, filter]);
+  }, [posts, query, filter]);
 
   // newsletter form
   const [email, setEmail] = useState("");

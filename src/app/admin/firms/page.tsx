@@ -2,6 +2,7 @@ import Link from "next/link";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { Plus } from "lucide-react";
 import FirmsTable from "@/components/admin/FirmsTable";
+import AdminHeader from "@/components/admin/AdminHeader";
 
 export const metadata = { title: "Firms, Admin" };
 
@@ -20,25 +21,17 @@ export default async function AdminFirmsPage() {
 
   return (
     <div>
-      <div className="flex items-center justify-between mb-8">
-        <div>
-          <h1
-            className="text-4xl text-[#002B55] mb-1"
-            style={{ fontFamily: "var(--display)", fontWeight: 500 }}
-          >
-            Firms
-          </h1>
-          <p className="text-slate-500 text-sm">{firms?.length ?? 0} firms total</p>
-        </div>
-        <Link
-          href="/admin/firms/new"
-          className="flex items-center gap-2 px-5 py-2.5 rounded-2xl bg-[#002B55] text-white text-sm font-medium hover:opacity-90 transition-opacity"
-        >
-          <Plus size={15} />
-          Add Firm
-        </Link>
-      </div>
-
+      <AdminHeader
+        eyebrow="Content"
+        title="Firms"
+        subtitle={`${firms.length} firm${firms.length !== 1 ? "s" : ""} in the directory.`}
+        actions={
+          <Link href="/admin/firms/new" className="adm-btn adm-btn-primary">
+            <Plus size={16} strokeWidth={2} />
+            Add firm
+          </Link>
+        }
+      />
       <FirmsTable firms={firms} />
     </div>
   );

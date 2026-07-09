@@ -4,6 +4,7 @@ import {
   AlertCircle, Globe, Clock, Smartphone, CreditCard,
   BookOpen, Target, Zap, Map, BarChart2, Calendar,
 } from "lucide-react";
+import AdminHeader from "@/components/admin/AdminHeader";
 
 export const metadata = { title: "Analytics, LWYRD Admin" };
 
@@ -277,7 +278,7 @@ function SectionHeader({
   return (
     <div id={id} className="flex items-start justify-between mb-5 pt-2">
       <div>
-        <h2 className="text-base font-semibold text-[#002B55] mb-0.5">{title}</h2>
+        <h2 style={{ fontFamily: "var(--body)", fontSize: "1rem", fontWeight: 600, lineHeight: 1.3, color: "var(--navy)", marginBottom: 2 }}>{title}</h2>
         <p className="text-xs text-slate-400">{description}</p>
       </div>
       {tag && (
@@ -427,15 +428,11 @@ export default function AnalyticsPage() {
   return (
     <div>
       {/* Page header */}
-      <h1
-        className="text-4xl text-[#002B55] mb-2"
-        style={{ fontFamily: "var(--display)", fontWeight: 500 }}
-      >
-        Analytics
-      </h1>
-      <p className="text-slate-500 text-sm mb-6">
-        Platform usage, intake funnel, match quality, and user behavior, last 30 days.
-      </p>
+      <AdminHeader
+        eyebrow="Overview"
+        title="Analytics"
+        subtitle="Platform usage, intake funnel, match quality, and user behavior — last 30 days."
+      />
 
       {/* Jump nav */}
       <div className="flex flex-wrap gap-1.5 mb-8">

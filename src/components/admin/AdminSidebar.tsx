@@ -11,6 +11,8 @@ import {
   ListChecks,
   FileText,
   BarChart2,
+  Newspaper,
+  Shield,
 } from "lucide-react";
 
 const navSections = [
@@ -24,6 +26,7 @@ const navSections = [
   {
     label: "Content",
     items: [
+      { href: "/admin/blog", label: "Blog", icon: Newspaper, exact: false },
       { href: "/admin/firms", label: "Firms", icon: Building2, exact: false },
       { href: "/admin/categories", label: "Categories", icon: Layers, exact: false },
       { href: "/admin/questions", label: "Questions", icon: ClipboardList, exact: false },
@@ -39,47 +42,63 @@ const navSections = [
   },
 ];
 
-export default function AdminSidebar() {
-  const pathname = usePathname();
+const flatItems = navSections.flatMap((s) => s.items);
 
-  const isActive = (href: string, exact: boolean) =>
+function useActive() {
+  const pathname = usePathname();
+  return (href: string, exact: boolean) =>
     exact ? pathname === href : pathname.startsWith(href);
+}
+
+export default function AdminSidebar() {
+  const isActive = useActive();
 
   return (
-    <aside className="w-52 shrink-0 border-r border-[#E7E7E3] bg-[#FFFFFF] min-h-full pt-6 pb-10">
-      <div className="px-4 mb-6">
-        <span className="text-xs font-medium text-slate-400 uppercase tracking-widest">
-          Admin Panel
-        </span>
+    <>
+      {/* Mobile tab strip */}
+      <div className="adm-tabs">
+        {flatItems.map(({ href, label, icon: Icon, exact }) => (
+          <Link
+            key={href}
+            href={href}
+            className={`adm-tab ${isActive(href, exact) ? "is-active" : ""}`}
+          >
+            <Icon size={14} strokeWidth={1.75} />
+            {label}
+          </Link>
+        ))}
       </div>
-      <nav className="px-2 space-y-5">
-        {navSections.map(({ label, items }) => (
-          <div key={label}>
-            <p className="px-3 mb-1 text-[10px] font-semibold text-slate-400 uppercase tracking-widest">
-              {label}
-            </p>
-            <div className="space-y-0.5">
-              {items.map(({ href, label: itemLabel, icon: Icon, exact }) => {
-                const active = isActive(href, exact);
-                return (
-                  <Link
-                    key={href}
-                    href={href}
-                    className={`flex items-center gap-3 px-3 py-2.5 rounded-2xl text-sm transition-colors ${
-                      active
-                        ? "bg-[#002B55] text-white"
-                        : "text-slate-600 hover:bg-[#002B55]/8 hover:text-[#002B55]"
-                    }`}
-                  >
-                    <Icon size={15} strokeWidth={1.5} />
-                    {itemLabel}
-                  </Link>
-                );
-              })}
+
+      {/* Desktop sidebar */}
+      <aside className="adm-side">
+        <div className="adm-side-inner">
+          <div className="adm-side-head">
+            <span className="adm-side-badge">
+              <Shield size={15} strokeWidth={2} />
+            </span>
+            <div>
+              <div className="t">LWYRD</div>
+              <div className="s">Admin</div>
             </div>
           </div>
-        ))}
-      </nav>
-    </aside>
+
+          {navSections.map(({ label, items }) => (
+            <div key={label} className="adm-nav-group">
+              <p className="adm-nav-label">{label}</p>
+              {items.map(({ href, label: itemLabel, icon: Icon, exact }) => (
+                <Link
+                  key={href}
+                  href={href}
+                  className={`adm-nav-link ${isActive(href, exact) ? "is-active" : ""}`}
+                >
+                  <Icon size={16} strokeWidth={1.75} />
+                  {itemLabel}
+                </Link>
+              ))}
+            </div>
+          ))}
+        </div>
+      </aside>
+    </>
   );
 }

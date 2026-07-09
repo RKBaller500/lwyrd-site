@@ -1,5 +1,6 @@
 import { getAllUsers } from "@/lib/actions/admin/users";
 import UsersTable from "@/components/admin/UsersTable";
+import AdminHeader from "@/components/admin/AdminHeader";
 
 export const metadata = { title: "Users, Admin" };
 
@@ -8,21 +9,13 @@ export default async function AdminUsersPage() {
 
   return (
     <div>
-      <div className="mb-8">
-        <h1
-          className="text-4xl text-[#002B55] mb-1"
-          style={{ fontFamily: "var(--display)", fontWeight: 500 }}
-        >
-          Users
-        </h1>
-        <p className="text-slate-500 text-sm">{users?.length ?? 0} registered users</p>
-      </div>
+      <AdminHeader
+        eyebrow="Activity"
+        title="Users"
+        subtitle={`${users?.length ?? 0} registered user${(users?.length ?? 0) !== 1 ? "s" : ""}.`}
+      />
 
-      {error && (
-        <div className="bg-red-50 border border-red-200 text-red-700 rounded-2xl px-5 py-4 text-sm mb-6">
-          {error}
-        </div>
-      )}
+      {error && <div className="adm-error" style={{ marginBottom: 20 }}>{error}</div>}
 
       <UsersTable users={users ?? []} />
     </div>

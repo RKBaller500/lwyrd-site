@@ -34,38 +34,18 @@ function formatDate(iso: string) {
   });
 }
 
-function trackBadge(track?: string) {
-  if (!track) return null;
-  const colors: Record<string, string> = {
-    startup: "bg-blue-50 text-blue-700 border-blue-200",
-    individual: "bg-purple-50 text-purple-700 border-purple-200",
-    small_business: "bg-green-50 text-green-700 border-green-200",
-  };
-  return (
-    <span className={`inline-block text-xs font-medium px-2 py-0.5 rounded-full border ${colors[track] ?? "bg-slate-50 text-slate-600 border-slate-200"}`}>
-      {TRACK_LABELS[track] ?? track}
-    </span>
-  );
-}
-
 function SortHeader({
-  col, label, sort, dir, onSort, className,
+  col, label, sort, dir, onSort,
 }: {
-  col: SortCol; label: string; sort: SortCol; dir: Dir;
-  onSort: (c: SortCol) => void; className?: string;
+  col: SortCol; label: string; sort: SortCol; dir: Dir; onSort: (c: SortCol) => void;
 }) {
   const active = sort === col;
   return (
-    <th
-      onClick={() => onSort(col)}
-      className={`text-left px-5 py-4 text-xs font-medium uppercase tracking-wide cursor-pointer select-none group transition-colors ${active ? "text-[#002B55]" : "text-slate-400 hover:text-slate-600"} ${className ?? ""}`}
-    >
-      <div className="flex items-center gap-1">
+    <th className={`sortable ${active ? "is-sorted" : ""}`} onClick={() => onSort(col)}>
+      <span className="th-inner">
         {label}
-        {active
-          ? dir === "asc" ? <ChevronUp size={12} /> : <ChevronDown size={12} />
-          : <ChevronsUpDown size={12} className="opacity-0 group-hover:opacity-50 transition-opacity" />}
-      </div>
+        {active ? (dir === "asc" ? <ChevronUp size={12} /> : <ChevronDown size={12} />) : <ChevronsUpDown size={12} style={{ opacity: 0.4 }} />}
+      </span>
     </th>
   );
 }
@@ -120,82 +100,81 @@ export default function SubmissionsTable({
   const hasFilters = search || trackFilter;
 
   return (
-    <div className="bg-[#FFFFFF] border border-[#E7E7E3] rounded-3xl overflow-hidden">
-      {/* Toolbar */}
-      <div className="px-5 py-4 border-b border-[#E7E7E3] flex flex-wrap items-center gap-3">
-        <div className="relative flex-1 min-w-[180px]">
-          <Search size={13} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+    <div className="adm-panel">
+      <div className="adm-toolbar">
+        <div className="adm-search">
+          <Search size={15} />
           <input
-            type="text"
+            type="search"
             placeholder="Search by user or category…"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="w-full pl-8 pr-3 py-2 text-sm border border-[#E7E7E3] rounded-xl bg-white focus:outline-none focus:border-[#002B55] placeholder:text-slate-400 text-slate-700"
           />
         </div>
-        <select
-          value={trackFilter}
-          onChange={(e) => setTrackFilter(e.target.value)}
-          className="text-sm border border-[#E7E7E3] rounded-xl px-3 py-2 bg-white text-slate-600 focus:outline-none focus:border-[#002B55]"
-        >
+        <select className="adm-select is-sm" value={trackFilter} onChange={(e) => setTrackFilter(e.target.value)}>
           <option value="">All tracks</option>
           {tracks.map((t) => (
             <option key={t} value={t}>{TRACK_LABELS[t] ?? t}</option>
           ))}
         </select>
-        <span className="text-xs text-slate-400 ml-auto whitespace-nowrap">
+        <span className="adm-count">
           {filtered.length} of {submissions.length} submission{submissions.length !== 1 ? "s" : ""}
           {hasFilters ? " (filtered)" : ""}
         </span>
       </div>
 
-      {/* Table */}
-      <table className="w-full text-sm">
-        <thead>
-          <tr className="border-b border-[#E7E7E3] text-left">
-            <SortHeader col="created_at" label="Date" sort={sort} dir={dir} onSort={handleSort} />
-            <th className="px-5 py-4 text-xs font-medium text-slate-400 uppercase tracking-wide">User</th>
-            <SortHeader col="track" label="Track" sort={sort} dir={dir} onSort={handleSort} />
-            <SortHeader col="category" label="Category" sort={sort} dir={dir} onSort={handleSort} />
-            <SortHeader col="top_score" label="Top Match" sort={sort} dir={dir} onSort={handleSort} />
-            <th className="px-5 py-4" />
-          </tr>
-        </thead>
-        <tbody>
-          {filtered.map((sub, i) => {
-            const topMatch = sub.top_matches?.[0];
-            const displayCategory = sub.category_label ?? sub.legal_category ?? sub.category_slug.replace(/-/g, " ");
-            return (
-              <tr key={sub.id} className={i < filtered.length - 1 ? "border-b border-[#E7E7E3]" : ""}>
-                <td className="px-5 py-4 text-slate-500 whitespace-nowrap">{formatDate(sub.created_at)}</td>
-                <td className="px-5 py-4">
-                  <p className="text-slate-700 font-medium">{sub.userName || " "}</p>
-                  <p className="text-slate-400 text-xs">{sub.userEmail}</p>
-                </td>
-                <td className="px-5 py-4">{trackBadge(sub.track)}</td>
-                <td className="px-5 py-4 text-slate-600 capitalize">{displayCategory}</td>
-                <td className="px-5 py-4 text-slate-600">
-                  {topMatch
-                    ? <span>{topMatch.firmName} <span className="text-slate-400">({topMatch.score})</span></span>
-                    : " "}
-                </td>
-                <td className="px-5 py-4 text-right">
-                  <Link href={`/admin/submissions/${sub.id}`} className="inline-flex items-center gap-1.5 text-xs text-[#002B55] hover:underline">
-                    View <ArrowRight size={12} />
-                  </Link>
+      <div className="adm-table-scroll">
+        <table className="adm-table">
+          <thead>
+            <tr>
+              <SortHeader col="created_at" label="Date" sort={sort} dir={dir} onSort={handleSort} />
+              <th>User</th>
+              <SortHeader col="track" label="Track" sort={sort} dir={dir} onSort={handleSort} />
+              <SortHeader col="category" label="Category" sort={sort} dir={dir} onSort={handleSort} />
+              <SortHeader col="top_score" label="Top Match" sort={sort} dir={dir} onSort={handleSort} />
+              <th style={{ textAlign: "right" }}>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {filtered.map((sub) => {
+              const topMatch = sub.top_matches?.[0];
+              const displayCategory = sub.category_label ?? sub.legal_category ?? sub.category_slug.replace(/-/g, " ");
+              return (
+                <tr key={sub.id}>
+                  <td className="adm-cell-muted" style={{ whiteSpace: "nowrap" }}>{formatDate(sub.created_at)}</td>
+                  <td>
+                    <div className="adm-cell-title">{sub.userName || "—"}</div>
+                    <span className="adm-cell-mono">{sub.userEmail}</span>
+                  </td>
+                  <td>
+                    {sub.track ? <span className="adm-badge is-navy">{TRACK_LABELS[sub.track] ?? sub.track}</span> : null}
+                  </td>
+                  <td className="adm-cell-muted" style={{ textTransform: "capitalize" }}>{displayCategory}</td>
+                  <td className="adm-cell-muted">
+                    {topMatch ? (
+                      <span>{topMatch.firmName} <span style={{ color: "var(--faint)" }}>({topMatch.score})</span></span>
+                    ) : "—"}
+                  </td>
+                  <td>
+                    <div className="adm-row-actions">
+                      <Link href={`/admin/submissions/${sub.id}`} className="adm-link" style={{ display: "inline-flex", alignItems: "center", gap: 4 }}>
+                        View <ArrowRight size={12} />
+                      </Link>
+                    </div>
+                  </td>
+                </tr>
+              );
+            })}
+            {filtered.length === 0 && (
+              <tr>
+                <td colSpan={6} className="adm-table-empty">
+                  {hasFilters ? "No submissions match the current filters." : "No submissions yet."}
                 </td>
               </tr>
-            );
-          })}
-          {filtered.length === 0 && (
-            <tr>
-              <td colSpan={6} className="px-5 py-10 text-center text-slate-400 text-sm">
-                {hasFilters ? "No submissions match the current filters." : "No submissions yet."}
-              </td>
-            </tr>
-          )}
-        </tbody>
-      </table>
+            )}
+          </tbody>
+        </table>
+      </div>
     </div>
   );
 }

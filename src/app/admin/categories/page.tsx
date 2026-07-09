@@ -2,6 +2,7 @@ import Link from "next/link";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { Plus } from "lucide-react";
 import CategoriesTable from "@/components/admin/CategoriesTable";
+import AdminHeader from "@/components/admin/AdminHeader";
 
 export const metadata = { title: "Categories, Admin" };
 
@@ -14,24 +15,17 @@ export default async function AdminCategoriesPage() {
 
   return (
     <div>
-      <div className="flex items-center justify-between mb-8">
-        <div>
-          <h1
-            className="text-4xl text-[#002B55] mb-1"
-            style={{ fontFamily: "var(--display)", fontWeight: 500 }}
-          >
-            Categories
-          </h1>
-          <p className="text-slate-500 text-sm">{categories?.length ?? 0} categories total</p>
-        </div>
-        <Link
-          href="/admin/categories/new"
-          className="flex items-center gap-2 px-5 py-2.5 rounded-2xl bg-[#002B55] text-white text-sm font-medium hover:opacity-90 transition-opacity"
-        >
-          <Plus size={15} />
-          Add Category
-        </Link>
-      </div>
+      <AdminHeader
+        eyebrow="Content"
+        title="Categories"
+        subtitle={`${categories?.length ?? 0} legal categor${(categories?.length ?? 0) !== 1 ? "ies" : "y"}.`}
+        actions={
+          <Link href="/admin/categories/new" className="adm-btn adm-btn-primary">
+            <Plus size={16} strokeWidth={2} />
+            Add category
+          </Link>
+        }
+      />
 
       <CategoriesTable categories={categories ?? []} />
     </div>

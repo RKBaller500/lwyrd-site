@@ -17,7 +17,7 @@ export default function DeleteFirmButton({ id, name }: { id: string; name: strin
     <button
       onClick={handleDelete}
       disabled={isPending}
-      className="text-xs text-red-400 hover:text-red-600 transition-colors disabled:opacity-50"
+      className="adm-del"
     >
       {isPending ? "Deleting…" : "Delete"}
     </button>

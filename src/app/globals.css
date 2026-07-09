@@ -53,6 +53,11 @@ html {
   font-size: 1rem;
   line-height: 1.8;
 }
+.prose-blog h2,
+.prose-blog h3,
+.prose-blog h4 {
+  scroll-margin-top: 90px;
+}
 .prose-blog h2 {
   font-family: "Lora", Georgia, serif;
   font-weight: 500;
@@ -70,8 +75,68 @@ html {
   margin-top: 2rem;
   margin-bottom: 0.5rem;
 }
+.prose-blog h4 {
+  font-family: "Lora", Georgia, serif;
+  font-weight: 600;
+  font-size: 1rem;
+  color: #002452;
+  margin-top: 1.5rem;
+  margin-bottom: 0.4rem;
+}
 .prose-blog p {
   margin-bottom: 1.25rem;
+}
+.prose-blog a {
+  color: #002452;
+  font-weight: 500;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+.prose-blog a:hover {
+  opacity: 0.75;
+}
+.prose-blog ul,
+.prose-blog ol {
+  margin: 0 0 1.25rem 1.4rem;
+  padding: 0;
+}
+.prose-blog ul {
+  list-style: disc;
+}
+.prose-blog ol {
+  list-style: decimal;
+}
+.prose-blog li {
+  margin-bottom: 0.5rem;
+  padding-left: 0.25rem;
+}
+.prose-blog li::marker {
+  color: #002452;
+}
+.prose-blog ul ul,
+.prose-blog ol ol,
+.prose-blog ul ol,
+.prose-blog ol ul {
+  margin-bottom: 0.25rem;
+}
+.prose-blog blockquote {
+  margin: 0 0 1.25rem;
+  padding: 0.35rem 0 0.35rem 1.1rem;
+  border-left: 3px solid #002452;
+  color: #475569;
+  font-style: italic;
+}
+.prose-blog blockquote p {
+  margin-bottom: 0.5rem;
+}
+.prose-blog code {
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 0.875em;
+  background: #f1efe9;
+  border: 1px solid #e2ddd2;
+  border-radius: 5px;
+  padding: 0.1em 0.4em;
+  color: #002452;
 }
 .prose-blog strong {
   font-weight: 600;

@@ -14,7 +14,7 @@ create table if not exists public.blog_posts (
   content text not null default '',
   author_name text not null default 'LWYRD Editorial',
   author_title text,
-  category text not null default 'news' check (category in ('news', 'advice')),
+  category text not null default 'news' check (category in ('news', 'advice', 'general')),
   business_types text[] not null default '{}',
   business_focus text[] not null default '{}',
   is_editors_pick boolean not null default false,

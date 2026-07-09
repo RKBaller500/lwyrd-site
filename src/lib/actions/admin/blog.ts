@@ -6,7 +6,7 @@ import { logAdminAction } from "./audit";
 import { readingTimeMinutes } from "@/lib/blog/markdown";
 
 const SLUG_RE = /^[a-z0-9-]+$/;
-const CATEGORIES = ["news", "advice"] as const;
+const CATEGORIES = ["news", "advice", "general"] as const;
 const STATUSES = ["draft", "published"] as const;
 
 export interface BlogPostInput {

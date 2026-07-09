@@ -9,6 +9,9 @@ import {
   Heading3,
   Link2,
   List,
+  ListOrdered,
+  Quote,
+  Code,
   Minus,
 } from "lucide-react";
 import {
@@ -238,8 +241,14 @@ export default function BlogPostForm({ mode, postId, initial }: Props) {
                 <button type="button" className="adm-editor-btn" title="Heading 3" onClick={() => prefixLine("### ")}>
                   <Heading3 size={15} />
                 </button>
-                <button type="button" className="adm-editor-btn" title="List item" onClick={() => prefixLine("- ")}>
+                <button type="button" className="adm-editor-btn" title="Bulleted list" onClick={() => prefixLine("- ")}>
                   <List size={15} />
+                </button>
+                <button type="button" className="adm-editor-btn" title="Numbered list" onClick={() => prefixLine("1. ")}>
+                  <ListOrdered size={15} />
+                </button>
+                <button type="button" className="adm-editor-btn" title="Quote" onClick={() => prefixLine("> ")}>
+                  <Quote size={15} />
                 </button>
                 <span className="adm-editor-sep" />
                 <button
@@ -249,6 +258,9 @@ export default function BlogPostForm({ mode, postId, initial }: Props) {
                   onClick={() => surround("[", "](https://)", "link text")}
                 >
                   <Link2 size={15} />
+                </button>
+                <button type="button" className="adm-editor-btn" title="Inline code" onClick={() => surround("`", "`", "code")}>
+                  <Code size={15} />
                 </button>
                 <button
                   type="button"
@@ -263,12 +275,15 @@ export default function BlogPostForm({ mode, postId, initial }: Props) {
                 ref={textareaRef}
                 value={form.content}
                 onChange={(e) => set("content", e.target.value)}
-                placeholder={"Write in Markdown.\n\n## A section heading\n\nA paragraph of body text. Use **bold**, *italic*, and [links](https://example.com).\n\n- A bullet point\n- Another point"}
+                placeholder={"Write in Markdown.\n\n## A section heading\n\nA paragraph of body text. Use **bold**, *italic*, `code`, and [links](https://example.com).\n\n- A bullet point\n- Another point\n\n1. First step\n2. Second step\n\n> A pull quote."}
               />
             </div>
             <p className="adm-hint">
-              Supports Markdown: ## / ### headings, **bold**, *italic*,
-              [links](url), - lists, and --- dividers.
+              Markdown: <strong>##</strong>/<strong>###</strong>/<strong>####</strong> headings,
+              <strong> **bold**</strong>, <strong>*italic*</strong>, <strong>`code`</strong>,
+              <strong> [links](url)</strong>, <strong>-</strong> bullet lists,
+              <strong> 1.</strong> numbered lists, <strong>&gt;</strong> quotes, and
+              <strong> ---</strong> dividers.
             </p>
           </div>
         </div>
@@ -348,6 +363,7 @@ export default function BlogPostForm({ mode, postId, initial }: Props) {
             >
               <option value="news">News</option>
               <option value="advice">Advice</option>
+              <option value="general">General</option>
             </select>
           </div>
           <div className="adm-field">

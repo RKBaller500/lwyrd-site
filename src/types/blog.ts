@@ -1,4 +1,4 @@
-export type BusinessType = "startup" | "individual" | "small_business";
+export type BusinessType = "startup" | "individual" | "small_business" | "other";
 export type BusinessFocus =
   | "fintech"
   | "healthcare"
@@ -6,8 +6,9 @@ export type BusinessFocus =
   | "e_commerce"
   | "saas"
   | "manufacturing"
-  | "nonprofits";
-export type ContentType = "news" | "advice";
+  | "nonprofits"
+  | "other";
+export type ContentType = "news" | "advice" | "general";
 export type PostStatus = "draft" | "published";
 
 export interface BlogAuthor {

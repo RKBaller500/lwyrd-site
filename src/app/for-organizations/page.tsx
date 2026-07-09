@@ -3,8 +3,7 @@
 import "@/styles/lwyrd-ds.css";
 import { useState } from "react";
 import { motion } from "framer-motion";
-import Link from "next/link";
-import { ArrowRight, CheckCircle2, ShieldCheck, MessageSquare, Sparkles, Send, CalendarClock } from "lucide-react";
+import { ArrowRight, CheckCircle2, ShieldCheck, MessageSquare, Sparkles, Send } from "lucide-react";
 import MarketingNav from "@/components/marketing/MarketingNav";
 import MarketingFooter from "@/components/marketing/MarketingFooter";
 import { submitForm } from "@/lib/formsubmit";
@@ -12,7 +11,6 @@ import { submitForm } from "@/lib/formsubmit";
 const ease = [0.25, 0.46, 0.45, 0.94] as const;
 
 // Update to your real scheduling link when ready.
-const BOOK_A_CALL_URL = "/contact";
 
 const benefits = [
   {
@@ -22,8 +20,8 @@ const benefits = [
   },
   {
     icon: MessageSquare,
-    title: "A consultation first.",
-    body: "A chance to talk the situation through before committing, so members move forward with confidence.",
+    title: "Matched with care.",
+    body: "Members are paired with counsel suited to their exact situation, so they move forward with confidence instead of guesswork.",
   },
   {
     icon: Sparkles,
@@ -81,10 +79,9 @@ export default function ForOrganizationsPage() {
               <h1>Give your community a trusted way to find legal help.</h1>
               <p className="orgs-lede">
                 Your members run into legal questions constantly, and most have nowhere good to
-                turn. A LWYRD partnership gives them a vetted path to the right lawyer, and a
-                consultation to talk it through first, with special access as a benefit of
-                belonging to your community. A real resource for them, and nothing for your team
-                to build or run.
+                turn. A LWYRD partnership gives them a vetted path to the right lawyer, with
+                special access as a benefit of belonging to your community. A real resource for
+                them, and nothing for your team to build or run.
               </p>
               <div className="orgs-hero-cta">
                 <a href="#connect" className="btn btn-primary">
@@ -244,23 +241,6 @@ export default function ForOrganizationsPage() {
                   </form>
                 )}
               </motion.div>
-
-              <motion.aside
-                initial={{ opacity: 0, y: 18 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true, margin: "-70px" }}
-                transition={{ duration: 0.6, ease, delay: 0.1 }}
-                className="orgs-call"
-              >
-                <span className="icon-box">
-                  <CalendarClock size={20} strokeWidth={1.7} />
-                </span>
-                <h3>Prefer to talk first?</h3>
-                <p>Book a call and we&apos;ll walk through what a partnership could look like for your community.</p>
-                <Link href={BOOK_A_CALL_URL} className="btn btn-outline">
-                  Book a call <ArrowRight size={15} />
-                </Link>
-              </motion.aside>
             </div>
           </div>
         </section>
@@ -294,27 +274,15 @@ export default function ForOrganizationsPage() {
         .orgs-connect-head{max-width:640px;margin-bottom:clamp(28px,4vw,44px)}
         .orgs-connect-head h2{margin-top:.55rem;max-width:18ch}
         .orgs-connect-head p{color:var(--muted);font-size:1rem;line-height:1.62;margin-top:1rem;max-width:56ch}
-        .orgs-connect-grid{display:grid;grid-template-columns:1fr;gap:clamp(20px,3vw,28px);align-items:start}
+        .orgs-connect-grid{display:grid;grid-template-columns:1fr;gap:clamp(20px,3vw,28px);align-items:start;max-width:680px}
         .orgs-form-error{color:#b42318;font-size:.85rem;line-height:1.45}
         .form-actions .btn{min-width:150px;justify-content:center}
-        .orgs-call{
-          border:1px solid var(--line);
-          border-radius:18px;
-          background:#fff;
-          box-shadow:var(--shadow-sm);
-          padding:clamp(24px,3vw,32px);
-        }
-        .orgs-call .icon-box{margin-bottom:16px}
-        .orgs-call h3{font-size:1.2rem;line-height:1.25;margin-bottom:8px}
-        .orgs-call p{color:var(--muted);font-size:.92rem;line-height:1.58;margin-bottom:20px}
-        .orgs-call .btn{justify-content:center}
         .orgs-success{text-align:center;padding:clamp(20px,4vw,36px) 8px}
         .orgs-success .icon-box{width:52px;height:52px;border-radius:14px;margin:0 auto 16px}
         .orgs-success h3{font-size:1.45rem;margin-bottom:8px}
         .orgs-success p{color:var(--muted);font-size:.95rem;line-height:1.6;max-width:44ch;margin:0 auto}
         @media(min-width:760px){
           .orgs-benefits{grid-template-columns:repeat(3,1fr)}
-          .orgs-connect-grid{grid-template-columns:1.5fr 1fr;gap:clamp(28px,3.5vw,44px)}
         }
         @media(max-width:640px){
           .orgs-beat{padding:64px 0}

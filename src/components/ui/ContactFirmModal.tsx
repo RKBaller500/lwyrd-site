@@ -33,7 +33,7 @@ export default function ContactFirmModal({ isOpen, onClose, firmName }: ContactF
         email,
         message,
         formType: `Contact Firm, ${firmName}`,
-        subject: `New inquiry for ${firmName} via LWYRD`,
+        _subject: `New inquiry for ${firmName} via LWYRD`,
         _replyto: email,
       });
       setStatus("success");

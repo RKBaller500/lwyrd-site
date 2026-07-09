@@ -49,7 +49,7 @@ export default function ContactLwyrdModal({
         email,
         message,
         formType,
-        subject: categoryName
+        _subject: categoryName
           ? `${subjectPrefix}, ${categoryName}`
           : subjectPrefix,
         _replyto: email,

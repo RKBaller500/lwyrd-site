@@ -13,11 +13,14 @@ import {
   Quote,
   Code,
   Minus,
+  Upload,
+  X,
 } from "lucide-react";
 import {
   createBlogPost,
   updateBlogPost,
   deleteBlogPost,
+  uploadBlogImage,
   type BlogPostInput,
 } from "@/lib/actions/admin/blog";
 import { renderMarkdown, readingTimeMinutes, slugify } from "@/lib/blog/markdown";
@@ -56,6 +59,8 @@ export default function BlogPostForm({ mode, postId, initial }: Props) {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
   const [error, setError] = useState("");
+  const [uploadMessage, setUploadMessage] = useState("");
+  const [isUploadingImage, setIsUploadingImage] = useState(false);
   const [form, setForm] = useState<BlogPostInput>(initial ?? EMPTY);
   const [slugTouched, setSlugTouched] = useState(mode === "edit");
   const textareaRef = useRef<HTMLTextAreaElement>(null);
@@ -126,6 +131,30 @@ export default function BlogPostForm({ mode, postId, initial }: Props) {
 
   const previewHtml = useMemo(() => renderMarkdown(form.content), [form.content]);
   const readTime = readingTimeMinutes(form.content);
+  const isBusy = isPending || isUploadingImage;
+
+  const uploadCoverImage = async (file: File | undefined) => {
+    if (!file) return;
+    setError("");
+    setUploadMessage("");
+    setIsUploadingImage(true);
+    try {
+      const body = new FormData();
+      body.set("image", file);
+      body.set("slug", form.slug || slugify(form.title) || "draft");
+      const res = await uploadBlogImage(body);
+      if (res.error) {
+        setError(res.error);
+        return;
+      }
+      if (res.url) {
+        set("thumbnailImage", res.url);
+        setUploadMessage("Cover image uploaded.");
+      }
+    } finally {
+      setIsUploadingImage(false);
+    }
+  };
 
   const submit = (statusOverride?: "draft" | "published") => {
     setError("");
@@ -417,9 +446,52 @@ export default function BlogPostForm({ mode, postId, initial }: Props) {
             <input
               className="adm-input"
               value={form.thumbnailImage}
-              onChange={(e) => set("thumbnailImage", e.target.value)}
+              onChange={(e) => {
+                set("thumbnailImage", e.target.value);
+                setUploadMessage("");
+              }}
               placeholder="https://images.unsplash.com/…"
             />
+            <div className="adm-upload-row">
+              <label className={`adm-btn adm-btn-ghost adm-btn-sm ${isBusy ? "is-disabled" : ""}`}>
+                <Upload size={14} />
+                {isUploadingImage ? "Uploading..." : "Upload image"}
+                <input
+                  type="file"
+                  accept="image/jpeg,image/png,image/webp,image/gif,image/avif"
+                  disabled={isBusy}
+                  onChange={(e) => {
+                    void uploadCoverImage(e.target.files?.[0]);
+                    e.currentTarget.value = "";
+                  }}
+                />
+              </label>
+              {form.thumbnailImage ? (
+                <button
+                  type="button"
+                  className="adm-btn adm-btn-ghost adm-btn-sm"
+                  disabled={isBusy}
+                  onClick={() => {
+                    set("thumbnailImage", "");
+                    setUploadMessage("");
+                  }}
+                >
+                  <X size={14} />
+                  Clear
+                </button>
+              ) : null}
+            </div>
+            {uploadMessage ? <p className="adm-hint is-success">{uploadMessage}</p> : null}
+            <p className="adm-hint">
+              Upload JPEG, PNG, WebP, GIF, or AVIF files up to 8 MB, or paste a
+              public image URL.
+            </p>
+            {form.thumbnailImage ? (
+              <div className="adm-cover-preview">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img src={form.thumbnailImage} alt="Cover preview" />
+              </div>
+            ) : null}
           </div>
           <div className="adm-field">
             <label className="adm-label">Accent color</label>
@@ -470,15 +542,15 @@ export default function BlogPostForm({ mode, postId, initial }: Props) {
         <button
           type="button"
           className="adm-btn adm-btn-primary"
-          disabled={isPending}
+          disabled={isBusy}
           onClick={() => submit("published")}
         >
-          {isPending ? "Saving…" : "Save & publish"}
+          {isPending ? "Saving..." : "Save & publish"}
         </button>
         <button
           type="button"
           className="adm-btn adm-btn-ghost"
-          disabled={isPending}
+          disabled={isBusy}
           onClick={() => submit("draft")}
         >
           Save as draft
@@ -486,7 +558,7 @@ export default function BlogPostForm({ mode, postId, initial }: Props) {
         <button
           type="button"
           className="adm-btn adm-btn-ghost"
-          disabled={isPending}
+          disabled={isBusy}
           onClick={() => router.push("/admin/blog")}
         >
           Cancel
@@ -496,7 +568,7 @@ export default function BlogPostForm({ mode, postId, initial }: Props) {
             type="button"
             className="adm-btn adm-btn-danger"
             style={{ marginLeft: "auto" }}
-            disabled={isPending}
+            disabled={isBusy}
             onClick={remove}
           >
             Delete post

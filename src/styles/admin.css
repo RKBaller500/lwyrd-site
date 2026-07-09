@@ -213,6 +213,11 @@
   cursor: not-allowed;
   transform: none !important;
 }
+.adm-btn.is-disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+  transform: none !important;
+}
 .adm-btn-primary {
   background: var(--navy-gradient);
   color: #fff;
@@ -613,6 +618,9 @@ a.adm-stat:hover .adm-stat-arrow {
   color: var(--faint);
   margin-top: 6px;
 }
+.adm-hint.is-success {
+  color: #0f7a45;
+}
 .adm-input,
 .adm-select,
 .adm-textarea {
@@ -653,6 +661,33 @@ a.adm-stat:hover .adm-stat-arrow {
 .adm-textarea.is-mono {
   font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
   font-size: 0.85rem;
+}
+
+.adm-upload-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-top: 10px;
+}
+.adm-upload-row input[type="file"] {
+  display: none;
+}
+.adm-cover-preview {
+  position: relative;
+  overflow: hidden;
+  width: min(100%, 340px);
+  aspect-ratio: 16 / 9;
+  margin-top: 12px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: var(--paper-alt);
+}
+.adm-cover-preview img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
 }
 
 /* editor toolbar --------------------------------------------- */

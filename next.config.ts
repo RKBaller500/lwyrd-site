@@ -13,6 +13,18 @@ const supabaseHostname = safeHostname(process.env.NEXT_PUBLIC_SUPABASE_URL ?? ""
 const supabaseConnect = supabaseHostname
   ? `https://${supabaseHostname} wss://${supabaseHostname}`
   : "https://*.supabase.co wss://*.supabase.co";
+const imageRemotePatterns: NonNullable<NextConfig["images"]>["remotePatterns"] = [
+  { protocol: "https", hostname: "images.unsplash.com" },
+  { protocol: "https", hostname: "plus.unsplash.com" },
+];
+
+if (supabaseHostname) {
+  imageRemotePatterns.push({
+    protocol: "https",
+    hostname: supabaseHostname,
+    pathname: "/storage/v1/object/public/blog-images/**",
+  });
+}
 
 const posthogHost = process.env.NEXT_PUBLIC_POSTHOG_HOST ?? "https://us.i.posthog.com";
 
@@ -54,9 +66,7 @@ const nextConfig: NextConfig = {
     return [{ source: "/(.*)", headers: securityHeaders }];
   },
   images: {
-    remotePatterns: [
-      { protocol: "https", hostname: "images.unsplash.com" },
-    ],
+    remotePatterns: imageRemotePatterns,
   },
 };
 

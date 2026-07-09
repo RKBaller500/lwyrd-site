@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useRef, useState, useTransition } from "react";
+import { useEffect, useMemo, useRef, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import {
   Bold,
@@ -61,6 +61,7 @@ export default function BlogPostForm({ mode, postId, initial }: Props) {
   const [error, setError] = useState("");
   const [uploadMessage, setUploadMessage] = useState("");
   const [isUploadingImage, setIsUploadingImage] = useState(false);
+  const [localCoverPreview, setLocalCoverPreview] = useState("");
   const [form, setForm] = useState<BlogPostInput>(initial ?? EMPTY);
   const [slugTouched, setSlugTouched] = useState(mode === "edit");
   const textareaRef = useRef<HTMLTextAreaElement>(null);
@@ -132,11 +133,23 @@ export default function BlogPostForm({ mode, postId, initial }: Props) {
   const previewHtml = useMemo(() => renderMarkdown(form.content), [form.content]);
   const readTime = readingTimeMinutes(form.content);
   const isBusy = isPending || isUploadingImage;
+  const coverPreviewSrc = localCoverPreview || form.thumbnailImage;
+
+  useEffect(() => {
+    return () => {
+      if (localCoverPreview) URL.revokeObjectURL(localCoverPreview);
+    };
+  }, [localCoverPreview]);
 
   const uploadCoverImage = async (file: File | undefined) => {
     if (!file) return;
     setError("");
     setUploadMessage("");
+    const previewUrl = URL.createObjectURL(file);
+    setLocalCoverPreview((current) => {
+      if (current) URL.revokeObjectURL(current);
+      return previewUrl;
+    });
     setIsUploadingImage(true);
     try {
       const body = new FormData();
@@ -149,8 +162,18 @@ export default function BlogPostForm({ mode, postId, initial }: Props) {
       }
       if (res.url) {
         set("thumbnailImage", res.url);
+        setLocalCoverPreview((current) => {
+          if (current) URL.revokeObjectURL(current);
+          return "";
+        });
         setUploadMessage("Cover image uploaded.");
       }
+    } catch (e) {
+      setError(
+        e instanceof Error
+          ? e.message
+          : "Image upload failed. Try a smaller JPG, or use WebP/PNG."
+      );
     } finally {
       setIsUploadingImage(false);
     }
@@ -458,7 +481,7 @@ export default function BlogPostForm({ mode, postId, initial }: Props) {
                 {isUploadingImage ? "Uploading..." : "Upload image"}
                 <input
                   type="file"
-                  accept="image/jpeg,image/png,image/webp,image/gif,image/avif"
+                  accept="image/jpeg,image/jpg,image/png,image/webp,image/gif,image/avif"
                   disabled={isBusy}
                   onChange={(e) => {
                     void uploadCoverImage(e.target.files?.[0]);
@@ -473,6 +496,10 @@ export default function BlogPostForm({ mode, postId, initial }: Props) {
                   disabled={isBusy}
                   onClick={() => {
                     set("thumbnailImage", "");
+                    setLocalCoverPreview((current) => {
+                      if (current) URL.revokeObjectURL(current);
+                      return "";
+                    });
                     setUploadMessage("");
                   }}
                 >
@@ -486,10 +513,10 @@ export default function BlogPostForm({ mode, postId, initial }: Props) {
               Upload JPEG, PNG, WebP, GIF, or AVIF files up to 8 MB, or paste a
               public image URL.
             </p>
-            {form.thumbnailImage ? (
+            {coverPreviewSrc ? (
               <div className="adm-cover-preview">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src={form.thumbnailImage} alt="Cover preview" />
+                <img src={coverPreviewSrc} alt="Cover preview" />
               </div>
             ) : null}
           </div>

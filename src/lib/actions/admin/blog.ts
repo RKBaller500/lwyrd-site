@@ -8,6 +8,15 @@ import { readingTimeMinutes } from "@/lib/blog/markdown";
 const SLUG_RE = /^[a-z0-9-]+$/;
 const CATEGORIES = ["news", "advice", "general"] as const;
 const STATUSES = ["draft", "published"] as const;
+const BLOG_IMAGE_BUCKET = "blog-images";
+const MAX_IMAGE_BYTES = 8 * 1024 * 1024;
+const IMAGE_EXTENSIONS: Record<string, string> = {
+  "image/avif": "avif",
+  "image/gif": "gif",
+  "image/jpeg": "jpg",
+  "image/png": "png",
+  "image/webp": "webp",
+};
 
 export interface BlogPostInput {
   slug: string;
@@ -64,6 +73,75 @@ function revalidateBlog(slug: string) {
   revalidatePath("/admin/blog");
   revalidatePath("/blog");
   revalidatePath(`/blog/${slug}`);
+}
+
+function sanitizePathPart(value: string, fallback: string) {
+  const clean = value
+    .trim()
+    .toLowerCase()
+    .replace(/[^a-z0-9-]+/g, "-")
+    .replace(/^-+|-+$/g, "")
+    .slice(0, 80);
+  return clean || fallback;
+}
+
+export async function uploadBlogImage(
+  formData: FormData
+): Promise<{ error?: string; url?: string }> {
+  let actor;
+  try {
+    actor = await verifyAdmin();
+  } catch (e) {
+    return { error: (e as Error).message };
+  }
+
+  const file = formData.get("image");
+  if (!(file instanceof File) || file.size === 0) {
+    return { error: "Choose an image file to upload." };
+  }
+
+  const extension = IMAGE_EXTENSIONS[file.type];
+  if (!extension) {
+    return {
+      error: "Upload a JPEG, PNG, WebP, GIF, or AVIF image.",
+    };
+  }
+
+  if (file.size > MAX_IMAGE_BYTES) {
+    return { error: "Image must be 8 MB or smaller." };
+  }
+
+  const db = createAdminClient();
+  const slug = sanitizePathPart(String(formData.get("slug") ?? ""), "draft");
+  const originalName = sanitizePathPart(
+    file.name.replace(/\.[^.]+$/, ""),
+    "cover"
+  );
+  const path = `${slug}/${Date.now()}-${crypto.randomUUID()}-${originalName}.${extension}`;
+  const bytes = Buffer.from(await file.arrayBuffer());
+
+  const { error } = await db.storage
+    .from(BLOG_IMAGE_BUCKET)
+    .upload(path, bytes, {
+      cacheControl: "31536000",
+      contentType: file.type,
+      upsert: false,
+    });
+
+  if (error) return { error: error.message };
+
+  const { data } = db.storage.from(BLOG_IMAGE_BUCKET).getPublicUrl(path);
+  const url = data.publicUrl;
+
+  void logAdminAction({
+    actorId: actor.id,
+    action: "upload_blog_image",
+    targetType: "blog_image",
+    targetId: path,
+    after: { url, contentType: file.type, size: file.size },
+  });
+
+  return { url };
 }
 
 export async function createBlogPost(

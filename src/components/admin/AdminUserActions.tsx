@@ -41,29 +41,21 @@ export default function AdminUserActions({
   };
 
   return (
-    <div className="flex items-center gap-3 justify-end">
+    <div className="adm-row-actions" style={{ gap: 10 }}>
       <select
         value={accessLevel}
         onChange={handleAccessChange}
         disabled={isPending}
-        className="text-xs border border-[#E7E7E3] rounded-xl px-2.5 py-1.5 text-slate-600 bg-white focus:outline-none focus:border-[#002B55] transition-colors disabled:opacity-50 cursor-pointer"
+        className="adm-select is-inline"
       >
         <option value="none">No access</option>
         <option value="subscription">Subscription</option>
         <option value="org">Organization</option>
       </select>
-      <button
-        onClick={handleToggleAdmin}
-        disabled={isPending}
-        className="text-xs text-[#002B55] hover:opacity-70 transition-opacity font-medium disabled:opacity-50"
-      >
+      <button onClick={handleToggleAdmin} disabled={isPending} className="adm-link">
         {isAdmin ? "Remove Admin" : "Make Admin"}
       </button>
-      <button
-        onClick={handleDelete}
-        disabled={isPending}
-        className="text-xs text-red-400 hover:text-red-600 transition-colors disabled:opacity-50"
-      >
+      <button onClick={handleDelete} disabled={isPending} className="adm-del">
         Delete
       </button>
     </div>

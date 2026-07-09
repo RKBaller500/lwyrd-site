@@ -13,11 +13,9 @@ interface AssessmentCriterionFormProps {
   mode: "create" | "edit";
 }
 
-const inputClass =
-  "w-full px-4 py-2.5 rounded-2xl border border-[#E7E7E3] bg-white text-slate-700 placeholder-slate-400 focus:outline-none focus:border-[#002B55] transition-colors text-sm";
-const labelClass = "block text-xs text-slate-400 font-medium mb-1.5";
-const sectionClass =
-  "bg-[#FFFFFF] border border-[#E7E7E3] rounded-3xl p-6 space-y-5";
+const inputClass = "adm-input";
+const labelClass = "adm-label";
+const sectionClass = "adm-card adm-stack";
 
 function Field({ label, children }: { label: string; children: React.ReactNode }) {
   return (
@@ -70,14 +68,9 @@ export default function AssessmentCriterionForm({
   };
 
   return (
-    <div className="space-y-8 max-w-3xl">
+    <div className="adm-form">
       <div className={sectionClass}>
-        <h2
-          className="text-lg text-[#002B55]"
-          style={{ fontFamily: "var(--display)", fontWeight: 500 }}
-        >
-          Criterion Details
-        </h2>
+        <h2 className="adm-card-title">Criterion Details</h2>
         <Field label="Label (shown on firm profiles)">
           <input
             className={inputClass}
@@ -95,7 +88,7 @@ export default function AssessmentCriterionForm({
             placeholder="Documented experience forming Delaware C-corps, LLCs..."
           />
         </Field>
-        <div className="grid grid-cols-2 gap-4">
+        <div className="adm-row">
           <Field label="Display Order">
             <input
               type="number"
@@ -105,37 +98,26 @@ export default function AssessmentCriterionForm({
               placeholder="1"
             />
           </Field>
-          <div className="flex items-end pb-1">
-            <div className="flex items-center gap-3">
+          <div style={{ display: "flex", alignItems: "flex-end", paddingBottom: 8 }}>
+            <label className="adm-inline-check">
               <input
                 type="checkbox"
-                id="active"
                 checked={active}
                 onChange={(e) => setActive(e.target.checked)}
-                className="w-4 h-4 accent-[#002B55]"
               />
-              <label htmlFor="active" className="text-sm text-slate-600">
-                Active (shown in firm assessment forms)
-              </label>
-            </div>
+              Active (shown in firm assessment forms)
+            </label>
           </div>
         </div>
       </div>
 
-      {error && <p className="text-red-500 text-sm">{error}</p>}
+      {error && <div className="adm-error">{error}</div>}
 
-      <div className="flex gap-3 pb-10">
-        <button
-          onClick={handleSave}
-          disabled={isPending}
-          className="px-8 py-3 rounded-2xl bg-[#002B55] text-white text-sm font-medium hover:opacity-90 transition-opacity disabled:opacity-60"
-        >
-          {isPending ? "Saving..." : mode === "create" ? "Create Criterion" : "Save Changes"}
+      <div className="adm-form-actions">
+        <button onClick={handleSave} disabled={isPending} className="adm-btn adm-btn-primary">
+          {isPending ? "Saving…" : mode === "create" ? "Create criterion" : "Save changes"}
         </button>
-        <button
-          onClick={() => router.push("/admin/criteria")}
-          className="px-6 py-3 rounded-2xl border border-[#E7E7E3] text-slate-600 text-sm hover:border-[#002B55] transition-colors"
-        >
+        <button onClick={() => router.push("/admin/criteria")} className="adm-btn adm-btn-ghost">
           Cancel
         </button>
       </div>

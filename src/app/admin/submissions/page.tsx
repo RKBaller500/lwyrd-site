@@ -1,5 +1,6 @@
 import { createAdminClient } from "@/lib/supabase/admin";
 import SubmissionsTable from "@/components/admin/SubmissionsTable";
+import AdminHeader from "@/components/admin/AdminHeader";
 
 export const metadata = { title: "Submissions, LWYRD Admin" };
 
@@ -41,15 +42,11 @@ export default async function SubmissionsPage() {
 
   return (
     <div>
-      <h1
-        className="text-4xl text-[#002B55] mb-2"
-        style={{ fontFamily: "var(--display)", fontWeight: 500 }}
-      >
-        Intake Submissions
-      </h1>
-      <p className="text-slate-500 text-sm mb-10">
-        Every intake questionnaire submitted by a user, {rows.length} total.
-      </p>
+      <AdminHeader
+        eyebrow="Activity"
+        title="Intake Submissions"
+        subtitle={`Every intake questionnaire submitted by a user · ${rows.length} total.`}
+      />
 
       <SubmissionsTable submissions={rows} tracks={tracks} />
     </div>

@@ -2,6 +2,7 @@ import Link from "next/link";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { Plus } from "lucide-react";
 import CriteriaTable from "@/components/admin/CriteriaTable";
+import AdminHeader from "@/components/admin/AdminHeader";
 
 export const metadata = { title: "Assessment Criteria, Admin" };
 
@@ -14,26 +15,17 @@ export default async function AdminCriteriaPage() {
 
   return (
     <div>
-      <div className="flex items-center justify-between mb-8">
-        <div>
-          <h1
-            className="text-4xl text-[#002B55] mb-1"
-            style={{ fontFamily: "var(--display)", fontWeight: 500 }}
-          >
-            Assessment Criteria
-          </h1>
-          <p className="text-slate-500 text-sm">
-            {criteria?.length ?? 0} criteria · standard checklist applied to all firms
-          </p>
-        </div>
-        <Link
-          href="/admin/criteria/new"
-          className="flex items-center gap-2 px-5 py-2.5 rounded-2xl bg-[#002B55] text-white text-sm font-medium hover:opacity-90 transition-opacity"
-        >
-          <Plus size={15} />
-          Add Criterion
-        </Link>
-      </div>
+      <AdminHeader
+        eyebrow="Content"
+        title="Assessment Criteria"
+        subtitle={`${criteria?.length ?? 0} criteria · standard checklist applied to all firms.`}
+        actions={
+          <Link href="/admin/criteria/new" className="adm-btn adm-btn-primary">
+            <Plus size={16} strokeWidth={2} />
+            Add criterion
+          </Link>
+        }
+      />
 
       <CriteriaTable criteria={criteria ?? []} />
     </div>

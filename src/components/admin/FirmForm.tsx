@@ -14,9 +14,9 @@ interface FirmFormProps {
 
 const emptyAttorney = (): AttorneyInput => ({ name: "", title: "", bio: "", barAdmissions: [] });
 
-const inputClass = "w-full px-4 py-2.5 rounded-2xl border border-[#E7E7E3] bg-white text-slate-700 placeholder-slate-400 focus:outline-none focus:border-[#002B55] transition-colors text-sm";
-const labelClass = "block text-xs text-slate-400 font-medium mb-1.5";
-const sectionClass = "bg-[#FFFFFF] border border-[#E7E7E3] rounded-3xl p-6 space-y-5";
+const inputClass = "adm-input";
+const labelClass = "adm-label";
+const sectionClass = "adm-card adm-stack";
 
 function Field({ label, children }: { label: string; children: React.ReactNode }) {
   return (
@@ -106,11 +106,11 @@ export default function FirmForm({ initialData, mode, allCriteria, defaultAssess
   };
 
   return (
-    <div className="space-y-8 max-w-3xl">
+    <div className="adm-form">
       {/* Basic info */}
       <div className={sectionClass}>
-        <h2 className="text-lg text-[#002B55]" style={{ fontFamily: "var(--display)", fontWeight: 500 }}>Basic Info</h2>
-        <div className="grid grid-cols-2 gap-4">
+        <h2 className="adm-card-title">Basic Info</h2>
+        <div className="adm-row">
           <Field label="ID (URL slug, e.g. meridian-legal)">
             <input className={inputClass} value={id} onChange={(e) => setId(e.target.value)} placeholder="my-firm-name" disabled={mode === "edit"} />
           </Field>
@@ -121,7 +121,7 @@ export default function FirmForm({ initialData, mode, allCriteria, defaultAssess
         <Field label="Tagline">
           <input className={inputClass} value={tagline} onChange={(e) => setTagline(e.target.value)} placeholder="One-line description" />
         </Field>
-        <div className="grid grid-cols-2 gap-4">
+        <div className="adm-row">
           <Field label="Location">
             <input className={inputClass} value={location} onChange={(e) => setLocation(e.target.value)} placeholder="City, State" />
           </Field>
@@ -129,16 +129,16 @@ export default function FirmForm({ initialData, mode, allCriteria, defaultAssess
             <input type="number" className={inputClass} value={founded} onChange={(e) => setFounded(e.target.value)} placeholder="2015" />
           </Field>
         </div>
-        <div className="grid grid-cols-3 gap-4">
+        <div className="adm-row adm-row-3">
           <Field label="Size">
-            <select className={inputClass} value={size} onChange={(e) => setSize(e.target.value as FirmInput["size"])}>
+            <select className="adm-select" value={size} onChange={(e) => setSize(e.target.value as FirmInput["size"])}>
               <option value="boutique">Boutique</option>
               <option value="mid-size">Mid-size</option>
               <option value="large">Large</option>
             </select>
           </Field>
           <Field label="Billing Model">
-            <select className={inputClass} value={billingModel} onChange={(e) => setBillingModel(e.target.value as FirmInput["billingModel"])}>
+            <select className="adm-select" value={billingModel} onChange={(e) => setBillingModel(e.target.value as FirmInput["billingModel"])}>
               <option value="hourly">Hourly</option>
               <option value="retainer">Retainer</option>
               <option value="flat-fee">Flat fee</option>
@@ -146,7 +146,7 @@ export default function FirmForm({ initialData, mode, allCriteria, defaultAssess
             </select>
           </Field>
           <Field label="Response Time">
-            <select className={inputClass} value={responseTime} onChange={(e) => setResponseTime(e.target.value as FirmInput["responseTime"])}>
+            <select className="adm-select" value={responseTime} onChange={(e) => setResponseTime(e.target.value as FirmInput["responseTime"])}>
               <option value="same-day">Same day</option>
               <option value="24h">24 hours</option>
               <option value="48h">48 hours</option>
@@ -154,7 +154,7 @@ export default function FirmForm({ initialData, mode, allCriteria, defaultAssess
             </select>
           </Field>
         </div>
-        <div className="grid grid-cols-3 gap-4">
+        <div className="adm-row adm-row-3">
           <Field label="Hourly Rate ($, optional)">
             <input type="number" className={inputClass} value={hourlyRate} onChange={(e) => setHourlyRate(e.target.value)} placeholder="450" />
           </Field>
@@ -165,7 +165,7 @@ export default function FirmForm({ initialData, mode, allCriteria, defaultAssess
             <input type="number" className={inputClass} value={budgetMax} onChange={(e) => setBudgetMax(e.target.value)} placeholder="15000" />
           </Field>
         </div>
-        <div className="grid grid-cols-2 gap-4">
+        <div className="adm-row">
           <Field label="LWYRD Score (0–100)">
             <input type="number" className={inputClass} value={overallScore} onChange={(e) => setOverallScore(e.target.value)} placeholder="85" min="0" max="100" />
           </Field>
@@ -173,16 +173,16 @@ export default function FirmForm({ initialData, mode, allCriteria, defaultAssess
             <input className={inputClass} value={logoUrl} onChange={(e) => setLogoUrl(e.target.value)} placeholder="https://..." />
           </Field>
         </div>
-        <div className="flex items-center gap-3">
-          <input type="checkbox" id="verified" checked={verified} onChange={(e) => setVerified(e.target.checked)} className="w-4 h-4 accent-[#002B55]" />
-          <label htmlFor="verified" className="text-sm text-slate-600">LWYRD Verified</label>
-        </div>
+        <label className="adm-inline-check">
+          <input type="checkbox" checked={verified} onChange={(e) => setVerified(e.target.checked)} />
+          LWYRD Verified
+        </label>
       </div>
 
       {/* Arrays */}
       <div className={sectionClass}>
-        <h2 className="text-lg text-[#002B55]" style={{ fontFamily: "var(--display)", fontWeight: 500 }}>Categories & Tags</h2>
-        <p className="text-xs text-slate-400">Separate values with commas.</p>
+        <h2 className="adm-card-title">Categories & Tags</h2>
+        <p className="adm-hint" style={{marginTop:0}}>Separate values with commas.</p>
         <Field label="Practice Areas (category slugs, e.g. startup-law, contract-law)">
           <input className={inputClass} value={practiceAreas} onChange={(e) => setPracticeAreas(e.target.value)} placeholder="startup-law, contract-law" />
         </Field>
@@ -202,24 +202,24 @@ export default function FirmForm({ initialData, mode, allCriteria, defaultAssess
 
       {/* Description */}
       <div className={sectionClass}>
-        <h2 className="text-lg text-[#002B55]" style={{ fontFamily: "var(--display)", fontWeight: 500 }}>Description</h2>
+        <h2 className="adm-card-title">Description</h2>
         <textarea rows={5} className={inputClass + " resize-none"} value={description} onChange={(e) => setDescription(e.target.value)} placeholder="Full description of the firm..." />
       </div>
 
       {/* Attorneys */}
       <div className={sectionClass}>
-        <div className="flex items-center justify-between">
-          <h2 className="text-lg text-[#002B55]" style={{ fontFamily: "var(--display)", fontWeight: 500 }}>Attorneys</h2>
-          <button type="button" onClick={() => setAttorneys([...attorneys, emptyAttorney()])} className="flex items-center gap-1.5 text-sm text-[#002B55] hover:opacity-70 transition-opacity">
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+          <h2 className="adm-card-title">Attorneys</h2>
+          <button type="button" onClick={() => setAttorneys([...attorneys, emptyAttorney()])} className="adm-add-btn">
             <Plus size={14} /> Add Attorney
           </button>
         </div>
         {attorneys.map((att, i) => (
-          <div key={i} className="border border-[#E7E7E3] rounded-2xl p-4 space-y-3 relative">
-            <button type="button" onClick={() => setAttorneys(attorneys.filter((_, j) => j !== i))} className="absolute top-3 right-3 text-slate-300 hover:text-red-400 transition-colors">
+          <div key={i} className="adm-subcard">
+            <button type="button" onClick={() => setAttorneys(attorneys.filter((_, j) => j !== i))} className="adm-subcard-del">
               <Trash2 size={14} />
             </button>
-            <div className="grid grid-cols-2 gap-3">
+            <div className="adm-row">
               <Field label="Name">
                 <input className={inputClass} value={att.name} onChange={(e) => { const a = [...attorneys]; a[i] = { ...a[i], name: e.target.value }; setAttorneys(a); }} placeholder="Jane Smith" />
               </Field>
@@ -240,24 +240,24 @@ export default function FirmForm({ initialData, mode, allCriteria, defaultAssess
       {/* Assessment Items, standard checklist */}
       <div className={sectionClass}>
         <div>
-          <h2 className="text-lg text-[#002B55]" style={{ fontFamily: "var(--display)", fontWeight: 500 }}>LWYRD Assessment</h2>
-          <p className="text-xs text-slate-400 mt-1">Toggle pass/fail for each standard criterion. Add an optional note per item.</p>
+          <h2 className="adm-card-title">LWYRD Assessment</h2>
+          <p className="adm-hint" style={{ marginTop: 4 }}>Toggle pass/fail for each standard criterion. Add an optional note per item.</p>
         </div>
         {assessmentItems.map((item, i) => {
           const criterion = allCriteria.find((c) => c.id === item.criterionId);
           return (
-            <div key={item.criterionId} className="border border-[#E7E7E3] rounded-2xl p-4 space-y-3">
-              <div className="flex items-start gap-3">
+            <div key={item.criterionId} className="adm-subcard">
+              <div style={{ display: "flex", alignItems: "flex-start", gap: 10 }}>
                 <input
                   type="checkbox"
                   checked={item.passed}
                   onChange={(e) => { const a = [...assessmentItems]; a[i] = { ...a[i], passed: e.target.checked }; setAssessmentItems(a); }}
-                  className="mt-0.5 w-4 h-4 accent-[#002B55] shrink-0"
+                  style={{ marginTop: 2, width: 16, height: 16, accentColor: "var(--navy)", flexShrink: 0 }}
                 />
                 <div>
-                  <p className="text-sm font-medium text-slate-700">{criterion?.label}</p>
+                  <p style={{ fontSize: ".88rem", fontWeight: 600, color: "var(--ink)" }}>{criterion?.label}</p>
                   {criterion?.description && (
-                    <p className="text-xs text-slate-400 mt-0.5">{criterion.description}</p>
+                    <p className="adm-hint" style={{ marginTop: 2 }}>{criterion.description}</p>
                   )}
                 </div>
               </div>
@@ -272,13 +272,13 @@ export default function FirmForm({ initialData, mode, allCriteria, defaultAssess
         })}
       </div>
 
-      {error && <p className="text-red-500 text-sm">{error}</p>}
+      {error && <div className="adm-error">{error}</div>}
 
-      <div className="flex gap-3 pb-10">
-        <button onClick={handleSave} disabled={isPending} className="px-8 py-3 rounded-2xl bg-[#002B55] text-white text-sm font-medium hover:opacity-90 transition-opacity disabled:opacity-60">
-          {isPending ? "Saving..." : mode === "create" ? "Create Firm" : "Save Changes"}
+      <div className="adm-form-actions">
+        <button onClick={handleSave} disabled={isPending} className="adm-btn adm-btn-primary">
+          {isPending ? "Saving…" : mode === "create" ? "Create firm" : "Save changes"}
         </button>
-        <button onClick={() => router.push("/admin/firms")} className="px-6 py-3 rounded-2xl border border-[#E7E7E3] text-slate-600 text-sm hover:border-[#002B55] transition-colors">
+        <button onClick={() => router.push("/admin/firms")} className="adm-btn adm-btn-ghost">
           Cancel
         </button>
       </div>

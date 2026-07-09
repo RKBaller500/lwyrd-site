@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import "@/styles/lwyrd-ds.css";
+import "@/styles/admin.css";
 import MarketingNav from "@/components/marketing/MarketingNav";
 import AdminSidebar from "@/components/admin/AdminSidebar";
 
@@ -25,11 +26,11 @@ export default async function AdminLayout({
   if (profile?.role !== "admin" && !profile?.is_admin) redirect("/");
 
   return (
-    <div className="lwyrd-ds ds-page" style={{ background: "var(--paper-alt)" }}>
+    <div className="lwyrd-ds ds-page adm-body">
       <MarketingNav />
-      <div className="flex flex-1">
+      <div className="adm-wrap">
         <AdminSidebar />
-        <main className="flex-1 px-6 sm:px-8 py-8 min-w-0">{children}</main>
+        <main className="adm-main">{children}</main>
       </div>
     </div>
   );

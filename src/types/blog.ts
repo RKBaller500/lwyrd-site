@@ -8,6 +8,7 @@ export type BusinessFocus =
   | "manufacturing"
   | "nonprofits";
 export type ContentType = "news" | "advice";
+export type PostStatus = "draft" | "published";
 
 export interface BlogAuthor {
   name: string;
@@ -30,6 +31,8 @@ export interface BlogPost {
   readTimeMinutes: number;
   thumbnailAccent: string;
   thumbnailImage?: string;
+  status?: PostStatus;
+  updatedAt?: string;
 }
 
 export interface BlogFilters {

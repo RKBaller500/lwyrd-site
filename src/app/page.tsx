@@ -1,6 +1,9 @@
-import MarketingPageClient from "@/components/marketing/MarketingPageClient";
-import { css, body, js } from "@/components/marketing/pages/home.data";
+import HomeClient from "@/components/marketing/HomeClient";
+import { getPublishedPosts } from "@/lib/supabase/blog";
 
-export default function HomePage() {
-  return <MarketingPageClient css={css} body={body} js={js} />;
+export const revalidate = 60;
+
+export default async function HomePage() {
+  const posts = await getPublishedPosts();
+  return <HomeClient posts={posts.slice(0, 3)} />;
 }

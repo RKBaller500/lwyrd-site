@@ -2,7 +2,7 @@
 
 import "@/styles/lwyrd-ds.css";
 import { motion } from "framer-motion";
-import { ArrowRight } from "lucide-react";
+import { ArrowRight, Mail } from "lucide-react";
 import MarketingNav from "@/components/marketing/MarketingNav";
 import MarketingFooter from "@/components/marketing/MarketingFooter";
 
@@ -32,6 +32,7 @@ const founders = [
     initials: "JM",
     photo: "/Profile Pics/Jai_Profile.jpeg",
     linkedin: "https://www.linkedin.com/in/jaimalhotra7/",
+    email: "jai@lwyrd.co",
   },
   {
     name: "Aidan Berkeley",
@@ -39,6 +40,7 @@ const founders = [
     initials: "AB",
     photo: "/Profile Pics/Aidan_Profile.png",
     linkedin: "https://www.linkedin.com/in/aidan-berkeley/",
+    email: "aidan@lwyrd.co",
   },
   {
     name: "Rahul Kochar",
@@ -46,6 +48,7 @@ const founders = [
     initials: "RK",
     photo: "/Profile Pics/Rahul_Profile.png",
     linkedin: "https://www.linkedin.com/in/rahulkochar23/",
+    email: "rahul@lwyrd.co",
   },
 ];
 
@@ -93,17 +96,33 @@ export default function AboutPage() {
                   </div>
                   <p className="about-founder-name">{f.name}</p>
                   <p className="about-founder-role">{f.role}</p>
-                  {f.linkedin ? (
-                    <a
-                      href={f.linkedin}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="about-founder-linkedin"
-                      aria-label={`${f.name} on LinkedIn`}
-                    >
-                      <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-                        <path d="M20.45 20.45h-3.56v-5.57c0-1.33-.02-3.04-1.85-3.04-1.85 0-2.14 1.45-2.14 2.94v5.67H9.35V9h3.42v1.56h.05c.48-.9 1.64-1.85 3.37-1.85 3.6 0 4.27 2.37 4.27 5.46v6.28zM5.34 7.43a2.06 2.06 0 1 1 0-4.13 2.06 2.06 0 0 1 0 4.13zM7.12 20.45H3.55V9h3.57v11.45zM22.22 0H1.77C.8 0 0 .78 0 1.74v20.52C0 23.22.79 24 1.77 24h20.45c.98 0 1.78-.78 1.78-1.74V1.74C24 .78 23.2 0 22.22 0z" />
-                      </svg>
+                  <div className="about-founder-links">
+                    {f.linkedin ? (
+                      <a
+                        href={f.linkedin}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="about-founder-linkedin"
+                        aria-label={`${f.name} on LinkedIn`}
+                      >
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                          <path d="M20.45 20.45h-3.56v-5.57c0-1.33-.02-3.04-1.85-3.04-1.85 0-2.14 1.45-2.14 2.94v5.67H9.35V9h3.42v1.56h.05c.48-.9 1.64-1.85 3.37-1.85 3.6 0 4.27 2.37 4.27 5.46v6.28zM5.34 7.43a2.06 2.06 0 1 1 0-4.13 2.06 2.06 0 0 1 0 4.13zM7.12 20.45H3.55V9h3.57v11.45zM22.22 0H1.77C.8 0 0 .78 0 1.74v20.52C0 23.22.79 24 1.77 24h20.45c.98 0 1.78-.78 1.78-1.74V1.74C24 .78 23.2 0 22.22 0z" />
+                        </svg>
+                      </a>
+                    ) : null}
+                    {f.email ? (
+                      <a
+                        href={`mailto:${f.email}`}
+                        className="about-founder-linkedin"
+                        aria-label={`Email ${f.name}`}
+                      >
+                        <Mail size={16} />
+                      </a>
+                    ) : null}
+                  </div>
+                  {f.email ? (
+                    <a href={`mailto:${f.email}`} className="about-founder-email">
+                      {f.email}
                     </a>
                   ) : null}
                 </motion.div>
@@ -272,13 +291,13 @@ export default function AboutPage() {
           margin-top:18px;
         }
         .about-founder-role{color:var(--muted);font-size:.9rem;margin-top:3px}
+        .about-founder-links{display:flex;align-items:center;gap:10px;margin-top:12px}
         .about-founder-linkedin{
           display:inline-flex;
           align-items:center;
           justify-content:center;
           width:34px;
           height:34px;
-          margin-top:12px;
           border-radius:50%;
           color:var(--navy);
           background:var(--navy-tint);
@@ -286,6 +305,13 @@ export default function AboutPage() {
           transition:background .16s ease,color .16s ease,transform .16s ease;
         }
         .about-founder-linkedin:hover{background:var(--navy);color:#fff;transform:translateY(-1px)}
+        .about-founder-email{
+          color:var(--muted);
+          font-size:.85rem;
+          margin-top:6px;
+          transition:color .16s ease;
+        }
+        .about-founder-email:hover{color:var(--navy)}
 
         /* the note */
         .about-note{background:var(--paper-alt);border-top:1px solid var(--line);border-bottom:1px solid var(--line)}

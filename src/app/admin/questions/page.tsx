@@ -2,6 +2,7 @@ import Link from "next/link";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { Plus } from "lucide-react";
 import QuestionsTable from "@/components/admin/QuestionsTable";
+import AdminHeader from "@/components/admin/AdminHeader";
 
 export const metadata = { title: "Questions, Admin" };
 
@@ -29,24 +30,17 @@ export default async function AdminQuestionsPage() {
 
   return (
     <div>
-      <div className="flex items-center justify-between mb-8">
-        <div>
-          <h1
-            className="text-4xl text-[#002B55] mb-1"
-            style={{ fontFamily: "var(--display)", fontWeight: 500 }}
-          >
-            Questions
-          </h1>
-          <p className="text-slate-500 text-sm">{questions?.length ?? 0} questions total</p>
-        </div>
-        <Link
-          href="/admin/questions/new"
-          className="flex items-center gap-2 px-5 py-2.5 rounded-2xl bg-[#002B55] text-white text-sm font-medium hover:opacity-90 transition-opacity"
-        >
-          <Plus size={15} />
-          Add Question
-        </Link>
-      </div>
+      <AdminHeader
+        eyebrow="Content"
+        title="Questions"
+        subtitle={`${questions?.length ?? 0} intake question${(questions?.length ?? 0) !== 1 ? "s" : ""}.`}
+        actions={
+          <Link href="/admin/questions/new" className="adm-btn adm-btn-primary">
+            <Plus size={16} strokeWidth={2} />
+            Add question
+          </Link>
+        }
+      />
 
       <QuestionsTable questions={enrichedQuestions} categoryOptions={categoryOptions} />
     </div>

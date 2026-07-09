@@ -45,6 +45,17 @@ const AUDIENCES: Record<string, ClientAudienceLandingData> = {
       { value: "ma", label: "M&A and exit" },
       { value: "dispute", label: "Disputes" },
     ],
+    intakeDemo: {
+      stepLabel: "Question 2 of 9",
+      pct: 22,
+      question: "What do you need help with?",
+      options: [
+        "Intellectual property",
+        "Formation and structure",
+        "Fundraising and securities",
+        "Employment and equity",
+      ],
+    },
     result: {
       rankLabel: "Top match",
       title: "Seed-stage IP counsel",
@@ -103,6 +114,17 @@ const AUDIENCES: Record<string, ClientAudienceLandingData> = {
       { value: "ma-buying-selling-business", label: "M&A and buying or selling a business" },
       { value: "data-privacy-cybersecurity", label: "Data privacy and cybersecurity" },
     ],
+    intakeDemo: {
+      stepLabel: "Question 3 of 8",
+      pct: 34,
+      question: "What's the issue you're facing?",
+      options: [
+        "Real estate and commercial leases",
+        "Employment law",
+        "Commercial contracts",
+        "Business disputes and litigation",
+      ],
+    },
     result: {
       rankLabel: "Top match",
       title: "Commercial lease counsel",
@@ -160,6 +182,17 @@ const AUDIENCES: Record<string, ClientAudienceLandingData> = {
       { value: "bankruptcy-debt", label: "Bankruptcy and debt" },
       { value: "consumer-protection", label: "Consumer protection" },
     ],
+    intakeDemo: {
+      stepLabel: "Question 2 of 7",
+      pct: 29,
+      question: "What are you dealing with?",
+      options: [
+        "Family law",
+        "Estate planning and wills",
+        "Real estate",
+        "Personal injury and civil litigation",
+      ],
+    },
     result: {
       rankLabel: "Top match",
       title: "Family-law counsel",

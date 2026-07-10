@@ -24,19 +24,42 @@ const STATE_SPECIFIC_PRACTICES = new Set([
 // licensed where the user is (previously bucketed under FEDERAL_PRACTICES below,
 // which let e.g. NY/FL firms outscore in-state firms for a user explicitly asking
 // for commercial contracts help in a state with no firms in the database).
-const SEMI_STATE_SPECIFIC_PRACTICES = new Set(["employment-law", "contract-law"]);
-
-// Practices governed entirely by federal law: firm can advise regardless of state.
-const FEDERAL_PRACTICES = new Set([
-  "immigration",
-  "intellectual-property",
+// Corporate-formation, fundraising, regulatory-compliance, corporate-governance,
+// mergers-acquisitions, and dispute-resolution moved here too — while these
+// routinely cross state lines, they're not purely agency-driven like tax/IP/
+// immigration, so an out-of-state firm should still take a real penalty against a
+// firm actually local to the user, not score identically to one. (Delaware
+// preference for the corporate-ish subset of these is still handled separately
+// via DELAWARE_FRIENDLY_PRACTICES below, so a DE-filing firm isn't wrongly
+// penalized just for not being HQ'd in the user's home state.)
+const SEMI_STATE_SPECIFIC_PRACTICES = new Set([
+  "employment-law",
+  "contract-law",
   "corporate-formation",
   "fundraising",
   "regulatory-compliance",
   "corporate-governance",
   "mergers-acquisitions",
   "dispute-resolution",
+]);
+
+// Practices handled through a federal agency/court regardless of where the client
+// or firm is located (USPTO, IRS, immigration court) — genuinely state-agnostic,
+// unlike the semi-state-specific set above.
+const FEDERAL_PRACTICES = new Set([
+  "immigration",
+  "intellectual-property",
   "tax-law",
+]);
+
+// Corporate-ish practices where a Delaware location preference specifically
+// signals "handle my DE filings," not "be headquartered near me" — firms
+// regularly do this work for out-of-state clients regardless of physical location.
+const DELAWARE_FRIENDLY_PRACTICES = new Set([
+  "corporate-formation",
+  "fundraising",
+  "mergers-acquisitions",
+  "corporate-governance",
 ]);
 
 // Maps full state names to abbreviations for HQ location matching
@@ -450,7 +473,10 @@ function scoreLocation(
   answers: IntakeAnswers,
   firm: Firm
 ): { pts: number; max: number; reason?: string } {
-  const MAX = 6;
+  // Raised from 6 — at 6 points, even a 0% out-of-state score barely moved a firm's
+  // rank (out of ~150+ total points across all signals). An explicit state
+  // preference should carry real weight, not a token nudge.
+  const MAX = 18;
   const pref = answers["location-preference"] as string | undefined;
 
   // No preference: all firms qualify fully, no location-specific reason to show.
@@ -465,7 +491,7 @@ function scoreLocation(
 
   // Delaware: corporate/startup firms regularly handle DE matters
   if (pref.includes("Delaware")) {
-    if (FEDERAL_PRACTICES.has(categorySlug)) {
+    if (FEDERAL_PRACTICES.has(categorySlug) || DELAWARE_FRIENDLY_PRACTICES.has(categorySlug)) {
       return { pts: MAX * 0.92, max: MAX, reason: "Regularly handles Delaware corporate filings" };
     }
     return { pts: MAX * 0.67, max: MAX };
@@ -487,9 +513,12 @@ function scoreLocation(
     return { pts: MAX, max: MAX };
   }
 
-  // Semi-state-specific (employment-law): partial credit
+  // Semi-state-specific (employment-law, contract-law): partial credit only.
+  // Lowered from 0.50 — an out-of-state firm for these practices is a real
+  // mismatch, not a near-equivalent, so it shouldn't score close to a firm
+  // actually headquartered where the user needs representation.
   if (SEMI_STATE_SPECIFIC_PRACTICES.has(categorySlug)) {
-    return { pts: MAX * 0.50, max: MAX };
+    return { pts: MAX * 0.15, max: MAX };
   }
 
   // State-specific but firm HQ didn't match, should already be hard-filtered, but be safe

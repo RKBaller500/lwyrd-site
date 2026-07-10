@@ -11,7 +11,6 @@ import AuthGuard from "@/components/auth/AuthGuard";
 import MatchCard from "@/components/results/MatchCard";
 import { runMatchingForSubmission } from "@/lib/actions/intake";
 import { PublicMatchResult } from "@/types";
-import { ArrowRight, LockKeyhole } from "lucide-react";
 
 const ease = [0.25, 0.46, 0.45, 0.94] as const;
 
@@ -97,7 +96,6 @@ function PastResultsContent() {
   if (!results) return null;
 
   const total = results.length;
-  const hasLockedResults = results.some(isLockedResult);
 
   return (
     <div className="lwyrd-ds ds-page">
@@ -123,7 +121,7 @@ function PastResultsContent() {
           </h1>
           <p>
             {total > 0
-              ? `Ranked by fit${categoryName ? ` for ${categoryName}` : ""}.${hasLockedResults ? " Identities stay hidden until you unlock this intake." : ""}`
+              ? `Ranked by fit${categoryName ? ` for ${categoryName}` : ""}.`
               : "Try adjusting your answers to surface more firms."}
             {intakeDate
               ? ` Intake from ${new Date(intakeDate).toLocaleDateString("en-US", {
@@ -134,29 +132,6 @@ function PastResultsContent() {
               : ""}
           </p>
         </motion.div>
-
-        {hasLockedResults && total > 0 && (
-          <motion.div
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, ease, delay: 0.03 }}
-            className="results-unlock"
-          >
-            <div className="results-unlock-copy">
-              <span className="icon-box">
-                <LockKeyhole size={16} strokeWidth={1.7} />
-              </span>
-              <p>
-                <strong>Your matches are ready.</strong> Unlock this intake to see who each firm is,
-                open full profiles, and get a prepared summary of your matter plus a ready-to-send
-                message for reaching out.
-              </p>
-            </div>
-            <Link href={`/access?next=/results/${submissionId}`} className="btn btn-primary results-unlock-btn">
-              Unlock with checkout <ArrowRight size={14} />
-            </Link>
-          </motion.div>
-        )}
 
         {total === 0 ? (
           <motion.div

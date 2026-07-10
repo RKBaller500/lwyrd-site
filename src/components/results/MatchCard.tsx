@@ -111,7 +111,7 @@ function LockedIdentity({ rank, isBestMatch }: { rank: number; isBestMatch?: boo
           </span>
         </div>
         <div className="locked-name" />
-        <p>A real matched firm is here. Unlock to see its name and profile.</p>
+        <p>A matched firm is here.</p>
       </div>
     </div>
   );
@@ -120,11 +120,9 @@ function LockedIdentity({ rank, isBestMatch }: { rank: number; isBestMatch?: boo
 function LockedMatchCard({
   result,
   rank,
-  intakeId,
 }: {
   result: Extract<PublicMatchResult, { isLocked: true }>;
   rank: number;
-  intakeId?: string | null;
 }) {
   const roundedScore = Math.round(result.score);
   const size = sizeLabels[result.firmSize] ?? result.firmSize;
@@ -181,17 +179,6 @@ function LockedMatchCard({
           </div>
         </div>
 
-        {isTop && (
-          <div className="locked-card-cta">
-            <p>
-              Your matches are ready. Unlock this intake to see who each firm is, open full profiles,
-              and get a prepared summary of your matter plus a ready-to-send message for reaching out.
-            </p>
-            <Link href={intakeId ? `/access?next=/results/${intakeId}` : "/access?next=/results"} className="btn btn-primary">
-              Unlock with checkout <ArrowRight size={14} strokeWidth={2} />
-            </Link>
-          </div>
-        )}
       </div>
     </div>
   );
@@ -199,7 +186,7 @@ function LockedMatchCard({
 
 export default function MatchCard({ result, rank, initialSaved = false, intakeId }: MatchCardProps) {
   if (isLockedResult(result)) {
-    return <LockedMatchCard result={result} rank={rank} intakeId={intakeId} />;
+    return <LockedMatchCard result={result} rank={rank} />;
   }
 
   const { firm, score, reasons, firmHighlights, isBestMatch } = result;

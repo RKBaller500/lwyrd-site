@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Confirm your email</title>
+</head>
+<body style="margin:0;padding:0;background-color:#f5f4f0;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;">
+  <table width="100%" cellpadding="0" cellspacing="0" style="background-color:#f5f4f0;padding:48px 16px;">
+    <tr>
+      <td align="center">
+        <table width="100%" cellpadding="0" cellspacing="0" style="max-width:520px;">
+
+          <!-- Logo -->
+          <tr>
+            <td align="center" style="padding-bottom:32px;">
+              <span style="font-family:Georgia,'Times New Roman',serif;font-size:22px;font-weight:700;color:#002452;letter-spacing:0.08em;">LWYRD</span>
+            </td>
+          </tr>
+
+          <!-- Card -->
+          <tr>
+            <td style="background-color:#ffffff;border-radius:16px;border:1px solid #e8e4dd;padding:48px 40px;">
+
+              <!-- Heading -->
+              <p style="margin:0 0 8px 0;font-size:11px;font-weight:600;letter-spacing:0.12em;text-transform:uppercase;color:#8a8a7a;">Verify your email</p>
+              <h1 style="margin:0 0 16px 0;font-family:Georgia,'Times New Roman',serif;font-size:28px;font-weight:500;color:#002452;line-height:1.25;">
+                One quick step before you get matched.
+              </h1>
+              <p style="margin:0 0 32px 0;font-size:15px;line-height:1.6;color:#5a5a50;">
+                Click the button below to confirm your email address and activate your LWYRD account. This link expires in 24 hours.
+              </p>
+
+              <!-- CTA -->
+              <table cellpadding="0" cellspacing="0" style="margin-bottom:32px;">
+                <tr>
+                  <td style="background-color:#002452;border-radius:10px;">
+                    <a href="{{ .ConfirmationURL }}"
+                       style="display:inline-block;padding:14px 32px;font-size:15px;font-weight:600;color:#ffffff;text-decoration:none;letter-spacing:0.01em;">
+                      Confirm my email
+                    </a>
+                  </td>
+                </tr>
+              </table>
+
+              <!-- Fallback link -->
+              <p style="margin:0 0 32px 0;font-size:13px;line-height:1.6;color:#9a9a8a;">
+                Button not working? Copy and paste this link into your browser:<br />
+                <a href="{{ .ConfirmationURL }}" style="color:#002452;word-break:break-all;">{{ .ConfirmationURL }}</a>
+              </p>
+
+              <!-- Divider -->
+              <hr style="border:none;border-top:1px solid #e8e4dd;margin:0 0 24px 0;" />
+
+              <!-- Security note -->
+              <p style="margin:0;font-size:12px;line-height:1.6;color:#9a9a8a;">
+                If you didn't create an account with LWYRD, you can safely ignore this email. No account will be created without confirmation.
+              </p>
+
+            </td>
+          </tr>
+
+          <!-- Footer -->
+          <tr>
+            <td align="center" style="padding-top:28px;">
+              <p style="margin:0;font-size:12px;color:#9a9a8a;line-height:1.6;">
+                LWYRD &mdash; Legal matchmaking, built differently.<br />
+                <a href="https://lwyrd.com" style="color:#002452;text-decoration:none;">lwyrd.com</a>
+              </p>
+            </td>
+          </tr>
+
+        </table>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>

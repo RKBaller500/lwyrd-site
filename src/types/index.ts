@@ -161,10 +161,19 @@ export type V2TrackSubmission = V2StartupSubmission | V2IndividualSubmission | V
 export interface MatchResult {
   firm: Firm;
   score: number; // 0-100
+  // Generic, non-identifying match-criteria reasons (budget fit, location, etc.) —
+  // safe to show pre-paywall since they don't reveal which firm this is.
   reasons: string[];
+  // Firm-specific highlights pulled from firm.strengths (named attorneys, rankings,
+  // credentials). These CAN identify the firm, so callers must not surface them on
+  // locked/pre-paywall results — see redactMatchResult in lib/actions/intake.ts.
+  firmHighlights: string[];
   matchedCriteria: string[];
   missedCriteria: string[];
   isBestMatch?: boolean;
+  // Set when no firm passed the hard filters and this is the closest fallback match.
+  isPartialMatch?: boolean;
+  partialMatchReasons?: string[];
 }
 
 export interface LockedMatchResult {

@@ -202,9 +202,12 @@ export default function MatchCard({ result, rank, initialSaved = false, intakeId
     return <LockedMatchCard result={result} rank={rank} intakeId={intakeId} />;
   }
 
-  const { firm, score, reasons, isBestMatch } = result;
+  const { firm, score, reasons, firmHighlights, isBestMatch } = result;
   const profileHref = intakeId ? `/firms/${firm.id}?intake=${intakeId}` : `/firms/${firm.id}`;
-  const displayReasons = visibleReasons(reasons);
+  // firmHighlights (named attorneys, specific rankings) can identify the firm, so
+  // they're only ever combined in here — after the isLockedResult check above —
+  // never passed into the locked/pre-paywall card.
+  const displayReasons = visibleReasons([...reasons, ...firmHighlights]);
   const displayMissedCriteria = visibleCriteria(result.missedCriteria);
   const roundedScore = Math.round(score);
   const hasCriteria = displayReasons.length > 0 || displayMissedCriteria.length > 0;

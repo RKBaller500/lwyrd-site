@@ -9,6 +9,7 @@ import MarketingNav from "@/components/marketing/MarketingNav";
 import MarketingFooter from "@/components/marketing/MarketingFooter";
 import AuthGuard from "@/components/auth/AuthGuard";
 import MatchCard from "@/components/results/MatchCard";
+import FreeUntilBanner from "@/components/results/FreeUntilBanner";
 import { runMatchingForSubmission } from "@/lib/actions/intake";
 import { PublicMatchResult } from "@/types";
 
@@ -132,6 +133,8 @@ function PastResultsContent() {
               : ""}
           </p>
         </motion.div>
+
+        <FreeUntilBanner />
 
         {total === 0 ? (
           <motion.div

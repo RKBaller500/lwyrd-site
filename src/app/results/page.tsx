@@ -8,6 +8,7 @@ import MarketingNav from "@/components/marketing/MarketingNav";
 import MarketingFooter from "@/components/marketing/MarketingFooter";
 import AuthGuard from "@/components/auth/AuthGuard";
 import MatchCard from "@/components/results/MatchCard";
+import FreeUntilBanner from "@/components/results/FreeUntilBanner";
 import { PublicMatchResult } from "@/types";
 import Link from "next/link";
 import { Info } from "lucide-react";
@@ -140,6 +141,8 @@ function ResultsContent() {
               : "No firms matched your criteria, try adjusting your answers."}
           </p>
         </motion.div>
+
+        <FreeUntilBanner />
 
         {/* Size gap notice */}
         {sizeGapNotice && (

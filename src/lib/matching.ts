@@ -1,5 +1,5 @@
 import { Firm, IntakeAnswers, MatchResult } from "@/types";
-import { CATEGORY_SLUG_MAP } from "@/data/intakeV2";
+import { CATEGORY_SLUG_MAP, US_STATES } from "@/data/intakeV2";
 
 // ── Constants ─────────────────────────────────────────────────────────────────
 
@@ -18,7 +18,13 @@ const STATE_SPECIFIC_PRACTICES = new Set([
 // Employment law is semi-state-specific (Title VII etc. are federal, but wage/hour
 // and wrongful termination claims often depend on state law). For non-NY users it's
 // a soft penalty, not a hard disqualification.
-const SEMI_STATE_SPECIFIC_PRACTICES = new Set(["employment-law"]);
+// Contract law is likewise semi-state-specific: contract formation/breach/interpretation
+// is governed by state law (UCC as adopted per-state, state common law), not federal
+// law, so an out-of-state firm shouldn't score identically to a firm actually
+// licensed where the user is (previously bucketed under FEDERAL_PRACTICES below,
+// which let e.g. NY/FL firms outscore in-state firms for a user explicitly asking
+// for commercial contracts help in a state with no firms in the database).
+const SEMI_STATE_SPECIFIC_PRACTICES = new Set(["employment-law", "contract-law"]);
 
 // Practices governed entirely by federal law: firm can advise regardless of state.
 const FEDERAL_PRACTICES = new Set([
@@ -26,7 +32,6 @@ const FEDERAL_PRACTICES = new Set([
   "intellectual-property",
   "corporate-formation",
   "fundraising",
-  "contract-law",
   "regulatory-compliance",
   "corporate-governance",
   "mergers-acquisitions",
@@ -35,13 +40,33 @@ const FEDERAL_PRACTICES = new Set([
 ]);
 
 // Maps full state names to abbreviations for HQ location matching
-const STATE_ABBRS: Record<string, string> = {
-  "New York": "NY", "California": "CA", "Texas": "TX", "Florida": "FL",
-  "Illinois": "IL", "Massachusetts": "MA", "Colorado": "CO", "Arizona": "AZ",
-  "New Jersey": "NJ", "Connecticut": "CT", "Pennsylvania": "PA",
-  "Georgia": "GA", "Washington": "WA", "Nevada": "NV", "Virginia": "VA",
-  "Delaware": "DE",
-};
+// Derived from the same US_STATES list the intake wizard uses, so every state a
+// user can actually select is recognized here too (previously this only covered
+// 16 of 51 states/DC — e.g. Alaska wasn't recognized at all, which meant a
+// state-specific-practice search from an unrecognized state could never find a
+// genuinely eligible firm, even if one existed).
+const STATE_ABBRS: Record<string, string> = Object.fromEntries(
+  US_STATES.filter((s) => s.value !== "outside_us").map((s) => [s.label, s.value])
+);
+
+const ABBR_TO_STATE: Record<string, string> = Object.fromEntries(
+  Object.entries(STATE_ABBRS).map(([name, abbr]) => [abbr, name])
+);
+
+// Sorted longest-name-first so substring matching below checks "West Virginia"
+// before "Virginia", and "Washington D.C." before "Washington" — otherwise a user
+// preference like "West Virginia" would incorrectly match "Virginia" first, since
+// it's a substring of it.
+const STATE_ABBRS_BY_LENGTH = Object.entries(STATE_ABBRS).sort((a, b) => b[0].length - a[0].length);
+
+// Firms aren't all New York-based (location strings like "Miami, FL", "London, UK",
+// "Washington, DC" exist in the dataset) — derive a firm's actual state/region label
+// from its HQ location instead of assuming New York.
+function getFirmStateLabel(firm: Firm): string {
+  const suffix = firm.location.split(",").pop()?.trim();
+  if (!suffix) return firm.location;
+  return ABBR_TO_STATE[suffix] ?? suffix;
+}
 
 const INDUSTRY_MAP: Record<string, string> = {
   "Technology / Software": "tech",
@@ -62,13 +87,10 @@ const STAGE_MAP: Record<string, string> = {
   "Enterprise / Established company": "enterprise",
 };
 
-const STAGE_ADJACENCY: Record<string, string[]> = {
-  "pre-seed": ["seed"],
-  "seed": ["pre-seed", "series-a"],
-  "series-a": ["seed", "growth"],
-  "growth": ["series-a", "enterprise"],
-  "enterprise": ["growth"],
-};
+// Linear stage progression, used to compute a numeric distance between the
+// user's stage and whatever stage(s) a firm serves, instead of a fixed
+// exact/adjacent/other tier system.
+const STAGE_ORDER = ["pre-seed", "seed", "series-a", "growth", "enterprise"];
 
 const RESPONSE_PRIORITY: Record<string, number> = {
   "same-day": 3, "24h": 2, "48h": 1, "72h": 0,
@@ -96,29 +118,25 @@ function isHardDisqualified(
   const budget = (answers["budget-monthly"] as number) ?? 0;
 
   // ── 1. Location: state-specific law ──────────────────────────────────────
-  // All firms in this database are licensed in New York. If the user needs legal
-  // services in a different state for a practice area governed by state law, these
-  // firms cannot represent them.
-  if (statePref && !statePref.includes("No preference")) {
-    const userWantsNY = statePref.includes("New York");
-
-    if (!userWantsNY && STATE_SPECIFIC_PRACTICES.has(categorySlug)) {
-      // Check if the firm's HQ is in the user's state, if so it can still serve.
-      let firmIsInUserState = false;
-      for (const [stateName, abbr] of Object.entries(STATE_ABBRS)) {
-        if (statePref.includes(stateName)) {
-          if (firm.location.includes(abbr) || firm.location.includes(stateName)) {
-            firmIsInUserState = true;
-          }
-          break;
+  // Firms are only licensed to practice state-specific law in their own HQ state.
+  // If the user needs legal services in a different state for a practice area
+  // governed by state law, a firm whose HQ isn't in that state cannot represent them.
+  if (statePref && !statePref.includes("No preference") && STATE_SPECIFIC_PRACTICES.has(categorySlug)) {
+    // Check if the firm's HQ is in the user's state, if so it can still serve.
+    let firmIsInUserState = false;
+    for (const [stateName, abbr] of STATE_ABBRS_BY_LENGTH) {
+      if (statePref.includes(stateName)) {
+        if (firm.location.includes(abbr) || firm.location.includes(stateName)) {
+          firmIsInUserState = true;
         }
+        break;
       }
-      if (!firmIsInUserState) {
-        return {
-          disqualified: true,
-          reason: `This firm is licensed in New York and cannot handle ${categorySlug.replace(/-/g, " ")} matters in your state.`,
-        };
-      }
+    }
+    if (!firmIsInUserState) {
+      return {
+        disqualified: true,
+        reason: `This firm is licensed in ${getFirmStateLabel(firm)} and cannot handle ${categorySlug.replace(/-/g, " ")} matters in your state.`,
+      };
     }
   }
 
@@ -200,7 +218,7 @@ function scoreBudget(answers: IntakeAnswers, firm: Firm): { pts: number; max: nu
 
   if (budget === 0) {
     // No budget stated, neutral, give 65% so it doesn't dominate the score
-    return { pts: Math.round(MAX * 0.65), max: MAX };
+    return { pts: MAX * 0.65, max: MAX };
   }
 
   if (budget >= min && budget <= max) {
@@ -208,33 +226,79 @@ function scoreBudget(answers: IntakeAnswers, firm: Firm): { pts: number; max: nu
   }
 
   if (budget > max) {
-    // Client has more budget than ceiling, still a fine match, slight discount
-    return { pts: Math.round(MAX * 0.80), max: MAX };
+    // Client has more budget than ceiling, still a fine match. Scales down
+    // continuously the further over the ceiling they are, floor at 65%.
+    const overRatio = budget / max;
+    return { pts: MAX * Math.max(0.65, 0.95 - (overRatio - 1) * 0.30), max: MAX };
   }
 
-  // budget < min (but above the hard-filter threshold of 28%)
+  // budget < min (but above the hard-filter threshold of 28% of min).
+  // Continuous linear scale from 20% (right at the hard-filter edge) to 95%
+  // (just under min) instead of snapping to 3 fixed tiers.
   const ratio = budget / min; // 0.28 – 0.99
-  if (ratio >= 0.80) return { pts: Math.round(MAX * 0.50), max: MAX };
-  if (ratio >= 0.55) return { pts: Math.round(MAX * 0.25), max: MAX };
-  return { pts: Math.round(MAX * 0.10), max: MAX }; // close to hard-filter threshold
+  return { pts: MAX * (0.20 + ((ratio - 0.28) / (1 - 0.28)) * 0.75), max: MAX };
 }
 
 function scoreQuality(firm: Firm): { pts: number; max: number; rawRatio: number; reason?: string } {
-  const MAX = 10;
+  const MAX = 28; // increased from 10 (then 20) — the strongest signal with genuine per-firm
+  // variance (overallScore has 36 distinct values 64-98 in the real data, vs. budget/stage
+  // which are heavily duplicated across firms)
   let qualityRatio: number;
 
   if (firm.assessment.length > 0) {
     const passed = firm.assessment.filter((a) => a.passed).length;
     const assessRatio = passed / firm.assessment.length;
-    // Blend assessment pass rate (70%) with overallScore (30%) so firms with the
-    // same pass count but different LWYRD scores still produce different quality pts.
-    qualityRatio = assessRatio * 0.7 + (firm.overallScore / 100) * 0.3;
+
+    // overall_score of exactly 0 on an assessed firm means the score hasn't been
+    // computed yet, not that the firm scored zero — every firm we've seen with
+    // overall_score=0 actually passed its full assessment. Treating 0 as a real
+    // score would wrongly tank an already-vetted firm. Use the same neutral 65%
+    // placeholder this file already uses elsewhere for "no data" cases, instead
+    // of letting a missing score read as the worst possible one.
+    const effectiveOverallScore = firm.overallScore === 0 ? 65 : firm.overallScore;
+
+    // Blend assessment pass rate (30%) with overallScore (70%). Most firms currently
+    // pass 100% of assessment items, so pass rate rarely differentiates in practice;
+    // weighting overallScore higher keeps quality scores spread out using the signal
+    // that actually varies, while assessment failures can still pull a score down.
+    qualityRatio = assessRatio * 0.3 + (effectiveOverallScore / 100) * 0.7;
   } else {
     qualityRatio = firm.overallScore / 100;
   }
 
-  // Square the ratio to amplify separation between top-rated and average firms
-  return { pts: Math.round(MAX * Math.pow(qualityRatio, 2)), max: MAX, rawRatio: qualityRatio };
+  // Square the ratio to amplify separation between top-rated and average firms.
+  // Not rounded here — only the final composite score is rounded, so this signal's
+  // full precision survives into the total instead of being quantized to 1 of 11 values.
+  return { pts: MAX * Math.pow(qualityRatio, 2), max: MAX, rawRatio: qualityRatio };
+}
+
+// Rewards firms with a narrower practice-area footprint as more specialized. Always
+// active regardless of what the user answered (firm-intrinsic, not preference-based),
+// so it helps differentiate firms even in "minimal answers" scenarios where most
+// preference-based signals go flat. Real data: 15 distinct values 1-15 practice
+// areas, no single value dominating.
+function scoreSpecialization(firm: Firm): { pts: number; max: number } {
+  const MAX = 12; // increased from 8 — meant to be a clear differentiator, not a nudge
+  // Full marks at 1 practice area, floors at 8+ so full-service generalist firms
+  // aren't crushed — specialization is a plus, not a requirement.
+  const specRatio = Math.max(0.2, 1 - (firm.practiceAreas.length - 1) / 7);
+  return { pts: MAX * specRatio, max: MAX };
+}
+
+// Rewards firms with a longer track record. Also always active regardless of user
+// answers. Real data: founded year ranges 1792-2025 with zero missing values, so
+// this is safe to lean on unlike budget/stage's heavily-duplicated data.
+function scoreFounded(firm: Firm): { pts: number; max: number } {
+  const MAX = 12; // increased from 6 — meant to be a clear differentiator, not a nudge
+  const yearsSinceFounding = new Date().getFullYear() - firm.founded;
+  // Full marks at 100+ years old, not 30 — a 30-year cap flattened most real firms
+  // in the data (e.g. a set of NY estate-planning firms founded 1866-1997 nearly
+  // all capped out identically at "30+ years", throwing away 130 years of real
+  // spread). 100 years still treats truly historic firms (1866, 1888, 1948) as
+  // similarly "very established" while giving the much larger 1970s-2010s cohort
+  // real room to differentiate on actual tenure.
+  const tenureRatio = 0.15 + 0.85 * Math.min(1, Math.max(0, yearsSinceFounding) / 100);
+  return { pts: MAX * tenureRatio, max: MAX };
 }
 
 function scoreIndustry(categorySlug: string, answers: IntakeAnswers, firm: Firm): { pts: number; max: number; reason?: string } {
@@ -248,39 +312,49 @@ function scoreIndustry(categorySlug: string, answers: IntakeAnswers, firm: Firm)
   const raw = answers["industry"] as string | undefined;
   const industry = raw ? INDUSTRY_MAP[raw] : undefined;
 
+  // Small continuous nudge from how many industries a firm covers, so firms that
+  // land in the same categorical tier below still differentiate from each other.
+  // Capped well under the smallest gap between tiers (5%) so it can never bump a
+  // firm into a higher tier than its actual match quality earned.
+  const breadthBonus = MAX * 0.025 * (Math.min(firm.industries.length, 6) / 6);
+
   if (firm.industries.length === 0) {
-    return { pts: Math.round(MAX * 0.50), max: MAX };
+    return { pts: MAX * 0.50, max: MAX };
   }
 
   if (!industry) {
     // User didn't specify an industry, modest neutral, don't reward firms with no industry data equally
-    return { pts: Math.round(MAX * 0.55), max: MAX };
+    return { pts: MAX * 0.55 + breadthBonus, max: MAX };
   }
 
   if (firm.industries.includes(industry)) {
-    return { pts: MAX, max: MAX, reason: `Experienced in ${raw!.split(" /")[0]}` };
+    // No reason text here on purpose: this just echoes the industry the user already
+    // selected, and since top-ranked firms are the ones that matched it, the phrase
+    // ends up identical across nearly every card. firm.strengths highlights carry
+    // the differentiating detail instead.
+    return { pts: MAX, max: MAX };
   }
 
   // Near-match adjacencies
   if (industry === "fintech" && (firm.industries.includes("finance") || firm.industries.includes("tech"))) {
-    return { pts: Math.round(MAX * 0.78), max: MAX };
+    return { pts: MAX * 0.78 + breadthBonus, max: MAX };
   }
   if ((industry === "healthcare" && firm.industries.includes("biotech")) ||
       (industry === "biotech" && firm.industries.includes("healthcare"))) {
-    return { pts: Math.round(MAX * 0.83), max: MAX };
+    return { pts: MAX * 0.83 + breadthBonus, max: MAX };
   }
   if (industry === "saas" && firm.industries.includes("tech")) {
-    return { pts: Math.round(MAX * 0.78), max: MAX };
+    return { pts: MAX * 0.78 + breadthBonus, max: MAX };
   }
   if (["saas", "media", "consumer"].includes(industry) && firm.industries.includes("tech")) {
-    return { pts: Math.round(MAX * 0.67), max: MAX };
+    return { pts: MAX * 0.67 + breadthBonus, max: MAX };
   }
   if (industry === "real-estate" && firm.industries.includes("finance")) {
-    return { pts: Math.round(MAX * 0.55), max: MAX };
+    return { pts: MAX * 0.55 + breadthBonus, max: MAX };
   }
 
   // Mismatch, firm doesn't serve this sector
-  return { pts: Math.round(MAX * 0.22), max: MAX };
+  return { pts: MAX * 0.22 + breadthBonus, max: MAX };
 }
 
 function scoreStage(answers: IntakeAnswers, firm: Firm): { pts: number; max: number; reason?: string } {
@@ -295,57 +369,80 @@ function scoreStage(answers: IntakeAnswers, firm: Firm): { pts: number; max: num
 
   // Firm serves all stages (empty array = broad scope)
   if (firm.companyStages.length === 0) {
-    return { pts: Math.round(MAX * 0.75), max: MAX };
+    return { pts: MAX * 0.85, max: MAX };
+  }
+
+  const stageIdx = STAGE_ORDER.indexOf(stage);
+  const firmStageIndices = firm.companyStages
+    .map((s) => STAGE_ORDER.indexOf(s))
+    .filter((i) => i !== -1);
+
+  if (stageIdx === -1 || firmStageIndices.length === 0) {
+    // Unrecognized stage token, fall back to the old neutral behavior
+    return { pts: MAX * 0.60, max: MAX };
   }
 
   if (firm.companyStages.includes(stage)) {
-    return { pts: MAX, max: MAX, reason: `Specializes in ${rawStage.split("/")[0].trim()} companies` };
+    // No reason text here on purpose, same rationale as the industry exact-match
+    // above: it just echoes the stage the user already selected, so it's near-
+    // universal across top-ranked cards instead of differentiating between them.
+    return { pts: MAX, max: MAX };
   }
 
-  const adjacent = STAGE_ADJACENCY[stage] ?? [];
-  if (adjacent.some((s) => firm.companyStages.includes(s))) {
-    return { pts: Math.round(MAX * 0.60), max: MAX };
-  }
-
-  // Not adjacent, but hard filter already caught extreme mismatches, so this is a moderate gap
-  return { pts: Math.round(MAX * 0.25), max: MAX };
+  // Distance (in stage-progression hops) to the closest stage the firm actually
+  // serves. Docks continuously with distance instead of snapping between a fixed
+  // exact/adjacent/other tier system, so firms with a 1-stage gap score
+  // meaningfully higher than firms with a 3-stage gap.
+  const minDistance = Math.min(...firmStageIndices.map((i) => Math.abs(i - stageIdx)));
+  return { pts: MAX * Math.max(0.12, 1 - minDistance * 0.35), max: MAX };
 }
 
 function scoreFirmSize(answers: IntakeAnswers, firm: Firm): { pts: number; max: number; reason?: string } {
   const MAX = 18;
   const pref = answers["seniority-preference"] as string | undefined;
 
+  // Continuous nudge from actual team depth, so firms sharing the same size
+  // category still differentiate. Capped well under the smallest tier gap (12%)
+  // so it can never bump a firm into a higher tier than its size category earned.
+  const depth = Math.min(firm.team.length, 20) / 20; // 0-1, more attorneys = deeper bench
+  const leanness = 1 - depth; // 0-1, fewer attorneys = leaner
+
   if (!pref || pref.includes("No preference")) {
-    return { pts: Math.round(MAX * 0.83), max: MAX }; // Slight discount for no preference expressed
+    return { pts: MAX * 0.83, max: MAX }; // Slight discount for no preference expressed
   }
 
   if (pref.includes("Senior partner only")) {
+    // Deeper bench favors this preference, more senior partners likely available
+    const bonus = MAX * 0.03 * depth;
     if (firm.size === "large") return { pts: MAX, max: MAX, reason: "Large firm with dedicated senior partners" };
-    if (firm.size === "mid-size") return { pts: Math.round(MAX * 0.75), max: MAX };
-    return { pts: Math.round(MAX * 0.50), max: MAX };
+    if (firm.size === "mid-size") return { pts: MAX * 0.75 + bonus, max: MAX };
+    return { pts: MAX * 0.50 + bonus, max: MAX };
   }
 
   if (pref.includes("mix is fine") || pref.includes("Mix is fine")) {
     if (firm.size === "mid-size") return { pts: MAX, max: MAX, reason: "Mid-size firm, strong senior/associate mix" };
-    return { pts: Math.round(MAX * 0.88), max: MAX }; // Any size works
+    return { pts: MAX * 0.88 + MAX * 0.03 * depth, max: MAX }; // Any size works, deeper bench a mild plus
   }
 
   if (pref.includes("Cost-efficiency")) {
+    // Leaner team favors this preference, less overhead
+    const bonus = MAX * 0.03 * leanness;
     // Intake has no mid-size option, mid-size is treated as equivalent to boutique
     if (firm.size === "boutique") return { pts: MAX, max: MAX, reason: "Boutique firm, lean structure, competitive rates" };
     if (firm.size === "mid-size") return { pts: MAX, max: MAX, reason: "Boutique firm, lean structure, competitive rates" };
-    return { pts: Math.round(MAX * 0.33), max: MAX }; // Large firm = high overhead
+    return { pts: MAX * 0.33 + bonus, max: MAX }; // Large firm = high overhead
   }
 
   if (pref.includes("Solo practitioner")) {
-    // No solo practitioners in the database; boutique is the closest available option
-    // but intentionally no positive reason so it doesn't surface as a green checkmark
-    if (firm.size === "boutique") return { pts: Math.round(MAX * 0.6), max: MAX };
-    if (firm.size === "mid-size") return { pts: Math.round(MAX * 0.33), max: MAX };
-    return { pts: Math.round(MAX * 0.1), max: MAX };
+    // No solo practitioners in the database. Boutique is the closest structural equivalent;
+    // no positive reason label so it doesn't show as a green checkmark on the card.
+    const bonus = MAX * 0.03 * leanness;
+    if (firm.size === "boutique") return { pts: MAX * 0.85 + bonus, max: MAX };
+    if (firm.size === "mid-size") return { pts: MAX * 0.55 + bonus, max: MAX };
+    return { pts: MAX * 0.40 + bonus, max: MAX }; // large firm: notable mismatch
   }
 
-  return { pts: Math.round(MAX * 0.75), max: MAX };
+  return { pts: MAX * 0.75, max: MAX };
 }
 
 function scoreLocation(
@@ -356,9 +453,9 @@ function scoreLocation(
   const MAX = 6;
   const pref = answers["location-preference"] as string | undefined;
 
-  // No preference, or NY preference, all firms qualify fully (all have NYC offices)
-  if (!pref || pref.includes("No preference") || pref.includes("New York")) {
-    return { pts: MAX, max: MAX, reason: pref?.includes("New York") ? "Licensed and operating in New York" : undefined };
+  // No preference: all firms qualify fully, no location-specific reason to show.
+  if (!pref || pref.includes("No preference")) {
+    return { pts: MAX, max: MAX };
   }
 
   // Immigration is federal, can serve any state
@@ -369,13 +466,13 @@ function scoreLocation(
   // Delaware: corporate/startup firms regularly handle DE matters
   if (pref.includes("Delaware")) {
     if (FEDERAL_PRACTICES.has(categorySlug)) {
-      return { pts: Math.round(MAX * 0.92), max: MAX, reason: "Regularly handles Delaware corporate filings" };
+      return { pts: MAX * 0.92, max: MAX, reason: "Regularly handles Delaware corporate filings" };
     }
-    return { pts: Math.round(MAX * 0.67), max: MAX };
+    return { pts: MAX * 0.67, max: MAX };
   }
 
   // Check if the firm's HQ state matches the user's preferred state
-  for (const [stateName] of Object.entries(STATE_ABBRS)) {
+  for (const [stateName] of STATE_ABBRS_BY_LENGTH) {
     if (pref.includes(stateName)) {
       const abbr = STATE_ABBRS[stateName];
       if (firm.location.includes(abbr) || firm.location.includes(stateName)) {
@@ -392,11 +489,11 @@ function scoreLocation(
 
   // Semi-state-specific (employment-law): partial credit
   if (SEMI_STATE_SPECIFIC_PRACTICES.has(categorySlug)) {
-    return { pts: Math.round(MAX * 0.50), max: MAX };
+    return { pts: MAX * 0.50, max: MAX };
   }
 
   // State-specific but firm HQ didn't match, should already be hard-filtered, but be safe
-  return { pts: Math.round(MAX * 0.17), max: MAX };
+  return { pts: MAX * 0.17, max: MAX };
 }
 
 function scoreTimeline(answers: IntakeAnswers, firm: Firm): { pts: number; max: number; reason?: string } {
@@ -407,12 +504,12 @@ function scoreTimeline(answers: IntakeAnswers, firm: Firm): { pts: number; max: 
 
   if (urgency === 3) {
     if (responseLevel >= 2) return { pts: MAX, max: MAX, reason: "Available on short notice" };
-    if (responseLevel === 1) return { pts: Math.round(MAX * 0.50), max: MAX };
-    return { pts: Math.round(MAX * 0.25), max: MAX };
+    if (responseLevel === 1) return { pts: MAX * 0.50, max: MAX };
+    return { pts: MAX * 0.25, max: MAX };
   }
   if (urgency === 2) {
     if (responseLevel >= 1) return { pts: MAX, max: MAX };
-    return { pts: Math.round(MAX * 0.75), max: MAX };
+    return { pts: MAX * 0.75, max: MAX };
   }
   // No urgency expressed, signal doesn't differentiate, exclude from denominator
   return { pts: 0, max: 0 };
@@ -427,9 +524,9 @@ function scoreBillingModel(answers: IntakeAnswers, firm: Firm): { pts: number; m
   if (pref === "Hourly"   && firm.billingModel === "hourly")                                      return { pts: MAX, max: MAX, reason: "Offers hourly billing" };
   if (pref === "Retainer" && (firm.billingModel === "retainer" || firm.billingModel === "hybrid")) return { pts: MAX, max: MAX, reason: "Offers monthly retainer arrangements" };
   if (pref === "Flat-fee" && firm.billingModel === "flat-fee")                                    return { pts: MAX, max: MAX, reason: "Offers flat-fee / fixed-cost arrangements" };
-  if (pref === "Hourly"   && firm.billingModel === "hybrid")                                      return { pts: Math.round(MAX * 0.67), max: MAX };
+  if (pref === "Hourly"   && firm.billingModel === "hybrid")                                      return { pts: MAX * 0.67, max: MAX };
 
-  return { pts: Math.round(MAX * 0.33), max: MAX };
+  return { pts: MAX * 0.33, max: MAX };
 }
 
 function scoreLanguage(answers: IntakeAnswers, firm: Firm): { pts: number; max: number; reason?: string } {
@@ -467,14 +564,53 @@ export function matchFirms(
     return !disqualified;
   });
 
-  // If hard filters removed everything, fall back to practice-area-only set
-  // so the user always sees some results (with low scores) rather than a blank page.
-  const pool = eligible.length > 0 ? eligible : byPracticeArea;
+  // Hard filters are intentional disqualifications. If nothing passes, return
+  // the single best-scoring firm from the practice-area pool as a partial match.
+  if (eligible.length === 0) {
+    const scored = byPracticeArea.map((firm) => {
+      const { reason } = isHardDisqualified(categorySlug, answers, firm);
+      const budgetResult   = scoreBudget(answers, firm);
+      const qualityResult  = scoreQuality(firm);
+      const specResult     = scoreSpecialization(firm);
+      const foundedResult  = scoreFounded(firm);
+      const industryResult = scoreIndustry(categorySlug, answers, firm);
+      const stageResult    = scoreStage(answers, firm);
+      const sizeResult     = scoreFirmSize(answers, firm);
+      const locationResult = scoreLocation(categorySlug, answers, firm);
+      const timelineResult = scoreTimeline(answers, firm);
+      const billingResult  = scoreBillingModel(answers, firm);
+      const languageResult = scoreLanguage(answers, firm);
+      const totalPts = budgetResult.pts + qualityResult.pts + specResult.pts + foundedResult.pts +
+        industryResult.pts + stageResult.pts + sizeResult.pts + locationResult.pts +
+        timelineResult.pts + billingResult.pts + languageResult.pts;
+      const maxPts = budgetResult.max + qualityResult.max + specResult.max + foundedResult.max +
+        industryResult.max + stageResult.max + sizeResult.max + locationResult.max +
+        timelineResult.max + billingResult.max + languageResult.max;
+      const rawScore = maxPts > 0 ? totalPts / maxPts : 0;
+      return { firm, rawScore, reason };
+    });
+    scored.sort((a, b) => b.rawScore - a.rawScore || b.firm.overallScore - a.firm.overallScore);
+    const top = scored[0];
+    const partialMatchReasons: string[] = top.reason ? [top.reason] : [];
+    return [{
+      firm: top.firm,
+      score: Math.round(top.rawScore * 100),
+      reasons: [],
+      firmHighlights: [],
+      matchedCriteria: [],
+      missedCriteria: [],
+      isBestMatch: false,
+      isPartialMatch: true,
+      partialMatchReasons,
+    }];
+  }
 
   // Step 3: Score each firm
-  const scored = pool.map((firm) => {
+  const scored = eligible.map((firm) => {
     const budgetResult    = scoreBudget(answers, firm);
     const qualityResult   = scoreQuality(firm);
+    const specResult      = scoreSpecialization(firm);
+    const foundedResult   = scoreFounded(firm);
     const industryResult  = scoreIndustry(categorySlug, answers, firm);
     const stageResult     = scoreStage(answers, firm);
     const sizeResult      = scoreFirmSize(answers, firm);
@@ -486,6 +622,8 @@ export function matchFirms(
     const totalPts =
       budgetResult.pts +
       qualityResult.pts +
+      specResult.pts +
+      foundedResult.pts +
       industryResult.pts +
       stageResult.pts +
       sizeResult.pts +
@@ -497,6 +635,8 @@ export function matchFirms(
     const maxPts =
       budgetResult.max +
       qualityResult.max +
+      specResult.max +
+      foundedResult.max +
       industryResult.max +
       stageResult.max +
       sizeResult.max +
@@ -508,7 +648,9 @@ export function matchFirms(
     const rawScore = maxPts > 0 ? totalPts / maxPts : 0;
     const finalScore = Math.round(rawScore * 100);
 
-    // Collect up to 3 reasons from criteria that scored well and have labels
+    // Collect up to 3 reasons from criteria that scored well and have labels. These
+    // are generic (budget fit, location, etc.) and safe to show even before a user
+    // has paid — they don't reveal which firm this is.
     const reasons: string[] = [
       budgetResult,
       qualityResult,
@@ -523,6 +665,23 @@ export function matchFirms(
       .filter((r) => r.reason && r.pts >= r.max * 0.8)
       .map((r) => r.reason!)
       .slice(0, 3);
+
+    // Separately, up to 2 firm-specific highlights from their curated strengths
+    // (rankings, named attorneys, specializations). These are what actually
+    // differentiate the top matches from each other, since `reasons` above is
+    // templated from the user's own answers and repeats across every card that
+    // shares them. Kept as a SEPARATE field (not merged into `reasons`) because
+    // this text can identify the firm — callers must exclude it from locked/
+    // pre-paywall results (see redactMatchResult in lib/actions/intake.ts).
+    // Prefers a strength that mentions the category itself, then fills the rest
+    // from the firm's other top-billed strengths.
+    const categoryWords = categorySlug.split("-").filter((w) => w.length >= 3 && w !== "law");
+    const relevantStrength = firm.strengths.find((s) =>
+      categoryWords.some((w) => s.toLowerCase().includes(w))
+    );
+    const firmHighlights = [relevantStrength, ...firm.strengths]
+      .filter((s, i, arr): s is string => !!s && arr.indexOf(s) === i)
+      .slice(0, 2);
 
     // Matched vs missed criteria summary
     const matchedCriteria: string[] = [];
@@ -565,7 +724,7 @@ export function matchFirms(
       else missedCriteria.push("language");
     }
 
-    return { firm, score: finalScore, rawScore, reasons, matchedCriteria, missedCriteria };
+    return { firm, score: finalScore, rawScore, reasons, firmHighlights, matchedCriteria, missedCriteria };
   });
 
   // Step 4: Sort by raw ratio (before rounding) so tied integer scores are ordered

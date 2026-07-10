@@ -110,6 +110,19 @@ function qualitySignals(firm: Firm, practiceAreaLabel: string): string[] {
 }
 
 function redactMatchResult(result: MatchResult, index: number, practiceAreaLabel: string): LockedMatchResult {
+  // result.reasons is templated from the user's own answers (budget fit, location,
+  // etc.) and is often sparse or identical across top matches by design — see the
+  // "no reason text on purpose" notes in matching.ts. firmHighlights differentiates
+  // cards but can identify the firm (named clients, rankings) so it's excluded here.
+  // strengths[0] is the one exception: every firm's data follows a fixed "Deep
+  // expertise in X and Y" template describing specialization only, never a firm
+  // name or named client, so it's safe to surface pre-paywall and gives each locked
+  // card a genuinely firm-specific first reason instead of repeating generic text.
+  const specialization = result.firm.strengths[0];
+  const reasons = specialization
+    ? [specialization, ...result.reasons].slice(0, 3)
+    : result.reasons.slice(0, 3);
+
   return {
     isLocked: true,
     score: result.score,
@@ -117,7 +130,7 @@ function redactMatchResult(result: MatchResult, index: number, practiceAreaLabel
     firmSize: result.firm.size,
     practiceAreaMatch: practiceAreaLabel,
     jurisdiction: inferJurisdiction(result.firm),
-    reasons: result.reasons.slice(0, 3),
+    reasons,
     credibilitySignals: qualitySignals(result.firm, practiceAreaLabel),
     matchedCriteria: result.matchedCriteria,
     missedCriteria: result.missedCriteria,

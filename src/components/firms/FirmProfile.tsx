@@ -98,7 +98,7 @@ function buildFitCards(firm: Firm, matchContext?: FirmProfileMatchContext | null
   const answers = matchContext?.prepared.answeredItems ?? [];
   const reasons = visibleText(matchContext?.reasons?.length ? matchContext.reasons : buildFallbackReasons(firm));
   const fallback = [
-    "This aligns with the matter category and jurisdiction stored in your unlocked match.",
+    "This aligns with the matter category and jurisdiction stored in your match.",
     `This firm concentrates on ${formatList(firm.practiceAreas, 2) || "the relevant practice areas"}.`,
     `You are viewing a ${sizeLabels[firm.size] ?? firm.size} firm profile from your matched shortlist.`,
     firm.industries.length ? `The firm's researched industry focus includes ${formatList(firm.industries, 2)}.` : "This firm has profile signals that align with your matter.",
@@ -148,8 +148,8 @@ export default function FirmProfile({ firm, initialSaved, matchContext }: FirmPr
   const fitCards = useMemo(() => buildFitCards(firm, matchContext), [firm, matchContext]);
   const strengths = visibleText(firm.strengths);
   const prepared = matchContext?.prepared;
-  const summaryText = prepared?.summary ?? "Open this profile from an unlocked match to generate a prepared matter summary from your intake answers.";
-  const outreachText = outreachDraft || "Open this profile from an unlocked match to generate a ready-to-send outreach message.";
+  const summaryText = prepared?.summary ?? "Open this profile from one of your matches to generate a prepared matter summary from your intake answers.";
+  const outreachText = outreachDraft || "Open this profile from one of your matches to generate a ready-to-send outreach message.";
 
   useEffect(() => {
     ph?.capture("firm_viewed", {

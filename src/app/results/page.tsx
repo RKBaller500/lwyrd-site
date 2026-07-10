@@ -10,7 +10,7 @@ import AuthGuard from "@/components/auth/AuthGuard";
 import MatchCard from "@/components/results/MatchCard";
 import { PublicMatchResult } from "@/types";
 import Link from "next/link";
-import { ArrowRight, Info, LockKeyhole } from "lucide-react";
+import { Info } from "lucide-react";
 
 const ease = [0.25, 0.46, 0.45, 0.94] as const;
 
@@ -61,9 +61,6 @@ function ResultsContent() {
   const [categoryName, setCategoryName] = useState<string>("");
   const [firmSizePref, setFirmSizePref] = useState<string | null>(null);
   const [submissionId, setSubmissionId] = useState<string>("");
-  const [creditsAvailable, setCreditsAvailable] = useState<number>(0);
-  const [redeeming, setRedeeming] = useState<boolean>(false);
-  const [redeemError, setRedeemError] = useState<string>("");
 
   useEffect(() => {
     const raw = sessionStorage.getItem("lwyrd_results");
@@ -105,53 +102,9 @@ function ResultsContent() {
     }
   }, [router]);
 
-  // Load available unlock credits so we can offer a one-click redeem on the blurred page.
-  useEffect(() => {
-    if (!submissionId) return;
-    let cancelled = false;
-    async function loadCredits() {
-      try {
-        const res = await fetch(`/api/paywall/status?submissionId=${encodeURIComponent(submissionId)}`, {
-          credentials: "same-origin",
-        });
-        const body = await res.json().catch(() => ({}));
-        if (cancelled || !res.ok) return;
-        setCreditsAvailable(typeof body.creditsAvailable === "number" ? body.creditsAvailable : 0);
-      } catch {
-        if (!cancelled) setCreditsAvailable(0);
-      }
-    }
-    loadCredits();
-    return () => {
-      cancelled = true;
-    };
-  }, [submissionId]);
-
-  const handleUseCredit = async () => {
-    if (!submissionId) return;
-    setRedeeming(true);
-    setRedeemError("");
-    try {
-      const res = await fetch("/api/paywall/preview-unlock", {
-        method: "POST",
-        credentials: "same-origin",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ submissionId, mode: "credit" }),
-      });
-      const body = await res.json().catch(() => ({}));
-      if (!res.ok) throw new Error(body.error ?? "Unable to unlock with a credit.");
-      router.push(typeof body.destination === "string" ? body.destination : `/results/${submissionId}`);
-      router.refresh();
-    } catch (error) {
-      setRedeemError(error instanceof Error ? error.message : "Unable to unlock with a credit.");
-      setRedeeming(false);
-    }
-  };
-
   if (!results) return null;
 
   const sizeGapNotice = getSizeGapNotice(results, firmSizePref, categoryName);
-  const hasLockedResults = results.some(isLockedResult);
 
   // When the size gap banner is showing, suppress the per-card "firm-size" miss
   // so the banner does the communicating rather than every card showing an X.
@@ -183,58 +136,10 @@ function ResultsContent() {
           </h1>
           <p>
             {results.length > 0
-              ? `Ranked by fit${categoryName ? ` for ${categoryName}` : ""}. Identities stay hidden until you unlock this intake.`
+              ? `Ranked by fit${categoryName ? ` for ${categoryName}` : ""}.`
               : "No firms matched your criteria, try adjusting your answers."}
           </p>
         </motion.div>
-
-        {hasLockedResults && results.length > 0 && (
-          <motion.div
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, ease, delay: 0.03 }}
-            className="results-unlock"
-          >
-            <div className="results-unlock-copy">
-              <span className="icon-box">
-                <LockKeyhole size={16} strokeWidth={1.7} />
-              </span>
-              <p>
-                <strong>Your matches are ready.</strong> Unlock this intake to see who each firm is,
-                open full profiles, and get a prepared summary of your matter plus a ready-to-send
-                message for reaching out.
-                {creditsAvailable > 0 && (
-                  <>
-                    {" "}
-                    <span className="results-unlock-credit-note">
-                      You have {creditsAvailable} unlock {creditsAvailable === 1 ? "credit" : "credits"} —
-                      use one to unlock this intake for free.
-                    </span>
-                  </>
-                )}
-              </p>
-            </div>
-            <div className="results-unlock-actions">
-              {creditsAvailable > 0 && (
-                <button
-                  type="button"
-                  onClick={handleUseCredit}
-                  disabled={redeeming}
-                  className="btn btn-primary results-unlock-btn"
-                >
-                  {redeeming ? "Unlocking..." : "Use 1 unlock credit"} <ArrowRight size={14} />
-                </button>
-              )}
-              <Link
-                href="/access?next=/results"
-                className={`btn ${creditsAvailable > 0 ? "btn-ghost" : "btn-primary"} results-unlock-btn`}
-              >
-                {creditsAvailable > 0 ? "Buy more / checkout" : "Unlock with checkout"} <ArrowRight size={14} />
-              </Link>
-            </div>
-            {redeemError && <p className="paywall-modal-error">{redeemError}</p>}
-          </motion.div>
-        )}
 
         {/* Size gap notice */}
         {sizeGapNotice && (

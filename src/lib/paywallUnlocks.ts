@@ -26,12 +26,6 @@ function writeClient(fallback: Client): Client {
   throw new Error("Server payment writes are not configured. Add SUPABASE_SERVICE_ROLE_KEY to enable unlock previews.");
 }
 
-async function hasCookiePreviewUnlock(submissionId?: string | null): Promise<boolean> {
-  if (!submissionId) return false;
-  const ids = await getPreviewUnlockCookieIds();
-  return ids.includes(submissionId);
-}
-
 export async function getPreviewUnlockCookieIds(): Promise<string[]> {
   const cookieStore = await cookies();
   const raw = cookieStore.get("lwyrd_preview_unlock")?.value ?? "";
@@ -70,21 +64,14 @@ export async function userOwnsSubmission(
 }
 
 export async function hasDurableIntakeUnlock(
-  supabase: Client,
-  userId: string,
-  submissionId?: string | null
+  _supabase: Client,
+  _userId: string,
+  _submissionId?: string | null
 ): Promise<boolean> {
-  if (!submissionId) return false;
-
-  const { data, error } = await supabase
-    .from("intake_unlocks")
-    .select("id")
-    .eq("user_id", userId)
-    .eq("intake_submission_id", submissionId)
-    .maybeSingle();
-
-  if (!error && data) return true;
-  return hasCookiePreviewUnlock(submissionId);
+  // Access is free for all users while checkout is disabled.
+  // Every intake is treated as unlocked; the paywall backend stays dormant
+  // for future Stripe re-integration.
+  return true;
 }
 
 export async function reconcilePreviewCookieUnlocks(

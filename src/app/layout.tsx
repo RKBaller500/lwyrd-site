@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import "./globals.css";
 import { AuthProvider } from "@/context/AuthContext";
 import AuthModal from "@/components/auth/AuthModal";
@@ -9,6 +9,12 @@ export const metadata: Metadata = {
   title: "LWYRD | Find the Right Legal Partner",
   description:
     "LWYRD provides a curated network of vetted law firms and guided tools that help you understand your legal needs before hiring.",
+};
+
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  viewportFit: "cover",
 };
 
 export default function RootLayout({

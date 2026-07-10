@@ -118,6 +118,17 @@
 
   
 /* ---- nav (mobile) ---- */
+  /* Collapse the full desktop nav to the hamburger drawer below 900px so the
+     multi-item menu never wraps/crams on tablets. */
+  @media(max-width:900px){
+    .nav-links,.nav-cta .btn-ghost{display:none}
+    .nav-toggle{display:flex}
+    .nav-menu-open .nav-links{display:flex;position:absolute;top:68px;left:0;right:0;flex-direction:column;align-items:stretch;height:auto;background:#fff;padding:20px var(--pad);gap:.9rem;border-bottom:1px solid var(--line);box-shadow:var(--shadow-md)}
+    .nav-item{height:auto;display:block}
+    .nav-trigger{width:100%;justify-content:flex-start;border-radius:10px}
+    .nav-menu{position:static;transform:none;min-width:0;margin-top:.55rem;opacity:1;visibility:visible;pointer-events:auto;box-shadow:none;border-radius:10px;background:var(--paper-alt)}
+    .nav-item:hover .nav-menu,.nav-item:focus-within .nav-menu{transform:none}
+  }
   @media(max-width:760px){
     .nav-links,.nav-cta .btn-ghost{display:none}
     .nav-toggle{display:flex}
@@ -1286,4 +1297,13 @@
   .match-actions{align-items:stretch;flex-direction:column}
   .match-actions .btn{width:100%;justify-content:center}
   .paywall-modal-actions .btn{flex-basis:100%}
+  .field-grid{grid-template-columns:1fr}
+  .app-stats{grid-template-columns:1fr 1fr;gap:10px}
+  .app-stat{padding:14px 16px}
+  .results-free-note{gap:10px}
+  .results-free-countdown{margin-left:0;width:100%;justify-content:space-between}
+  .results-free-unit{flex:1;min-width:0}
+}
+@media(max-width:400px){
+  .app-stats{grid-template-columns:1fr}
 }

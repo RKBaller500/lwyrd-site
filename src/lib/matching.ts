@@ -262,12 +262,9 @@ function scoreBudget(answers: IntakeAnswers, firm: Firm): { pts: number; max: nu
   return { pts: MAX * (0.20 + ((ratio - 0.28) / (1 - 0.28)) * 0.75), max: MAX };
 }
 
-function scoreQuality(firm: Firm): { pts: number; max: number; rawRatio: number; reason?: string } {
-  const MAX = 28; // increased from 10 (then 20) — the strongest signal with genuine per-firm
-  // variance (overallScore has 36 distinct values 64-98 in the real data, vs. budget/stage
-  // which are heavily duplicated across firms)
-  let qualityRatio: number;
-
+// Pulled out of scoreQuality so matchFirms can compute every eligible firm's ratio
+// up front (to find the pool's min/max) before scoring any single firm.
+function computeQualityRatio(firm: Firm): number {
   if (firm.assessment.length > 0) {
     const passed = firm.assessment.filter((a) => a.passed).length;
     const assessRatio = passed / firm.assessment.length;
@@ -284,15 +281,35 @@ function scoreQuality(firm: Firm): { pts: number; max: number; rawRatio: number;
     // pass 100% of assessment items, so pass rate rarely differentiates in practice;
     // weighting overallScore higher keeps quality scores spread out using the signal
     // that actually varies, while assessment failures can still pull a score down.
-    qualityRatio = assessRatio * 0.3 + (effectiveOverallScore / 100) * 0.7;
-  } else {
-    qualityRatio = firm.overallScore / 100;
+    return assessRatio * 0.3 + (effectiveOverallScore / 100) * 0.7;
   }
+  return firm.overallScore / 100;
+}
 
-  // Square the ratio to amplify separation between top-rated and average firms.
-  // Not rounded here — only the final composite score is rounded, so this signal's
-  // full precision survives into the total instead of being quantized to 1 of 11 values.
-  return { pts: MAX * Math.pow(qualityRatio, 2), max: MAX, rawRatio: qualityRatio };
+function scoreQuality(
+  firm: Firm,
+  pool: { min: number; max: number }
+): { pts: number; max: number; rawRatio: number; reason?: string } {
+  const MAX = 28; // increased from 10 (then 20) — the strongest signal with genuine per-firm
+  // variance (overallScore has 36 distinct values 64-98 in the real data, vs. budget/stage
+  // which are heavily duplicated across firms)
+  const qualityRatio = computeQualityRatio(firm);
+
+  // Scored relative to the OTHER eligible firms in this specific search, not on an absolute
+  // 0-100 scale. Real firm quality clusters tightly (mostly 80-95), so an absolute formula
+  // barely separated firms that were actually meaningfully different within a given result
+  // set — the best and 5th-best firm for the same search could land within a few points of
+  // each other. Stretching the pool's actual min-max range across the full point allocation
+  // means the best-in-pool firm always gets full marks and the weakest-in-pool gets ~0,
+  // regardless of how tightly or widely the absolute scores happen to cluster.
+  const spread = pool.max - pool.min;
+  const normalized = spread > 0 ? (qualityRatio - pool.min) / spread : 1;
+
+  // Still squared, but now on the normalized (already pool-relative) ratio — this widens the
+  // gap further between the top firms and the mid-pack, on top of the stretch above.
+  // Not rounded here — only the final composite score is rounded, so this signal's full
+  // precision survives into the total instead of being quantized to 1 of 11 values.
+  return { pts: MAX * Math.pow(normalized, 2), max: MAX, rawRatio: qualityRatio };
 }
 
 // Rewards firms with a narrower practice-area footprint as more specialized. Always
@@ -472,7 +489,7 @@ function scoreLocation(
   categorySlug: string,
   answers: IntakeAnswers,
   firm: Firm
-): { pts: number; max: number; reason?: string } {
+): { pts: number; max: number; reason?: string; isOutOfState?: boolean } {
   // Raised from 6 — at 6 points, even a 0% out-of-state score barely moved a firm's
   // rank (out of ~150+ total points across all signals). An explicit state
   // preference should carry real weight, not a token nudge.
@@ -513,17 +530,29 @@ function scoreLocation(
     return { pts: MAX, max: MAX };
   }
 
-  // Semi-state-specific (employment-law, contract-law): partial credit only.
-  // Lowered from 0.50 — an out-of-state firm for these practices is a real
-  // mismatch, not a near-equivalent, so it shouldn't score close to a firm
-  // actually headquartered where the user needs representation.
+  // Semi-state-specific (employment-law, contract-law, etc.): minimal credit only.
+  // Lowered from 0.50, then 0.15 — an out-of-state firm for these practices is a
+  // real mismatch, not a near-equivalent. Not a hard exclusion (out-of-state counsel
+  // genuinely can still do this work), but scored as close to a mismatch as
+  // possible while leaving a token amount so it never fully ties with a true
+  // disqualification tier.
   if (SEMI_STATE_SPECIFIC_PRACTICES.has(categorySlug)) {
-    return { pts: MAX * 0.15, max: MAX };
+    return { pts: MAX * 0.05, max: MAX, isOutOfState: true };
   }
 
   // State-specific but firm HQ didn't match, should already be hard-filtered, but be safe
-  return { pts: MAX * 0.17, max: MAX };
+  return { pts: MAX * 0.17, max: MAX, isOutOfState: true };
 }
+
+// Out-of-state firms in semi-state-specific categories no longer just take a hit on
+// the location line item (which gets diluted to ~11% of the total score once
+// blended with budget/quality/industry/etc.) — this multiplies the firm's WHOLE
+// score down, so being out-of-state drags the overall match percentage, not just
+// one sub-score among many. Tuned so it's not an automatic wipeout: a firm that
+// was already a strong match on everything else (budget/quality/industry) can
+// still clear the 50 floor and show up in the low 50s, while an average or weak
+// out-of-state match gets pushed under it and excluded.
+const OUT_OF_STATE_SCORE_MULTIPLIER = 0.75;
 
 function scoreTimeline(answers: IntakeAnswers, firm: Firm): { pts: number; max: number; reason?: string } {
   const MAX = 4;
@@ -596,10 +625,12 @@ export function matchFirms(
   // Hard filters are intentional disqualifications. If nothing passes, return
   // the single best-scoring firm from the practice-area pool as a partial match.
   if (eligible.length === 0) {
+    const fallbackQualityRatios = byPracticeArea.map(computeQualityRatio);
+    const fallbackQualityPool = { min: Math.min(...fallbackQualityRatios), max: Math.max(...fallbackQualityRatios) };
     const scored = byPracticeArea.map((firm) => {
       const { reason } = isHardDisqualified(categorySlug, answers, firm);
       const budgetResult   = scoreBudget(answers, firm);
-      const qualityResult  = scoreQuality(firm);
+      const qualityResult  = scoreQuality(firm, fallbackQualityPool);
       const specResult     = scoreSpecialization(firm);
       const foundedResult  = scoreFounded(firm);
       const industryResult = scoreIndustry(categorySlug, answers, firm);
@@ -615,11 +646,17 @@ export function matchFirms(
       const maxPts = budgetResult.max + qualityResult.max + specResult.max + foundedResult.max +
         industryResult.max + stageResult.max + sizeResult.max + locationResult.max +
         timelineResult.max + billingResult.max + languageResult.max;
-      const rawScore = maxPts > 0 ? totalPts / maxPts : 0;
+      const rawScoreBeforePenalty = maxPts > 0 ? totalPts / maxPts : 0;
+      const rawScore = locationResult.isOutOfState
+        ? rawScoreBeforePenalty * OUT_OF_STATE_SCORE_MULTIPLIER
+        : rawScoreBeforePenalty;
       return { firm, rawScore, reason };
     });
     scored.sort((a, b) => b.rawScore - a.rawScore || b.firm.overallScore - a.firm.overallScore);
     const top = scored[0];
+    // Never surface a match under 50%, even as a best-effort fallback — below that
+    // it's not a useful suggestion, it's noise.
+    if (Math.round(top.rawScore * 100) < 50) return [];
     const partialMatchReasons: string[] = top.reason ? [top.reason] : [];
     return [{
       firm: top.firm,
@@ -635,9 +672,11 @@ export function matchFirms(
   }
 
   // Step 3: Score each firm
+  const qualityRatios = eligible.map(computeQualityRatio);
+  const qualityPool = { min: Math.min(...qualityRatios), max: Math.max(...qualityRatios) };
   const scored = eligible.map((firm) => {
     const budgetResult    = scoreBudget(answers, firm);
-    const qualityResult   = scoreQuality(firm);
+    const qualityResult   = scoreQuality(firm, qualityPool);
     const specResult      = scoreSpecialization(firm);
     const foundedResult   = scoreFounded(firm);
     const industryResult  = scoreIndustry(categorySlug, answers, firm);
@@ -674,7 +713,14 @@ export function matchFirms(
       billingResult.max +
       languageResult.max;
 
-    const rawScore = maxPts > 0 ? totalPts / maxPts : 0;
+    const rawScoreBeforePenalty = maxPts > 0 ? totalPts / maxPts : 0;
+    // Out-of-state firms in semi-state-specific categories take a cut on their
+    // WHOLE score here, not just the location line item above — otherwise the
+    // location penalty gets diluted to a fraction of the total and barely moves
+    // the needle once budget/quality/industry/etc. are blended in.
+    const rawScore = locationResult.isOutOfState
+      ? rawScoreBeforePenalty * OUT_OF_STATE_SCORE_MULTIPLIER
+      : rawScoreBeforePenalty;
     const finalScore = Math.round(rawScore * 100);
 
     // Collect up to 3 reasons from criteria that scored well and have labels. These
@@ -760,11 +806,16 @@ export function matchFirms(
   // by actual quality rather than arbitrary insertion order.
   scored.sort((a, b) => b.rawScore - a.rawScore || b.firm.overallScore - a.firm.overallScore);
 
-  // Step 5: Cap at 8 results, mark best match (strip rawScore, not part of MatchResult)
-  return scored.slice(0, 8).map(({ rawScore: _raw, ...r }, i) => ({
-    ...r,
-    isBestMatch: i === 0 && r.score >= 60,
-  }));
+  // Step 5: Never surface a match under 50% — below that it's not a useful
+  // suggestion, it's noise. Then cap at 8 results and mark best match (strip
+  // rawScore, not part of MatchResult).
+  return scored
+    .filter((r) => r.score >= 50)
+    .slice(0, 8)
+    .map(({ rawScore: _raw, ...r }, i) => ({
+      ...r,
+      isBestMatch: i === 0 && r.score >= 60,
+    }));
 }
 
 // ── V2 intake answer mapping ──────────────────────────────────────────────────
@@ -840,17 +891,24 @@ function mapV2AnswersForMatching(
   const firmTypeAnswer = (v2Answers.sf1 ?? v2Answers.if1 ?? v2Answers.bf1) as string | undefined;
   if (firmTypeAnswer) result["seniority-preference"] = firmTypeMap[firmTypeAnswer] ?? "";
 
-  // State requirement
-  const stateNameMap: Record<string, string> = {
-    none: "No preference, I can work with any qualified firm remotely",
-    NY: "New York", CA: "California", TX: "Texas", FL: "Florida",
-    IL: "Illinois", DE: "Delaware", NJ: "New Jersey", CT: "Connecticut",
-    MA: "Massachusetts", CO: "Colorado", AZ: "Arizona",
-    other: "No preference, I can work with any qualified firm remotely",
-    multi_state: "No preference, I can work with any qualified firm remotely",
-  };
+  // State requirement. Non-state sentinel values map to the "no preference" phrase
+  // isHardDisqualified/scoreLocation check for; every real 2-letter state/DC code
+  // resolves through the same ABBR_TO_STATE table used elsewhere in this file, so
+  // every state the intake wizard can produce is recognized here too. (This used to
+  // be a hardcoded 11-state map — any other state, e.g. Georgia or Pennsylvania,
+  // fell through to the raw 2-letter code, which never matches the full state names
+  // isHardDisqualified/scoreLocation search for. That silently hard-disqualified
+  // every firm for state-specific practices whenever a user picked one of the other
+  // 40 states, collapsing results down to the single partial-match fallback.)
+  const NO_PREFERENCE_TOKENS = new Set(["none", "other", "multi_state"]);
   const stateAnswer = (v2Answers.sf7 ?? v2Answers.if5 ?? v2Answers.bf7) as string | undefined;
-  if (stateAnswer) result["location-preference"] = stateNameMap[stateAnswer] ?? stateAnswer;
+  if (stateAnswer) {
+    if (NO_PREFERENCE_TOKENS.has(stateAnswer)) {
+      result["location-preference"] = "No preference, I can work with any qualified firm remotely";
+    } else {
+      result["location-preference"] = ABBR_TO_STATE[stateAnswer] ?? stateAnswer;
+    }
+  }
 
   // Language preference
   const langLabelMap: Record<string, string> = {

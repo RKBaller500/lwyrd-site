@@ -74,6 +74,20 @@ export const US_STATES: V2Option[] = [
   { value: 'outside_us', label: 'Outside the US' },
 ];
 
+// Real 2-letter US state/DC codes, excluding sentinel values ('none', 'multi_state',
+// 'outside_us') that state-dropdown questions mix in but aren't tied to firm HQ location.
+const REAL_STATE_CODES = new Set(US_STATES.map((s) => s.value).filter((v) => v !== "outside_us"));
+
+// Filters a state-dropdown's options down to only the states the firm database can
+// actually serve (per getAvailableFirmStates), leaving sentinel options untouched.
+// Pass null/undefined to skip filtering — e.g. while the live list is still loading,
+// or if it couldn't be fetched — so the dropdown falls back to showing every state.
+export function filterStateOptions(options: V2Option[], availableStates: string[] | null | undefined): V2Option[] {
+  if (!availableStates) return options;
+  const available = new Set(availableStates);
+  return options.filter((opt) => !REAL_STATE_CODES.has(opt.value) || available.has(opt.value));
+}
+
 // ── Q1 & Q2 ──────────────────────────────────────────────────────────────────
 
 export const Q1: V2Question = {
@@ -1334,14 +1348,11 @@ export const BF6: V2Question = {
 
 export const BF7: V2Question = {
   id: 'bf7',
-  text: 'In which state(s) does your business primarily operate?',
+  text: 'In which state does your business primarily operate?',
   subtext: 'Many business law matters require locally licensed counsel.',
   type: 'state-dropdown',
   required: true,
-  options: [
-    { value: 'multi_state', label: 'Multiple states' },
-    ...US_STATES,
-  ],
+  options: [...US_STATES],
 };
 
 export const BF8: V2Question = {

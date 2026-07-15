@@ -524,7 +524,7 @@ export const SF3: V2Question = {
   options: [],
   min: 0,
   max: 100000,
-  step: 2500,
+  step: 50,
 };
 
 export const SF4: V2Question = {
@@ -942,7 +942,7 @@ export const IF3: V2Question = {
   options: [],
   min: 0,
   max: 75000,
-  step: 1500,
+  step: 50,
 };
 
 export const IF4: V2Question = {
@@ -1306,7 +1306,7 @@ export const BF3: V2Question = {
   options: [],
   min: 0,
   max: 100000,
-  step: 2500,
+  step: 50,
 };
 
 export const BF4: V2Question = {

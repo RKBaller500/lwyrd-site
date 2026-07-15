@@ -50,14 +50,6 @@ function StatCard({ value, label }: { value: number | string; label: string }) {
   );
 }
 
-function UnlockBadge({ unlocked }: { unlocked: boolean }) {
-  return (
-    <span className={`chip ${unlocked ? "is-unlocked" : ""}`} style={unlocked ? { color: "#047857", background: "#ecfdf5", borderColor: "#a7f3d0" } : undefined}>
-      {unlocked ? "Unlocked" : "Locked"}
-    </span>
-  );
-}
-
 function EmptyState({ icon: Icon, title, body, cta }: {
   icon: React.ElementType;
   title: string;
@@ -83,14 +75,12 @@ function fmtDate(iso: string) {
 function OverviewTab({
   intakes,
   savedFirms,
-  unlockCreditsAvailable,
   loading,
   error,
   setActiveTab,
 }: {
   intakes: DashboardIntake[];
   savedFirms: DashboardSavedFirm[];
-  unlockCreditsAvailable: number;
   loading: boolean;
   error: string | null;
   setActiveTab: (t: TabId) => void;
@@ -128,7 +118,7 @@ function OverviewTab({
       <div className="app-stats">
         <StatCard value={intakes.length} label="Intakes" />
         <StatCard value={savedFirms.length} label="Saved Firms" />
-        <StatCard value={unlockCreditsAvailable} label="Unlock Credits" />
+        <StatCard value={intakes.reduce((sum, i) => sum + i.matchCount, 0)} label="Matches" />
       </div>
 
       {latestIntake && (
@@ -138,7 +128,6 @@ function OverviewTab({
             <p style={{ color: "rgba(255,255,255,.75)", fontSize: ".85rem", marginTop: 2 }}>
               {latestIntake.matchCount} matched {latestIntake.matchCount === 1 ? "firm" : "firms"} ready to review
               {latestIntake.topScore !== null ? ` · Top score ${latestIntake.topScore}%` : ""}
-              {latestIntake.unlocked ? " · Unlocked" : " · Locked until unlocked"}
             </p>
           </div>
           <Link href={`/results/${latestIntake.id}`} className="btn" style={{ background: "#fff", color: "var(--navy)" }}>
@@ -174,7 +163,6 @@ function OverviewTab({
                   </div>
                 </div>
                 <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-                  <UnlockBadge unlocked={intake.unlocked} />
                   <Link href={`/results/${intake.id}`} className="app-link">
                     Results <ChevronRight size={12} />
                   </Link>
@@ -242,12 +230,10 @@ function OverviewTab({
 
 function MatchesTab({
   intakes,
-  unlockCreditsAvailable,
   loading,
   error,
 }: {
   intakes: DashboardIntake[];
-  unlockCreditsAvailable: number;
   loading: boolean;
   error: string | null;
 }) {
@@ -272,16 +258,6 @@ function MatchesTab({
 
   return (
     <div style={{ display: "grid", gap: 24 }}>
-      {unlockCreditsAvailable > 0 && (
-        <div className="ds-card" style={{ padding: 16, display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12, flexWrap: "wrap" }}>
-          <div>
-            <p style={{ fontWeight: 700 }}>You have {unlockCreditsAvailable} unused {unlockCreditsAvailable === 1 ? "unlock credit" : "unlock credits"}</p>
-            <p style={{ color: "var(--muted)", fontSize: ".82rem", marginTop: 2 }}>Open any locked intake and apply a credit from the unlock page.</p>
-          </div>
-          <Link href="/intake/start" className="app-link">Start another intake <ArrowRight size={13} /></Link>
-        </div>
-      )}
-
       {latestIntake && (
         <div className="navy-panel" style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 16, flexWrap: "wrap" }}>
           <div>
@@ -290,7 +266,6 @@ function MatchesTab({
             <p style={{ color: "rgba(255,255,255,.75)", fontSize: ".82rem", marginTop: 4 }}>
               {latestIntake.matchCount} matched {latestIntake.matchCount === 1 ? "firm" : "firms"}
               {latestIntake.topScore !== null ? ` · Top score ${latestIntake.topScore}%` : ""}
-              {latestIntake.unlocked ? " · Unlocked" : " · Locked"}
             </p>
           </div>
           <Link href={`/results/${latestIntake.id}`} className="btn" style={{ background: "#fff", color: "var(--navy)" }}>
@@ -335,7 +310,6 @@ function MatchesTab({
                       {intake.topScore !== null ? ` · ${intake.topScore}% top score` : ""}
                     </span>
                   )}
-                  <UnlockBadge unlocked={intake.unlocked} />
                   <Link href={`/results/${intake.id}`} className="app-link">
                     Results <ChevronRight size={12} />
                   </Link>
@@ -502,7 +476,6 @@ function DashboardContent() {
   const [activeTab, setActiveTab] = useState<TabId>("overview");
   const [intakes, setIntakes] = useState<DashboardIntake[]>([]);
   const [savedFirms, setSavedFirms] = useState<DashboardSavedFirm[]>([]);
-  const [unlockCreditsAvailable, setUnlockCreditsAvailable] = useState(0);
   const [loading, setLoading] = useState(true);
   const [loadError, setLoadError] = useState<string | null>(null);
 
@@ -521,11 +494,9 @@ function DashboardContent() {
         setLoadError(result.error ?? "Something went wrong while loading your dashboard.");
         setIntakes([]);
         setSavedFirms([]);
-        setUnlockCreditsAvailable(0);
       } else {
         setIntakes(result.data.intakes);
         setSavedFirms(result.data.savedFirms);
-        setUnlockCreditsAvailable(result.data.unlockCreditsAvailable);
       }
       setLoading(false);
     }
@@ -594,13 +565,12 @@ function DashboardContent() {
                   <OverviewTab
                     intakes={intakes}
                     savedFirms={savedFirms}
-                    unlockCreditsAvailable={unlockCreditsAvailable}
                     loading={loading}
                     error={loadError}
                     setActiveTab={setActiveTab}
                   />
                 )}
-                {activeTab === "matches" && <MatchesTab intakes={intakes} unlockCreditsAvailable={unlockCreditsAvailable} loading={loading} error={loadError} />}
+                {activeTab === "matches" && <MatchesTab intakes={intakes} loading={loading} error={loadError} />}
                 {activeTab === "saved" && <SavedFirmsTab savedFirms={savedFirms} setSavedFirms={setSavedFirms} loading={loading} error={loadError} />}
                 {activeTab === "engagements" && <EngagementsTab />}
               </motion.div>

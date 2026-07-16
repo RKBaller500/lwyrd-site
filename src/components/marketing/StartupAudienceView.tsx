@@ -316,7 +316,7 @@ export default function StartupAudienceView() {
         @media(max-width:640px){
           .startup-beat{padding:64px 0}
           .startup-problem{padding-top:54px}
-          .startup-head h1,.startup-head h2{font-size:clamp(2rem,12vw,2.8rem)}
+          .startup-head h1,.startup-head h2{font-size:clamp(1.9rem,8.5vw,2.6rem);line-height:1.1}
           .startup-result-head{flex-direction:column}
           .startup-score{width:100%;text-align:left}
           .startup-score strong,.startup-score span{display:inline-block}

@@ -377,7 +377,7 @@ export default function ForLawFirmsPage() {
         @media(max-width:640px){
           .firms-beat{padding:64px 0}
           .firms-hero{padding-top:54px}
-          .firms-hero-inner h1{font-size:clamp(2rem,11vw,2.8rem)}
+          .firms-hero-inner h1{font-size:clamp(1.9rem,8.5vw,2.6rem);line-height:1.1}
           .form-actions .btn{width:100%}
         }
       `}</style>

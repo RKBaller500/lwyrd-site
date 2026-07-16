@@ -287,7 +287,7 @@ export default function ForOrganizationsPage() {
         @media(max-width:640px){
           .orgs-beat{padding:64px 0}
           .orgs-hero{padding-top:54px}
-          .orgs-hero-inner h1{font-size:clamp(2rem,11vw,2.8rem)}
+          .orgs-hero-inner h1{font-size:clamp(1.9rem,8.5vw,2.6rem);line-height:1.1}
           .form-actions .btn{width:100%}
         }
       `}</style>

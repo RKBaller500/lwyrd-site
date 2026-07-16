@@ -115,3 +115,32 @@
     box-shadow: 0 10px 30px rgba(11, 11, 12, 0.14);
   }
 }
+
+/* Auth actions rendered inside the mobile drawer (.nav-links). Hidden on
+   desktop, where the .nav-cta buttons/avatar are used instead. */
+.nav-mobile-cta {
+  display: none;
+}
+@media (max-width: 900px) {
+  .nav-menu-open .nav-mobile-cta {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-top: 0.35rem;
+    padding-top: 1rem;
+    border-top: 1px solid #e7e7e3;
+  }
+  .nav-mobile-cta .btn {
+    width: 100%;
+    justify-content: center;
+    font-size: 0.95rem;
+    padding: 0.85em 1.2em;
+  }
+  .nav-mobile-cta .nav-mobile-signout {
+    color: #b42318;
+  }
+  .nav-mobile-cta .nav-mobile-signout:hover {
+    border-color: #b42318;
+    color: #b42318;
+  }
+}

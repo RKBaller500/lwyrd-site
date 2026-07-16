@@ -175,6 +175,48 @@ export default function MarketingNav({
               <Link href="/contact" onClick={closeMobile} {...itemAria("contact")}>Contact</Link>
             </div>
           </div>
+
+          {/* Auth actions inside the mobile drawer. The desktop equivalents live
+              in .nav-cta (hidden in the drawer); this block is hidden on desktop. */}
+          <div className="nav-mobile-cta">
+            {isAuthenticated && user ? (
+              <>
+                <Link href="/dashboard" className="btn btn-ghost" onClick={closeMobile}>
+                  Dashboard
+                </Link>
+                <Link href="/account" className="btn btn-ghost" onClick={closeMobile}>
+                  Account settings
+                </Link>
+                {user.isAdmin && (
+                  <Link href="/admin" className="btn btn-ghost" onClick={closeMobile}>
+                    Admin panel
+                  </Link>
+                )}
+                <button type="button" className="btn btn-primary" onClick={getMatched}>
+                  Get matched
+                </button>
+                <button
+                  type="button"
+                  className="btn btn-ghost nav-mobile-signout"
+                  onClick={() => {
+                    closeMobile();
+                    logout();
+                  }}
+                >
+                  Sign out
+                </button>
+              </>
+            ) : (
+              <>
+                <button type="button" className="btn btn-ghost" onClick={signIn}>
+                  Sign in
+                </button>
+                <button type="button" className="btn btn-primary" onClick={getMatched}>
+                  Get matched
+                </button>
+              </>
+            )}
+          </div>
         </nav>
 
         <div className="nav-cta">

@@ -461,7 +461,7 @@ export default function ClientAudienceLanding({ data }: { data: ClientAudienceLa
         @media(max-width:640px){
           .audience-beat{padding:64px 0}
           .audience-problem{padding-top:54px}
-          .audience-head h1,.audience-head h2{font-size:clamp(2rem,12vw,2.8rem)}
+          .audience-head h1,.audience-head h2{font-size:clamp(1.9rem,8.5vw,2.6rem);line-height:1.1}
           .mock-match-head{flex-direction:column-reverse;align-items:flex-start}
           .mock-score-ring{flex-direction:row;align-items:center;gap:9px}
           .audience-actions .btn{width:100%;justify-content:center}

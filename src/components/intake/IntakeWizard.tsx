@@ -11,6 +11,7 @@ import {
   getQuestionSequence,
   getQ2ForTrack,
   TRACK_CONTEXT_QUESTIONS,
+  filterStateOptions,
 } from "@/data/intakeV2";
 import ProgressBar from "./ProgressBar";
 import { ArrowLeft, ArrowRight, Pencil } from "lucide-react";
@@ -48,11 +49,13 @@ function QuestionCard({
   value,
   onChange,
   billingPreference,
+  availableStates,
 }: {
   question: V2Question;
   value: string | string[] | number | undefined;
   onChange: (val: string | string[] | number) => void;
   billingPreference?: string;
+  availableStates?: string[];
 }) {
   const [otherText, setOtherText] = useState(() => {
     if (typeof value === "string" && value.startsWith("other: ")) return value.slice(7);
@@ -64,6 +67,18 @@ function QuestionCard({
   });
 
   const isOtherVal = (v: string) => v === "other" || v.startsWith("other: ");
+
+  // Keeps the stored answer in sync with the visible cap when billing preference
+  // shrinks the effective max (e.g. switching to Hourly drops it from up to 100k
+  // down to 1k) — otherwise the display clamps but the stored value silently stays
+  // above the new max, which can leave the native slider's drag state stuck on a
+  // node whose min/max/value all got rewritten in place on the same render.
+  useEffect(() => {
+    if (question.type !== "budget-range") return;
+    if (typeof value !== "number") return;
+    const effectiveMax = getEffectiveBudgetMax(billingPreference, question.max ?? 100000);
+    if (value > effectiveMax) onChange(effectiveMax);
+  }, [question.id, question.max, question.type, billingPreference, value, onChange]);
 
   // ── budget-range ─────────────────────────────────────────
   if (question.type === "budget-range") {
@@ -125,6 +140,7 @@ function QuestionCard({
               {display}
             </p>
             <input
+              key={`budget-${billingPreference ?? "default"}`}
               type="range"
               min={min}
               max={effectiveMax}
@@ -147,6 +163,7 @@ function QuestionCard({
   if (question.type === "state-dropdown") {
     const selected = (value as string) ?? "";
     const isOutsideUS = selected === "outside_us";
+    const visibleOptions = filterStateOptions(question.options, availableStates);
 
     return (
       <div className="intake-card">
@@ -169,7 +186,7 @@ function QuestionCard({
           className="intake-select"
         >
           <option value="" disabled>Select a state…</option>
-          {question.options.map((opt) => (
+          {visibleOptions.map((opt) => (
             <option key={opt.value} value={opt.value}>{opt.label}</option>
           ))}
         </select>
@@ -430,7 +447,7 @@ function SummaryView({
 
 // ── Main wizard ───────────────────────────────────────────────────────────────
 
-export default function IntakeWizard() {
+export default function IntakeWizard({ availableStates }: { availableStates?: string[] }) {
   const router = useRouter();
   const searchParams = useSearchParams();
   const ph = usePostHog();
@@ -657,6 +674,7 @@ export default function IntakeWizard() {
                     ? (answers[BUDGET_TO_BILLING_ID[currentQuestion.id] ?? ""] as string | undefined)
                     : undefined
                 }
+                availableStates={availableStates}
               />
             )}
           </motion.div>

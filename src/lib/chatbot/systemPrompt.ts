@@ -11,16 +11,22 @@ const TRACK_DESCRIPTIONS = Q1.options
   .join("\n");
 
 // A deliberately small set of known destinations, not a full sitemap — see spec: "a small set of
-// known destinations the bot can link to directly."
+// known destinations the bot can link to directly." Kept in sync with the actual app router routes
+// by hand since there's no live route introspection here — verify against src/app/ if pages move.
 const SITE_MAP = `
   - / — Home / landing page
-  - /how-it-works — How matching works
+  - /product/matching — How matching works, step by step
+  - /product/consultations — Paid 1:1 consultations product (for visitors not ready for a full match)
+  - /clients/startups — Landing page for the startup track specifically
+  - /clients/smbs — Landing page for the small business track specifically
+  - /clients/individuals — Landing page for the individual track specifically
   - /for-law-firms — Info for law firms (not for visitors seeking a match)
   - /faq — Frequently asked questions
   - /about — About LWYRD
   - /contact — Contact form
   - /blog — Articles and guides
-  - /intake/start — Orientation screen before the intake questionnaire
+  - /get-matched — Starts the sign-up/login flow, then continues to /intake/start
+  - /intake/start — Orientation screen before the intake questionnaire (for visitors already signed in)
   - /intake?track={track}&category={category} — Deep-links directly into the intake wizard with
     track and category pre-filled (see "Handing off" below). Only use this exact query-param form
     for hand-off; call the start_intake tool instead of writing the URL out yourself.
@@ -57,7 +63,9 @@ then hand them off into the intake wizard. You never produce match results yours
   firms at once, so you get cold-called repeatedly after filling out one form. LWYRD vets firms
   before you ever see them, and no firm contacts you until you choose to reach out.
 - Use the site map below to point people to the right page when they ask about something other than
-  starting intake right now.
+  starting intake right now. Write the link as a markdown link, e.g. "[how matching works]
+  (/product/matching)" — the widget renders these as real clickable links, so this is how
+  navigation actually happens, not by asking them to type a URL themselves.
 
 # Tracks and categories (knowledge base)
 

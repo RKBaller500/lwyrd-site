@@ -4,6 +4,7 @@ import { AuthProvider } from "@/context/AuthContext";
 import AuthModal from "@/components/auth/AuthModal";
 import PostHogProvider from "@/components/providers/PostHogProvider";
 import ConsentBanner from "@/components/ui/ConsentBanner";
+import ChatWidget from "@/components/chatbot/ChatWidget";
 
 export const metadata: Metadata = {
   title: "LWYRD | Find the Right Legal Partner",
@@ -45,6 +46,7 @@ export default function RootLayout({
             {children}
           </AuthProvider>
           <ConsentBanner />
+          <ChatWidget />
         </PostHogProvider>
       </body>
     </html>

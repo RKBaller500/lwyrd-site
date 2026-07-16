@@ -3,6 +3,7 @@ import { mapDbFirmToFirm } from "./mappers";
 import { Firm, LegalCategory, IntakeQuestion, AssessmentCriterion } from "@/types";
 import { DbFirm } from "./types";
 import { firms as localFirms, getFirmById as getLocalFirmById, getFirmsByPracticeArea as getLocalFirmsByPracticeArea } from "@/data/firms";
+import { US_STATES } from "@/data/intakeV2";
 
 const FIRM_SELECT = `
   *,
@@ -67,6 +68,50 @@ export async function getFirmsByPracticeArea(slug: string): Promise<Firm[]> {
     // Supabase unavailable
   }
   return getLocalFirmsByPracticeArea(slug);
+}
+
+const VALID_STATE_ABBRS = new Set(US_STATES.map((s) => s.value).filter((v) => v !== "outside_us"));
+
+// Firm locations are freeform strings ("New York, NY", "Phoenix, AZ (serves Tucson &
+// Arizona)", "San Francisco", "London, UK") — pull the state code off the tail after
+// the last comma and validate it against real US state/DC codes, so descriptive
+// suffixes and non-US locations don't produce bogus "states".
+function extractStateAbbr(location: string): string | null {
+  const tail = location.split(",").pop()?.trim() ?? "";
+  const match = tail.match(/^([A-Z]{2})\b/);
+  return match && VALID_STATE_ABBRS.has(match[1]) ? match[1] : null;
+}
+
+// Powers the intake wizard's state dropdown so it only lists states the firm
+// database can actually serve, instead of all 50+DC regardless of coverage.
+// Paginated in 1000-row pages since PostgREST caps a single request's rows.
+export async function getAvailableFirmStates(): Promise<string[]> {
+  try {
+    const supabase = await createClient();
+    const abbrs = new Set<string>();
+    let offset = 0;
+    const pageSize = 1000;
+    while (true) {
+      const { data, error } = await supabase
+        .from("firms")
+        .select("location")
+        .range(offset, offset + pageSize - 1);
+      if (error) throw error;
+      if (!data || data.length === 0) break;
+      for (const row of data as { location: string }[]) {
+        const abbr = extractStateAbbr(row.location);
+        if (abbr) abbrs.add(abbr);
+      }
+      if (data.length < pageSize) break;
+      offset += pageSize;
+    }
+    if (abbrs.size > 0) return [...abbrs].sort();
+  } catch {
+    // Supabase unavailable
+  }
+  return [...new Set(
+    localFirms.map((f) => extractStateAbbr(f.location)).filter((a): a is string => !!a)
+  )].sort();
 }
 
 export async function getAllCategories(): Promise<LegalCategory[]> {

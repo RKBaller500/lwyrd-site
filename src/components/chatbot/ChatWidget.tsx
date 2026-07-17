@@ -161,9 +161,9 @@ export default function ChatWidget() {
   };
 
   return (
-    // bottom-24 (not bottom-5) so the launcher clears the cookie consent banner
-    // (ConsentBanner.tsx, fixed bottom-0) on a first visit instead of sitting behind/on top of it.
-    <div className="fixed bottom-24 right-5 z-[1000] flex flex-col items-end gap-3">
+    // Keep the guide out of the way on phones. Mobile pages already have dense
+    // CTAs and browser chrome, so the launcher is desktop/tablet-only.
+    <div className="fixed bottom-6 right-5 z-[45] hidden flex-col items-end gap-3 md:flex">
       <AnimatePresence>
         {isOpen && (
           <motion.div
@@ -171,7 +171,7 @@ export default function ChatWidget() {
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 16, scale: 0.97 }}
             transition={{ duration: 0.22, ease }}
-            className="flex h-[min(600px,calc(100vh-140px))] w-[min(380px,calc(100vw-40px))] flex-col overflow-hidden rounded-3xl border border-[#ddd7cc] bg-[#fbfaf6] shadow-xl"
+            className="flex h-[min(560px,calc(100vh-120px))] w-[min(360px,calc(100vw-40px))] flex-col overflow-hidden rounded-2xl border border-[#ddd7cc] bg-[#fbfaf6] shadow-xl"
           >
             {/* Header */}
             <div className="flex items-center justify-between gap-3 bg-[#002452] px-5 py-4 text-white">
@@ -241,9 +241,9 @@ export default function ChatWidget() {
           initial={{ opacity: 0, scale: 0.9 }}
           animate={{ opacity: 1, scale: 1 }}
           transition={{ duration: 0.3, ease }}
-          className="flex h-14 w-14 items-center justify-center rounded-2xl bg-[#002452] text-white shadow-lg transition-transform hover:scale-105"
+          className="flex h-12 w-12 items-center justify-center rounded-2xl bg-[#002452] text-white shadow-md transition-transform hover:scale-105"
         >
-          <MessageCircle size={24} strokeWidth={2} />
+          <MessageCircle size={21} strokeWidth={2} />
         </motion.button>
       )}
     </div>

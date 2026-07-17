@@ -34,6 +34,160 @@ const MarketingBodyMarkup = memo(
   })
 );
 
+const responsiveMarketingOverrides = `
+  @media (max-width: 900px) {
+    header.nav .nav-inner { height: 64px; }
+    header.nav .nav-menu-open .nav-links { top: 64px !important; }
+  }
+
+  @media (max-width: 680px) {
+    :root { --pad: clamp(18px, 5.2vw, 24px); --sec: 58px; }
+    .wrap { width: 100%; max-width: 100%; }
+    .sec { padding-top: 58px; padding-bottom: 58px; }
+    h1, h2, h3 { overflow-wrap: anywhere; }
+    .btn { min-height: 44px; }
+    .mhero { overflow: hidden; }
+    .mhero-grid {
+      min-height: 0 !important;
+      padding: 54px var(--pad) 38px !important;
+      gap: 28px !important;
+    }
+    .mhero h1 {
+      max-width: 11.5ch !important;
+      font-size: clamp(2.25rem, 13vw, 3.15rem) !important;
+      line-height: 1.08 !important;
+      margin-bottom: 1rem !important;
+    }
+    .mhero .hsub {
+      max-width: 100% !important;
+      font-size: 1rem !important;
+      line-height: 1.62 !important;
+      margin-bottom: 1.45rem !important;
+    }
+    .mhero .hactions .btn,
+    .vs-close .btn {
+      width: auto;
+      max-width: 100%;
+      justify-content: center;
+    }
+    .beamfig {
+      max-width: min(360px, 92vw) !important;
+      margin: 6px auto 0 !important;
+      transform: none !important;
+    }
+    .bf-card {
+      right: 0 !important;
+      width: min(220px, 68%) !important;
+    }
+    .mflow {
+      gap: 46px !important;
+      margin-top: 34px !important;
+    }
+    .mstep {
+      gap: 18px !important;
+    }
+    .mstep-copy {
+      max-width: 100% !important;
+    }
+    .mstep-copy h3 {
+      font-size: clamp(1.35rem, 8vw, 1.75rem) !important;
+    }
+    .mstep-copy p,
+    .sec-lead p {
+      font-size: 0.96rem !important;
+      line-height: 1.62 !important;
+    }
+    .mwin {
+      border-radius: 14px !important;
+      width: 100%;
+    }
+    .mwin-url {
+      max-width: 62vw;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    .mwin-body {
+      padding: 14px !important;
+    }
+    .mi-opt,
+    .mm-card,
+    .mf-draft,
+    .know-attrs li,
+    .alt {
+      min-width: 0;
+    }
+    .mi-opt {
+      align-items: flex-start !important;
+    }
+    .mm-head,
+    .mf-hero {
+      display: grid !important;
+      grid-template-columns: 1fr auto;
+      gap: 12px !important;
+      align-items: start !important;
+    }
+    .mm-identity {
+      min-width: 0;
+    }
+    .mm-ring,
+    .mf-score {
+      transform: scale(.88);
+      transform-origin: top right;
+    }
+    .mm-meta {
+      gap: 6px !important;
+    }
+    .mm-meta span,
+    .mm-badge,
+    .mm-rank {
+      white-space: normal !important;
+    }
+    .mf-actions {
+      display: grid !important;
+      grid-template-columns: 1fr 1fr;
+    }
+    .mf-btn {
+      min-height: 40px;
+      display: inline-flex !important;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+    }
+    .vs-close {
+      display: grid !important;
+      gap: 18px !important;
+      text-align: left !important;
+    }
+    .vs-close h2 {
+      font-size: clamp(1.8rem, 10vw, 2.35rem) !important;
+    }
+    .book-page {
+      padding: 16px 0 38px !important;
+    }
+    .book-card {
+      border-radius: 18px !important;
+      min-height: 0 !important;
+      box-shadow: 0 8px 28px rgba(0,43,85,.10) !important;
+    }
+    .bk-info {
+      border-radius: 0 !important;
+      min-height: 0 !important;
+    }
+    .bk-info h1 {
+      max-width: 12ch;
+    }
+    .bk-main-live,
+    .bk-live-empty,
+    .bk-live-frame {
+      min-height: 0 !important;
+    }
+    .bk-live-frame {
+      height: min(680px, 78vh) !important;
+    }
+  }
+`;
+
 /**
  * Renders a ported design page: injects the page's exact CSS, the shared
  * React nav, the page body markup, then runs the page's original JS.
@@ -143,6 +297,12 @@ export default function MarketingPageClient({
 
   useEffect(() => {
     const root = ref.current;
+    if (!root || !onReady) return;
+    return onReady(root);
+  }, [body, onReady]);
+
+  useEffect(() => {
+    const root = ref.current;
     if (!root) return;
     // Wait for the initial Supabase session check before running the ported
     // scripts. Later auth UI changes should not restart the raw HTML subtree:
@@ -153,8 +313,6 @@ export default function MarketingPageClient({
       initializedBodyRef.current = body;
       initedRef.current = false;
     }
-    let cleanup: void | (() => void);
-
     // Run the page's original JS (maze, reveals, accordions, smooth scroll).
     // Load it as a first-party external script so direct URL loads and client
     // transitions both run the exact generated animation code under CSP.
@@ -197,20 +355,13 @@ export default function MarketingPageClient({
       observer.observe(root, { childList: true, subtree: true });
     }
 
-    if (onReady) cleanup = onReady(root);
-
     return () => {
       frames.forEach((frame) => window.cancelAnimationFrame(frame));
       timers.forEach((timer) => window.clearTimeout(timer));
       window.removeEventListener("load", runOriginalJs);
       observer?.disconnect();
-      if (typeof cleanup === "function") cleanup();
       if (scriptEl) scriptEl.remove();
     };
-    // Re-run only when the page content changes or the initial auth hydrate
-    // settles. Auth transitions re-render the nav, but the raw page markup and
-    // its animations should keep their current DOM state.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [body, js, authReady]);
 
   return (
@@ -221,6 +372,8 @@ export default function MarketingPageClient({
             // Design display/body fonts (the original <head> link was stripped).
             "@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;450;500;600&family=Libre+Baskerville:wght@400;700&display=swap');\n" +
             css +
+            "\n" +
+            responsiveMarketingOverrides +
             /* keep the dark root overlay off marketing pages */
             "\n#ambient-overlay{display:none !important;}\n",
         }}

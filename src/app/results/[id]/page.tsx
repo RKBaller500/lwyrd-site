@@ -156,7 +156,7 @@ function PastResultsContent() {
           <motion.div className="results-list" variants={container} initial="hidden" animate="visible">
             {results.map((result, i) => (
               <motion.div key={isLockedResult(result) ? `locked-${i}` : result.firm.id} variants={cardItem}>
-                <MatchCard result={result} rank={i + 1} intakeId={submissionId} />
+                <MatchCard result={result} rank={i + 1} intakeId={submissionId} categoryLabel={categoryName} />
               </motion.div>
             ))}
           </motion.div>

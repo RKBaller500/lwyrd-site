@@ -179,7 +179,7 @@ function ResultsContent() {
           <motion.div className="results-list" variants={container} initial="hidden" animate="visible">
             {displayResults.map((result, i) => (
               <motion.div key={isLockedResult(result) ? `locked-${i}` : result.firm.id} variants={item}>
-                <MatchCard result={result} rank={i + 1} intakeId={submissionId || undefined} />
+                <MatchCard result={result} rank={i + 1} intakeId={submissionId || undefined} categoryLabel={categoryName} />
               </motion.div>
             ))}
           </motion.div>

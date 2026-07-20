@@ -4,8 +4,9 @@ import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { AnimatePresence, motion } from "framer-motion";
+import posthog from "posthog-js";
 import { usePostHog } from "posthog-js/react";
-import { MessageCircle, Send, Sparkles, X } from "lucide-react";
+import { MessageCircle, RotateCcw, Send, Sparkles, X } from "lucide-react";
 
 const serif = { fontFamily: '"Lora", Georgia, serif', fontWeight: 500 } as const;
 const ease = [0.25, 0.46, 0.45, 0.94] as const;
@@ -16,6 +17,23 @@ const HIDDEN_PATH_PREFIXES = ["/admin", "/portal"];
 const GREETING =
   "Hi, I'm the LWYRD Guide. I can help you figure out which track and category fits your " +
   "situation, answer questions about how matching works, and get you started. What's going on?";
+
+// Reduces blank-input friction on first open — one tap answers the questions the
+// spec calls out as the ones that stall people before they start.
+const STARTER_PROMPTS = [
+  "How does matching work?",
+  "What does it cost?",
+  "I'm not sure where to start",
+];
+
+// Survives a refresh (tab close still clears it, same as the rest of this app's
+// session-scoped intake state) so a visitor doesn't lose their conversation by
+// accident. Bumped if the message shape ever changes incompatibly.
+const HISTORY_STORAGE_KEY = "lwyrd_chat_history_v1";
+
+// Mirrors MAX_MESSAGES in the API route — stop proactively instead of letting a
+// real request land and bounce off a raw 400.
+const MAX_MESSAGES = 40;
 
 interface ChatMessage {
   role: "user" | "assistant";
@@ -49,6 +67,7 @@ export default function ChatWidget() {
   const [isOpen, setIsOpen] = useState(false);
   const [hasOpenedOnce, setHasOpenedOnce] = useState(false);
   const [history, setHistory] = useState<ChatMessage[]>([]);
+  const [hydrated, setHydrated] = useState(false);
   const [input, setInput] = useState("");
   const [isStreaming, setIsStreaming] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -56,6 +75,35 @@ export default function ChatWidget() {
 
   const scrollRef = useRef<HTMLDivElement>(null);
   const messageCountRef = useRef(0);
+
+  // Restore a conversation from a previous page load in this tab. Runs once on
+  // mount; reading sessionStorage during render would differ between server and
+  // client and trip a hydration mismatch, so this waits for the client-only effect.
+  useEffect(() => {
+    try {
+      const raw = sessionStorage.getItem(HISTORY_STORAGE_KEY);
+      if (raw) {
+        const restored: ChatMessage[] = JSON.parse(raw);
+        setHistory(restored);
+        messageCountRef.current = restored.filter((m) => m.role === "user").length;
+      }
+    } catch {
+      // corrupted or inaccessible storage, start fresh
+    } finally {
+      setHydrated(true);
+    }
+  }, []);
+
+  // Persist after hydration only, so restoring on mount doesn't immediately
+  // re-save the same data right back (harmless, but pointless work).
+  useEffect(() => {
+    if (!hydrated) return;
+    try {
+      sessionStorage.setItem(HISTORY_STORAGE_KEY, JSON.stringify(history));
+    } catch {
+      // storage full or unavailable, conversation just won't survive a refresh
+    }
+  }, [history, hydrated]);
 
   useEffect(() => {
     scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: "smooth" });
@@ -79,9 +127,34 @@ export default function ChatWidget() {
     });
   };
 
+  const handleReset = () => {
+    setHistory([]);
+    setError(null);
+    setReachedHandoff(false);
+    messageCountRef.current = 0;
+    try {
+      sessionStorage.removeItem(HISTORY_STORAGE_KEY);
+    } catch {
+      // best effort
+    }
+    ph?.capture("chatbot_reset");
+  };
+
   const sendMessage = async (text: string) => {
     const trimmed = text.trim();
     if (!trimmed || isStreaming) return;
+
+    // Stop proactively instead of sending a request the API will reject anyway
+    // (MAX_MESSAGES in src/app/api/chat/route.ts) — a clear in-chat message beats
+    // a raw 400 surfacing as a generic error bubble.
+    if (history.length >= MAX_MESSAGES - 1) {
+      setError(
+        "This conversation's gotten long enough that it's time for a fresh start. " +
+          "Use the reset button above to begin a new one, your progress on track and " +
+          "category so far isn't lost if you already confirmed them."
+      );
+      return;
+    }
 
     const nextHistory: ChatMessage[] = [...history, { role: "user", content: trimmed }];
     setHistory(nextHistory);
@@ -179,14 +252,27 @@ export default function ChatWidget() {
                 <Sparkles size={16} strokeWidth={2} />
                 <span style={serif} className="text-[15px]">LWYRD Guide</span>
               </div>
-              <button
-                type="button"
-                onClick={handleClose}
-                aria-label="Close chat"
-                className="rounded-xl p-1.5 text-white/80 transition-colors hover:bg-white/10 hover:text-white"
-              >
-                <X size={18} strokeWidth={2} />
-              </button>
+              <div className="flex items-center gap-1">
+                {history.length > 0 && (
+                  <button
+                    type="button"
+                    onClick={handleReset}
+                    aria-label="Start a new conversation"
+                    title="Start a new conversation"
+                    className="rounded-xl p-1.5 text-white/80 transition-colors hover:bg-white/10 hover:text-white"
+                  >
+                    <RotateCcw size={16} strokeWidth={2} />
+                  </button>
+                )}
+                <button
+                  type="button"
+                  onClick={handleClose}
+                  aria-label="Close chat"
+                  className="rounded-xl p-1.5 text-white/80 transition-colors hover:bg-white/10 hover:text-white"
+                >
+                  <X size={18} strokeWidth={2} />
+                </button>
+              </div>
             </div>
 
             {/* Messages */}
@@ -198,6 +284,20 @@ export default function ChatWidget() {
               className="flex-1 space-y-3 overflow-y-auto px-4 py-4"
             >
               <ChatBubble role="assistant" content={GREETING} />
+              {history.length === 0 && (
+                <div className="flex flex-wrap gap-2 pl-1">
+                  {STARTER_PROMPTS.map((prompt) => (
+                    <button
+                      key={prompt}
+                      type="button"
+                      onClick={() => sendMessage(prompt)}
+                      className="rounded-full border border-[#ddd7cc] bg-white px-3.5 py-1.5 text-[13px] text-[#002452] transition-colors hover:border-[#002452] hover:bg-[#002452]/5"
+                    >
+                      {prompt}
+                    </button>
+                  ))}
+                </div>
+              )}
               {history.map((m, i) => (
                 <ChatBubble key={i} role={m.role} content={m.content} pending={isStreaming && i === history.length - 1 && m.content === ""} />
               ))}
@@ -293,13 +393,14 @@ function renderMessageContent(content: string, isUser: boolean) {
     const linkClass = isUser
       ? "underline decoration-white/50 hover:decoration-white"
       : "text-[#002452] underline decoration-[#002452]/40 hover:decoration-[#002452] font-medium";
+    const trackClick = () => posthog.capture("chatbot_link_clicked", { href, label });
     nodes.push(
       href.startsWith("/") ? (
-        <Link key={key++} href={href} className={linkClass}>
+        <Link key={key++} href={href} className={linkClass} onClick={trackClick}>
           {label}
         </Link>
       ) : (
-        <a key={key++} href={href} target="_blank" rel="noopener noreferrer" className={linkClass}>
+        <a key={key++} href={href} target="_blank" rel="noopener noreferrer" className={linkClass} onClick={trackClick}>
           {label}
         </a>
       )

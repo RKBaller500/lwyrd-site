@@ -2,11 +2,10 @@
 
 import Link from "next/link";
 import { Firm, PublicMatchResult } from "@/types";
-import { Award, Building2, CheckCircle2, XCircle, ArrowRight, LockKeyhole, ShieldCheck } from "lucide-react";
+import { Award, CheckCircle2, ArrowRight, LockKeyhole, ShieldCheck } from "lucide-react";
 import SaveFirmButton from "@/components/firms/SaveFirmButton";
 
 const serif = { fontFamily: '"Libre Baskerville", Georgia, serif' } as const;
-const hiddenPricingCriteria = new Set(["budget", "billing"]);
 const pricingLanguage = /\b(budget|billing|fee|fees|cost|costs|price|pricing|retainer|hourly|flat[- ]?fee|\$)\b/i;
 
 const sizeLabels: Record<string, string> = {
@@ -15,32 +14,30 @@ const sizeLabels: Record<string, string> = {
   large: "Large",
 };
 
-const missedLabels: Record<string, string> = {
-  "company-stage": "Stage: doesn't specialize in your company stage",
-  industry: "Industry: doesn't serve your vertical",
-  location: "Location: may not be licensed in your state",
-  timeline: "Timeline: may not match your urgency",
-  language: "Language: may not have attorneys who speak your language",
-};
-
 function formatPractice(slug: string): string {
   return slug.replace(/-/g, " ").replace(/\b\w/g, (char) => char.toUpperCase());
 }
 
-function getMissedLabel(criterion: string, firm: Firm): string {
-  if (criterion === "firm-size") {
-    const size = sizeLabels[firm.size]?.toLowerCase() ?? firm.size;
-    return `Firm size: ${size} firm`;
+// Same "quality signals" logic as the old locked/pre-paywall card (qualitySignals
+// in lib/actions/intake.ts) — duplicated here as a pure client-side function since
+// that file is server-only. Unlocked cards have the real firm, so this reads real
+// data instead of the generic version the locked card had to use.
+function computeQualitySignals(firm: Firm, categoryLabel?: string): string[] {
+  const signals: string[] = [];
+  if (firm.verified) signals.push("Bar standing verified");
+  if (firm.founded) {
+    const years = Math.max(1, new Date().getFullYear() - firm.founded);
+    if (years >= 5) signals.push(`${years}+ years in practice`);
   }
-  return missedLabels[criterion] ?? criterion;
+  if (categoryLabel) signals.push(`Specialist in ${categoryLabel}`);
+  if (firm.assessment.some((item) => item.passed && /response|contact|conflict|insurance/i.test(`${item.label} ${item.note ?? ""}`))) {
+    signals.push("Quality standards reviewed");
+  }
+  return signals.slice(0, 3);
 }
 
 function visibleReasons(reasons: string[]) {
   return reasons.filter((reason) => !pricingLanguage.test(reason));
-}
-
-function visibleCriteria(criteria: string[]) {
-  return criteria.filter((criterion) => !hiddenPricingCriteria.has(criterion));
 }
 
 function ScoreRing({ score }: { score: number }) {
@@ -82,6 +79,7 @@ interface MatchCardProps {
   rank: number;
   initialSaved?: boolean;
   intakeId?: string | null;
+  categoryLabel?: string;
 }
 
 function isLockedResult(result: PublicMatchResult): result is Extract<PublicMatchResult, { isLocked: true }> {
@@ -184,7 +182,7 @@ function LockedMatchCard({
   );
 }
 
-export default function MatchCard({ result, rank, initialSaved = false, intakeId }: MatchCardProps) {
+export default function MatchCard({ result, rank, initialSaved = false, intakeId, categoryLabel }: MatchCardProps) {
   if (isLockedResult(result)) {
     return <LockedMatchCard result={result} rank={rank} />;
   }
@@ -194,11 +192,16 @@ export default function MatchCard({ result, rank, initialSaved = false, intakeId
   // firmHighlights (named attorneys, specific rankings) can identify the firm, so
   // they're only ever combined in here — after the isLockedResult check above —
   // never passed into the locked/pre-paywall card.
-  const displayReasons = visibleReasons([...reasons, ...firmHighlights]);
-  const displayMissedCriteria = visibleCriteria(result.missedCriteria);
+  // Not capped — the pre-merge unlocked card showed the full merged list (up to 3
+  // generic reasons + up to 2 firm-specific highlights), not just the first 3.
+  const rawDisplayReasons = visibleReasons([...reasons, ...firmHighlights]);
+  // Same fallback the old locked card used when a firm's reasons were too sparse to
+  // fill the section — a card should never show an empty "Why this fits" list.
+  const displayReasons = rawDisplayReasons.length > 0
+    ? rawDisplayReasons
+    : ["Matches the legal need described in your intake", "Aligned with your stated preferences"];
+  const qualitySignals = computeQualitySignals(firm, categoryLabel ?? formatPractice(firm.practiceAreas[0] ?? ""));
   const roundedScore = Math.round(score);
-  const hasCriteria = displayReasons.length > 0 || displayMissedCriteria.length > 0;
-  const hasBoth = displayReasons.length > 0 && displayMissedCriteria.length > 0;
 
   return (
     <div className={`match-card ${isBestMatch ? "is-top" : ""}`}>
@@ -232,62 +235,39 @@ export default function MatchCard({ result, rank, initialSaved = false, intakeId
           <ScoreRing score={roundedScore} />
         </div>
 
-        <div className="match-meta-row">
-          <span>
-            <Building2 size={13} strokeWidth={1.75} className="shrink-0" />
-            {sizeLabels[firm.size] ?? firm.size} firm
-          </span>
-          {firm.founded && (
-            <span>Est. {firm.founded}</span>
-          )}
+        <div className="match-chip-row">
+          <span className="chip">{sizeLabels[firm.size] ?? firm.size} firm</span>
           {firm.practiceAreas[0] && (
-            <span>{formatPractice(firm.practiceAreas[0])}</span>
+            <span className="chip">{formatPractice(firm.practiceAreas[0])}</span>
           )}
+          <span className="chip">{firm.location}</span>
         </div>
 
-        {hasCriteria && (
-          <div className={`match-criteria ${hasBoth ? "has-both" : ""}`}>
-            {hasBoth ? (
-              <>
-                <div className="match-list">
-                  {displayReasons.map((r, i) => (
-                    <div key={i}>
-                      <CheckCircle2 size={15} />
-                      <span>{r}</span>
-                    </div>
-                  ))}
+        <div className="locked-proof-grid">
+          <div>
+            <p className="match-section-label">Why this fits</p>
+            <div className="match-list">
+              {displayReasons.map((r, i) => (
+                <div key={i}>
+                  <CheckCircle2 size={15} />
+                  <span>{r}</span>
                 </div>
-                <div className="match-list is-muted">
-                  {displayMissedCriteria.map((c) => (
-                    <div key={c}>
-                      <XCircle size={15} />
-                      <span>{getMissedLabel(c, firm)}</span>
-                    </div>
-                  ))}
-                </div>
-              </>
-            ) : (
-              <>
-                {displayReasons.map((r, i) => (
-                  <div key={i} className="match-list">
-                    <div>
-                      <CheckCircle2 size={15} />
-                      <span>{r}</span>
-                    </div>
-                  </div>
-                ))}
-                {displayMissedCriteria.map((c) => (
-                  <div key={c} className="match-list is-muted">
-                    <div>
-                      <XCircle size={15} />
-                      <span>{getMissedLabel(c, firm)}</span>
-                    </div>
-                  </div>
-                ))}
-              </>
-            )}
+              ))}
+            </div>
           </div>
-        )}
+
+          <div>
+            <p className="match-section-label">Quality signals</p>
+            <div className="match-list is-cred">
+              {qualitySignals.map((signal, i) => (
+                <div key={i}>
+                  <ShieldCheck size={15} />
+                  <span>{signal}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
 
         <div className="match-actions">
           <SaveFirmButton firmId={firm.id} initialSaved={initialSaved} compact />

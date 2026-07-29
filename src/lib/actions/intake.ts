@@ -132,6 +132,7 @@ function redactMatchResult(result: MatchResult, index: number, practiceAreaLabel
     jurisdiction: inferJurisdiction(result.firm),
     reasons,
     credibilitySignals: qualitySignals(result.firm, practiceAreaLabel),
+    feeLevel: result.firm.costTier,
     matchedCriteria: result.matchedCriteria,
     missedCriteria: result.missedCriteria,
     isBestMatch: result.isBestMatch,

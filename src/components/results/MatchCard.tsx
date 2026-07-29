@@ -149,6 +149,7 @@ function LockedMatchCard({
           <span className="chip">{size} firm</span>
           <span className="chip">{result.practiceAreaMatch}</span>
           <span className="chip">{result.jurisdiction}</span>
+          {result.feeLevel && <span className="chip">{result.feeLevel}</span>}
         </div>
 
         <div className="locked-proof-grid">
@@ -241,6 +242,7 @@ export default function MatchCard({ result, rank, initialSaved = false, intakeId
             <span className="chip">{formatPractice(firm.practiceAreas[0])}</span>
           )}
           <span className="chip">{firm.location}</span>
+          {firm.costTier && <span className="chip">{firm.costTier}</span>}
         </div>
 
         <div className="locked-proof-grid">

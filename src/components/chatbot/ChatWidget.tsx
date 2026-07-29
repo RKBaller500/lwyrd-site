@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, useSyncExternalStore } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { AnimatePresence, motion } from "framer-motion";
@@ -40,6 +40,60 @@ interface ChatMessage {
   content: string;
 }
 
+// Session-storage-backed chat history, read/written outside React so it can be
+// shared via useSyncExternalStore. Reading sessionStorage directly during render
+// would differ between server and client and trip a hydration mismatch — this
+// is the pattern React itself recommends for that: the server/first-hydration
+// render uses getServerHistorySnapshot, then React reconciles to the real value
+// right after mount, instead of restoring it with a setState call in an effect.
+let historyCache: ChatMessage[] = [];
+let historyCacheLoaded = false;
+const historyListeners = new Set<() => void>();
+
+function readHistoryFromStorage(): ChatMessage[] {
+  try {
+    const raw = sessionStorage.getItem(HISTORY_STORAGE_KEY);
+    return raw ? JSON.parse(raw) : [];
+  } catch {
+    // corrupted or inaccessible storage, start fresh
+    return [];
+  }
+}
+
+function getHistorySnapshot(): ChatMessage[] {
+  if (!historyCacheLoaded) {
+    historyCache = readHistoryFromStorage();
+    historyCacheLoaded = true;
+  }
+  return historyCache;
+}
+
+// Must be a stable reference — useSyncExternalStore compares snapshots with
+// Object.is, so a fresh [] literal on every call reads as "always changed."
+const EMPTY_HISTORY: ChatMessage[] = [];
+
+function getServerHistorySnapshot(): ChatMessage[] {
+  return EMPTY_HISTORY;
+}
+
+function subscribeHistory(callback: () => void): () => void {
+  historyListeners.add(callback);
+  return () => historyListeners.delete(callback);
+}
+
+// Writes through to sessionStorage immediately, so there's no separate persist
+// effect needed, and notifies subscribers so the widget re-renders.
+function setHistoryStore(next: ChatMessage[] | ((prev: ChatMessage[]) => ChatMessage[])): void {
+  historyCache = typeof next === "function" ? next(historyCache) : next;
+  historyCacheLoaded = true;
+  try {
+    sessionStorage.setItem(HISTORY_STORAGE_KEY, JSON.stringify(historyCache));
+  } catch {
+    // storage full or unavailable, conversation just won't survive a refresh
+  }
+  historyListeners.forEach((cb) => cb());
+}
+
 function parseSseChunk(chunk: string): Array<{ event: string; data: Record<string, unknown> }> {
   const events: Array<{ event: string; data: Record<string, unknown> }> = [];
   for (const block of chunk.split("\n\n")) {
@@ -66,44 +120,13 @@ export default function ChatWidget() {
 
   const [isOpen, setIsOpen] = useState(false);
   const [hasOpenedOnce, setHasOpenedOnce] = useState(false);
-  const [history, setHistory] = useState<ChatMessage[]>([]);
-  const [hydrated, setHydrated] = useState(false);
+  const history = useSyncExternalStore(subscribeHistory, getHistorySnapshot, getServerHistorySnapshot);
   const [input, setInput] = useState("");
   const [isStreaming, setIsStreaming] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [reachedHandoff, setReachedHandoff] = useState(false);
 
   const scrollRef = useRef<HTMLDivElement>(null);
-  const messageCountRef = useRef(0);
-
-  // Restore a conversation from a previous page load in this tab. Runs once on
-  // mount; reading sessionStorage during render would differ between server and
-  // client and trip a hydration mismatch, so this waits for the client-only effect.
-  useEffect(() => {
-    try {
-      const raw = sessionStorage.getItem(HISTORY_STORAGE_KEY);
-      if (raw) {
-        const restored: ChatMessage[] = JSON.parse(raw);
-        setHistory(restored);
-        messageCountRef.current = restored.filter((m) => m.role === "user").length;
-      }
-    } catch {
-      // corrupted or inaccessible storage, start fresh
-    } finally {
-      setHydrated(true);
-    }
-  }, []);
-
-  // Persist after hydration only, so restoring on mount doesn't immediately
-  // re-save the same data right back (harmless, but pointless work).
-  useEffect(() => {
-    if (!hydrated) return;
-    try {
-      sessionStorage.setItem(HISTORY_STORAGE_KEY, JSON.stringify(history));
-    } catch {
-      // storage full or unavailable, conversation just won't survive a refresh
-    }
-  }, [history, hydrated]);
 
   useEffect(() => {
     scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: "smooth" });
@@ -122,21 +145,15 @@ export default function ChatWidget() {
   const handleClose = () => {
     setIsOpen(false);
     ph?.capture("chatbot_closed", {
-      message_count: messageCountRef.current,
+      message_count: history.filter((m) => m.role === "user").length,
       reached_handoff: reachedHandoff,
     });
   };
 
   const handleReset = () => {
-    setHistory([]);
+    setHistoryStore([]);
     setError(null);
     setReachedHandoff(false);
-    messageCountRef.current = 0;
-    try {
-      sessionStorage.removeItem(HISTORY_STORAGE_KEY);
-    } catch {
-      // best effort
-    }
     ph?.capture("chatbot_reset");
   };
 
@@ -157,15 +174,15 @@ export default function ChatWidget() {
     }
 
     const nextHistory: ChatMessage[] = [...history, { role: "user", content: trimmed }];
-    setHistory(nextHistory);
+    const userMessageCount = nextHistory.filter((m) => m.role === "user").length;
+    setHistoryStore(nextHistory);
     setInput("");
     setError(null);
     setIsStreaming(true);
-    messageCountRef.current += 1;
-    ph?.capture("chatbot_message_sent", { message_count: messageCountRef.current });
+    ph?.capture("chatbot_message_sent", { message_count: userMessageCount });
 
     // Placeholder assistant turn we append streamed text into.
-    setHistory((prev) => [...prev, { role: "assistant", content: "" }]);
+    setHistoryStore((prev) => [...prev, { role: "assistant", content: "" }]);
 
     try {
       const res = await fetch("/api/chat", {
@@ -194,7 +211,7 @@ export default function ChatWidget() {
         for (const { event, data } of parseSseChunk(parts.join("\n\n"))) {
           if (event === "text" && typeof data.delta === "string") {
             const delta = data.delta;
-            setHistory((prev) => {
+            setHistoryStore((prev) => {
               const copy = [...prev];
               copy[copy.length - 1] = { role: "assistant", content: copy[copy.length - 1].content + delta };
               return copy;
@@ -214,7 +231,7 @@ export default function ChatWidget() {
         ph?.capture("chatbot_handoff", {
           track: trackMatch ? decodeURIComponent(trackMatch[1]) : undefined,
           category: categoryMatch ? decodeURIComponent(categoryMatch[1]) : undefined,
-          message_count: messageCountRef.current,
+          message_count: userMessageCount,
         });
         window.setTimeout(() => router.push(handoffUrl!), 1100);
       }
@@ -225,6 +242,20 @@ export default function ChatWidget() {
       });
     } finally {
       setIsStreaming(false);
+      // A turn that errored before any text arrived (or that was tool-call-only,
+      // e.g. an immediate handoff) leaves the placeholder assistant message
+      // empty. Fill it with a short fallback rather than a permanent blank
+      // bubble. This can't just be dropped from history either: the Anthropic
+      // API rejects both empty content blocks AND two consecutive user turns,
+      // so removing it would trade one failure mode (empty content) for another
+      // (broken role alternation) on the visitor's very next message.
+      setHistoryStore((prev) => {
+        const last = prev[prev.length - 1];
+        if (!last || last.role !== "assistant" || last.content.trim() !== "") return prev;
+        const copy = [...prev];
+        copy[copy.length - 1] = { role: "assistant", content: "Sorry, I wasn't able to respond to that." };
+        return copy;
+      });
     }
   };
 

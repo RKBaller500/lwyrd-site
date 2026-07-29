@@ -8,6 +8,11 @@ function fallbackContactType(id: string): Firm["contactType"] {
   return "phone";
 }
 
+function normalizeCostTier(cost: string | null | undefined): Firm["costTier"] {
+  if (cost === "$" || cost === "$$" || cost === "$$$") return cost;
+  return undefined;
+}
+
 export function mapDbFirmToFirm(row: DbFirm): Firm {
   const contactType = row.contact_type ?? fallbackContactType(row.id);
   return {
@@ -48,6 +53,9 @@ export function mapDbFirmToFirm(row: DbFirm): Firm {
       })),
     overallScore: row.overall_score,
     verified: row.is_verified ?? row.verified,
+    costTier: normalizeCostTier(row.cost),
+    googleReview: row.google_review ?? undefined,
+    googleReviewCount: row.google_review_count ?? undefined,
     contactType,
     contactUrl: row.contact_url ?? `https://www.google.com/search?q=${encodeURIComponent(`${row.name} contact`)}`,
     contactEmail: row.contact_email ?? `intake@${row.id.replace(/[^a-z0-9-]/g, "")}.example`,

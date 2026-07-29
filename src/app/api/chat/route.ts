@@ -31,6 +31,15 @@ function sseEvent(event: string, data: unknown): Uint8Array {
   return new TextEncoder().encode(`event: ${event}\ndata: ${JSON.stringify(data)}\n\n`);
 }
 
+// Never forward raw error messages to the client, they can leak internal
+// config/implementation details (e.g. "ANTHROPIC_API_KEY is not set", SDK
+// error internals). Log the real error server-side for debugging instead.
+const GENERIC_ERROR_MESSAGE = "Something went wrong on our end. Please try again in a moment.";
+
+function logChatError(context: string, error: unknown): void {
+  console.error(`[chat] ${context}:`, error);
+}
+
 function getClientIp(request: NextRequest): string {
   const forwardedFor = request.headers.get("x-forwarded-for");
   return forwardedFor?.split(",")[0]?.trim() || "unknown";
@@ -92,7 +101,8 @@ export async function POST(request: NextRequest) {
         });
 
         anthropicStream.on("error", (error) => {
-          controller.enqueue(sseEvent("error", { message: error.message }));
+          logChatError("stream error", error);
+          controller.enqueue(sseEvent("error", { message: GENERIC_ERROR_MESSAGE }));
         });
 
         const finalMessage = await anthropicStream.finalMessage();
@@ -114,7 +124,8 @@ export async function POST(request: NextRequest) {
 
         controller.enqueue(sseEvent("done", {}));
       } catch (error) {
-        controller.enqueue(sseEvent("error", { message: error instanceof Error ? error.message : "Unknown error" }));
+        logChatError("request failed", error);
+        controller.enqueue(sseEvent("error", { message: GENERIC_ERROR_MESSAGE }));
       } finally {
         controller.close();
       }

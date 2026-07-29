@@ -225,6 +225,7 @@ const INDUSTRY_IRRELEVANT_PRACTICES = new Set([
 //   Location / state:      6 pts , Remaining soft location signal (after hard filter)
 //   Billing model:         6 pts , Matches how the user wants to pay? (* excluded if no preference)
 //   Quality (LWYRD):      10 pts , Squared ratio for top-end amplification
+//   Google reviews:       10 pts , Confidence-weighted (Bayesian) rating vs. pool mean; neutral when a firm has no review data (see REVIEW_SIGNAL_MAX_PTS)
 //   Language:              5 pts , Can the firm serve in the user's language? (* excluded if English-only)
 //   Timeline / urgency:    4 pts , Can they respond fast enough? (* excluded if no urgency)
 // ─────────────────────────────────────────────────────────────────────────────
@@ -284,6 +285,77 @@ function computeQualityRatio(firm: Firm): number {
     return assessRatio * 0.3 + (effectiveOverallScore / 100) * 0.7;
   }
   return firm.overallScore / 100;
+}
+
+// ── Google review signal ─────────────────────────────────────────────────────
+// Point budget for this signal in the overall composite score, alongside every
+// other signal's MAX above — tune this single constant to change how much
+// Google reviews influence ranking relative to budget/quality/industry/etc.
+const REVIEW_SIGNAL_MAX_PTS = 10;
+
+// "Confidence" constant for the Bayesian/weighted-average blend below, in
+// review-equivalents: how many of the pool's average-rating reviews a firm's
+// own rating has to be weighed against before it's trusted on its own. Higher
+// = firms need more reviews before their raw rating dominates the pool mean,
+// which is what stops a firm with 1 review at 5.0 from outranking one with
+// 500 reviews at 4.8.
+const REVIEW_CONFIDENCE_M = 20;
+
+function hasReviewData(firm: Firm): boolean {
+  return firm.googleReview != null && !!firm.googleReviewCount && firm.googleReviewCount > 0;
+}
+
+// Mean rating across only the firms in this search's pool that actually have
+// review data — the Bayesian prior firms get pulled toward. Pulled out so
+// matchFirms can compute it once per pool before scoring any single firm,
+// same as computeQualityRatio/qualityPool below.
+function computeReviewPoolMean(firms: Firm[]): number | null {
+  const rated = firms.filter(hasReviewData);
+  if (rated.length === 0) return null;
+  return rated.reduce((sum, f) => sum + f.googleReview!, 0) / rated.length;
+}
+
+// Confidence-weighted (Bayesian) rating: blends the firm's own average with
+// the pool's mean, weighted by review count vs. REVIEW_CONFIDENCE_M. A firm
+// with few reviews lands close to the pool mean; a firm with many reviews
+// lands close to its own actual average.
+function computeBayesianReviewScore(firm: Firm, poolMean: number): number {
+  const v = firm.googleReviewCount!;
+  const r = firm.googleReview!;
+  return (v / (v + REVIEW_CONFIDENCE_M)) * r + (REVIEW_CONFIDENCE_M / (v + REVIEW_CONFIDENCE_M)) * poolMean;
+}
+
+function scoreReviews(
+  firm: Firm,
+  pool: { poolMean: number | null; min: number; max: number }
+): { pts: number; max: number; reason?: string } {
+  const MAX = REVIEW_SIGNAL_MAX_PTS;
+
+  // No review data for this firm, or no firm in the pool has review data yet
+  // to compare against: neutral midpoint, never a penalty relative to firms
+  // that do have data (data collection is still incomplete for some firms).
+  if (pool.poolMean === null || !hasReviewData(firm)) {
+    return { pts: MAX * 0.5, max: MAX };
+  }
+
+  const weighted = computeBayesianReviewScore(firm, pool.poolMean);
+  const spread = pool.max - pool.min;
+  const normalized = spread > 0 ? (weighted - pool.min) / spread : 1;
+
+  const reason = firm.googleReview! >= 4.5 && firm.googleReviewCount! >= 20
+    ? `${firm.googleReview!.toFixed(1)}★ on Google (${firm.googleReviewCount!.toLocaleString()} reviews)`
+    : undefined;
+
+  return { pts: MAX * Math.max(0, Math.min(1, normalized)), max: MAX, reason };
+}
+
+// Pulled out so matchFirms can compute the pool's Bayesian min/max once,
+// same pattern as qualityPool for scoreQuality.
+function computeReviewPool(firms: Firm[]): { poolMean: number | null; min: number; max: number } {
+  const poolMean = computeReviewPoolMean(firms);
+  if (poolMean === null) return { poolMean: null, min: 0, max: 0 };
+  const weightedScores = firms.filter(hasReviewData).map((f) => computeBayesianReviewScore(f, poolMean));
+  return { poolMean, min: Math.min(...weightedScores), max: Math.max(...weightedScores) };
 }
 
 function scoreQuality(
@@ -656,10 +728,12 @@ export function matchFirms(
   if (eligible.length === 0) {
     const fallbackQualityRatios = byPracticeArea.map(computeQualityRatio);
     const fallbackQualityPool = { min: Math.min(...fallbackQualityRatios), max: Math.max(...fallbackQualityRatios) };
+    const fallbackReviewPool = computeReviewPool(byPracticeArea);
     const scored = byPracticeArea.map((firm) => {
       const { reason } = isHardDisqualified(categorySlug, answers, firm);
       const budgetResult   = scoreBudget(answers, firm);
       const qualityResult  = scoreQuality(firm, fallbackQualityPool);
+      const reviewResult   = scoreReviews(firm, fallbackReviewPool);
       const specResult     = scoreSpecialization(firm);
       const foundedResult  = scoreFounded(firm);
       const industryResult = scoreIndustry(categorySlug, answers, firm);
@@ -669,10 +743,10 @@ export function matchFirms(
       const timelineResult = scoreTimeline(answers, firm);
       const billingResult  = scoreBillingModel(answers, firm);
       const languageResult = scoreLanguage(answers, firm);
-      const totalPts = budgetResult.pts + qualityResult.pts + specResult.pts + foundedResult.pts +
+      const totalPts = budgetResult.pts + qualityResult.pts + reviewResult.pts + specResult.pts + foundedResult.pts +
         industryResult.pts + stageResult.pts + sizeResult.pts + locationResult.pts +
         timelineResult.pts + billingResult.pts + languageResult.pts;
-      const maxPts = budgetResult.max + qualityResult.max + specResult.max + foundedResult.max +
+      const maxPts = budgetResult.max + qualityResult.max + reviewResult.max + specResult.max + foundedResult.max +
         industryResult.max + stageResult.max + sizeResult.max + locationResult.max +
         timelineResult.max + billingResult.max + languageResult.max;
       const rawScoreBeforePenalty = maxPts > 0 ? totalPts / maxPts : 0;
@@ -682,30 +756,35 @@ export function matchFirms(
       return { firm, rawScore, reason };
     });
     scored.sort((a, b) => b.rawScore - a.rawScore || b.firm.overallScore - a.firm.overallScore);
-    const top = scored[0];
     // Never surface a match under 50%, even as a best-effort fallback — below that
-    // it's not a useful suggestion, it's noise.
-    if (Math.round(top.rawScore * 100) < 50) return [];
-    const partialMatchReasons: string[] = top.reason ? [top.reason] : [];
-    return [{
-      firm: top.firm,
-      score: Math.round(top.rawScore * 100),
-      reasons: [],
-      firmHighlights: [],
-      matchedCriteria: [],
-      missedCriteria: [],
-      isBestMatch: false,
-      isPartialMatch: true,
-      partialMatchReasons,
-    }];
+    // it's not a useful suggestion, it's noise. Capped at 5 (not the usual 8):
+    // every firm here failed a hard filter (most often "not licensed in your
+    // state" for the state-specific practices), so padding the list out to 8
+    // would understate how partial these matches really are.
+    return scored
+      .filter((r) => Math.round(r.rawScore * 100) >= 50)
+      .slice(0, 5)
+      .map((r) => ({
+        firm: r.firm,
+        score: Math.round(r.rawScore * 100),
+        reasons: [],
+        firmHighlights: [],
+        matchedCriteria: [],
+        missedCriteria: [],
+        isBestMatch: false,
+        isPartialMatch: true,
+        partialMatchReasons: r.reason ? [r.reason] : [],
+      }));
   }
 
   // Step 3: Score each firm
   const qualityRatios = eligible.map(computeQualityRatio);
   const qualityPool = { min: Math.min(...qualityRatios), max: Math.max(...qualityRatios) };
+  const reviewPool = computeReviewPool(eligible);
   const scored = eligible.map((firm) => {
     const budgetResult    = scoreBudget(answers, firm);
     const qualityResult   = scoreQuality(firm, qualityPool);
+    const reviewResult    = scoreReviews(firm, reviewPool);
     const specResult      = scoreSpecialization(firm);
     const foundedResult   = scoreFounded(firm);
     const industryResult  = scoreIndustry(categorySlug, answers, firm);
@@ -719,6 +798,7 @@ export function matchFirms(
     const totalPts =
       budgetResult.pts +
       qualityResult.pts +
+      reviewResult.pts +
       specResult.pts +
       foundedResult.pts +
       industryResult.pts +
@@ -732,6 +812,7 @@ export function matchFirms(
     const maxPts =
       budgetResult.max +
       qualityResult.max +
+      reviewResult.max +
       specResult.max +
       foundedResult.max +
       industryResult.max +
@@ -764,6 +845,7 @@ export function matchFirms(
     const reasons: string[] = [
       specResult,
       foundedResult,
+      reviewResult,
       budgetResult,
       qualityResult,
       industryResult,

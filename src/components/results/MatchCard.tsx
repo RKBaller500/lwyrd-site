@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { Firm, PublicMatchResult } from "@/types";
-import { Award, CheckCircle2, ArrowRight, LockKeyhole, ShieldCheck } from "lucide-react";
+import { Award, CheckCircle2, ArrowRight, LockKeyhole, ShieldCheck, AlertCircle } from "lucide-react";
 import SaveFirmButton from "@/components/firms/SaveFirmButton";
 
 const serif = { fontFamily: '"Libre Baskerville", Georgia, serif' } as const;
@@ -188,7 +188,7 @@ export default function MatchCard({ result, rank, initialSaved = false, intakeId
     return <LockedMatchCard result={result} rank={rank} />;
   }
 
-  const { firm, score, reasons, firmHighlights, isBestMatch } = result;
+  const { firm, score, reasons, firmHighlights, isBestMatch, isPartialMatch, partialMatchReasons } = result;
   const profileHref = intakeId ? `/firms/${firm.id}?intake=${intakeId}` : `/firms/${firm.id}`;
   // firmHighlights (named attorneys, specific rankings) can identify the firm, so
   // they're only ever combined in here — after the isLockedResult check above —
@@ -196,11 +196,15 @@ export default function MatchCard({ result, rank, initialSaved = false, intakeId
   // Not capped — the pre-merge unlocked card showed the full merged list (up to 3
   // generic reasons + up to 2 firm-specific highlights), not just the first 3.
   const rawDisplayReasons = visibleReasons([...reasons, ...firmHighlights]);
-  // Same fallback the old locked card used when a firm's reasons were too sparse to
-  // fill the section — a card should never show an empty "Why this fits" list.
+  // Partial matches (failed a hard filter, e.g. out-of-state) never have reasons/
+  // highlights — they're not a genuine fit. Show the specific disqualification
+  // reason instead of the generic fallback below, which would otherwise render
+  // identically on every partial-match card and read as a bug.
   const displayReasons = rawDisplayReasons.length > 0
     ? rawDisplayReasons
-    : ["Matches the legal need described in your intake", "Aligned with your stated preferences"];
+    : isPartialMatch && partialMatchReasons && partialMatchReasons.length > 0
+      ? partialMatchReasons
+      : ["Matches the legal need described in your intake", "Aligned with your stated preferences"];
   const qualitySignals = computeQualitySignals(firm, categoryLabel ?? formatPractice(firm.practiceAreas[0] ?? ""));
   const roundedScore = Math.round(score);
 
@@ -227,6 +231,12 @@ export default function MatchCard({ result, rank, initialSaved = false, intakeId
                 {!isBestMatch && rank > 0 && (
                   <span className="match-rank">#{rank}</span>
                 )}
+                {isPartialMatch && (
+                  <span className="match-badge">
+                    <AlertCircle size={9} strokeWidth={2.5} />
+                    Partial match
+                  </span>
+                )}
               </div>
               <h3>{firm.name}</h3>
               <p>{firm.tagline}</p>
@@ -238,8 +248,8 @@ export default function MatchCard({ result, rank, initialSaved = false, intakeId
 
         <div className="match-chip-row">
           <span className="chip">{sizeLabels[firm.size] ?? firm.size} firm</span>
-          {firm.practiceAreas[0] && (
-            <span className="chip">{formatPractice(firm.practiceAreas[0])}</span>
+          {(categoryLabel || firm.practiceAreas[0]) && (
+            <span className="chip">{categoryLabel ?? formatPractice(firm.practiceAreas[0])}</span>
           )}
           <span className="chip">{firm.location}</span>
           {firm.costTier && <span className="chip">{firm.costTier}</span>}

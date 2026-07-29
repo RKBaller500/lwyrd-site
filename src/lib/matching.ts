@@ -172,7 +172,7 @@ function isHardDisqualified(
     if (budget < firmMin * 0.28) {
       return {
         disqualified: true,
-        reason: `Your budget is well below this firm's minimum engagement.`,
+        reason: `Your $${(budget / 1000).toFixed(0)}k/month budget is well below this firm's $${(firmMin / 1000).toFixed(0)}k/month minimum engagement.`,
       };
     }
   }

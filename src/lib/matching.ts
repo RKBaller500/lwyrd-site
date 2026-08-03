@@ -172,7 +172,7 @@ function isHardDisqualified(
     if (budget < firmMin * 0.28) {
       return {
         disqualified: true,
-        reason: `Your budget is well below this firm's minimum engagement.`,
+        reason: `Your $${(budget / 1000).toFixed(0)}k/month budget is well below this firm's $${(firmMin / 1000).toFixed(0)}k/month minimum engagement.`,
       };
     }
   }
@@ -225,6 +225,7 @@ const INDUSTRY_IRRELEVANT_PRACTICES = new Set([
 //   Location / state:      6 pts , Remaining soft location signal (after hard filter)
 //   Billing model:         6 pts , Matches how the user wants to pay? (* excluded if no preference)
 //   Quality (LWYRD):      10 pts , Squared ratio for top-end amplification
+//   Google reviews:       10 pts , Confidence-weighted (Bayesian) rating vs. pool mean; neutral when a firm has no review data (see REVIEW_SIGNAL_MAX_PTS)
 //   Language:              5 pts , Can the firm serve in the user's language? (* excluded if English-only)
 //   Timeline / urgency:    4 pts , Can they respond fast enough? (* excluded if no urgency)
 // ─────────────────────────────────────────────────────────────────────────────
@@ -286,6 +287,77 @@ function computeQualityRatio(firm: Firm): number {
   return firm.overallScore / 100;
 }
 
+// ── Google review signal ─────────────────────────────────────────────────────
+// Point budget for this signal in the overall composite score, alongside every
+// other signal's MAX above — tune this single constant to change how much
+// Google reviews influence ranking relative to budget/quality/industry/etc.
+const REVIEW_SIGNAL_MAX_PTS = 10;
+
+// "Confidence" constant for the Bayesian/weighted-average blend below, in
+// review-equivalents: how many of the pool's average-rating reviews a firm's
+// own rating has to be weighed against before it's trusted on its own. Higher
+// = firms need more reviews before their raw rating dominates the pool mean,
+// which is what stops a firm with 1 review at 5.0 from outranking one with
+// 500 reviews at 4.8.
+const REVIEW_CONFIDENCE_M = 20;
+
+function hasReviewData(firm: Firm): boolean {
+  return firm.googleReview != null && !!firm.googleReviewCount && firm.googleReviewCount > 0;
+}
+
+// Mean rating across only the firms in this search's pool that actually have
+// review data — the Bayesian prior firms get pulled toward. Pulled out so
+// matchFirms can compute it once per pool before scoring any single firm,
+// same as computeQualityRatio/qualityPool below.
+function computeReviewPoolMean(firms: Firm[]): number | null {
+  const rated = firms.filter(hasReviewData);
+  if (rated.length === 0) return null;
+  return rated.reduce((sum, f) => sum + f.googleReview!, 0) / rated.length;
+}
+
+// Confidence-weighted (Bayesian) rating: blends the firm's own average with
+// the pool's mean, weighted by review count vs. REVIEW_CONFIDENCE_M. A firm
+// with few reviews lands close to the pool mean; a firm with many reviews
+// lands close to its own actual average.
+function computeBayesianReviewScore(firm: Firm, poolMean: number): number {
+  const v = firm.googleReviewCount!;
+  const r = firm.googleReview!;
+  return (v / (v + REVIEW_CONFIDENCE_M)) * r + (REVIEW_CONFIDENCE_M / (v + REVIEW_CONFIDENCE_M)) * poolMean;
+}
+
+function scoreReviews(
+  firm: Firm,
+  pool: { poolMean: number | null; min: number; max: number }
+): { pts: number; max: number; reason?: string } {
+  const MAX = REVIEW_SIGNAL_MAX_PTS;
+
+  // No review data for this firm, or no firm in the pool has review data yet
+  // to compare against: neutral midpoint, never a penalty relative to firms
+  // that do have data (data collection is still incomplete for some firms).
+  if (pool.poolMean === null || !hasReviewData(firm)) {
+    return { pts: MAX * 0.5, max: MAX };
+  }
+
+  const weighted = computeBayesianReviewScore(firm, pool.poolMean);
+  const spread = pool.max - pool.min;
+  const normalized = spread > 0 ? (weighted - pool.min) / spread : 1;
+
+  const reason = firm.googleReview! >= 4.5 && firm.googleReviewCount! >= 20
+    ? `${firm.googleReview!.toFixed(1)}★ on Google (${firm.googleReviewCount!.toLocaleString()} reviews)`
+    : undefined;
+
+  return { pts: MAX * Math.max(0, Math.min(1, normalized)), max: MAX, reason };
+}
+
+// Pulled out so matchFirms can compute the pool's Bayesian min/max once,
+// same pattern as qualityPool for scoreQuality.
+function computeReviewPool(firms: Firm[]): { poolMean: number | null; min: number; max: number } {
+  const poolMean = computeReviewPoolMean(firms);
+  if (poolMean === null) return { poolMean: null, min: 0, max: 0 };
+  const weightedScores = firms.filter(hasReviewData).map((f) => computeBayesianReviewScore(f, poolMean));
+  return { poolMean, min: Math.min(...weightedScores), max: Math.max(...weightedScores) };
+}
+
 function scoreQuality(
   firm: Firm,
   pool: { min: number; max: number }
@@ -305,11 +377,16 @@ function scoreQuality(
   const spread = pool.max - pool.min;
   const normalized = spread > 0 ? (qualityRatio - pool.min) / spread : 1;
 
-  // Still squared, but now on the normalized (already pool-relative) ratio — this widens the
-  // gap further between the top firms and the mid-pack, on top of the stretch above.
+  // Linear on the normalized (already pool-relative) ratio. Squaring on top of the
+  // stretch above was double-amplifying the differentiation: the stretch alone maps
+  // the pool's actual min-max range across the full point allocation, so a firm just
+  // a few points behind the pool leader was already scoring well below it — squaring
+  // that again collapsed anyone but the single best-in-pool firm to near-zero quality
+  // points, which (combined with the score >= 50 floor in matchFirms) was enough on
+  // its own to filter every firm but the top pick out of most result sets.
   // Not rounded here — only the final composite score is rounded, so this signal's full
   // precision survives into the total instead of being quantized to 1 of 11 values.
-  return { pts: MAX * Math.pow(normalized, 2), max: MAX, rawRatio: qualityRatio };
+  return { pts: MAX * Math.pow(normalized, 1.4), max: MAX, rawRatio: qualityRatio };
 }
 
 // Rewards firms with a narrower practice-area footprint as more specialized. Always
@@ -317,18 +394,29 @@ function scoreQuality(
 // so it helps differentiate firms even in "minimal answers" scenarios where most
 // preference-based signals go flat. Real data: 15 distinct values 1-15 practice
 // areas, no single value dominating.
-function scoreSpecialization(firm: Firm): { pts: number; max: number } {
+function scoreSpecialization(firm: Firm): { pts: number; max: number; reason?: string } {
   const MAX = 12; // increased from 8 — meant to be a clear differentiator, not a nudge
   // Full marks at 1 practice area, floors at 8+ so full-service generalist firms
   // aren't crushed — specialization is a plus, not a requirement.
   const specRatio = Math.max(0.2, 1 - (firm.practiceAreas.length - 1) / 7);
-  return { pts: MAX * specRatio, max: MAX };
+  // This is firm-intrinsic data (unlike budget/location/etc., which just echo the
+  // user's own answer back), so it's one of the few "why this fits" lines that
+  // actually varies firm-to-firm within the same result set. Only worth saying for
+  // firms where it's genuinely true — a 10-practice-area generalist gets no reason
+  // rather than a hollow claim of focus.
+  const n = firm.practiceAreas.length;
+  const reason = n === 1
+    ? "Practices exclusively in this area, not a generalist firm"
+    : n <= 3
+      ? "Concentrated practice across a small number of specialties"
+      : undefined;
+  return { pts: MAX * specRatio, max: MAX, reason };
 }
 
 // Rewards firms with a longer track record. Also always active regardless of user
 // answers. Real data: founded year ranges 1792-2025 with zero missing values, so
 // this is safe to lean on unlike budget/stage's heavily-duplicated data.
-function scoreFounded(firm: Firm): { pts: number; max: number } {
+function scoreFounded(firm: Firm): { pts: number; max: number; reason?: string } {
   const MAX = 12; // increased from 6 — meant to be a clear differentiator, not a nudge
   const yearsSinceFounding = new Date().getFullYear() - firm.founded;
   // Full marks at 100+ years old, not 30 — a 30-year cap flattened most real firms
@@ -338,7 +426,13 @@ function scoreFounded(firm: Firm): { pts: number; max: number } {
   // similarly "very established" while giving the much larger 1970s-2010s cohort
   // real room to differentiate on actual tenure.
   const tenureRatio = 0.15 + 0.85 * Math.min(1, Math.max(0, yearsSinceFounding) / 100);
-  return { pts: MAX * tenureRatio, max: MAX };
+  // Another firm-intrinsic signal, like specialization above — genuinely varies
+  // firm-to-firm instead of echoing the user's own answer. Gated at 25+ years so a
+  // firm founded five years ago doesn't get a reason that reads as a non-claim.
+  const reason = yearsSinceFounding >= 25
+    ? `In practice since ${firm.founded} (${yearsSinceFounding}+ years)`
+    : undefined;
+  return { pts: MAX * tenureRatio, max: MAX, reason };
 }
 
 function scoreIndustry(categorySlug: string, answers: IntakeAnswers, firm: Firm): { pts: number; max: number; reason?: string } {
@@ -519,7 +613,14 @@ function scoreLocation(
     if (pref.includes(stateName)) {
       const abbr = STATE_ABBRS[stateName];
       if (firm.location.includes(abbr) || firm.location.includes(stateName)) {
-        return { pts: MAX, max: MAX, reason: `Headquartered in ${stateName}` };
+        // City, not just state — every firm matching a state preference would
+        // otherwise show the identical "Headquartered in California" line even
+        // though they're actually spread across San Francisco, Palo Alto, LA, etc.
+        const city = firm.location.split(",")[0]?.trim();
+        const reason = city && city !== stateName
+          ? `Headquartered in ${city}, ${stateName}`
+          : `Headquartered in ${stateName}`;
+        return { pts: MAX, max: MAX, reason };
       }
       break;
     }
@@ -627,10 +728,12 @@ export function matchFirms(
   if (eligible.length === 0) {
     const fallbackQualityRatios = byPracticeArea.map(computeQualityRatio);
     const fallbackQualityPool = { min: Math.min(...fallbackQualityRatios), max: Math.max(...fallbackQualityRatios) };
+    const fallbackReviewPool = computeReviewPool(byPracticeArea);
     const scored = byPracticeArea.map((firm) => {
       const { reason } = isHardDisqualified(categorySlug, answers, firm);
       const budgetResult   = scoreBudget(answers, firm);
       const qualityResult  = scoreQuality(firm, fallbackQualityPool);
+      const reviewResult   = scoreReviews(firm, fallbackReviewPool);
       const specResult     = scoreSpecialization(firm);
       const foundedResult  = scoreFounded(firm);
       const industryResult = scoreIndustry(categorySlug, answers, firm);
@@ -640,10 +743,10 @@ export function matchFirms(
       const timelineResult = scoreTimeline(answers, firm);
       const billingResult  = scoreBillingModel(answers, firm);
       const languageResult = scoreLanguage(answers, firm);
-      const totalPts = budgetResult.pts + qualityResult.pts + specResult.pts + foundedResult.pts +
+      const totalPts = budgetResult.pts + qualityResult.pts + reviewResult.pts + specResult.pts + foundedResult.pts +
         industryResult.pts + stageResult.pts + sizeResult.pts + locationResult.pts +
         timelineResult.pts + billingResult.pts + languageResult.pts;
-      const maxPts = budgetResult.max + qualityResult.max + specResult.max + foundedResult.max +
+      const maxPts = budgetResult.max + qualityResult.max + reviewResult.max + specResult.max + foundedResult.max +
         industryResult.max + stageResult.max + sizeResult.max + locationResult.max +
         timelineResult.max + billingResult.max + languageResult.max;
       const rawScoreBeforePenalty = maxPts > 0 ? totalPts / maxPts : 0;
@@ -653,30 +756,35 @@ export function matchFirms(
       return { firm, rawScore, reason };
     });
     scored.sort((a, b) => b.rawScore - a.rawScore || b.firm.overallScore - a.firm.overallScore);
-    const top = scored[0];
     // Never surface a match under 50%, even as a best-effort fallback — below that
-    // it's not a useful suggestion, it's noise.
-    if (Math.round(top.rawScore * 100) < 50) return [];
-    const partialMatchReasons: string[] = top.reason ? [top.reason] : [];
-    return [{
-      firm: top.firm,
-      score: Math.round(top.rawScore * 100),
-      reasons: [],
-      firmHighlights: [],
-      matchedCriteria: [],
-      missedCriteria: [],
-      isBestMatch: false,
-      isPartialMatch: true,
-      partialMatchReasons,
-    }];
+    // it's not a useful suggestion, it's noise. Capped at 5 (not the usual 8):
+    // every firm here failed a hard filter (most often "not licensed in your
+    // state" for the state-specific practices), so padding the list out to 8
+    // would understate how partial these matches really are.
+    return scored
+      .filter((r) => Math.round(r.rawScore * 100) >= 50)
+      .slice(0, 5)
+      .map((r) => ({
+        firm: r.firm,
+        score: Math.round(r.rawScore * 100),
+        reasons: [],
+        firmHighlights: [],
+        matchedCriteria: [],
+        missedCriteria: [],
+        isBestMatch: false,
+        isPartialMatch: true,
+        partialMatchReasons: r.reason ? [r.reason] : [],
+      }));
   }
 
   // Step 3: Score each firm
   const qualityRatios = eligible.map(computeQualityRatio);
   const qualityPool = { min: Math.min(...qualityRatios), max: Math.max(...qualityRatios) };
+  const reviewPool = computeReviewPool(eligible);
   const scored = eligible.map((firm) => {
     const budgetResult    = scoreBudget(answers, firm);
     const qualityResult   = scoreQuality(firm, qualityPool);
+    const reviewResult    = scoreReviews(firm, reviewPool);
     const specResult      = scoreSpecialization(firm);
     const foundedResult   = scoreFounded(firm);
     const industryResult  = scoreIndustry(categorySlug, answers, firm);
@@ -690,6 +798,7 @@ export function matchFirms(
     const totalPts =
       budgetResult.pts +
       qualityResult.pts +
+      reviewResult.pts +
       specResult.pts +
       foundedResult.pts +
       industryResult.pts +
@@ -703,6 +812,7 @@ export function matchFirms(
     const maxPts =
       budgetResult.max +
       qualityResult.max +
+      reviewResult.max +
       specResult.max +
       foundedResult.max +
       industryResult.max +
@@ -724,9 +834,18 @@ export function matchFirms(
     const finalScore = Math.round(rawScore * 100);
 
     // Collect up to 3 reasons from criteria that scored well and have labels. These
-    // are generic (budget fit, location, etc.) and safe to show even before a user
-    // has paid — they don't reveal which firm this is.
+    // are safe to show even before a user has paid — they don't reveal which firm
+    // this is. specResult/foundedResult lead the list: unlike the preference-echo
+    // signals (budget/location/etc.), they're firm-intrinsic, so they're what
+    // actually differ between two cards that both matched the same budget/state/
+    // billing preference. Filtering on reason-presence alone (no separate pts
+    // threshold) is correct here because every scoring function above only sets
+    // `reason` in its own genuinely-good-fit branch already — there's no case
+    // where a low-scoring result also carries a reason string.
     const reasons: string[] = [
+      specResult,
+      foundedResult,
+      reviewResult,
       budgetResult,
       qualityResult,
       industryResult,
@@ -737,7 +856,7 @@ export function matchFirms(
       billingResult,
       languageResult,
     ]
-      .filter((r) => r.reason && r.pts >= r.max * 0.8)
+      .filter((r) => r.reason)
       .map((r) => r.reason!)
       .slice(0, 3);
 
@@ -799,20 +918,35 @@ export function matchFirms(
       else missedCriteria.push("language");
     }
 
-    return { firm, score: finalScore, rawScore, reasons, firmHighlights, matchedCriteria, missedCriteria };
+    return {
+      firm, score: finalScore, rawScore, reasons, firmHighlights, matchedCriteria, missedCriteria,
+      isOutOfState: !!locationResult.isOutOfState,
+    };
   });
 
-  // Step 4: Sort by raw ratio (before rounding) so tied integer scores are ordered
-  // by actual quality rather than arbitrary insertion order.
-  scored.sort((a, b) => b.rawScore - a.rawScore || b.firm.overallScore - a.firm.overallScore);
+  // Step 4: Out-of-state firms always sort below in-state ones, regardless of how
+  // they compare on other signals. The 0.75x whole-score multiplier above is a
+  // meaningful cut, but it only dilutes into ~150+ points of other signals — a
+  // high-quality out-of-state firm could still out-*rank* (not just out-score) a
+  // real local option on raw points, which reads as "this wrong-state firm is a
+  // better match than the one actually licensed here." Tiering the sort on
+  // isOutOfState first guarantees that never happens, while still letting
+  // out-of-state firms appear (scored appropriately low) when no in-state option
+  // exists at all. Within each tier, sort by raw ratio (before rounding) so tied
+  // integer scores are ordered by actual quality rather than arbitrary insertion order.
+  scored.sort((a, b) =>
+    Number(a.isOutOfState) - Number(b.isOutOfState) ||
+    b.rawScore - a.rawScore ||
+    b.firm.overallScore - a.firm.overallScore
+  );
 
   // Step 5: Never surface a match under 50% — below that it's not a useful
   // suggestion, it's noise. Then cap at 8 results and mark best match (strip
-  // rawScore, not part of MatchResult).
+  // rawScore/isOutOfState, not part of MatchResult).
   return scored
     .filter((r) => r.score >= 50)
     .slice(0, 8)
-    .map(({ rawScore: _raw, ...r }, i) => ({
+    .map(({ rawScore: _raw, isOutOfState: _oos, ...r }, i) => ({
       ...r,
       isBestMatch: i === 0 && r.score >= 60,
     }));

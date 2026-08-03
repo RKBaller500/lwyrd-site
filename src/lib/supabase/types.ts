@@ -24,6 +24,9 @@ export interface DbFirm {
   strengths: string[];
   overall_score: number;
   verified: boolean;
+  cost?: string | null;
+  google_review?: number | null;
+  google_review_count?: number | null;
   is_verified?: boolean | null;
   contact_type?: "form" | "email" | "phone" | null;
   contact_url?: string | null;

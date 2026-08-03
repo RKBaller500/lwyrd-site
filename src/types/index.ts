@@ -60,6 +60,9 @@ export interface Firm {
   assessment: AssessmentItem[];
   overallScore: number; // 0-100
   verified: boolean;
+  costTier?: "$" | "$$" | "$$$";
+  googleReview?: number; // avg star rating 0-5; absent = no review data collected yet
+  googleReviewCount?: number; // absent/0 = no review data collected yet
   contactType?: FirmContactType;
   contactUrl?: string;
   contactEmail?: string;

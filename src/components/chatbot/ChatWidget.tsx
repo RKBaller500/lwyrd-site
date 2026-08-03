@@ -275,13 +275,13 @@ export default function ChatWidget() {
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 16, scale: 0.97 }}
             transition={{ duration: 0.22, ease }}
-            className="flex h-[min(560px,calc(100vh-120px))] w-[min(360px,calc(100vw-40px))] flex-col overflow-hidden rounded-2xl border border-[#ddd7cc] bg-[#fbfaf6] shadow-xl"
+            className="flex max-h-[min(600px,calc(100vh-120px))] min-h-[320px] w-[min(400px,calc(100vw-40px))] flex-col overflow-hidden rounded-2xl border border-[#ddd7cc] bg-[#fbfaf6] shadow-xl"
           >
             {/* Header */}
             <div className="flex items-center justify-between gap-3 bg-[#002452] px-5 py-4 text-white">
               <div className="flex items-center gap-2">
-                <Sparkles size={16} strokeWidth={2} />
-                <span style={serif} className="text-[15px]">LWYRD Guide</span>
+                <Sparkles size={16} strokeWidth={2} className="shrink-0" />
+                <span style={serif} className="text-[15px] leading-none">LWYRD Chatbot</span>
               </div>
               <div className="flex items-center gap-1">
                 {history.length > 0 && (
@@ -312,7 +312,7 @@ export default function ChatWidget() {
               role="log"
               aria-live="polite"
               aria-label="Conversation with the LWYRD Guide"
-              className="flex-1 space-y-3 overflow-y-auto px-4 py-4"
+              className="flex-1 space-y-3 overflow-y-auto px-5! py-4!"
             >
               <ChatBubble role="assistant" content={GREETING} />
               {history.length === 0 && (
@@ -322,7 +322,7 @@ export default function ChatWidget() {
                       key={prompt}
                       type="button"
                       onClick={() => sendMessage(prompt)}
-                      className="rounded-full border border-[#ddd7cc] bg-white px-3.5 py-1.5 text-[13px] text-[#002452] transition-colors hover:border-[#002452] hover:bg-[#002452]/5"
+                      className="rounded-full border! border-[#ddd7cc]! bg-white! px-3.5! py-1.5! text-[13px] text-[#002452] transition-colors hover:border-[#002452]! hover:bg-[#002452]/5!"
                     >
                       {prompt}
                     </button>
@@ -340,7 +340,7 @@ export default function ChatWidget() {
             </div>
 
             {/* Input */}
-            <form onSubmit={handleSubmit} className="flex items-end gap-2 border-t border-[#ddd7cc] p-3">
+            <form onSubmit={handleSubmit} className="flex items-end gap-2 border-t border-[#ddd7cc] py-3! pl-5! pr-4!">
               <input
                 type="text"
                 value={input}
@@ -348,13 +348,13 @@ export default function ChatWidget() {
                 placeholder="Ask about LWYRD or describe your situation…"
                 aria-label="Message the LWYRD Guide"
                 disabled={isStreaming}
-                className="flex-1 rounded-2xl border border-[#ddd7cc] bg-white px-4 py-2.5 text-[14px] text-[#002452] placeholder:text-[#9a9488] focus:border-[#002452] focus:outline-none focus:ring-2 focus:ring-[#002452]/15 transition-colors disabled:opacity-50"
+                className="flex-1 rounded-2xl border border-[#ddd7cc] bg-white px-4! py-2.5! text-[14px] text-[#002452] placeholder:text-[#9a9488] focus:border-[#002452] focus:outline-none focus:ring-2 focus:ring-[#002452]/15 transition-colors disabled:opacity-50"
               />
               <button
                 type="submit"
                 disabled={isStreaming || !input.trim()}
                 aria-label="Send message"
-                className="flex h-[42px] w-[42px] shrink-0 items-center justify-center rounded-2xl bg-[#002452] text-white transition-colors hover:bg-[#003170] disabled:opacity-50"
+                className="flex h-[42px] w-[42px] shrink-0 items-center justify-center rounded-2xl bg-[#002452]! text-white transition-colors hover:bg-[#003170]! disabled:opacity-50"
               >
                 <Send size={16} strokeWidth={2} />
               </button>
@@ -372,7 +372,7 @@ export default function ChatWidget() {
           initial={{ opacity: 0, scale: 0.9 }}
           animate={{ opacity: 1, scale: 1 }}
           transition={{ duration: 0.3, ease }}
-          className="flex h-12 w-12 items-center justify-center rounded-2xl bg-[#002452] text-white shadow-md transition-transform hover:scale-105"
+          className="flex h-12 w-12 items-center justify-center rounded-2xl bg-[#002452]! text-white shadow-md transition-transform hover:scale-105"
         >
           <MessageCircle size={21} strokeWidth={2} />
         </motion.button>
@@ -394,7 +394,7 @@ function ChatBubble({
   return (
     <div className={`flex ${isUser ? "justify-end" : "justify-start"}`}>
       <div
-        className={`max-w-[85%] whitespace-pre-wrap rounded-2xl px-4 py-2.5 text-[14px] leading-relaxed ${
+        className={`max-w-[80%] whitespace-pre-wrap rounded-2xl px-4! py-2.5! text-[14px] leading-relaxed shadow-sm ${
           isUser
             ? "bg-[#002452] text-white"
             : "border border-[#ddd7cc] bg-white text-[#1a2436]"

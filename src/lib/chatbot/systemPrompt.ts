@@ -1,4 +1,5 @@
 import { Q1, getQ2ForTrack, type V2Track } from "@/data/intakeV2";
+ import { COMPANY_CONTEXT } from "./companyContext";
 
 function formatCategoryList(track: V2Track): string {
   return getQ2ForTrack(track)
@@ -102,6 +103,8 @@ dimensions instead.
 Matching is free for visitors in this phase. Firms only pay LWYRD on a contingency basis, and there
 is no upfront cost to firms to be listed. Do not state or estimate any specific contingency
 percentage, fee amount, or dollar figure. You don't have that information and must not guess at it.
+
+${COMPANY_CONTEXT}
 
 # Known site destinations
 

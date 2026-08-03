@@ -132,8 +132,6 @@ export default function ChatWidget() {
     scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: "smooth" });
   }, [history, isStreaming]);
 
-  if (HIDDEN_PATH_PREFIXES.some((p) => pathname?.startsWith(p))) return null;
-
   const handleOpen = () => {
     setIsOpen(true);
     if (!hasOpenedOnce) {
@@ -141,6 +139,18 @@ export default function ChatWidget() {
       ph?.capture("chatbot_opened");
     }
   };
+
+  // Lets non-React markup (e.g. the "Try the chatbot" CTA in the raw marketing
+  // page HTML) open the widget without needing access to this component's state.
+  // Declared before the HIDDEN_PATH_PREFIXES early return so hook order stays
+  // consistent across client-side navigations between hidden and visible routes.
+  useEffect(() => {
+    const listener = () => handleOpen();
+    window.addEventListener("lwyrd:open-chat", listener);
+    return () => window.removeEventListener("lwyrd:open-chat", listener);
+  });
+
+  if (HIDDEN_PATH_PREFIXES.some((p) => pathname?.startsWith(p))) return null;
 
   const handleClose = () => {
     setIsOpen(false);
